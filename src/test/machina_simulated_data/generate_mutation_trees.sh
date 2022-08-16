@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ ! $# -eq 3 ]
+if [ ! $# -eq 2 ]
 then
     echo "Usage: $0 <machina_sims_data_dir> <generatemutationtrees_executable>" >&2
     exit 1
@@ -29,7 +29,7 @@ do
     	      s=$(basename $f .tsv | sed -e s/reads_seed//g)
 
       	    echo Solving seed $s, pattern $p, anatomical sites $m...
-      	    $2 ${1}/input_${m}/cluster_${p}_seed${s}.tsv > ${1}/mut_trees_${m}/mut_trees_${p}_seed${s}.txt
+      	    $2 ${1}/clustered_input_${m}/cluster_${p}_seed${s}.tsv > ${1}/mut_trees_${m}/mut_trees_${p}_seed${s}.txt
         done
     done
 done
