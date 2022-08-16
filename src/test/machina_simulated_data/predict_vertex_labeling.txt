@@ -1,0 +1,561 @@
+======================================================================================================================================================
+Tree 0
+Predicting vertex labeling for m8 M seed 241.
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 3.0
+Neg log likelihood: 1.064
+======================================================================================================================================================
+Tree 1
+Predicting vertex labeling for m8 M seed 7.
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.019
+======================================================================================================================================================
+Tree 2
+Predicting vertex labeling for m8 M seed 19.
+Migration number: 9.0
+Comigration number: 7.0
+Seeding site number: 4.0
+Neg log likelihood: 1.28
+======================================================================================================================================================
+Tree 3
+Predicting vertex labeling for m8 M seed 35.
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 0.933
+======================================================================================================================================================
+Tree 4
+Predicting vertex labeling for m8 M seed 243.
+Migration number: 17.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.189
+======================================================================================================================================================
+Tree 5
+Predicting vertex labeling for m8 M seed 76.
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.318
+======================================================================================================================================================
+Tree 6
+Predicting vertex labeling for m8 M seed 172.
+Migration number: 15.0
+Comigration number: 12.0
+Seeding site number: 3.0
+Neg log likelihood: 0.888
+======================================================================================================================================================
+Tree 7
+Predicting vertex labeling for m8 M seed 216.
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 4.0
+Neg log likelihood: 0.976
+======================================================================================================================================================
+Tree 8
+Predicting vertex labeling for m8 M seed 45.
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.25
+======================================================================================================================================================
+Tree 9
+Predicting vertex labeling for m8 M seed 239.
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.41
+======================================================================================================================================================
+Tree 10
+Predicting vertex labeling for m8 mS seed 0.
+Migration number: 8.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.925
+======================================================================================================================================================
+Tree 11
+Predicting vertex labeling for m8 mS seed 7.
+Migration number: 7.0
+Comigration number: 7.0
+Seeding site number: 1.0
+Neg log likelihood: 0.939
+======================================================================================================================================================
+Tree 12
+Predicting vertex labeling for m8 mS seed 12.
+Migration number: 8.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.892
+======================================================================================================================================================
+Tree 13
+Predicting vertex labeling for m8 mS seed 9.
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.85
+======================================================================================================================================================
+Tree 14
+Predicting vertex labeling for m8 mS seed 8.
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.978
+======================================================================================================================================================
+Tree 15
+Predicting vertex labeling for m8 mS seed 3.
+Migration number: 8.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.876
+======================================================================================================================================================
+Tree 16
+Predicting vertex labeling for m8 mS seed 2.
+Migration number: 8.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.039
+======================================================================================================================================================
+Tree 17
+Predicting vertex labeling for m8 mS seed 10.
+Migration number: 8.0
+Comigration number: 7.0
+Seeding site number: 3.0
+Neg log likelihood: 1.076
+======================================================================================================================================================
+Tree 18
+Predicting vertex labeling for m8 mS seed 4.
+Migration number: 7.0
+Comigration number: 7.0
+Seeding site number: 2.0
+Neg log likelihood: 1.292
+======================================================================================================================================================
+Tree 19
+Predicting vertex labeling for m8 mS seed 5.
+Migration number: 7.0
+Comigration number: 7.0
+Seeding site number: 1.0
+Neg log likelihood: 0.995
+======================================================================================================================================================
+Tree 20
+Predicting vertex labeling for m8 R seed 394.
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.555
+======================================================================================================================================================
+Tree 21
+Predicting vertex labeling for m8 R seed 383.
+Migration number: 9.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.241
+======================================================================================================================================================
+Tree 22
+Predicting vertex labeling for m8 R seed 10046.
+Migration number: 13.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 4.641
+======================================================================================================================================================
+Tree 23
+Predicting vertex labeling for m8 R seed 9.
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 3.0
+Neg log likelihood: 1.137
+======================================================================================================================================================
+Tree 24
+Predicting vertex labeling for m8 R seed 905.
+Migration number: 9.0
+Comigration number: 7.0
+Seeding site number: 2.0
+Neg log likelihood: 1.137
+======================================================================================================================================================
+Tree 25
+Predicting vertex labeling for m8 R seed 10157.
+Migration number: 10.0
+Comigration number: 7.0
+Seeding site number: 3.0
+Neg log likelihood: 0.912
+======================================================================================================================================================
+Tree 26
+Predicting vertex labeling for m8 R seed 30342.
+Migration number: 10.0
+Comigration number: 7.0
+Seeding site number: 1.0
+Neg log likelihood: 1.169
+======================================================================================================================================================
+Tree 27
+Predicting vertex labeling for m8 R seed 981.
+Migration number: 12.0
+Comigration number: 10.0
+Seeding site number: 4.0
+Neg log likelihood: 1.248
+======================================================================================================================================================
+Tree 28
+Predicting vertex labeling for m8 R seed 1070.
+Migration number: 8.0
+Comigration number: 7.0
+Seeding site number: 2.0
+Neg log likelihood: 1.352
+======================================================================================================================================================
+Tree 29
+Predicting vertex labeling for m8 R seed 157.
+Migration number: 15.0
+Comigration number: 11.0
+Seeding site number: 3.0
+Neg log likelihood: 0.867
+======================================================================================================================================================
+Tree 30
+Predicting vertex labeling for m8 S seed 69.
+Migration number: 9.0
+Comigration number: 7.0
+Seeding site number: 3.0
+Neg log likelihood: 1.096
+======================================================================================================================================================
+Tree 31
+Predicting vertex labeling for m8 S seed 0.
+Migration number: 11.0
+Comigration number: 10.0
+Seeding site number: 4.0
+Neg log likelihood: 1.018
+======================================================================================================================================================
+Tree 32
+Predicting vertex labeling for m8 S seed 37.
+Migration number: 9.0
+Comigration number: 7.0
+Seeding site number: 3.0
+Neg log likelihood: 0.942
+======================================================================================================================================================
+Tree 33
+Predicting vertex labeling for m8 S seed 31.
+Migration number: 8.0
+Comigration number: 7.0
+Seeding site number: 3.0
+Neg log likelihood: 0.999
+======================================================================================================================================================
+Tree 34
+Predicting vertex labeling for m8 S seed 12.
+Migration number: 8.0
+Comigration number: 7.0
+Seeding site number: 1.0
+Neg log likelihood: 0.757
+======================================================================================================================================================
+Tree 35
+Predicting vertex labeling for m8 S seed 35.
+Migration number: 9.0
+Comigration number: 7.0
+Seeding site number: 1.0
+Neg log likelihood: 0.795
+======================================================================================================================================================
+Tree 36
+Predicting vertex labeling for m8 S seed 2.
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 3.0
+Neg log likelihood: 1.076
+======================================================================================================================================================
+Tree 37
+Predicting vertex labeling for m8 S seed 23.
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.237
+======================================================================================================================================================
+Tree 38
+Predicting vertex labeling for m8 S seed 54.
+Migration number: 7.0
+Comigration number: 7.0
+Seeding site number: 3.0
+Neg log likelihood: 1.222
+======================================================================================================================================================
+Tree 39
+Predicting vertex labeling for m8 S seed 5.
+Migration number: 8.0
+Comigration number: 7.0
+Seeding site number: 2.0
+Neg log likelihood: 0.9
+======================================================================================================================================================
+Tree 40
+Predicting vertex labeling for m5 M seed 865.
+Migration number: 7.0
+Comigration number: 6.0
+Seeding site number: 3.0
+Neg log likelihood: 1.821
+======================================================================================================================================================
+Tree 41
+Predicting vertex labeling for m5 M seed 565.
+Migration number: 6.0
+Comigration number: 5.0
+Seeding site number: 2.0
+Neg log likelihood: 1.602
+======================================================================================================================================================
+Tree 42
+Predicting vertex labeling for m5 M seed 512.
+Migration number: 6.0
+Comigration number: 5.0
+Seeding site number: 3.0
+Neg log likelihood: 1.376
+======================================================================================================================================================
+Tree 43
+Predicting vertex labeling for m5 M seed 209.
+Migration number: 7.0
+Comigration number: 5.0
+Seeding site number: 2.0
+Neg log likelihood: 1.258
+======================================================================================================================================================
+Tree 44
+Predicting vertex labeling for m5 M seed 907.
+Migration number: 7.0
+Comigration number: 6.0
+Seeding site number: 3.0
+Neg log likelihood: 1.636
+======================================================================================================================================================
+Tree 45
+Predicting vertex labeling for m5 M seed 694.
+Migration number: 7.0
+Comigration number: 5.0
+Seeding site number: 2.0
+Neg log likelihood: 1.517
+======================================================================================================================================================
+Tree 46
+Predicting vertex labeling for m5 M seed 473.
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 4.0
+Neg log likelihood: 1.248
+======================================================================================================================================================
+Tree 47
+Predicting vertex labeling for m5 M seed 76.
+Migration number: 6.0
+Comigration number: 5.0
+Seeding site number: 3.0
+Neg log likelihood: 1.448
+======================================================================================================================================================
+Tree 48
+Predicting vertex labeling for m5 M seed 545.
+Migration number: 7.0
+Comigration number: 6.0
+Seeding site number: 3.0
+Neg log likelihood: 1.088
+======================================================================================================================================================
+Tree 49
+Predicting vertex labeling for m5 M seed 534.
+Migration number: 7.0
+Comigration number: 4.0
+Seeding site number: 1.0
+Neg log likelihood: 1.768
+======================================================================================================================================================
+Tree 50
+Predicting vertex labeling for m5 mS seed 0.
+Migration number: 4.0
+Comigration number: 4.0
+Seeding site number: 1.0
+Neg log likelihood: 1.141
+======================================================================================================================================================
+Tree 51
+Predicting vertex labeling for m5 mS seed 7.
+Migration number: 4.0
+Comigration number: 4.0
+Seeding site number: 1.0
+Neg log likelihood: 1.219
+======================================================================================================================================================
+Tree 52
+Predicting vertex labeling for m5 mS seed 12.
+Migration number: 5.0
+Comigration number: 4.0
+Seeding site number: 1.0
+Neg log likelihood: 1.218
+======================================================================================================================================================
+Tree 53
+Predicting vertex labeling for m5 mS seed 9.
+Migration number: 4.0
+Comigration number: 4.0
+Seeding site number: 2.0
+Neg log likelihood: 1.326
+======================================================================================================================================================
+Tree 54
+Predicting vertex labeling for m5 mS seed 8.
+Migration number: 4.0
+Comigration number: 4.0
+Seeding site number: 1.0
+Neg log likelihood: 1.187
+======================================================================================================================================================
+Tree 55
+Predicting vertex labeling for m5 mS seed 3.
+Migration number: 5.0
+Comigration number: 5.0
+Seeding site number: 1.0
+Neg log likelihood: 1.12
+======================================================================================================================================================
+Tree 56
+Predicting vertex labeling for m5 mS seed 2.
+Migration number: 4.0
+Comigration number: 4.0
+Seeding site number: 1.0
+Neg log likelihood: 1.53
+======================================================================================================================================================
+Tree 57
+Predicting vertex labeling for m5 mS seed 10.
+Migration number: 5.0
+Comigration number: 4.0
+Seeding site number: 3.0
+Neg log likelihood: 1.369
+======================================================================================================================================================
+Tree 58
+Predicting vertex labeling for m5 mS seed 4.
+Migration number: 4.0
+Comigration number: 4.0
+Seeding site number: 2.0
+Neg log likelihood: 1.625
+======================================================================================================================================================
+Tree 59
+Predicting vertex labeling for m5 mS seed 5.
+Migration number: 4.0
+Comigration number: 4.0
+Seeding site number: 1.0
+Neg log likelihood: 1.339
+======================================================================================================================================================
+Tree 60
+Predicting vertex labeling for m5 R seed 518.
+Migration number: 6.0
+Comigration number: 4.0
+Seeding site number: 2.0
+Neg log likelihood: 1.727
+======================================================================================================================================================
+Tree 61
+Predicting vertex labeling for m5 R seed 2155.
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 3.0
+Neg log likelihood: 1.191
+======================================================================================================================================================
+Tree 62
+Predicting vertex labeling for m5 R seed 247.
+Migration number: 6.0
+Comigration number: 4.0
+Seeding site number: 2.0
+Neg log likelihood: 1.212
+======================================================================================================================================================
+Tree 63
+Predicting vertex labeling for m5 R seed 955.
+Migration number: 7.0
+Comigration number: 5.0
+Seeding site number: 2.0
+Neg log likelihood: 1.492
+======================================================================================================================================================
+Tree 64
+Predicting vertex labeling for m5 R seed 538.
+Migration number: 8.0
+Comigration number: 6.0
+Seeding site number: 3.0
+Neg log likelihood: 1.521
+======================================================================================================================================================
+Tree 65
+Predicting vertex labeling for m5 R seed 571.
+Migration number: 7.0
+Comigration number: 5.0
+Seeding site number: 1.0
+Neg log likelihood: 1.478
+======================================================================================================================================================
+Tree 66
+Predicting vertex labeling for m5 R seed 981.
+Migration number: 6.0
+Comigration number: 4.0
+Seeding site number: 2.0
+Neg log likelihood: 1.575
+======================================================================================================================================================
+Tree 67
+Predicting vertex labeling for m5 R seed 950.
+Migration number: 7.0
+Comigration number: 7.0
+Seeding site number: 2.0
+Neg log likelihood: 1.162
+======================================================================================================================================================
+Tree 68
+Predicting vertex labeling for m5 R seed 17.
+Migration number: 10.0
+Comigration number: 6.0
+Seeding site number: 2.0
+Neg log likelihood: 1.343
+======================================================================================================================================================
+Tree 69
+Predicting vertex labeling for m5 R seed 1140.
+Migration number: 6.0
+Comigration number: 4.0
+Seeding site number: 1.0
+Neg log likelihood: 5.944
+======================================================================================================================================================
+Tree 70
+Predicting vertex labeling for m5 S seed 62.
+Migration number: 5.0
+Comigration number: 4.0
+Seeding site number: 1.0
+Neg log likelihood: 1.145
+======================================================================================================================================================
+Tree 71
+Predicting vertex labeling for m5 S seed 40.
+Migration number: 6.0
+Comigration number: 5.0
+Seeding site number: 3.0
+Neg log likelihood: 1.344
+======================================================================================================================================================
+Tree 72
+Predicting vertex labeling for m5 S seed 31.
+Migration number: 6.0
+Comigration number: 4.0
+Seeding site number: 1.0
+Neg log likelihood: 1.125
+======================================================================================================================================================
+Tree 73
+Predicting vertex labeling for m5 S seed 81.
+Migration number: 6.0
+Comigration number: 4.0
+Seeding site number: 1.0
+Neg log likelihood: 1.406
+======================================================================================================================================================
+Tree 74
+Predicting vertex labeling for m5 S seed 35.
+Migration number: 5.0
+Comigration number: 4.0
+Seeding site number: 1.0
+Neg log likelihood: 1.182
+======================================================================================================================================================
+Tree 75
+Predicting vertex labeling for m5 S seed 49.
+Migration number: 5.0
+Comigration number: 4.0
+Seeding site number: 2.0
+Neg log likelihood: 1.663
+======================================================================================================================================================
+Tree 76
+Predicting vertex labeling for m5 S seed 23.
+Migration number: 8.0
+Comigration number: 4.0
+Seeding site number: 1.0
+Neg log likelihood: 1.539
+======================================================================================================================================================
+Tree 77
+Predicting vertex labeling for m5 S seed 17.
+Migration number: 5.0
+Comigration number: 4.0
+Seeding site number: 1.0
+Neg log likelihood: 1.539
+======================================================================================================================================================
+Tree 78
+Predicting vertex labeling for m5 S seed 25.
+Migration number: 6.0
+Comigration number: 4.0
+Seeding site number: 1.0
+Neg log likelihood: 1.334
+======================================================================================================================================================
+Tree 79
+Predicting vertex labeling for m5 S seed 32.
+Migration number: 6.0
+Comigration number: 5.0
+Seeding site number: 2.0
+Neg log likelihood: 1.895
+80 simulations run

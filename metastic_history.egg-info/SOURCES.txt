@@ -1,0 +1,12 @@
+setup.py
+metastic_history.egg-info/PKG-INFO
+metastic_history.egg-info/SOURCES.txt
+metastic_history.egg-info/dependency_links.txt
+metastic_history.egg-info/top_level.txt
+src/__init__.py
+src/lib/__init__.py
+src/lib/vertex_labeling.py
+src/util/__init__.py
+src/util/machina_data_extraction_util.py
+src/util/pairtree_data_extraction_util.py
+src/util/vertex_labeling_util.py

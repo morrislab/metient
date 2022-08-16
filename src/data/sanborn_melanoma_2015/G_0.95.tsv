@@ -1,0 +1,13 @@
+5 #anatomical sites
+5 #samples
+9 #mutations
+#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	f_lb	f_ub	ref	var
+0	primary	0	primary	0	0	0.0	0.07017269065958967	111	0
+0	primary	0	primary	1	1	0.0	0.01895729249247982	419	0
+0	primary	0	primary	2	2	0.5827240121239138	0.6235801793057909	10833	4676
+1	lung	1	lung	0	0	0.36705107626374545	0.8700025238982918	68	29
+1	lung	1	lung	1	1	0.0	0.028469569321811897	278	0
+1	lung	1	lung	2	2	0.5934294429067744	0.6414458282903048	7865	3511
+2	locoregional	2	locoregional	0	0	0.0	0.05594266870071201	140	0
+2	locoregional	2	locoregional	1	1	0.8266863530925649	1	215	199
+2	locoregional	2	locoregional	2	2	0.8975430201516736	0.9375716996611381	10310	8739
