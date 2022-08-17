@@ -103,6 +103,8 @@ def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=
 
     G.add_edges_from(edges)
 
+    assert(nx.is_tree(G))
+    
     nodes = [full_node_idx_to_label_map[i] for i in range(len(T))]
 
     dot = to_pydot(G).to_string()

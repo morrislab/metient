@@ -7,19 +7,10 @@ fi
 
 for m in {m5,m8}
 do
-    if [ ! -e input_${m} ]
-    then
-	mkdir input_${m}
-    fi
 
-    if [ ! -e mut_trees_${m} ]
+    if [ ! -e ${1}/mut_trees_${m} ]
     then
-	mkdir mut_trees_${m}
-    fi
-
-    if [ ! -e output_${m} ]
-    then
-	mkdir output_${m}
+	     mkdir ${1}/mut_trees_${m}
     fi
 
     for p in {mS,S,M,R}
@@ -29,7 +20,7 @@ do
     	      s=$(basename $f .tsv | sed -e s/reads_seed//g)
 
       	    echo Solving seed $s, pattern $p, anatomical sites $m...
-      	    $2 ${1}/clustered_input_${m}/cluster_${p}_seed${s}.tsv > ${1}/mut_trees_${m}/mut_trees_${p}_seed${s}.txt
+      	    $2 ${1}/${m}_clustered_input/cluster_${p}_seed${s}.tsv > ${1}/mut_trees_${m}/mut_trees_${p}_seed${s}.txt
         done
     done
 done

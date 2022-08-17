@@ -2,6 +2,8 @@ import csv
 import numpy as np
 import os
 import torch
+import copy
+from collections import OrderedDict
 
 def is_resolved_polytomy_cluster(cluster_label):
     '''
@@ -40,7 +42,7 @@ def get_cluster_label_to_idx(cluster_filepath, ignore_polytomies):
     for e.g. for the file above, this would return:
         {'0': 0, '1': 1, '3;15;17;22;24;29;32;34;53;56': 2, '69;78;80;81': 3}
     '''
-    cluster_label_to_idx = dict()
+    cluster_label_to_idx = OrderedDict()
     with open(cluster_filepath) as f:
         i = 0
         for line in f:
@@ -51,15 +53,19 @@ def get_cluster_label_to_idx(cluster_filepath, ignore_polytomies):
             i += 1
     return cluster_label_to_idx
 
-def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, cluster_label_to_idx, T):
+# TODO: remove polytomy stuff?
+def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_cluster_label_to_idx, T):
     '''
     tsv_filepath: path to tsv for machina simulated data (generated from create_conf_intervals_from_reads.py)
 
     tsv is expected to have columns: ['#sample_index', 'sample_label', '#anatomical_site_index',
     'anatomical_site_label', 'character_index', 'character_label', 'f_lb', 'f_ub', 'ref', 'var']
 
-    cluster_label_to_idx:  dictionary mapping the cluster label to index which corresponds to
-    col index in the R matrix and V matrix returned.
+    pruned_cluster_label_to_idx:  dictionary mapping the cluster label to index which corresponds to
+    col index in the R matrix and V matrix returned. This isn't 1:1 with the
+    'character_label' to 'character_index' mapping in the tsv because we only keep the
+    nodes which appear in the mutation tree, and re-index after removing unseen nodes
+    (see _get_adj_matrix_from_machina_tree)
 
     T: adjacency matrix of the internal nodes.
 
@@ -71,7 +77,7 @@ def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, cluster_label_to_id
     # subclones, so this would map 'pink' to n, if pink is the nth node in the adjacency matrix)
     '''
 
-    assert(cluster_label_to_idx != None)
+    assert(pruned_cluster_label_to_idx != None)
     assert(T != None)
 
     with open(tsv_filepath) as f:
@@ -92,7 +98,7 @@ def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, cluster_label_to_id
         # 0 indexing
         num_samples += 1
 
-    num_clusters = len(cluster_label_to_idx.keys())
+    num_clusters = len(pruned_cluster_label_to_idx.keys())
 
     R = np.zeros((num_samples, num_clusters))
     V = np.zeros((num_samples, num_clusters))
@@ -101,9 +107,10 @@ def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, cluster_label_to_id
         tsv = csv.reader(f, delimiter="\t", quotechar='"')
         for i, row in enumerate(tsv):
             if i < 4: continue
-            mut_cluster_idx = cluster_label_to_idx[row[cluster_label_idx]]
-            R[int(row[sample_idx]), mut_cluster_idx] = int(row[ref_idx])
-            V[int(row[sample_idx]), mut_cluster_idx] = int(row[var_idx])
+            if row[cluster_label_idx] in pruned_cluster_label_to_idx:
+                mut_cluster_idx = pruned_cluster_label_to_idx[row[cluster_label_idx]]
+                R[int(row[sample_idx]), mut_cluster_idx] = int(row[ref_idx])
+                V[int(row[sample_idx]), mut_cluster_idx] = int(row[var_idx])
 
             # collect additional metadata
             # doing this as a list instead of a set so we preserve the order
@@ -113,9 +120,9 @@ def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, cluster_label_to_id
 
     # Fill the columns in R and V with the resolved polytomies' parents data
     # (if there are resolved polytomies)
-    for cluster_label in cluster_label_to_idx:
+    for cluster_label in pruned_cluster_label_to_idx:
         if is_resolved_polytomy_cluster(cluster_label):
-            res_polytomy_idx = cluster_label_to_idx[cluster_label]
+            res_polytomy_idx = pruned_cluster_label_to_idx[cluster_label]
             parent_idx = np.where(T[:,res_polytomy_idx] == 1)[0][0]
             R[:, res_polytomy_idx] = R[:, parent_idx]
             V[:, res_polytomy_idx] = V[:, parent_idx]
@@ -179,7 +186,100 @@ def get_ref_var_matrices_from_real_data(tsv_filepath):
 
     return torch.tensor(R, dtype=torch.float32), torch.tensor(V, dtype=torch.float32), list(unique_sites), character_label_to_idx
 
+def _get_adj_matrix_from_machina_tree(tree_edges, character_label_to_idx, remove_unseen_nodes=True, skip_polytomies=False):
+    '''
+    Args:
+        tree_edges: list of tuples where each tuple is an edge in the tree
+        character_label_to_idx: dictionary mapping character_label to index (machina
+        uses colors to represent subclones, so this would map 'pink' to n, if pink
+        is the nth node in the adjacency matrix).
+        remove_unseen_nodes: if True, removes nodes that
+        appear in the machina tsv file but do not appear in the reported tree
+        skip_polyomies: if True, checks for polytomies and skips over them. For example
+        if the tree is 0 -> polytomy -> 1, returns 0 -> 1. If the tree is 0 -> polytomy
+        returns 0.
 
+    Returns:
+        T: adjacency matrix where Tij = 1 if there is a path from i to j
+        character_label_to_idx: a pruned character_label_to_idx where nodes that
+        appear in the machina tsv file but do not appear in the reported tree are removed
+    '''
+    num_internal_nodes = len(character_label_to_idx)
+    T = np.zeros((num_internal_nodes, num_internal_nodes))
+    seen_nodes = set()
+
+    # dict of { child_label : parent_label } needed to skip over polytomies
+    child_to_parent_map = {}
+    for edge in tree_edges:
+        node_i, node_j = edge[0], edge[1]
+        seen_nodes.add(node_i)
+        seen_nodes.add(node_j)
+        # don't include the leaf/extant nodes (determined from U)
+        if node_i in character_label_to_idx and node_j in character_label_to_idx:
+            T[character_label_to_idx[node_i], character_label_to_idx[node_j]] = 1
+
+        # we don't want to include the leaf nodes, only internal nodes
+        if not is_leaf(node_j) and node_i != "GL":
+            child_to_parent_map[node_j] = node_i
+
+    # Fix missing connections
+    if skip_polytomies:
+        for child_label in child_to_parent_map:
+            parent_label = child_to_parent_map[child_label]
+            if is_resolved_polytomy_cluster(parent_label) and parent_label in child_to_parent_map:
+                # Connect the resolved polytomy's parent to the resolved polytomy's child
+                res_poly_parent = child_to_parent_map[parent_label]
+                if res_poly_parent in character_label_to_idx and child_label in character_label_to_idx:
+                    T[character_label_to_idx[res_poly_parent], character_label_to_idx[child_label]] = 1
+
+    unseen_nodes = list(set(character_label_to_idx.keys()) - seen_nodes)
+    pruned_character_label_to_idx = OrderedDict()
+    if remove_unseen_nodes:
+        unseen_node_indices = [character_label_to_idx[unseen_node] for unseen_node in unseen_nodes]
+        T = np.delete(T, unseen_node_indices, 0)
+        T = np.delete(T, unseen_node_indices, 1)
+
+        i = 0
+        for char_label in character_label_to_idx:
+            if char_label not in unseen_nodes:
+                pruned_character_label_to_idx[char_label] = i
+                i += 1
+        if len(unseen_nodes) > 0:
+            print("Removing unseen nodes:", unseen_nodes, pruned_character_label_to_idx)
+
+    return T, pruned_character_label_to_idx if remove_unseen_nodes else character_label_to_idx
+
+def get_adj_matrices_from_all_mutation_trees(mut_trees_filename, character_label_to_idx):
+    '''
+    When running MACHINA's generatemutationtrees executable, it provides a txt file with
+    all possible mutation trees. See data/machina_simulated_data/mut_trees_m5/ for examples
+
+    Returns a list of tuples, each containing (T, character_label_to_idx) for each
+    tree in mut_trees_filename.
+        - T: adjacency matrix where Tij = 1 if there is a path from i to j
+        - character_label_to_idx: a pruned character_label_to_idx where nodes that
+        appear in the machina tsv file but do not appear in the reported tree are removed
+    '''
+
+    out = []
+    with open(mut_trees_filename, 'r') as f:
+        tree_data = []
+        for i, line in enumerate(f):
+            if i < 3: continue
+            # This marks the beginning of a tree
+            if "#edges, tree" in line:
+                adj_matrix, pruned_char_label_to_idx = _get_adj_matrix_from_machina_tree(tree_data, character_label_to_idx)
+                out.append((adj_matrix, pruned_char_label_to_idx))
+                tree_data = []
+            else:
+                nodes = line.strip().split()
+                tree_data.append((";".join(nodes[0].split("_")), ";".join(nodes[1].split("_"))))
+
+        adj_matrix, pruned_char_label_to_idx = _get_adj_matrix_from_machina_tree(tree_data, character_label_to_idx)
+        out.append((adj_matrix, pruned_char_label_to_idx))
+    return out
+
+# TODO: take out skip polytomies functionality?
 def get_adj_matrix_from_machina_tree(character_label_to_idx, tree_filename, remove_unseen_nodes=True, skip_polytomies=False):
     '''
     character_label_to_idx: dictionary mapping character_label to index (machina
@@ -192,42 +292,15 @@ def get_adj_matrix_from_machina_tree(character_label_to_idx, tree_filename, remo
     if the tree is 0 -> polytomy -> 1, returns 0 -> 1. If the tree is 0 -> polytomy
     returns 0.
 
-    returns adjacency matrix T, where Tij = 1 if there is a path from i to j
+    Returns:
+        T: adjacency matrix where Tij = 1 if there is a path from i to j
+        character_label_to_idx: a pruned character_label_to_idx where nodes that
+        appear in the machina tsv file but do not appear in the reported tree are removed
     '''
-    num_internal_nodes = len(character_label_to_idx)
-    T = np.zeros((num_internal_nodes, num_internal_nodes))
-    seen_nodes = set()
-
-    # dict of { child_label : parent_label } needed to skip over polytomies
-    child_to_parent_map = {}
+    edges = []
     with open(tree_filename, 'r') as f:
         for line in f:
             nodes = line.strip().split()
             node_i, node_j = nodes[0], nodes[1]
-            seen_nodes.add(node_i)
-            seen_nodes.add(node_j)
-            # don't include the leaf/extant nodes (determined from U)
-            if node_i in character_label_to_idx and node_j in character_label_to_idx:
-                T[character_label_to_idx[node_i], character_label_to_idx[node_j]] = 1
-
-            # we don't want to include the leaf nodes, only internal nodes
-            if not is_leaf(node_j) and node_i != "GL":
-                child_to_parent_map[node_j] = node_i
-
-    # Fix missing connections
-    if skip_polytomies:
-        for child_label in child_to_parent_map:
-            parent_label = child_to_parent_map[child_label]
-            if is_resolved_polytomy_cluster(parent_label) and parent_label in child_to_parent_map:
-                # Connect the resolved polytomy's parent to the resolved polytomy's child
-                res_poly_parent = child_to_parent_map[parent_label]
-                if res_poly_parent in character_label_to_idx and child_label in character_label_to_idx:
-                    T[character_label_to_idx[res_poly_parent], character_label_to_idx[child_label]] = 1
-
-    if remove_unseen_nodes:
-        unseen_nodes = list(set(character_label_to_idx.keys()) - seen_nodes)
-        for unseen_node in unseen_nodes:
-            unseen_node_idx = character_label_to_idx[unseen_node]
-            T = np.delete(T, unseen_node_idx, 0)
-            T = np.delete(T, unseen_node_idx, 1)
-    return T
+            edges.append((node_i, node_j))
+    return _get_adj_matrix_from_machina_tree(edges, character_label_to_idx, remove_unseen_nodes, skip_polytomies)

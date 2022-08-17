@@ -96,7 +96,7 @@ def print_char(row, i, sam, cluster_index_to_variant_indices, use_char_idx_as_ch
     char_label = row.name if use_char_idx_as_char_label else cluster_index_to_variant_indices[row.name]
     return "\t".join(map(str,[i, sam, i, sam, row.name, char_label, max(row['lb-'+sam] * 2, 0), min(1, 2 * row['ub-'+sam]), int(row['ref-'+sam]), int(row['var-'+sam])]))+"\n"
 
-def write(reads_filename, cluster_filename, out_directory, cluster_split_function=None, use_char_idx_as_char_label=False):
+def write(reads_filename, cluster_filename, out_directory, output_fn=None, cluster_split_function=None, use_char_idx_as_char_label=False):
     '''
     To obtain mutation clusters and their frequencies, we use the clustering
     procedure of AncesTree
@@ -113,6 +113,7 @@ def write(reads_filename, cluster_filename, out_directory, cluster_split_functio
     '''
 
     read_data = pd.read_table(reads_filename, skiprows=3)
+    read_data['character_label'] = read_data['character_label'].astype(str)
     # Map variant IDs to observed clusters IDs
     variant_id_to_cluster_idx_map = {}
     cluster_index_to_variant_indices = {} # this will be saved as the character label
@@ -179,18 +180,21 @@ def write(reads_filename, cluster_filename, out_directory, cluster_split_functio
     for i, sam in enumerate(sample_labels):
         rows += list(ctable_cutoff.apply(print_char, args=[i, sam, cluster_index_to_variant_indices, use_char_idx_as_char_label], axis=1))
 
-    basename = os.path.basename(reads_filename).replace("reads_", "").replace(".tsv", "")
-    with open(os.path.join(out_directory, basename+"_"+str(CONFIDENCE)+".tsv"), 'w') as f:
+    if output_fn == None:
+        basename = os.path.basename(reads_filename).replace("reads_", "").replace(".tsv", "")
+        output_fn = basename+"_"+str(CONFIDENCE)+".tsv"
+    with open(os.path.join(out_directory, output_fn), 'w') as f:
         for line in rows:
             f.write(line)
 
 if __name__=="__main__":
-    if len(sys.argv) != 4:
-        print("USAGE: python create_conf_intervals_from_reads.py [reads_file] [cluster_file] [out_directory]")
+    if len(sys.argv) != 5:
+        print("USAGE: python create_conf_intervals_from_reads.py [reads_file] [cluster_file] [out_directory] [out_fn]")
         quit()
 
     reads_filename = sys.argv[1]
     cluster_filename = sys.argv[2]
     out_directory = sys.argv[3]
+    out_fn = sys.argv[4]
 
-    write(reads_filename, cluster_filename, out_directory)
+    write(reads_filename, cluster_filename, out_directory, output_fn=out_fn)
