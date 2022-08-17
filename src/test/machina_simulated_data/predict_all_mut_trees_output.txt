@@ -1,0 +1,3622 @@
+======================================================================================================================================================
+num_run: 0
+Predicting vertex labeling for m8 M seed 241.
+{'0;1': 0, '2;4;6': 1, '5;7;13;20;21;24': 2, '26': 3, '29;31': 4, '9;11;12;15;17;19;22;23;25;32;33': 5, '38;39': 6, '45': 7, '47': 8, '3;8;10;14;18;27;28;30;34;35;41;46;50': 9, '62': 10, '42;49;63': 11, '54;64': 12, '51;53;55;57;68': 13, '36;43;52;59;69': 14, '66;70;71': 15, '72': 16, '56;61;67;73': 17, '76': 18}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 3.0
+Neg log likelihood: 1.05
+L1: 8.0
+Loss: 127.41
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 3.0
+Neg log likelihood: 1.063
+L1: 8.0
+Loss: 127.411
+Tree 2
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 3.0
+Neg log likelihood: 1.049
+L1: 7.999999523162842
+Loss: 117.41
+Tree 3
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 3.0
+Neg log likelihood: 1.054
+L1: 7.999999523162842
+Loss: 117.411
+Tree 4
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 3.0
+Neg log likelihood: 1.055
+L1: 7.999999046325684
+Loss: 117.411
+Tree 5
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 3.0
+Neg log likelihood: 1.034
+L1: 7.999999523162842
+Loss: 117.41
+======================================================================================================================================================
+num_run: 1
+Predicting vertex labeling for m8 M seed 7.
+{'0': 0, '2;7;13;17;23;27': 1, '4;22;28': 2, '1;6;8;9;11;14;21;25;37': 3, '31;36;38': 4, '39': 5, '41;43;44;48': 6, '29;55': 7, '45;52;54;60': 8, '47;56;57;58;61': 9, '12;15;20;24;32;42;62': 10, '49;51;53;66;73': 11, '5;18;19;26;30;64;65;74': 12, '40;46;50;59;70;75': 13, '79;81': 14}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 10.0
+Seeding site number: 2.0
+Neg log likelihood: 1.673
+L1: 8.0
+Loss: 128.417
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 10.0
+Seeding site number: 2.0
+Neg log likelihood: 1.948
+L1: 8.0
+Loss: 128.419
+Tree 2
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.643
+L1: 8.0
+Loss: 118.416
+Tree 3
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.859
+L1: 7.999999523162842
+Loss: 118.419
+Tree 4
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.592
+L1: 8.0
+Loss: 118.416
+Tree 5
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.612
+L1: 8.0
+Loss: 117.416
+======================================================================================================================================================
+num_run: 2
+Predicting vertex labeling for m8 M seed 19.
+{'0': 0, '1': 1, '2': 2, '3;4': 3, '5;10': 4, '19;21': 5, '13;25;29': 6, '11;12;14;31;32': 7, '22;26;27;28;30;36;45': 8, '6;7;9;15;18;20;35;42;43;46': 9, '8;38;41;44;48;49;51;54;58;59': 10, '52;61': 11, '62': 12, '47;50;56;57;64': 13, '74': 14, '75': 15}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.713
+L1: 8.0
+Loss: 109.417
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.725
+L1: 8.000000953674316
+Loss: 119.417
+Tree 2
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.538
+L1: 8.000000953674316
+Loss: 119.415
+Tree 3
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.848
+L1: 7.999998569488525
+Loss: 119.418
+Tree 4
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.587
+L1: 8.0
+Loss: 129.416
+Tree 5
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.303
+L1: 8.000000953674316
+Loss: 129.413
+Tree 6
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.716
+L1: 7.999999523162842
+Loss: 129.417
+Tree 7
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 12.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.818
+L1: 8.0
+Loss: 139.418
+Tree 8
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.571
+L1: 8.0
+Loss: 129.416
+Tree 9
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.745
+L1: 8.0
+Loss: 119.417
+Tree 10
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.571
+L1: 8.0
+Loss: 119.416
+Tree 11
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.729
+L1: 8.0
+Loss: 129.417
+Tree 12
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.218
+L1: 7.999999523162842
+Loss: 129.412
+Tree 13
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.8
+L1: 8.0
+Loss: 119.418
+Tree 14
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.804
+L1: 7.999999523162842
+Loss: 119.418
+Tree 15
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.859
+L1: 8.0
+Loss: 129.419
+Tree 16
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.403
+L1: 8.0
+Loss: 119.414
+Tree 17
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.567
+L1: 8.0
+Loss: 119.416
+Tree 18
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.207
+L1: 8.0
+Loss: 119.412
+Tree 19
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 4.0
+Neg log likelihood: 1.448
+L1: 8.0
+Loss: 118.414
+Tree 20
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.39
+L1: 8.0
+Loss: 129.414
+Tree 21
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.197
+L1: 8.0
+Loss: 119.412
+Tree 22
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.531
+L1: 8.0
+Loss: 119.415
+Tree 23
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 4.0
+Neg log likelihood: 1.527
+L1: 7.999999523162842
+Loss: 118.415
+Tree 24
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.835
+L1: 8.000000953674316
+Loss: 109.418
+Tree 25
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 9.0
+Comigration number: 9.0
+Seeding site number: 5.0
+Neg log likelihood: 1.839
+L1: 8.0
+Loss: 110.418
+Tree 26
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.711
+L1: 7.999999523162842
+Loss: 119.417
+Tree 27
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.515
+L1: 7.999999523162842
+Loss: 129.415
+Tree 28
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.374
+L1: 8.0
+Loss: 129.414
+Tree 29
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.2
+L1: 7.999999523162842
+Loss: 119.412
+Tree 30
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.198
+L1: 8.0
+Loss: 109.412
+Tree 31
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.378
+L1: 8.0
+Loss: 119.414
+Tree 32
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.192
+L1: 8.0
+Loss: 119.412
+Tree 33
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.243
+L1: 8.0
+Loss: 119.412
+Tree 34
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.49
+L1: 8.000000953674316
+Loss: 109.415
+Tree 35
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.484
+L1: 7.999999523162842
+Loss: 109.415
+Tree 36
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.206
+L1: 8.0
+Loss: 129.412
+Tree 37
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.704
+L1: 8.0
+Loss: 129.417
+Tree 38
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.397
+L1: 8.0
+Loss: 119.414
+Tree 39
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.19
+L1: 8.0
+Loss: 119.412
+Tree 40
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.464
+L1: 8.0
+Loss: 119.415
+Tree 41
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.192
+L1: 8.0
+Loss: 119.412
+Tree 42
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.686
+L1: 8.0
+Loss: 109.417
+Tree 43
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 7.0
+Seeding site number: 4.0
+Neg log likelihood: 1.744
+L1: 8.0
+Loss: 117.417
+Tree 44
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.345
+L1: 8.0
+Loss: 109.413
+Tree 45
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.194
+L1: 8.0
+Loss: 109.412
+Tree 46
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.311
+L1: 8.0
+Loss: 109.413
+Tree 47
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.484
+L1: 8.0
+Loss: 109.415
+======================================================================================================================================================
+num_run: 3
+Predicting vertex labeling for m8 M seed 35.
+{'0': 0, '4;19;22': 1, '25': 2, '24;28;29': 3, '40': 4, '42': 5, '32;49': 6, '5;10;15;20;21;44;51': 7, '2;8;9;12;16;18;23;35;53': 8, '68': 9, '48;56;61;79': 10, '80': 11, '75;81': 12, '82': 13, '27;31;36;37;47;50;58;59;63;64;86': 14, '41;43;54;57;87': 15, '77;84;90;91': 16, '66;78;89;102': 17, '96;99;100;103': 18}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.045
+L1: 9.0
+Loss: 148.21
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.023
+L1: 9.0
+Loss: 138.21
+Tree 2
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 10.0
+Seeding site number: 3.0
+Neg log likelihood: 1.492
+L1: 9.000000953674316
+Loss: 140.215
+Tree 3
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 10.0
+Seeding site number: 3.0
+Neg log likelihood: 1.029
+L1: 9.0
+Loss: 150.21
+Tree 4
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.018
+L1: 9.0
+Loss: 148.21
+Tree 5
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.012
+L1: 9.0
+Loss: 138.21
+Tree 6
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.017
+L1: 9.0
+Loss: 138.21
+Tree 7
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 0.998
+L1: 9.000000953674316
+Loss: 138.21
+Tree 8
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.023
+L1: 8.999999046325684
+Loss: 138.21
+Tree 9
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.004
+L1: 9.0
+Loss: 128.21
+Tree 10
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 0.994
+L1: 9.0
+Loss: 128.21
+Tree 11
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 10.0
+Seeding site number: 3.0
+Neg log likelihood: 1.126
+L1: 9.0
+Loss: 140.211
+Tree 12
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.012
+L1: 9.000000953674316
+Loss: 139.21
+Tree 13
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.091
+L1: 9.0
+Loss: 138.211
+Tree 14
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 0.99
+L1: 9.0
+Loss: 128.21
+Tree 15
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 0.981
+L1: 9.000000953674316
+Loss: 128.21
+Tree 16
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.039
+L1: 9.0
+Loss: 148.21
+Tree 17
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.384
+L1: 9.0
+Loss: 148.214
+Tree 18
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.019
+L1: 9.0
+Loss: 148.21
+Tree 19
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.026
+L1: 9.0
+Loss: 149.21
+Tree 20
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.198
+L1: 9.0
+Loss: 148.212
+Tree 21
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 11.0
+Seeding site number: 4.0
+Neg log likelihood: 1.205
+L1: 9.0
+Loss: 152.212
+Tree 22
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.14
+L1: 9.0
+Loss: 148.211
+Tree 23
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 11.0
+Seeding site number: 4.0
+Neg log likelihood: 1.168
+L1: 9.0
+Loss: 152.212
+Tree 24
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.027
+L1: 9.0
+Loss: 138.21
+Tree 25
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.169
+L1: 8.999999046325684
+Loss: 148.212
+Tree 26
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 0.996
+L1: 9.0
+Loss: 138.21
+Tree 27
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.012
+L1: 8.999999046325684
+Loss: 138.21
+Tree 28
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.015
+L1: 9.0
+Loss: 138.21
+Tree 29
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.155
+L1: 9.0
+Loss: 138.212
+Tree 30
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.171
+L1: 9.0
+Loss: 148.212
+Tree 31
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.126
+L1: 9.0
+Loss: 148.211
+Tree 32
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.024
+L1: 9.0
+Loss: 138.21
+Tree 33
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.002
+L1: 9.0
+Loss: 128.21
+Tree 34
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.205
+L1: 9.0
+Loss: 148.212
+Tree 35
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.107
+L1: 9.0
+Loss: 128.211
+Tree 36
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 11.0
+Seeding site number: 4.0
+Neg log likelihood: 1.097
+L1: 9.0
+Loss: 142.211
+Tree 37
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 10.0
+Seeding site number: 3.0
+Neg log likelihood: 1.13
+L1: 9.0
+Loss: 150.211
+Tree 38
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 13.0
+Comigration number: 10.0
+Seeding site number: 3.0
+Neg log likelihood: 1.087
+L1: 8.999999046325684
+Loss: 150.211
+Tree 39
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.001
+L1: 9.0
+Loss: 138.21
+Tree 40
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.073
+L1: 9.0
+Loss: 138.211
+Tree 41
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 11.0
+Seeding site number: 4.0
+Neg log likelihood: 1.01
+L1: 9.000000953674316
+Loss: 142.21
+Tree 42
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 0.991
+L1: 9.0
+Loss: 128.21
+Tree 43
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 0.997
+L1: 9.0
+Loss: 128.21
+Tree 44
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 0.98
+L1: 9.0
+Loss: 128.21
+Tree 45
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.107
+L1: 9.0
+Loss: 138.211
+Tree 46
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 0.988
+L1: 9.0
+Loss: 138.21
+Tree 47
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.082
+L1: 9.0
+Loss: 128.211
+======================================================================================================================================================
+num_run: 4
+Predicting vertex labeling for m8 M seed 243.
+{'0': 0, '2;3': 1, '9': 2, '1;4;6;14;15;16;21;28;31;32': 3, '5;7;10;11;17;18;20;22;23;38': 4, '8;12;13;19;40': 5, '45': 6, '27;35;48': 7, '50': 8, '36;59': 9, '67': 10, '66;69': 11, '73': 12, '25;26;30;34;41;44;60;63;68;74;75': 13, '33;47;56;58;70;78;79': 14, '24;39;42;49;52;53;55;57;72;81': 15, '86': 16, '54;62;64;65;87': 17}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 5.0
+Neg log likelihood: 1.172
+L1: 9.0
+Loss: 195.212
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 5.0
+Neg log likelihood: 1.181
+L1: 9.000000953674316
+Loss: 195.212
+Tree 2
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 5.0
+Neg log likelihood: 1.18
+L1: 9.0
+Loss: 195.212
+Tree 3
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 5.0
+Neg log likelihood: 1.187
+L1: 9.0
+Loss: 195.212
+Tree 4
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 5.0
+Neg log likelihood: 1.162
+L1: 8.999999046325684
+Loss: 195.212
+Tree 5
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 5.0
+Neg log likelihood: 1.167
+L1: 9.0
+Loss: 195.212
+Tree 6
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 16.0
+Comigration number: 13.0
+Seeding site number: 5.0
+Neg log likelihood: 1.166
+L1: 9.0
+Loss: 185.212
+Tree 7
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 16.0
+Comigration number: 13.0
+Seeding site number: 5.0
+Neg log likelihood: 1.172
+L1: 9.0
+Loss: 185.212
+Tree 8
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 16.0
+Comigration number: 13.0
+Seeding site number: 5.0
+Neg log likelihood: 1.177
+L1: 9.0
+Loss: 185.212
+Tree 9
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 16.0
+Comigration number: 13.0
+Seeding site number: 5.0
+Neg log likelihood: 1.167
+L1: 9.0
+Loss: 185.212
+Tree 10
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 5.0
+Neg log likelihood: 1.171
+L1: 9.0
+Loss: 195.212
+Tree 11
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 5.0
+Neg log likelihood: 1.179
+L1: 9.0
+Loss: 195.212
+======================================================================================================================================================
+num_run: 5
+Predicting vertex labeling for m8 M seed 76.
+{'0;1;2': 0, '3': 1, '4': 2, '9;12;16': 3, '5;7;10;14;18;19;22': 4, '6;15;17;26;27;30;32': 5, '24;29;31;33;38': 6, '37;39': 7, '53': 8, '8;11;13;23;25;28;34;35;42;46;64': 9, '71;77': 10, '74;83': 11, '89': 12, '44;60;67;90;92;96': 13, '36;40;45;47;54;65;104': 14, '43;48;49;50;62;73;102;105': 15, '76;106': 16, '52;57;63;69;91;99;107': 17, '111': 18}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.288
+L1: 9.0
+Loss: 129.213
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.279
+L1: 9.0
+Loss: 129.213
+Tree 2
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.287
+L1: 9.000000953674316
+Loss: 129.213
+Tree 3
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.451
+L1: 9.0
+Loss: 129.215
+======================================================================================================================================================
+num_run: 6
+Predicting vertex labeling for m8 M seed 172.
+{'0': 0, '1': 1, '3': 2, '5;11;16;17;18;20': 3, '6;7;10;13;14;23;28': 4, '35;36': 5, '33;39': 6, '43': 7, '46;48;60': 8, '40;47;63': 9, '30;54;61;64': 10, '8;9;15;19;22;24;26;29;45;67;69': 11, '55;56;70': 12, '72': 13, '77': 14, '44;53;57;65;71;75;78': 15, '83': 16, '34;38;41;66;68;73;81;84': 17, '88': 18}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.142
+L1: 10.0
+Loss: 206.011
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.223
+L1: 9.999999046325684
+Loss: 206.012
+Tree 2
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.488
+L1: 10.0
+Loss: 206.015
+Tree 3
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.304
+L1: 9.999999046325684
+Loss: 185.013
+Tree 4
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.459
+L1: 10.0
+Loss: 204.015
+Tree 5
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 12.0
+Seeding site number: 2.0
+Neg log likelihood: 1.087
+L1: 10.0
+Loss: 212.011
+Tree 6
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 3.0
+Neg log likelihood: 1.178
+L1: 10.0
+Loss: 204.012
+Tree 7
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 12.0
+Seeding site number: 2.0
+Neg log likelihood: 1.176
+L1: 9.999999046325684
+Loss: 192.012
+Tree 8
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 12.0
+Seeding site number: 2.0
+Neg log likelihood: 1.145
+L1: 10.0
+Loss: 202.011
+Tree 9
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 12.0
+Seeding site number: 2.0
+Neg log likelihood: 1.14
+L1: 10.0
+Loss: 212.011
+Tree 10
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 13.0
+Seeding site number: 3.0
+Neg log likelihood: 1.326
+L1: 10.0
+Loss: 214.013
+Tree 11
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.216
+L1: 9.999999046325684
+Loss: 186.012
+Tree 12
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.27
+L1: 10.000000953674316
+Loss: 205.013
+Tree 13
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.26
+L1: 10.0
+Loss: 196.013
+Tree 14
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.308
+L1: 10.0
+Loss: 195.013
+Tree 15
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.552
+L1: 10.000000953674316
+Loss: 205.016
+Tree 16
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.286
+L1: 10.0
+Loss: 196.013
+Tree 17
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.806
+L1: 10.0
+Loss: 216.018
+Tree 18
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.201
+L1: 10.0
+Loss: 196.012
+Tree 19
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.468
+L1: 10.0
+Loss: 206.015
+Tree 20
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.289
+L1: 10.0
+Loss: 206.013
+Tree 21
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.3
+L1: 10.0
+Loss: 215.013
+Tree 22
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 13.0
+Seeding site number: 3.0
+Neg log likelihood: 1.627
+L1: 10.0
+Loss: 214.016
+Tree 23
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.625
+L1: 10.0
+Loss: 194.016
+Tree 24
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.983
+L1: 10.0
+Loss: 216.02
+Tree 25
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.713
+L1: 10.0
+Loss: 205.017
+Tree 26
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.228
+L1: 10.0
+Loss: 206.012
+Tree 27
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 12.0
+Seeding site number: 3.0
+Neg log likelihood: 1.574
+L1: 10.0
+Loss: 203.016
+Tree 28
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 3.0
+Neg log likelihood: 1.086
+L1: 10.0
+Loss: 194.011
+Tree 29
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.28
+L1: 10.0
+Loss: 191.013
+Tree 30
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.253
+L1: 9.999999046325684
+Loss: 185.013
+Tree 31
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.246
+L1: 9.999999046325684
+Loss: 196.012
+Tree 32
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 15.0
+Seeding site number: 4.0
+Neg log likelihood: 1.098
+L1: 9.999999046325684
+Loss: 197.011
+Tree 33
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.169
+L1: 10.0
+Loss: 206.012
+Tree 34
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.147
+L1: 10.0
+Loss: 206.011
+Tree 35
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.636
+L1: 10.0
+Loss: 215.016
+Tree 36
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.16
+L1: 10.0
+Loss: 191.012
+Tree 37
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 12.0
+Seeding site number: 2.0
+Neg log likelihood: 1.17
+L1: 10.0
+Loss: 202.012
+Tree 38
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.183
+L1: 10.000000953674316
+Loss: 185.012
+Tree 39
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.21
+L1: 10.0
+Loss: 194.012
+Tree 40
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.184
+L1: 9.999999046325684
+Loss: 206.012
+Tree 41
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.216
+L1: 10.0
+Loss: 196.012
+Tree 42
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.191
+L1: 10.0
+Loss: 205.012
+Tree 43
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.177
+L1: 10.0
+Loss: 195.012
+Tree 44
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.226
+L1: 10.0
+Loss: 201.012
+Tree 45
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.199
+L1: 10.0
+Loss: 195.012
+Tree 46
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 12.0
+Seeding site number: 3.0
+Neg log likelihood: 1.146
+L1: 9.999999046325684
+Loss: 203.011
+Tree 47
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.252
+L1: 10.0
+Loss: 205.013
+Tree 48
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.121
+L1: 10.0
+Loss: 185.011
+Tree 49
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.111
+L1: 9.999999046325684
+Loss: 205.011
+Tree 50
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.382
+L1: 10.0
+Loss: 215.014
+Tree 51
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.085
+L1: 10.0
+Loss: 196.011
+Tree 52
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.113
+L1: 9.999999046325684
+Loss: 195.011
+Tree 53
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.166
+L1: 10.0
+Loss: 204.012
+Tree 54
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.367
+L1: 10.0
+Loss: 215.014
+Tree 55
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.167
+L1: 10.0
+Loss: 201.012
+Tree 56
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.164
+L1: 10.0
+Loss: 185.012
+Tree 57
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.579
+L1: 9.999999046325684
+Loss: 206.016
+Tree 58
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.093
+L1: 10.000000953674316
+Loss: 205.011
+Tree 59
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.09
+L1: 10.0
+Loss: 195.011
+Tree 60
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 12.0
+Seeding site number: 3.0
+Neg log likelihood: 1.209
+L1: 9.999999046325684
+Loss: 203.012
+Tree 61
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.16
+L1: 9.999999046325684
+Loss: 205.012
+Tree 62
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 12.0
+Seeding site number: 3.0
+Neg log likelihood: 1.092
+L1: 10.0
+Loss: 203.011
+Tree 63
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.087
+L1: 10.0
+Loss: 201.011
+Tree 64
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.059
+L1: 10.000000953674316
+Loss: 201.011
+Tree 65
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 12.0
+Seeding site number: 3.0
+Neg log likelihood: 1.033
+L1: 10.0
+Loss: 193.01
+Tree 66
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.113
+L1: 10.000000953674316
+Loss: 195.011
+Tree 67
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.498
+L1: 10.000000953674316
+Loss: 196.015
+Tree 68
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 15.0
+Seeding site number: 4.0
+Neg log likelihood: 1.394
+L1: 10.0
+Loss: 197.014
+Tree 69
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.328
+L1: 10.0
+Loss: 205.013
+Tree 70
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.12
+L1: 10.0
+Loss: 195.011
+Tree 71
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.177
+L1: 10.0
+Loss: 184.012
+Tree 72
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 12.0
+Seeding site number: 3.0
+Neg log likelihood: 1.09
+L1: 9.999999046325684
+Loss: 203.011
+Tree 73
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 12.0
+Seeding site number: 3.0
+Neg log likelihood: 1.398
+L1: 10.0
+Loss: 213.014
+Tree 74
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.061
+L1: 10.0
+Loss: 201.011
+Tree 75
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.144
+L1: 10.0
+Loss: 196.011
+Tree 76
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.142
+L1: 10.0
+Loss: 201.011
+Tree 77
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.098
+L1: 10.0
+Loss: 191.011
+Tree 78
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.117
+L1: 10.0
+Loss: 201.011
+Tree 79
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 12.0
+Seeding site number: 3.0
+Neg log likelihood: 1.059
+L1: 10.0
+Loss: 183.011
+Tree 80
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.457
+L1: 10.0
+Loss: 196.015
+Tree 81
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.522
+L1: 10.0
+Loss: 185.015
+Tree 82
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 12.0
+Seeding site number: 3.0
+Neg log likelihood: 1.104
+L1: 10.0
+Loss: 183.011
+Tree 83
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.473
+L1: 10.0
+Loss: 184.015
+Tree 84
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.636
+L1: 9.999999046325684
+Loss: 194.016
+Tree 85
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.26
+L1: 10.000000953674316
+Loss: 195.013
+Tree 86
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.175
+L1: 10.0
+Loss: 201.012
+Tree 87
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.201
+L1: 10.0
+Loss: 186.012
+Tree 88
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.189
+L1: 10.0
+Loss: 195.012
+Tree 89
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 3.0
+Neg log likelihood: 1.149
+L1: 10.0
+Loss: 194.011
+Tree 90
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.07
+L1: 10.0
+Loss: 191.011
+Tree 91
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.088
+L1: 10.0
+Loss: 206.011
+Tree 92
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.088
+L1: 10.0
+Loss: 211.011
+Tree 93
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.258
+L1: 10.0
+Loss: 206.013
+Tree 94
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.093
+L1: 10.000000953674316
+Loss: 196.011
+Tree 95
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.072
+L1: 10.0
+Loss: 201.011
+Tree 96
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 12.0
+Seeding site number: 3.0
+Neg log likelihood: 1.093
+L1: 10.0
+Loss: 193.011
+Tree 97
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.153
+L1: 10.0
+Loss: 201.012
+Tree 98
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.085
+L1: 10.0
+Loss: 201.011
+Tree 99
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 12.0
+Seeding site number: 3.0
+Neg log likelihood: 1.116
+L1: 10.0
+Loss: 183.011
+Tree 100
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.133
+L1: 10.0
+Loss: 195.011
+Tree 101
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.187
+L1: 10.0
+Loss: 205.012
+Tree 102
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.072
+L1: 10.0
+Loss: 185.011
+Tree 103
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.081
+L1: 10.0
+Loss: 186.011
+Tree 104
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.12
+L1: 10.0
+Loss: 205.011
+Tree 105
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.07
+L1: 10.0
+Loss: 185.011
+Tree 106
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.139
+L1: 10.0
+Loss: 205.011
+Tree 107
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.075
+L1: 10.0
+Loss: 195.011
+Tree 108
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.642
+L1: 10.000000953674316
+Loss: 216.016
+Tree 109
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.648
+L1: 10.0
+Loss: 205.016
+Tree 110
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.459
+L1: 10.0
+Loss: 201.015
+Tree 111
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.472
+L1: 9.999999046325684
+Loss: 211.015
+Tree 112
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 15.0
+Seeding site number: 4.0
+Neg log likelihood: 1.164
+L1: 9.999999046325684
+Loss: 207.012
+Tree 113
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.174
+L1: 10.0
+Loss: 206.012
+Tree 114
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 3.0
+Neg log likelihood: 1.172
+L1: 10.0
+Loss: 194.012
+Tree 115
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.183
+L1: 10.000000953674316
+Loss: 206.012
+Tree 116
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.426
+L1: 10.0
+Loss: 204.014
+Tree 117
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.58
+L1: 9.999999046325684
+Loss: 205.016
+Tree 118
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.58
+L1: 9.999999046325684
+Loss: 195.016
+Tree 119
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 13.0
+Seeding site number: 5.0
+Neg log likelihood: 1.714
+L1: 9.999999046325684
+Loss: 216.017
+Tree 120
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.534
+L1: 10.0
+Loss: 206.015
+Tree 121
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.175
+L1: 10.0
+Loss: 195.012
+Tree 122
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.918
+L1: 10.000000953674316
+Loss: 194.019
+Tree 123
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.452
+L1: 10.0
+Loss: 205.015
+Tree 124
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.314
+L1: 10.0
+Loss: 194.013
+Tree 125
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.447
+L1: 9.999999046325684
+Loss: 194.014
+Tree 126
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.163
+L1: 10.0
+Loss: 186.012
+Tree 127
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.62
+L1: 10.0
+Loss: 191.016
+Tree 128
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.459
+L1: 9.999999046325684
+Loss: 195.015
+Tree 129
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.759
+L1: 10.000000953674316
+Loss: 206.018
+Tree 130
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.139
+L1: 10.0
+Loss: 195.011
+Tree 131
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.137
+L1: 9.999999046325684
+Loss: 186.011
+Tree 132
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 11.0
+Seeding site number: 3.0
+Neg log likelihood: 1.374
+L1: 10.0
+Loss: 192.014
+Tree 133
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 20.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.647
+L1: 10.0
+Loss: 225.016
+Tree 134
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 12.0
+Seeding site number: 3.0
+Neg log likelihood: 1.182
+L1: 10.0
+Loss: 203.012
+Tree 135
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 12.0
+Seeding site number: 3.0
+Neg log likelihood: 1.192
+L1: 10.000000953674316
+Loss: 193.012
+Tree 136
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.219
+L1: 10.0
+Loss: 196.012
+Tree 137
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.797
+L1: 10.0
+Loss: 194.018
+Tree 138
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.443
+L1: 10.0
+Loss: 205.014
+Tree 139
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.311
+L1: 10.000000953674316
+Loss: 195.013
+Tree 140
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.509
+L1: 9.999999046325684
+Loss: 194.015
+Tree 141
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.207
+L1: 10.0
+Loss: 195.012
+Tree 142
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.657
+L1: 10.0
+Loss: 215.017
+Tree 143
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.516
+L1: 10.000000953674316
+Loss: 205.015
+Tree 144
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 13.0
+Seeding site number: 3.0
+Neg log likelihood: 1.302
+L1: 10.0
+Loss: 214.013
+Tree 145
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.244
+L1: 10.0
+Loss: 205.012
+Tree 146
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.53
+L1: 10.000000953674316
+Loss: 194.015
+Tree 147
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.173
+L1: 9.999999046325684
+Loss: 205.012
+Tree 148
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.349
+L1: 10.0
+Loss: 195.013
+Tree 149
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.593
+L1: 10.0
+Loss: 206.016
+Tree 150
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.061
+L1: 10.0
+Loss: 201.011
+Tree 151
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 4.0
+Neg log likelihood: 1.525
+L1: 10.0
+Loss: 203.015
+Tree 152
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.338
+L1: 9.999999046325684
+Loss: 215.013
+Tree 153
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.041
+L1: 10.0
+Loss: 201.01
+Tree 154
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.229
+L1: 9.999999046325684
+Loss: 201.012
+Tree 155
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.041
+L1: 10.0
+Loss: 191.01
+Tree 156
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.185
+L1: 10.0
+Loss: 195.012
+Tree 157
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.118
+L1: 10.0
+Loss: 185.011
+Tree 158
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.223
+L1: 9.999999046325684
+Loss: 205.012
+Tree 159
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.058
+L1: 10.0
+Loss: 195.011
+Tree 160
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.06
+L1: 10.0
+Loss: 205.011
+Tree 161
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 16.0
+Comigration number: 12.0
+Seeding site number: 3.0
+Neg log likelihood: 1.165
+L1: 10.0
+Loss: 183.012
+Tree 162
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 20.0
+Comigration number: 13.0
+Seeding site number: 3.0
+Neg log likelihood: 1.561
+L1: 10.0
+Loss: 224.016
+Tree 163
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.392
+L1: 10.0
+Loss: 204.014
+Tree 164
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.595
+L1: 10.0
+Loss: 205.016
+Tree 165
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.567
+L1: 10.0
+Loss: 206.016
+Tree 166
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 14.0
+Seeding site number: 4.0
+Neg log likelihood: 1.247
+L1: 10.0
+Loss: 206.012
+Tree 167
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 11.0
+Seeding site number: 2.0
+Neg log likelihood: 1.042
+L1: 10.0
+Loss: 201.01
+Tree 168
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.616
+L1: 10.0
+Loss: 215.016
+Tree 169
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.635
+L1: 10.0
+Loss: 214.016
+Tree 170
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.581
+L1: 10.0
+Loss: 194.016
+Tree 171
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.186
+L1: 10.0
+Loss: 205.012
+Tree 172
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.475
+L1: 9.999999046325684
+Loss: 195.015
+Tree 173
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 19.0
+Comigration number: 12.0
+Seeding site number: 3.0
+Neg log likelihood: 1.442
+L1: 9.999999046325684
+Loss: 213.014
+Tree 174
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.425
+L1: 10.0
+Loss: 205.014
+Tree 175
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.461
+L1: 9.999999046325684
+Loss: 205.015
+Tree 176
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.399
+L1: 9.999999046325684
+Loss: 204.014
+Tree 177
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 18.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.553
+L1: 10.0
+Loss: 205.016
+Tree 178
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 13.0
+Seeding site number: 4.0
+Neg log likelihood: 1.675
+L1: 10.0
+Loss: 195.017
+Tree 179
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9']
+Migration number: 17.0
+Comigration number: 12.0
+Seeding site number: 4.0
+Neg log likelihood: 1.442
+L1: 10.0
+Loss: 194.014
+======================================================================================================================================================
+num_run: 7
+Predicting vertex labeling for m8 M seed 216.
+{'0': 0, '1': 1, '7;10': 2, '17;23': 3, '3;8;11;12;13;22;24;26;33': 4, '45': 5, '52;57': 6, '31;43;55;64': 7, '72': 8, '34;47;51;53;73;74': 9, '75': 10, '6;9;15;16;21;56;60;83': 11, '84': 12, '87': 13, '91;92;94': 14, '97': 15, '2;14;20;29;35;38;54;63;69;79;98;105': 16, '108;109': 17}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 4.0
+Neg log likelihood: 0.984
+L1: 8.0
+Loss: 129.41
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 12.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.09
+L1: 8.0
+Loss: 139.411
+Tree 2
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 3.0
+Neg log likelihood: 1.028
+L1: 8.0
+Loss: 127.41
+Tree 3
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 5.0
+Neg log likelihood: 1.056
+L1: 7.999999523162842
+Loss: 119.411
+Tree 4
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 4.0
+Neg log likelihood: 1.012
+L1: 8.0
+Loss: 128.41
+Tree 5
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 12.0
+Comigration number: 8.0
+Seeding site number: 3.0
+Neg log likelihood: 0.985
+L1: 8.0
+Loss: 137.41
+======================================================================================================================================================
+num_run: 8
+Predicting vertex labeling for m8 M seed 45.
+{'0': 0, '1;4': 1, '5;6;7;8': 2, '14;15;16': 3, '2;3;9;13;18;23;41;53;60;65;68;71': 4, '22;24;26;31;46;49;50;54;56;62;64;66;67;88': 5, '10;11;12;25;33;34;76;79;91': 6, '35;36;37;39;58;61;81;86;95;100;109': 7, '17;20;42;45;51;55;69;72;74;77;85;113': 8, '28;44;48;75;82;104;111;119': 9, '29;38;43;47;57;63;70;78;83;84;87;96;98;102;117;118;120': 10}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 11.0
+Comigration number: 10.0
+Seeding site number: 3.0
+Neg log likelihood: 2.566
+L1: 8.0
+Loss: 129.426
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 13.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 2.119
+L1: 8.0
+Loss: 146.421
+======================================================================================================================================================
+num_run: 9
+Predicting vertex labeling for m8 M seed 239.
+{'0': 0, '1;2': 1, '4;10;13;15;17': 2, '21': 3, '33': 4, '3;5;6;7;11;12;14;16;20;29;30;31;34;36;38': 5, '8;9;18;19;25;26;27;32;37;42;43;44;45;46': 6, '47': 7, '41;49;55;58;59': 8, '48;51;54;60;61;62;64': 9, '53;65': 10, '67': 11, '52;57;68': 12, '69': 13, '50;56;63;70;71': 14, '72': 15}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.295
+L1: 8.0
+Loss: 138.413
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.295
+L1: 8.000000953674316
+Loss: 138.413
+======================================================================================================================================================
+num_run: 10
+Predicting vertex labeling for m8 mS seed 0.
+{'0': 0, '1;3': 1, '4;6;9;10;12': 2, '7;8;13': 3, '14': 4, '15': 5, '16': 6, '19': 7, '21;27': 8, '30;34': 9, '36': 10, '5;11;18;20;24;29;32;33;38': 11, '25;40': 12, '37;43': 13, '45': 14, '48': 15, '22;23;28;35;46;51': 16, '49;52;53': 17, '59': 18, '26;31;39;62;65': 19}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.249
+L1: 9.0
+Loss: 107.212
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.218
+L1: 9.0
+Loss: 107.212
+======================================================================================================================================================
+num_run: 11
+Predicting vertex labeling for m8 mS seed 7.
+{'0': 0, '1;6;10;12;16;19': 1, '23': 2, '5;9;22;27': 3, '8;21;28': 4, '38': 5, '2;4;7;11;13;14;17;33;35;41;45': 6, '31;47': 7, '3;15;48': 8, '50': 9, '37;39;46;49;53': 10, '56': 11, '34;36;55;57': 12, '40;61;64': 13, '63;66': 14, '67;68': 15}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 8.0
+Comigration number: 7.0
+Seeding site number: 1.0
+Neg log likelihood: 1.066
+L1: 8.0
+Loss: 94.411
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 7.0
+Comigration number: 7.0
+Seeding site number: 1.0
+Neg log likelihood: 1.04
+L1: 8.000000953674316
+Loss: 84.41
+======================================================================================================================================================
+num_run: 12
+Predicting vertex labeling for m8 mS seed 12.
+{'0': 0, '3;7': 1, '10': 2, '6;11': 3, '17': 4, '20': 5, '19;24': 6, '27;28': 7, '29': 8, '33': 9, '37;38': 10, '41': 11, '1;2;9;12;13;18;21;26;36;39;42;47': 12, '14;25;30;51': 13, '4;5;8;52': 14, '32;48;49;53': 15, '15;23;43;50;54;55': 16, '61': 17}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.107
+L1: 9.0
+Loss: 127.211
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.92
+L1: 9.0
+Loss: 127.209
+Tree 2
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.914
+L1: 9.0
+Loss: 127.209
+Tree 3
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 11.0
+Seeding site number: 3.0
+Neg log likelihood: 1.169
+L1: 9.0
+Loss: 141.212
+Tree 4
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.916
+L1: 9.0
+Loss: 127.209
+Tree 5
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.186
+L1: 9.0
+Loss: 117.212
+Tree 6
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 11.0
+Seeding site number: 3.0
+Neg log likelihood: 1.109
+L1: 9.0
+Loss: 131.211
+Tree 7
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.892
+L1: 9.0
+Loss: 117.209
+Tree 8
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.894
+L1: 9.0
+Loss: 117.209
+Tree 9
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.209
+L1: 9.000000953674316
+Loss: 129.212
+Tree 10
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.893
+L1: 9.0
+Loss: 117.209
+Tree 11
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.892
+L1: 9.000000953674316
+Loss: 117.209
+Tree 12
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.152
+L1: 9.0
+Loss: 127.212
+Tree 13
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.875
+L1: 9.0
+Loss: 107.209
+Tree 14
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.181
+L1: 9.000000953674316
+Loss: 119.212
+Tree 15
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 10.0
+Seeding site number: 3.0
+Neg log likelihood: 1.136
+L1: 9.0
+Loss: 120.211
+Tree 16
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.895
+L1: 9.000000953674316
+Loss: 117.209
+Tree 17
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.88
+L1: 9.0
+Loss: 107.209
+Tree 18
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 4.0
+Neg log likelihood: 1.202
+L1: 9.0
+Loss: 130.212
+Tree 19
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 4.0
+Neg log likelihood: 1.195
+L1: 9.0
+Loss: 120.212
+Tree 20
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.143
+L1: 9.0
+Loss: 127.211
+Tree 21
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 9.0
+Seeding site number: 4.0
+Neg log likelihood: 1.171
+L1: 8.999999046325684
+Loss: 110.212
+Tree 22
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 10.0
+Seeding site number: 4.0
+Neg log likelihood: 1.118
+L1: 9.0
+Loss: 121.211
+Tree 23
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.477
+L1: 9.0
+Loss: 129.215
+Tree 24
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.182
+L1: 9.0
+Loss: 119.212
+Tree 25
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.904
+L1: 9.0
+Loss: 117.209
+Tree 26
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.902
+L1: 9.0
+Loss: 117.209
+Tree 27
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.709
+L1: 9.0
+Loss: 129.217
+Tree 28
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 10.0
+Seeding site number: 4.0
+Neg log likelihood: 1.223
+L1: 9.0
+Loss: 131.212
+Tree 29
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.682
+L1: 9.0
+Loss: 129.217
+Tree 30
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.22
+L1: 9.0
+Loss: 119.212
+Tree 31
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 4.0
+Neg log likelihood: 1.184
+L1: 9.0
+Loss: 120.212
+Tree 32
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.111
+L1: 9.0
+Loss: 117.211
+Tree 33
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 10.0
+Seeding site number: 4.0
+Neg log likelihood: 1.182
+L1: 9.0
+Loss: 121.212
+Tree 34
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.875
+L1: 9.0
+Loss: 107.209
+Tree 35
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.875
+L1: 9.0
+Loss: 107.209
+Tree 36
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 10.0
+Seeding site number: 3.0
+Neg log likelihood: 1.273
+L1: 9.0
+Loss: 140.213
+Tree 37
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.909
+L1: 9.0
+Loss: 127.209
+Tree 38
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.914
+L1: 9.000000953674316
+Loss: 127.209
+Tree 39
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.916
+L1: 8.999999046325684
+Loss: 127.209
+Tree 40
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.891
+L1: 9.0
+Loss: 117.209
+Tree 41
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.894
+L1: 9.0
+Loss: 117.209
+Tree 42
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.885
+L1: 8.999999046325684
+Loss: 117.209
+Tree 43
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.885
+L1: 8.999999046325684
+Loss: 117.209
+Tree 44
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.904
+L1: 8.999999046325684
+Loss: 127.209
+Tree 45
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.869
+L1: 9.000000953674316
+Loss: 107.209
+Tree 46
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.884
+L1: 9.0
+Loss: 117.209
+Tree 47
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.867
+L1: 9.0
+Loss: 107.209
+Tree 48
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.912
+L1: 9.0
+Loss: 127.209
+Tree 49
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 10.0
+Seeding site number: 3.0
+Neg log likelihood: 1.49
+L1: 9.0
+Loss: 140.215
+Tree 50
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.917
+L1: 9.0
+Loss: 127.209
+Tree 51
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.914
+L1: 9.0
+Loss: 127.209
+Tree 52
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.896
+L1: 9.0
+Loss: 117.209
+Tree 53
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.893
+L1: 9.0
+Loss: 117.209
+Tree 54
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.889
+L1: 9.0
+Loss: 117.209
+Tree 55
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.906
+L1: 9.0
+Loss: 127.209
+Tree 56
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.893
+L1: 9.0
+Loss: 117.209
+Tree 57
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.872
+L1: 9.0
+Loss: 107.209
+Tree 58
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.87
+L1: 9.000001907348633
+Loss: 107.209
+Tree 59
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.886
+L1: 9.0
+Loss: 117.209
+Tree 60
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.476
+L1: 9.0
+Loss: 129.215
+Tree 61
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 4.0
+Neg log likelihood: 1.255
+L1: 9.0
+Loss: 130.213
+Tree 62
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.91
+L1: 9.0
+Loss: 127.209
+Tree 63
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.741
+L1: 9.0
+Loss: 129.217
+Tree 64
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.895
+L1: 8.999999046325684
+Loss: 117.209
+Tree 65
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.894
+L1: 9.0
+Loss: 117.209
+Tree 66
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.875
+L1: 9.000000953674316
+Loss: 107.209
+Tree 67
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.878
+L1: 9.0
+Loss: 107.209
+Tree 68
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.894
+L1: 9.0
+Loss: 117.209
+Tree 69
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.388
+L1: 9.0
+Loss: 119.214
+Tree 70
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.896
+L1: 8.999999046325684
+Loss: 117.209
+Tree 71
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.897
+L1: 8.999999046325684
+Loss: 117.209
+Tree 72
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.367
+L1: 9.0
+Loss: 119.214
+Tree 73
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 9.0
+Seeding site number: 2.0
+Neg log likelihood: 1.523
+L1: 8.999999046325684
+Loss: 128.215
+Tree 74
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.874
+L1: 9.0
+Loss: 107.209
+Tree 75
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.882
+L1: 8.999999046325684
+Loss: 107.209
+Tree 76
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.9
+L1: 9.0
+Loss: 117.209
+Tree 77
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.895
+L1: 9.0
+Loss: 117.209
+Tree 78
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.294
+L1: 9.0
+Loss: 139.213
+Tree 79
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 4.0
+Neg log likelihood: 1.236
+L1: 9.0
+Loss: 120.212
+Tree 80
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 4.0
+Neg log likelihood: 1.572
+L1: 9.0
+Loss: 140.216
+Tree 81
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.897
+L1: 9.0
+Loss: 117.209
+Tree 82
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.894
+L1: 9.0
+Loss: 117.209
+Tree 83
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 4.0
+Neg log likelihood: 1.688
+L1: 9.0
+Loss: 120.217
+Tree 84
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 4.0
+Neg log likelihood: 1.177
+L1: 9.0
+Loss: 120.212
+Tree 85
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.892
+L1: 9.0
+Loss: 117.209
+Tree 86
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 12.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.464
+L1: 9.0
+Loss: 139.215
+Tree 87
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.877
+L1: 9.0
+Loss: 107.209
+Tree 88
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.888
+L1: 9.0
+Loss: 117.209
+Tree 89
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.875
+L1: 9.0
+Loss: 107.209
+Tree 90
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.877
+L1: 9.0
+Loss: 117.209
+Tree 91
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.872
+L1: 9.0
+Loss: 107.209
+Tree 92
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.867
+L1: 9.0
+Loss: 107.209
+Tree 93
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 8.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.853
+L1: 9.0
+Loss: 97.209
+Tree 94
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.863
+L1: 9.0
+Loss: 107.209
+Tree 95
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 8.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.851
+L1: 9.000000953674316
+Loss: 97.209
+Tree 96
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 1.509
+L1: 9.0
+Loss: 119.215
+Tree 97
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.344
+L1: 9.0
+Loss: 127.213
+Tree 98
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.324
+L1: 9.0
+Loss: 127.213
+Tree 99
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.872
+L1: 9.0
+Loss: 107.209
+Tree 100
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 4.0
+Neg log likelihood: 1.276
+L1: 9.0
+Loss: 120.213
+Tree 101
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.875
+L1: 9.0
+Loss: 107.209
+Tree 102
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.888
+L1: 9.0
+Loss: 117.209
+Tree 103
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.871
+L1: 9.0
+Loss: 107.209
+Tree 104
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.869
+L1: 9.0
+Loss: 107.209
+Tree 105
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 8.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.854
+L1: 9.0
+Loss: 97.209
+Tree 106
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 8.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.858
+L1: 9.0
+Loss: 97.209
+Tree 107
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.872
+L1: 8.999999046325684
+Loss: 107.209
+======================================================================================================================================================
+num_run: 13
+Predicting vertex labeling for m8 mS seed 9.
+{'0': 0, '1': 1, '11;12;16': 2, '17;18': 3, '23;24': 4, '4;25': 5, '26': 6, '7;8;14;31': 7, '28;32;40': 8, '6;9;10;13;15;36;42': 9, '29;35;38;46': 10, '44;47': 11}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.955
+L1: 9.0
+Loss: 117.21
+======================================================================================================================================================
+num_run: 14
+Predicting vertex labeling for m8 mS seed 8.
+{'0': 0, '8;15;22': 1, '5;7;9;13;21;25;29;31': 2, '3;6;28;32': 3, '40': 4, '10;14;16;24;26;27;30;33;34;39;42;48;52;56;58': 5, '55;61;63': 6, '1;4;12;35;37;51;59;64;66': 7, '65;71': 8, '2;11;36;41;73;74': 9, '49;60;77': 10, '38;62;67;76;78': 11, '47;54;57;79;81': 12, '80;85;86;88': 13, '89': 14, '90;95': 15, '68;93;98;99;103': 16, '104': 17}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 11.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.09
+L1: 9.0
+Loss: 127.211
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.07
+L1: 9.0
+Loss: 117.211
+======================================================================================================================================================
+num_run: 15
+Predicting vertex labeling for m8 mS seed 3.
+{'0': 0, '3;7;10': 1, '1;4;13;14': 2, '15': 3, '2;9;18': 4, '21': 5, '22': 6, '19;27;29': 7, '5;6;8;11;12;16;20;32;35': 8, '30;31;34;40;44': 9, '45': 10, '49;50;51': 11, '33;38;39;47;56': 12, '46;52;59': 13, '26;36;37;41;42;43;48;53;55;57;60': 14, '64': 15, '66': 16, '54;58;67;70': 17, '73': 18}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.048
+L1: 8.999999046325684
+Loss: 117.21
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.089
+L1: 9.0
+Loss: 117.211
+Tree 2
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 1.007
+L1: 9.0
+Loss: 117.21
+Tree 3
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 10.0
+Comigration number: 9.0
+Seeding site number: 3.0
+Neg log likelihood: 0.983
+L1: 9.0
+Loss: 119.21
+Tree 4
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 9.0
+Seeding site number: 4.0
+Neg log likelihood: 0.984
+L1: 9.0
+Loss: 110.21
+Tree 5
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 9.0
+Seeding site number: 4.0
+Neg log likelihood: 0.981
+L1: 9.000000953674316
+Loss: 110.21
+Tree 6
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 9.0
+Seeding site number: 4.0
+Neg log likelihood: 0.974
+L1: 9.000000953674316
+Loss: 110.21
+Tree 7
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 9.0
+Seeding site number: 4.0
+Neg log likelihood: 0.975
+L1: 9.000000953674316
+Loss: 110.21
+======================================================================================================================================================
+num_run: 16
+Predicting vertex labeling for m8 mS seed 2.
+{'0;1;2;3;4;5;6': 0, '13': 1, '9;14': 2, '18': 3, '7;19': 4, '11;20;22': 5, '16;21;23;25;30': 6, '17;32': 7, '36;38': 8, '39': 9, '43': 10}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 1.0
+Neg log likelihood: 0.911
+L1: 9.0
+Loss: 106.209
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8']
+Migration number: 9.0
+Comigration number: 8.0
+Seeding site number: 2.0
+Neg log likelihood: 0.903
+L1: 9.0
+Loss: 107.209
+======================================================================================================================================================
+num_run: 17
+Predicting vertex labeling for m8 mS seed 10.
+{'0': 0, '1': 1, '4': 2, '5': 3, '9': 4, '17;19;21': 5, '22;24;25': 6, '26;38': 7, '14;15;31;34;36;37;41': 8, '45': 9, '52': 10, '49;61': 11, '3;6;13;16;18;20;23;39;40;42;47;56;59;60;62;63': 12, '48;66': 13, '76': 14}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 8.0
+Comigration number: 7.0
+Seeding site number: 3.0
+Neg log likelihood: 1.068
+L1: 8.0
+Loss: 96.411
+Tree 1
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 8.0
+Comigration number: 7.0
+Seeding site number: 3.0
+Neg log likelihood: 1.084
+L1: 7.999999046325684
+Loss: 96.411
+Tree 2
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 8.0
+Comigration number: 7.0
+Seeding site number: 3.0
+Neg log likelihood: 1.068
+L1: 8.0
+Loss: 96.411
+Tree 3
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']
+Migration number: 8.0
+Comigration number: 7.0
+Seeding site number: 3.0
+Neg log likelihood: 1.073
+L1: 8.0
+Loss: 96.411
+======================================================================================================================================================
+num_run: 18
+Predicting vertex labeling for m8 mS seed 4.
+{'0': 0, '1': 1, '2': 2, '4;7;8;11;12;17;18': 3, '19': 4, '29;30': 5, '3;6;10;26;31;32': 6, '36': 7, '9;15;16;27;33;43': 8, '47;48': 9, '22;23;25;34;37;40;44;53;56': 10, '54;59': 11, '60': 12, '50;52;61': 13, '5;13;14;28;35;46;51;58;62': 14, '55;57;64': 15, '67': 16, '69;71;72;73': 17}
+Tree 0
+['P', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7']

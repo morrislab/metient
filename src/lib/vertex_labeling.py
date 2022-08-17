@@ -13,8 +13,7 @@ pd.options.display.float_format = '{:,.3f}'.format
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger('SGD')
-logger.setLevel(logging.DEBUG)
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s\n\r%(message)s', datefmt='%H:%M:%S')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s\n\r%(message)s', datefmt='%H:%M:%S')
 
 U_CUTOFF = 0.05
 

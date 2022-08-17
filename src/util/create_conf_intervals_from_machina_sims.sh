@@ -24,8 +24,8 @@ do
         do
             seed_num=$(basename $read_file | tr -d -c 0-9)
             echo $read_file
-            cluster_file="$1/${m}/${p}/clustering_observed_seed${seed_num}.txt"
-            python create_conf_intervals_from_reads.py $read_file $cluster_file "$1/${m}/${p}/"
+            cluster_file="$1/clustered_input_${m}/cluster_${p}_seed${seed_num}.txt"
+            python create_conf_intervals_from_reads.py $read_file $cluster_file "$1/clustered_input_${m}/" "cluster_${p}_seed${seed_num}.tsv"
         done
     done
 done
