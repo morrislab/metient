@@ -68,9 +68,9 @@ if __name__=="__main__":
                 print("="*150)
                 print(f"Predicting vertex labeling for {site} {mig_type} seed {seed}.")
 
-                cluster_fn = os.path.join(MACHINA_DATA_DIR, f"clustered_input_{site}", f"cluster_{mig_type}_seed{seed}.txt")
-                all_mut_trees_fn = os.path.join(MACHINA_DATA_DIR, f"mut_trees_{site}", f"mut_trees_{mig_type}_seed{seed}.txt")
-                ref_var_fn = os.path.join(MACHINA_DATA_DIR, f"clustered_input_{site}", f"cluster_{mig_type}_seed{seed}.tsv")
+                cluster_fn = os.path.join(MACHINA_DATA_DIR, f"{site}_clustered_input", f"cluster_{mig_type}_seed{seed}.txt")
+                all_mut_trees_fn = os.path.join(MACHINA_DATA_DIR, f"{site}_mut_trees", f"mut_trees_{mig_type}_seed{seed}.txt")
+                ref_var_fn = os.path.join(MACHINA_DATA_DIR, f"{site}_clustered_input", f"cluster_{mig_type}_seed{seed}.tsv")
                 predict_vertex_labelings(cluster_fn, all_mut_trees_fn, ref_var_fn, MACHINA_DATA_DIR, site)
 
                 num_sims_runs += 1
