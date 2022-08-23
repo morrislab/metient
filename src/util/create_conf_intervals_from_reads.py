@@ -80,7 +80,7 @@ def get_ub(row, sam, corrected_confidence):
     return v[2]
 
 
-def get_lb(row, sam, corrected_confidence, cutoff=False,):
+def get_lb(row, sam, corrected_confidence, cutoff):
     v=binomial_hpdr(row['var-'+sam], row['var-'+sam]+row['ref-'+sam], corrected_confidence)
     mval = v[1]
     if cutoff and mval < 0.01:

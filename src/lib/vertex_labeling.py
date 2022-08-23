@@ -11,17 +11,18 @@ from torch.distributions.binomial import Binomial
 import pandas as pd
 pd.options.display.float_format = '{:,.3f}'.format
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger('SGD')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s\n\r%(message)s', datefmt='%H:%M:%S')
+logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
 U_CUTOFF = 0.05
 
 class LabeledTree:
-    def __init__(self, tree, labeling, U):
+    def __init__(self, tree, labeling, U, loss):
         self.tree = tree
         self.labeling = labeling
         self.U = U
+        self.loss = loss
 
     def __eq__(self, other):
         return isinstance(other, LabeledTree) and self.tree == other.tree and self.labeling == other.labeling
@@ -330,54 +331,53 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites,
                 min_U = U[idx,:,:]
                 min_psi = psi[idx,:,:]
 
-                min_loss_labelings = [V[i] for i in min_loss_indices]
-                min_loss_trees = [full_trees[i] for i in min_loss_indices]
-                min_loss_Us = [U[i] for i in min_loss_indices]
                 all_min_loss_labeled_trees = set()
-                for min_loss_labeling, min_loss_tree, min_loss_U in zip(min_loss_labelings, min_loss_trees, min_loss_Us):
-                    labeled_tree = LabeledTree(min_loss_tree, min_loss_labeling, min_loss_U)
+                for i in min_loss_indices:
+                    labeled_tree = LabeledTree(full_trees[i], V[i], U[i], losses_tensor[i])
                     all_min_loss_labeled_trees.add(labeled_tree)
 
     if visualize:
         vertex_labeling_util.plot_losses(losses)
 
-    best_tree = None
-    min_loss = float("inf")
+    with torch.no_grad():
+        best_tree = None
+        min_loss = float("inf")
+        print("all_min_loss_labeled_trees", all_min_loss_labeled_trees)
+        for i, min_loss_labeled_tree in enumerate(all_min_loss_labeled_trees):
+            labeling, tree, U = min_loss_labeled_tree.labeling, min_loss_labeled_tree.tree, min_loss_labeled_tree.U
+            loss = objective(labeling, tree, T, ref_matrix, var_matrix, U, B, w_e, w_m, w_s, w_c, w_l, verbose=show_top_trees)
 
-    for i, min_loss_labeled_tree in enumerate(all_min_loss_labeled_trees):
-        labeling, tree, U = min_loss_labeled_tree.labeling, min_loss_labeled_tree.tree, min_loss_labeled_tree.U
+            if show_top_trees:
+                print(f"Tree {i+1}")
+                U_clipped = U.detach().numpy()
+                U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
+                print(f"U > {U_CUTOFF}\n")
+                col_labels = ["norm"] + [_truncated_cluster_name(node_idx_to_label[k]) if k in node_idx_to_label else "0" for k in range(U_clipped.shape[1] - 1)]
+                print(col_labels)
+                df = pd.DataFrame(U_clipped, columns=col_labels, index=ordered_sites)
+                print(df)
+                print("F_hat")
+                print(U @ B)
 
-        if show_top_trees:
-            print(f"Tree {i+1}")
-            U_clipped = U.detach().numpy()
-            U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
-            print(f"U > {U_CUTOFF}\n")
-            col_labels = ["norm"] + [_truncated_cluster_name(node_idx_to_label[k]) if k in node_idx_to_label else "0" for k in range(U_clipped.shape[1] - 1)]
-            print(col_labels)
-            df = pd.DataFrame(U_clipped, columns=col_labels, index=ordered_sites)
-            print(df)
+                if visualize:
+                    vertex_labeling_util.plot_tree(labeling, tree, ordered_sites, custom_colors, node_idx_to_label)
+                    vertex_labeling_util.plot_migration_graph(labeling, tree, ordered_sites, custom_colors, primary)
+                print("-"*100 + "\n")
 
-            loss = objective(labeling, tree, T, ref_matrix, var_matrix, U, B, w_e, w_m, w_s, w_c, w_l, verbose=True)
+            if loss < min_loss:
+                best_tree = min_loss_labeled_tree
+                min_loss = loss
 
-            if visualize:
-                vertex_labeling_util.plot_tree(labeling, tree, ordered_sites, custom_colors, node_idx_to_label)
-                vertex_labeling_util.plot_migration_graph(labeling, tree, ordered_sites, custom_colors, primary)
-            print("-"*100 + "\n")
-
-        if loss < min_loss:
-            best_tree = min_loss_labeled_tree
-            min_loss = loss
-
-    logger.debug("\nBest tree")
-    loss = objective(best_tree.labeling, best_tree.tree, T, ref_matrix, var_matrix, U, B, w_e, w_m, w_s, w_c, w_l, verbose=True)
-    U_clipped = U.detach().numpy()
-    U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
-    logger.debug(f"\nU > {U_CUTOFF}\n")
-    col_labels = ["norm"] + [_truncated_cluster_name(node_idx_to_label[k]) if k in node_idx_to_label else "0" for k in range(U_clipped.shape[1] - 1)]
-    df = pd.DataFrame(U_clipped, columns=col_labels, index=ordered_sites)
-    logger.debug(df)
-    logger.debug("\nF")
-    logger.debug(U @ B)
+        if visualize: print("\nBest tree")
+        loss = objective(best_tree.labeling, best_tree.tree, T, ref_matrix, var_matrix, best_tree.U, B, w_e, w_m, w_s, w_c, w_l, verbose=True)
+        U_clipped = U.detach().numpy()
+        U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
+        logger.debug(f"\nU > {U_CUTOFF}\n")
+        col_labels = ["norm"] + [_truncated_cluster_name(node_idx_to_label[k]) if k in node_idx_to_label else "0" for k in range(U_clipped.shape[1] - 1)]
+        df = pd.DataFrame(U_clipped, columns=col_labels, index=ordered_sites)
+        logger.debug(df)
+        logger.debug("\nF_hat")
+        logger.debug(U @ B)
 
     best_tree_edges, best_tree_vertex_name_to_site_map = vertex_labeling_util.plot_tree(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, node_idx_to_label, show=visualize)
     best_mig_graph_edges = vertex_labeling_util.plot_migration_graph(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, primary, show=visualize)

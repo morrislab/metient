@@ -207,7 +207,6 @@ def _get_adj_matrix_from_machina_tree(tree_edges, character_label_to_idx, remove
     num_internal_nodes = len(character_label_to_idx)
     T = np.zeros((num_internal_nodes, num_internal_nodes))
     seen_nodes = set()
-
     # dict of { child_label : parent_label } needed to skip over polytomies
     child_to_parent_map = {}
     for edge in tree_edges:
@@ -249,7 +248,7 @@ def _get_adj_matrix_from_machina_tree(tree_edges, character_label_to_idx, remove
 
     return T, pruned_character_label_to_idx if remove_unseen_nodes else character_label_to_idx
 
-def get_adj_matrices_from_all_mutation_trees(mut_trees_filename, character_label_to_idx):
+def get_adj_matrices_from_all_mutation_trees(mut_trees_filename, character_label_to_idx, is_sim_data=False):
     '''
     When running MACHINA's generatemutationtrees executable, it provides a txt file with
     all possible mutation trees. See data/machina_simulated_data/mut_trees_m5/ for examples
@@ -273,7 +272,12 @@ def get_adj_matrices_from_all_mutation_trees(mut_trees_filename, character_label
                 tree_data = []
             else:
                 nodes = line.strip().split()
-                tree_data.append((";".join(nodes[0].split("_")), ";".join(nodes[1].split("_"))))
+                # fixes incompatibility with naming b/w cluster file (uses ";" separator)
+                # and the ./generatemutationtrees output (uses "_" separator)
+                if is_sim_data:
+                    tree_data.append((";".join(nodes[0].split("_")), ";".join(nodes[1].split("_"))))
+                else:
+                    tree_data.append((nodes[0], nodes[1]))
 
         adj_matrix, pruned_char_label_to_idx = _get_adj_matrix_from_machina_tree(tree_data, character_label_to_idx)
         out.append((adj_matrix, pruned_char_label_to_idx))
