@@ -14,7 +14,7 @@ def predict_vertex_labelings(cluster_fn, all_mut_trees_fn, ref_var_fn, site_mig_
     cluster_label_to_idx = mach_util.get_cluster_label_to_idx(cluster_fn, ignore_polytomies=True)
     global num_sims_runs
 
-    data = mach_util.get_adj_matrices_from_all_mutation_trees(all_mut_trees_fn, cluster_label_to_idx)
+    data = mach_util.get_adj_matrices_from_all_mutation_trees(all_mut_trees_fn, cluster_label_to_idx, is_sim_data=True)
     custom_colors = [matplotlib.colors.to_hex(c) for c in ['limegreen', 'royalblue', 'hotpink', 'grey', 'saddlebrown', 'darkorange', 'purple', 'red', 'black', 'black', 'black', 'black']]
     tree_num = 0
     for adj_matrix, pruned_cluster_label_to_idx in data:

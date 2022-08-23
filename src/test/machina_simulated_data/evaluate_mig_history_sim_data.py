@@ -3,6 +3,8 @@ import sys
 import re
 import os
 import fnmatch
+import numpy as np
+import pprint
 
 # plotting
 import pandas as pd
@@ -120,7 +122,6 @@ def evaluate_migration_graph(sim_mig_graph_fn, predicted_mig_graph_fn):
 def evaluate_migration_multigraph(sim_mig_graph_fn, predicted_mig_graph_fn):
     edge_multiset_G_simulated = multi_graph_to_set(parse_migration_graph(sim_mig_graph_fn))
     edge_multiset_G_inferred = multi_graph_to_set(parse_migration_graph(predicted_mig_graph_fn))
-
     recall_G2 = float(len(edge_multiset_G_inferred & edge_multiset_G_simulated)) / float(len(edge_multiset_G_simulated))
     precision_G2 = float(len(edge_multiset_G_inferred & edge_multiset_G_simulated)) / float(len(edge_multiset_G_inferred))
 
@@ -134,6 +135,7 @@ def evaluate_migration_multigraph(sim_mig_graph_fn, predicted_mig_graph_fn):
 def save_boxplot(df, y, fig_name):
     seeding_pattern_order = ["mS", "pS", "pM", "pR"]
     box_pairs = []
+
     for seeding_pattern in seeding_pattern_order:
         box_pairs.append(((seeding_pattern, "SGD"),(seeding_pattern, "MACHINA")))
     ax = sns.boxplot(x="seeding pattern", y=y, hue="method", data=df, order=seeding_pattern_order, palette=sns.color_palette("Set2"))
@@ -162,14 +164,54 @@ def load_machina_results(machina_results_dir):
 
     return res_m5_MACHINA, res_m8_MACHINA
 
-if __name__ == "__main__":
-    # if len(sys.argv) != 7:
-    #     sys.stderr.write("Usage: %s <SIMULATED_CLONE_TREE> <SIMULATED_VERTEX_LABELING> <SIMULATED_MIGRATION_GRAPH>"
-    #                      " <INFERRED_CLONE_TREE> <INFERRED_VERTEX_LABELING> <INFERRED_MIGRATION_GRAPH>\n" % sys.argv[0])
-    #     sys.exit(1)
+def extract_minimum_loss_trees(loss_output_txt_fn, sites, mig_types):
+    '''
+    Get all the trees per unique site+mig_type+seed combo with minimum loss.
+    Returns dict in the following format:
+    {'m5':
+        {'M':
+            {'<seed_num>': [list of all trees with same min loss],
+            }
+         'mS': ...
+        }
+    }
+    '''
 
-    if len(sys.argv) != 2:
-        sys.stderr.write("Usage: %s <MACHINA_SIM_DATA_DIR>\n" % sys.argv[0])
+    output = { site : { mig_type: dict() for mig_type in mig_types } for site in sites }
+    loss_values = []
+    with open(loss_output_txt_fn, 'r') as f:
+        for line in f:
+            if "Predicting vertex labeling" in line:
+                if len(loss_values) > 0:
+                    x = np.array(loss_values)
+                    min_trees = np.where(x == x.min())[0]
+                    output[site_num][mig_type][seed] = list(min_trees)
+                items = line.strip().split() # in format "Predicting vertex labeling for m8 M seed 241.""
+                site_num = items[4]
+                mig_type = items[5]
+                seed = items[7][:-1] # remove period
+                loss_values = []
+            elif "Loss" in line:
+                items = line.strip().split() # in format "Loss: 117.411"
+                loss = float(items[1])
+                loss_values.append(loss)
+
+    # for the last tree in the results
+    x = np.array(loss_values)
+    min_trees = np.where(x == x.min())[0]
+    output[site_num][mig_type][seed] = list(min_trees)
+
+    pprint.pprint(output)
+    return(output)
+
+
+
+if __name__ == "__main__":
+
+    if len(sys.argv) != 3:
+        sys.stderr.write("Usage: %s <MACHINA_SIM_DATA_DIR> <LOSS_OUTPUT_TXT>\n" % sys.argv[0])
+        sys.stderr.write("MACHINA_SIM_DATA_DIR: directory containing the true labelings and predicted labelings")
+        sys.stderr.write("LOSS_OUTPUT_TXT: txt file containing the loss values for all the mutation trees within a seed. Only trees with minimum value are used")
         sys.exit(1)
 
 
@@ -180,77 +222,91 @@ if __name__ == "__main__":
     grad_m5_f1_scores = []
     grad_m8_f1_scores = []
 
-    MACHINA_DATA_DIR = sys.argv[1]
+    mach_sim_data_dir = sys.argv[1]
+    loss_output_txt_fn = sys.argv[2]
+
+    min_loss_trees = extract_minimum_loss_trees(loss_output_txt_fn, sites, mig_types)
     i = 0
+
     for site in sites:
         for mig_type in mig_types:
+            mig_type_data_dir = os.path.join(mach_sim_data_dir, site, mig_type)
+            filenames = fnmatch.filter(os.listdir(mig_type_data_dir), 'T_tree*.predicted.tree')
+            seeds = set([s[s.find("seed")+4:s.find(".predicted")] for s in filenames])
 
-            SIM_DATA_DIR = os.path.join(MACHINA_DATA_DIR, "sims", site, mig_type)
-
-            seeds = fnmatch.filter(os.listdir(SIM_DATA_DIR), 'T_seed*.predicted.tree')
-            seeds = [s.replace("T_seed", "").replace(".predicted.tree", "") for s in seeds]
-
-            print(seeds)
             for seed in seeds:
-                print(f"Evaluating history for seed {seed} {site} {mig_type}")
+                seed_filenames = [f for f in filenames if seed == f[f.find("seed")+4:f.find(".predicted")]]
+                #trees = [t[t.find("tree")+4:t.find("_seed")] for t in filenames if seed == t[t.find("seed")+4:t.find(".predicted")]]
 
-                recall, precision, F = evaluate_seeding_clones(os.path.join(SIM_DATA_DIR, f"T_seed{seed}.tree"),
-                                                               os.path.join(SIM_DATA_DIR, f"T_seed{seed}.vertex.labeling"),
-                                                               os.path.join(SIM_DATA_DIR, f"T_seed{seed}.predicted.tree"),
-                                                               os.path.join(SIM_DATA_DIR, f"T_seed{seed}.predicted.vertex.labeling"))
+                trees = min_loss_trees[site][mig_type][seed]
+                for tree in trees:
 
-                recall_G, precision_G, F_G = evaluate_migration_graph(os.path.join(SIM_DATA_DIR, f"G_seed{seed}.tree"),
-                                                                      os.path.join(SIM_DATA_DIR, f"G_seed{seed}.predicted.tree"))
+                    #print(f"Evaluating history for seed {seed} {site} {mig_type} tree {tree}")
 
-                recall_G2, precision_G2, F_G2 = evaluate_migration_multigraph(os.path.join(SIM_DATA_DIR, f"G_seed{seed}.tree"),
-                                                                              os.path.join(SIM_DATA_DIR, f"G_seed{seed}.predicted.tree"))
+                    recall, precision, F = evaluate_seeding_clones(os.path.join(mig_type_data_dir, f"T_seed{seed}.tree"),
+                                                                   os.path.join(mig_type_data_dir, f"T_seed{seed}.vertex.labeling"),
+                                                                   os.path.join(mig_type_data_dir, f"T_tree{tree}_seed{seed}.predicted.tree"),
+                                                                   os.path.join(mig_type_data_dir, f"T_tree{tree}_seed{seed}.predicted.vertex.labeling"))
+
+                    recall_G, precision_G, F_G = evaluate_migration_graph(os.path.join(mig_type_data_dir, f"G_seed{seed}.tree"),
+                                                                          os.path.join(mig_type_data_dir, f"G_tree{tree}_seed{seed}.predicted.tree"))
+
+                    recall_G2, precision_G2, F_G2 = evaluate_migration_multigraph(os.path.join(mig_type_data_dir, f"G_seed{seed}.tree"),
+                                                                                  os.path.join(mig_type_data_dir, f"G_tree{tree}_seed{seed}.predicted.tree"))
 
 
-                scores = [recall, precision, F, recall_G, precision_G, F_G, recall_G2, precision_G2, F_G2]
-                print(",".join(map(str, scores)))
+                    scores = [recall, precision, F, recall_G, precision_G, F_G, recall_G2, precision_G2, F_G2]
+                    #print(",".join(map(str, scores)))
 
-                # rename "S", "M", "R" -> "pS", "pM", "pR"
-                mig_name = mig_type if len(mig_type) == 2 else "p"+mig_type
-                if site == 'm5':
-                    grad_m5_f1_scores.append([mig_name, F, F_G2])
-                elif site == 'm8':
-                    grad_m8_f1_scores.append([mig_name, F,  F_G2])
+                    # rename "S", "M", "R" -> "pS", "pM", "pR"
+                    mig_name = mig_type if len(mig_type) == 2 else "p"+mig_type
+                    if site == 'm5':
+                        grad_m5_f1_scores.append([seed, mig_name, F, F_G2])
+                    elif site == 'm8':
+                        grad_m8_f1_scores.append([seed, mig_name, F,  F_G2])
 
-                results[site][mig_type].append(scores)
+                    i += 1
+                    results[site][mig_type].append(scores)
+
+    print("num trees:",  i)
 
     # Plot results
+    grad_m5_df = pd.DataFrame(grad_m5_f1_scores, columns=["seed", "seeding pattern",  "migrating clones F1 score", "migration graph F1 score"])
+    grad_m8_df = pd.DataFrame(grad_m8_f1_scores, columns=["seed", "seeding pattern",  "migrating clones F1 score", "migration graph F1 score"])
 
-    grad_m5_df = pd.DataFrame(grad_m5_f1_scores, columns=["seeding pattern",  "migrating clones F1 score", "migration graph F1 score"]).assign(method="SGD")
-    grad_m8_df = pd.DataFrame(grad_m8_f1_scores, columns=["seeding pattern",  "migrating clones F1 score", "migration graph F1 score"]).assign(method="SGD")
+    grad_m5_df = grad_m5_df.groupby(['seeding pattern','seed']).mean().assign(method="SGD")
+    grad_m8_df = grad_m8_df.groupby(['seeding pattern','seed']).mean().assign(method="SGD")
 
     print("\nSGD m5 avg F1 scores")
+    print(grad_m5_df)
     print(grad_m5_df.groupby('seeding pattern').mean())
-    print("\nm5 average overall")
-    print(grad_m5_df.mean())
 
     print("\nSGD m8 avg F1 scores")
+    print(grad_m8_df)
     print(grad_m8_df.groupby('seeding pattern').mean())
-    print("\nm8 average overall")
-    print(grad_m8_df.mean())
 
     # Load machina results
-    machina_m5_df, machina_m8_df = load_machina_results(os.path.join(MACHINA_DATA_DIR, "../result/sims/machina"))
-    col_mapping = {"FscoreT": "migrating clones F1 score", "FscoreMultiG": "migration graph F1 score", "pattern": "seeding pattern"}
+    machina_m5_df, machina_m8_df = load_machina_results(".")
+    col_mapping = {"FscoreT": "migrating clones F1 score", "FscoreMultiG": "migration graph F1 score", "pattern": "seeding pattern", "seed":"seed"}
     machina_m5_df = machina_m5_df.rename(columns=col_mapping)
     machina_m8_df = machina_m8_df.rename(columns=col_mapping)
 
-    # TODO: why are there multiple entries in the results for the same tree??
-    machina_m5_df = machina_m5_df[col_mapping.values()].assign(method="MACHINA")
-    machina_m8_df = machina_m8_df[col_mapping.values()].assign(method="MACHINA")
+    machina_m5_df = machina_m5_df[col_mapping.values()]
+    machina_m5_df = machina_m5_df.groupby(['seeding pattern','seed']).mean().assign(method="MACHINA")
+    machina_m8_df = machina_m8_df[col_mapping.values()]
+    machina_m8_df = machina_m8_df.groupby(['seeding pattern','seed']).mean().assign(method="MACHINA")
 
     print("MACHINA m5 avg F1 scores")
+    print(machina_m5_df)
     print(machina_m5_df.groupby('seeding pattern').mean())
 
     print("MACHINA m8 avg F1 scores")
-    print(machina_m5_df.groupby('seeding pattern').mean())
+    print(machina_m8_df)
+    print(machina_m8_df.groupby('seeding pattern').mean())
 
-    joint_m5_df = pd.concat([grad_m5_df, machina_m5_df])
-    joint_m8_df = pd.concat([grad_m8_df, machina_m8_df])
+    joint_m5_df = pd.concat([grad_m5_df, machina_m5_df]).reset_index()
+    joint_m8_df = pd.concat([grad_m8_df, machina_m8_df]).reset_index()
+    print(joint_m5_df.reset_index())
 
     save_boxplot(joint_m5_df, "migration graph F1 score", "m5_migration_graph_f1_scores.png")
     save_boxplot(joint_m8_df, "migration graph F1 score", "m8_migration_graph_f1_scores.png")
