@@ -19,6 +19,8 @@ from graphviz import Source
 
 import string
 
+from functools import wraps
+import hashlib
 
 def view_pydot(pdot):
     plt = Image(pdot.create_png())
@@ -160,20 +162,49 @@ def plot_losses(losses):
     plt.show()
 
 def get_path_matrix(T, remove_self_loops=False):
-    I = np.identity(T.shape[0])
-    # T with self loops
-    M = np.logical_or(T,I)
     # Path matrix that tells us if path exists from node i to node j
-    P = np.linalg.matrix_power(M, len(T) - 1)
+    I = np.identity(T.shape[0])
+    # M is T with self loops.
+    # Convert to bool to get more efficient matrix multiplicaton
+    B = np.logical_or(T,I).astype(bool)
+    # Implementing Algorithm 1 here, which uses repeated squaring to efficiently calc path matrix:
+    # https://courses.grainger.illinois.edu/cs598cci/sp2020/LectureNotes/lecture1.pdf
+    k = np.ceil(np.log2(len(T)))
+    for i in range(int(k)):
+        B = np.dot(B, B)
     if remove_self_loops:
-        P = np.logical_xor(P,I).astype(int)
+        B = np.logical_xor(B,I)
+    P = B.astype(int)
     return P
 
+def adj_matrix_hash(A):
+    return hash((str(np.where(A == 1)[0]), str(np.where(A == 1)[1])))
+
+# Adapted from: https://forum.kavli.tudelft.nl/t/caching-of-python-functions-with-array-input/59/6
+# Caching path matrices because it's expensive to compute.
+# TODO: Consider using dask or something similar in the future
+def np_array_cache(function):
+    cache = {}
+
+    @wraps(function)
+    def wrapped(array):
+        hsh = adj_matrix_hash(array)
+
+        if hsh not in cache:
+            cache[hsh] = function(array)
+        # Not using built-in hash because it's prone to collisions.
+        return cache[hsh]
+
+    return wrapped
+
+# TODO: figure out why this isn't speeding things up :/
+#@np_array_cache
 def get_path_matrix_tensor(A):
     '''
-    A is a tensor adjacency matrix
+    A is a numpy adjacency matrix
     '''
-    return torch.tensor(get_path_matrix(A.numpy(), remove_self_loops=True), dtype = torch.float32)
+    return torch.tensor(get_path_matrix(A, remove_self_loops=True), dtype = torch.float32)
+
 
 def get_mutation_matrix_tensor(A):
     '''

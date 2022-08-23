@@ -10,7 +10,7 @@ import src.util.vertex_labeling_util as vert_util
 
 num_sims_runs = 0
 
-def predict_vertex_labelings(cluster_fn, all_mut_trees_fn, ref_var_fn, site_mig_data_dir):
+def predict_vertex_labelings(cluster_fn, all_mut_trees_fn, ref_var_fn, out_dir):
     cluster_label_to_idx = mach_util.get_cluster_label_to_idx(cluster_fn, ignore_polytomies=True)
     global num_sims_runs
 
@@ -35,35 +35,42 @@ def predict_vertex_labelings(cluster_fn, all_mut_trees_fn, ref_var_fn, site_mig_
 
         best_T_edges, best_labeling, best_G_edges = vertex_labeling.gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites=unique_sites,
                                                                                                 p=r, node_idx_to_label=idx_to_label,
-                                                                                                w_e=0.01, w_l=0.8, w_m=10, max_iter=150, batch_size=64,
+                                                                                                w_e=5, w_l=0.8, w_m=10, w_c=5, max_iter=150, batch_size=64,
                                                                                                 custom_colors=custom_colors, visualize=False)
 
-        vert_util.write_tree(best_T_edges, os.path.join(site_mig_data_dir, f"T_tree{tree_num}_seed{seed}.predicted.tree"))
-        vert_util.write_tree_vertex_labeling(best_labeling, os.path.join(site_mig_data_dir, f"T_tree{tree_num}_seed{seed}.predicted.vertex.labeling"))
-        vert_util.write_migration_graph(best_G_edges, os.path.join(site_mig_data_dir, f"G_tree{tree_num}_seed{seed}.predicted.tree"))
+        vert_util.write_tree(best_T_edges, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.tree"))
+        vert_util.write_tree_vertex_labeling(best_labeling, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.vertex.labeling"))
+        vert_util.write_migration_graph(best_G_edges, os.path.join(out_dir, f"G_tree{tree_num}_seed{seed}.predicted.tree"))
         num_sims_runs += 1
         tree_num += 1
 
 if __name__=="__main__":
 
     if len(sys.argv) != 2:
-        sys.stderr.write("Usage: %s <MACHINA_SIM_DATA_DIR>\n" % sys.argv[0])
+        sys.stderr.write("Usage: %s <MACHINA_SIM_DATA_DIR> <run_name>\n" % sys.argv[0])
         sys.exit(1)
-
 
 
     sites = ["m8", "m5"]
     mig_types = ["M", "mS", "R", "S"]
 
     machina_sims_data_dir = sys.argv[1]
+    run_name = sys.argv[2]
+
+    predictions_dir = f"predictions_{run_name}"
+    os.mkdir(predictions_dir)
 
     for site in sites:
+        os.mkdir(os.path.join(predictions_dir, site))
+
         for mig_type in mig_types:
+            out_dir = os.mkdir(os.path.join(predictions_dir, site, mig_type))
             site_mig_data_dir = os.path.join(machina_sims_data_dir, site, mig_type)
+
             seeds = fnmatch.filter(os.listdir(site_mig_data_dir), 'seed*_0.95.tsv')
             seeds = [s.replace("_0.95.tsv", "").replace("seed", "") for s in seeds]
 
-            for seed in seeds:
+            for seed in seeds[:2]:
 
                 print("="*150)
                 print(f"Predicting vertex labeling for {site} {mig_type} seed {seed}.")
@@ -72,7 +79,7 @@ if __name__=="__main__":
                 all_mut_trees_fn = os.path.join(machina_sims_data_dir, f"{site}_mut_trees", f"mut_trees_{mig_type}_seed{seed}.txt")
                 ref_var_fn = os.path.join(machina_sims_data_dir, f"{site}_clustered_input", f"cluster_{mig_type}_seed{seed}.tsv")
 
-                predict_vertex_labelings(cluster_fn, all_mut_trees_fn, ref_var_fn, site_mig_data_dir)
+                predict_vertex_labelings(cluster_fn, all_mut_trees_fn, ref_var_fn, out_dir)
 
                 num_sims_runs += 1
 

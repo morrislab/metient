@@ -11,6 +11,7 @@ from torch.distributions.binomial import Binomial
 import pandas as pd
 pd.options.display.float_format = '{:,.3f}'.format
 
+
 logger = logging.getLogger('SGD')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s\n\r%(message)s', datefmt='%H:%M:%S')
 logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
@@ -18,17 +19,22 @@ logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 U_CUTOFF = 0.05
 
 class LabeledTree:
-    def __init__(self, tree, labeling, U, loss):
+    def __init__(self, tree, labeling, U):
         self.tree = tree
         self.labeling = labeling
         self.U = U
-        self.loss = loss
 
     def __eq__(self, other):
-        return isinstance(other, LabeledTree) and self.tree == other.tree and self.labeling == other.labeling
+        return ( isinstance(other, LabeledTree) and
+               str(np.where(self.tree == 1)[0]) == str(np.where(other.tree == 1)[0]) and
+               str(np.where(self.tree == 1)[1]) == str(np.where(other.tree == 1)[1]) and
+               str(np.where(self.labeling == 1)[0]) == str(np.where(other.labeling == 1)[0]) and
+               str(np.where(self.labeling == 1)[1]) == str(np.where(other.labeling == 1)[0])
+               )
 
     def __hash__(self):
-        return hash((self.tree, self.labeling))
+        hsh = hash((str(np.where(self.tree == 1)[0]), str(np.where(self.tree == 1)[1]), str(np.where(self.labeling == 1)[0]), str(np.where(self.labeling == 1)[1])))
+        return hsh
 
 def _truncated_cluster_name(cluster_name):
     '''
@@ -119,7 +125,8 @@ def objective(V, A, T, ref_matrix, var_matrix, U, B, w_e, w_m, w_s, w_c, w_l, al
     shared_par_and_self_color = torch.mul(W, X)
     # tells us if two nodes are (1) in the same site and (2) have parents in the same site
     # and (3) there's a path from node i to node j
-    P = vertex_labeling_util.get_path_matrix_tensor(A)
+    # TODO: this is computationally expensive, maybe we could cache path matrices we've calculated before?
+    P = vertex_labeling_util.get_path_matrix_tensor(A.numpy())
     shared_path_and_par_and_self_color = torch.sum(torch.mul(P, shared_par_and_self_color), axis=1)
     repeated_temporal_migrations = torch.sum(torch.mul(shared_path_and_par_and_self_color, Y))
     binarized_site_adj = torch.sigmoid(alpha * (2 * site_adj - 1))
@@ -223,7 +230,6 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, batch_size, temp, hard
             leaf_idx += 1
         return full_adj
 
-
     losses_list = []
     V_list = []
     full_trees = []
@@ -237,6 +243,17 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, batch_size, temp, hard
         full_trees.append(full_T)
 
     return V_list, torch.stack(losses_list), full_trees
+
+def print_tree_info(labeled_tree, T, ref_matrix, var_matrix, B, w_e, w_m, w_s, w_c, w_l, node_idx_to_label, ordered_sites):
+    loss = objective(labeled_tree.labeling, labeled_tree.tree, T, ref_matrix, var_matrix, labeled_tree.U, B, w_e, w_m, w_s, w_c, w_l, verbose=True)
+    U_clipped = labeled_tree.U.detach().numpy()
+    U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
+    logger.debug(f"\nU > {U_CUTOFF}\n")
+    col_labels = ["norm"] + [_truncated_cluster_name(node_idx_to_label[k]) if k in node_idx_to_label else "0" for k in range(U_clipped.shape[1] - 1)]
+    df = pd.DataFrame(U_clipped, columns=col_labels, index=ordered_sites)
+    logger.debug(df)
+    logger.debug("\nF_hat")
+    logger.debug(labeled_tree.U @ B)
 
 def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites,
                                 p=None, node_idx_to_label=None,
@@ -295,13 +312,10 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites,
     temp = init_temp
     decay = (init_temp - final_temp) / max_iter
     hard = True
-
-    optimizer = torch.optim.Adam([psi, X], lr=lr)
     min_loss = torch.tensor(float("Inf"))
-    min_loss_labeling = None
-    min_U = None
-    all_min_loss_labeled_trees = None
-    min_tree = None
+    optimizer = torch.optim.Adam([psi, X], lr=lr)
+    k = 5
+    min_loss_labeled_trees = None
     losses = []
 
     for i in range(max_iter):
@@ -319,67 +333,40 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites,
         with torch.no_grad():
             V, losses_tensor, full_trees = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, batch_size, temp, hard, w_e, w_m, w_s, w_c, w_l)
             min_loss_iter = torch.min(losses_tensor)
-            idx = torch.argmin(losses_tensor)
 
-            _, min_loss_indices = torch.topk(losses_tensor, 3, largest=False)
-            #indices = (losses_tensor == min_loss_iter).nonzero()
             if min_loss_iter < min_loss:
-                # TODO: put this into a helper function
                 min_loss = min_loss_iter
-                min_loss_labeling = V[idx]
-                min_tree = full_trees[idx]
-                min_U = U[idx,:,:]
-                min_psi = psi[idx,:,:]
-
-                all_min_loss_labeled_trees = set()
+                _, min_loss_indices = torch.topk(losses_tensor, k, largest=False, sorted=True)
+                min_loss_labeled_trees = dict()
                 for i in min_loss_indices:
-                    labeled_tree = LabeledTree(full_trees[i], V[i], U[i], losses_tensor[i])
-                    all_min_loss_labeled_trees.add(labeled_tree)
+                    labeled_tree = LabeledTree(full_trees[i], V[i], U[i])
+                    # If it's already in the dict, we've added an identical labeling+tree combo with a lower loss (due to U)
+                    if labeled_tree not in min_loss_labeled_trees:
+                        min_loss_labeled_trees[labeled_tree] = losses_tensor[i]
+
 
     if visualize:
         vertex_labeling_util.plot_losses(losses)
 
     with torch.no_grad():
-        best_tree = None
-        min_loss = float("inf")
-        print("all_min_loss_labeled_trees", all_min_loss_labeled_trees)
-        for i, min_loss_labeled_tree in enumerate(all_min_loss_labeled_trees):
-            labeling, tree, U = min_loss_labeled_tree.labeling, min_loss_labeled_tree.tree, min_loss_labeled_tree.U
-            loss = objective(labeling, tree, T, ref_matrix, var_matrix, U, B, w_e, w_m, w_s, w_c, w_l, verbose=show_top_trees)
+        min_loss_labeled_trees_and_losses = [(tree, min_loss_labeled_trees[tree]) for tree in min_loss_labeled_trees]
+        min_loss_labeled_trees_and_losses.sort(key=lambda tup: tup[1])
 
-            if show_top_trees:
-                print(f"Tree {i+1}")
-                U_clipped = U.detach().numpy()
-                U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
-                print(f"U > {U_CUTOFF}\n")
-                col_labels = ["norm"] + [_truncated_cluster_name(node_idx_to_label[k]) if k in node_idx_to_label else "0" for k in range(U_clipped.shape[1] - 1)]
-                print(col_labels)
-                df = pd.DataFrame(U_clipped, columns=col_labels, index=ordered_sites)
-                print(df)
-                print("F_hat")
-                print(U @ B)
+        for i, tup in enumerate(min_loss_labeled_trees_and_losses):
+            labeled_tree = tup[0]
+            if i == 0:
+                print("*"*20 + " BEST TREE " + "*"*20+"\n")
+                best_tree = labeled_tree
+                print_tree_info(labeled_tree, T, ref_matrix, var_matrix, B, w_e, w_m, w_s, w_c, w_l, node_idx_to_label, ordered_sites)
+                best_tree_edges, best_tree_vertex_name_to_site_map = vertex_labeling_util.plot_tree(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, node_idx_to_label, show=visualize)
+                best_mig_graph_edges = vertex_labeling_util.plot_migration_graph(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, primary, show=visualize)
 
-                if visualize:
-                    vertex_labeling_util.plot_tree(labeling, tree, ordered_sites, custom_colors, node_idx_to_label)
-                    vertex_labeling_util.plot_migration_graph(labeling, tree, ordered_sites, custom_colors, primary)
                 print("-"*100 + "\n")
 
-            if loss < min_loss:
-                best_tree = min_loss_labeled_tree
-                min_loss = loss
-
-        if visualize: print("\nBest tree")
-        loss = objective(best_tree.labeling, best_tree.tree, T, ref_matrix, var_matrix, best_tree.U, B, w_e, w_m, w_s, w_c, w_l, verbose=True)
-        U_clipped = U.detach().numpy()
-        U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
-        logger.debug(f"\nU > {U_CUTOFF}\n")
-        col_labels = ["norm"] + [_truncated_cluster_name(node_idx_to_label[k]) if k in node_idx_to_label else "0" for k in range(U_clipped.shape[1] - 1)]
-        df = pd.DataFrame(U_clipped, columns=col_labels, index=ordered_sites)
-        logger.debug(df)
-        logger.debug("\nF_hat")
-        logger.debug(U @ B)
-
-    best_tree_edges, best_tree_vertex_name_to_site_map = vertex_labeling_util.plot_tree(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, node_idx_to_label, show=visualize)
-    best_mig_graph_edges = vertex_labeling_util.plot_migration_graph(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, primary, show=visualize)
+            elif show_top_trees:
+                print_tree_info(labeled_tree, T, ref_matrix, var_matrix, B, w_e, w_m, w_s, w_c, w_l, node_idx_to_label, ordered_sites)
+                vertex_labeling_util.plot_tree(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, node_idx_to_label)
+                vertex_labeling_util.plot_migration_graph(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, primary)
+                print("-"*100 + "\n")
 
     return best_tree_edges, best_tree_vertex_name_to_site_map, best_mig_graph_edges
