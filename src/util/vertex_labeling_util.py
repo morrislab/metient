@@ -50,7 +50,7 @@ def plot_migration_graph(V, full_tree, ordered_sites, custom_colors, primary, sh
         for j, num_edges in enumerate(adj_row):
             if num_edges > 0:
                 for _ in range(int(num_edges.item())):
-                    G.add_edge(ordered_sites[i], ordered_sites[j], color=f"{colors[i]};0.5:{colors[j]}", penwidth=3)
+                    G.add_edge(ordered_sites[i], ordered_sites[j], color=f'"{colors[i]};0.5:{colors[j]}"', penwidth=3)
                     edges.append((ordered_sites[i], ordered_sites[j]))
 
     dot = nx.nx_pydot.to_pydot(G)
@@ -101,7 +101,7 @@ def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=
                 edges.append((label_i, label_j))
                 G.add_node(label_i, color=color_map[label_i], penwidth=3)
                 G.add_node(label_j, color=color_map[label_j], penwidth=3)
-                G.add_edge(label_i, label_j, color=f"{color_map[label_i]};0.5:{color_map[label_j]}", penwidth=3)
+                G.add_edge(label_i, label_j, color=f'"{color_map[label_i]};0.5:{color_map[label_j]}"', penwidth=3)
 
     assert(nx.is_tree(G))
 
