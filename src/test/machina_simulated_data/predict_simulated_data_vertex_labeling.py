@@ -10,6 +10,7 @@ import src.util.vertex_labeling_util as vert_util
 
 num_sims_runs = 0
 
+
 def predict_vertex_labelings(cluster_fn, all_mut_trees_fn, ref_var_fn, out_dir):
     cluster_label_to_idx = mach_util.get_cluster_label_to_idx(cluster_fn, ignore_polytomies=True)
     global num_sims_runs
@@ -46,13 +47,16 @@ def predict_vertex_labelings(cluster_fn, all_mut_trees_fn, ref_var_fn, out_dir):
 
 if __name__=="__main__":
 
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 3:
         sys.stderr.write("Usage: %s <MACHINA_SIM_DATA_DIR> <run_name>\n" % sys.argv[0])
         sys.exit(1)
 
 
-    sites = ["m8", "m5"]
-    mig_types = ["M", "mS", "R", "S"]
+    # sites = ["m8", "m5"]
+    # mig_types = ["M", "mS", "R", "S"]
+
+    sites = ["m5"]
+    mig_types = ["R", "S"]
 
     machina_sims_data_dir = sys.argv[1]
     run_name = sys.argv[2]
@@ -64,13 +68,15 @@ if __name__=="__main__":
         os.mkdir(os.path.join(predictions_dir, site))
 
         for mig_type in mig_types:
-            out_dir = os.mkdir(os.path.join(predictions_dir, site, mig_type))
+            out_dir = os.path.join(predictions_dir, site, mig_type)
+            os.mkdir(out_dir)
+            print(out_dir)
             site_mig_data_dir = os.path.join(machina_sims_data_dir, site, mig_type)
 
             seeds = fnmatch.filter(os.listdir(site_mig_data_dir), 'seed*_0.95.tsv')
             seeds = [s.replace("_0.95.tsv", "").replace("seed", "") for s in seeds]
 
-            for seed in seeds[:2]:
+            for seed in seeds:
 
                 print("="*150)
                 print(f"Predicting vertex labeling for {site} {mig_type} seed {seed}.")

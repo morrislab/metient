@@ -355,13 +355,13 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites,
         for i, tup in enumerate(min_loss_labeled_trees_and_losses):
             labeled_tree = tup[0]
             if i == 0:
-                print("*"*20 + " BEST TREE " + "*"*20+"\n")
+                #print("*"*20 + " BEST TREE " + "*"*20+"\n")
                 best_tree = labeled_tree
                 print_tree_info(labeled_tree, T, ref_matrix, var_matrix, B, w_e, w_m, w_s, w_c, w_l, node_idx_to_label, ordered_sites)
                 best_tree_edges, best_tree_vertex_name_to_site_map = vertex_labeling_util.plot_tree(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, node_idx_to_label, show=visualize)
                 best_mig_graph_edges = vertex_labeling_util.plot_migration_graph(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, primary, show=visualize)
 
-                print("-"*100 + "\n")
+                #print("-"*100 + "\n")
 
             elif show_top_trees:
                 print_tree_info(labeled_tree, T, ref_matrix, var_matrix, B, w_e, w_m, w_s, w_c, w_l, node_idx_to_label, ordered_sites)
