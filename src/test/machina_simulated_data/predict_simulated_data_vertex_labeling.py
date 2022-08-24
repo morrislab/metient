@@ -52,11 +52,8 @@ if __name__=="__main__":
         sys.exit(1)
 
 
-    # sites = ["m8", "m5"]
-    # mig_types = ["M", "mS", "R", "S"]
-
-    sites = ["m5"]
-    mig_types = ["R", "S"]
+    sites = ["m8", "m5"]
+    mig_types = ["M", "mS", "R", "S"]
 
     machina_sims_data_dir = sys.argv[1]
     run_name = sys.argv[2]
