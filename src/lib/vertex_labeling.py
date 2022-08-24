@@ -317,6 +317,7 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites,
     k = 5
     min_loss_labeled_trees = None
     losses = []
+    max_patience_epochs = 20
 
     for i in range(max_iter):
         optimizer.zero_grad()
@@ -336,6 +337,7 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites,
 
             if min_loss_iter < min_loss:
                 min_loss = min_loss_iter
+                early_stopping_ctr = 1
                 _, min_loss_indices = torch.topk(losses_tensor, k, largest=False, sorted=True)
                 min_loss_labeled_trees = dict()
                 for i in min_loss_indices:
@@ -343,6 +345,11 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites,
                     # If it's already in the dict, we've added an identical labeling+tree combo with a lower loss (due to U)
                     if labeled_tree not in min_loss_labeled_trees:
                         min_loss_labeled_trees[labeled_tree] = losses_tensor[i]
+
+            else:
+                early_stopping_ctr += 1
+                if early_stopping_ctr == max_patience_epochs:
+                    break
 
 
     if visualize:
