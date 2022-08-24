@@ -208,10 +208,12 @@ def extract_minimum_loss_trees(loss_output_txt_fn, sites, mig_types):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) != 3:
-        sys.stderr.write("Usage: %s <MACHINA_SIM_DATA_DIR> <LOSS_OUTPUT_TXT>\n" % sys.argv[0])
-        sys.stderr.write("MACHINA_SIM_DATA_DIR: directory containing the true labelings and predicted labelings")
-        sys.stderr.write("LOSS_OUTPUT_TXT: txt file containing the loss values for all the mutation trees within a seed. Only trees with minimum value are used")
+    if len(sys.argv) != 5:
+        sys.stderr.write("Usage: %s <MACHINA_SIM_DATA_DIR> <PREDICTIONS_DATA_DIR> <LOSS_OUTPUT_TXT> <RUN_NAME>\n" % sys.argv[0])
+        sys.stderr.write("MACHINA_SIM_DATA_DIR: directory containing the true labelings\n")
+        sys.stderr.write("PREDICTIONS_DATA_DIR: directory containing the predicted labelings\n")
+        sys.stderr.write("LOSS_OUTPUT_TXT: txt file containing the loss values for all the mutation trees within a seed. Only trees with minimum loss value are used.\n")
+        sys.stderr.write("RUN_NAME: Name of the run to use in output png naming.\n")
         sys.exit(1)
 
 
@@ -223,15 +225,18 @@ if __name__ == "__main__":
     grad_m8_f1_scores = []
 
     mach_sim_data_dir = sys.argv[1]
-    loss_output_txt_fn = sys.argv[2]
+    predictions_data_dir = sys.argv[2]
+    loss_output_txt_fn = sys.argv[3]
+    run_name = sys.argv[4]
 
     min_loss_trees = extract_minimum_loss_trees(loss_output_txt_fn, sites, mig_types)
     i = 0
 
     for site in sites:
         for mig_type in mig_types:
-            mig_type_data_dir = os.path.join(mach_sim_data_dir, site, mig_type)
-            filenames = fnmatch.filter(os.listdir(mig_type_data_dir), 'T_tree*.predicted.tree')
+            true_site_mig_type_data_dir = os.path.join(mach_sim_data_dir, site, mig_type)
+            predicted_site_mig_type_data_dir = os.path.join(predictions_data_dir, site, mig_type)
+            filenames = fnmatch.filter(os.listdir(predicted_site_mig_type_data_dir), 'T_tree*.predicted.tree')
             seeds = set([s[s.find("seed")+4:s.find(".predicted")] for s in filenames])
 
             for seed in seeds:
@@ -243,16 +248,16 @@ if __name__ == "__main__":
 
                     #print(f"Evaluating history for seed {seed} {site} {mig_type} tree {tree}")
 
-                    recall, precision, F = evaluate_seeding_clones(os.path.join(mig_type_data_dir, f"T_seed{seed}.tree"),
-                                                                   os.path.join(mig_type_data_dir, f"T_seed{seed}.vertex.labeling"),
-                                                                   os.path.join(mig_type_data_dir, f"T_tree{tree}_seed{seed}.predicted.tree"),
-                                                                   os.path.join(mig_type_data_dir, f"T_tree{tree}_seed{seed}.predicted.vertex.labeling"))
+                    recall, precision, F = evaluate_seeding_clones(os.path.join(true_site_mig_type_data_dir, f"T_seed{seed}.tree"),
+                                                                   os.path.join(true_site_mig_type_data_dir, f"T_seed{seed}.vertex.labeling"),
+                                                                   os.path.join(predicted_site_mig_type_data_dir, f"T_tree{tree}_seed{seed}.predicted.tree"),
+                                                                   os.path.join(predicted_site_mig_type_data_dir, f"T_tree{tree}_seed{seed}.predicted.vertex.labeling"))
 
-                    recall_G, precision_G, F_G = evaluate_migration_graph(os.path.join(mig_type_data_dir, f"G_seed{seed}.tree"),
-                                                                          os.path.join(mig_type_data_dir, f"G_tree{tree}_seed{seed}.predicted.tree"))
+                    recall_G, precision_G, F_G = evaluate_migration_graph(os.path.join(true_site_mig_type_data_dir, f"G_seed{seed}.tree"),
+                                                                          os.path.join(predicted_site_mig_type_data_dir, f"G_tree{tree}_seed{seed}.predicted.tree"))
 
-                    recall_G2, precision_G2, F_G2 = evaluate_migration_multigraph(os.path.join(mig_type_data_dir, f"G_seed{seed}.tree"),
-                                                                                  os.path.join(mig_type_data_dir, f"G_tree{tree}_seed{seed}.predicted.tree"))
+                    recall_G2, precision_G2, F_G2 = evaluate_migration_multigraph(os.path.join(true_site_mig_type_data_dir, f"G_seed{seed}.tree"),
+                                                                                  os.path.join(predicted_site_mig_type_data_dir, f"G_tree{tree}_seed{seed}.predicted.tree"))
 
 
                     scores = [recall, precision, F, recall_G, precision_G, F_G, recall_G2, precision_G2, F_G2]
@@ -308,8 +313,8 @@ if __name__ == "__main__":
     joint_m8_df = pd.concat([grad_m8_df, machina_m8_df]).reset_index()
     print(joint_m5_df.reset_index())
 
-    save_boxplot(joint_m5_df, "migration graph F1 score", "m5_migration_graph_f1_scores.png")
-    save_boxplot(joint_m8_df, "migration graph F1 score", "m8_migration_graph_f1_scores.png")
+    save_boxplot(joint_m5_df, "migration graph F1 score", f"m5_migration_graph_f1_scores_{run_name}.png")
+    save_boxplot(joint_m8_df, "migration graph F1 score", f"m8_migration_graph_f1_scores_{run_name}.png")
 
-    save_boxplot(joint_m5_df, "migrating clones F1 score", "m5_migrating_clones_f1_scores.png")
-    save_boxplot(joint_m8_df, "migrating clones F1 score", "m8_migrating_clones_f1_scores.png")
+    save_boxplot(joint_m5_df, "migrating clones F1 score", f"m5_migrating_clones_f1_scores_{run_name}.png")
+    save_boxplot(joint_m8_df, "migrating clones F1 score", f"m8_migrating_clones_f1_scores_{run_name}.png")
