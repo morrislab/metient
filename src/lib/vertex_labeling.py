@@ -174,7 +174,7 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, weights, alpha=100.0, verbo
         print("Neg log likelihood:", round(nlglh.item(), 3))
         print("L1:", l1.item())
         if g != 0:
-            print("Genetic distance loss:", g.item())
+            print("Genetic distance:", g.item())
         print("Loss:", round(loss.item(), 3))
 
     return loss
