@@ -34,10 +34,11 @@ def predict_vertex_labelings(cluster_fn, all_mut_trees_fn, ref_var_fn, out_dir):
         primary_idx = unique_sites.index('P')
         r = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(unique_sites)).T
 
-            weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, l1=2.0, gen_dist=0.5)
+        weights = vertex_labeling.Weights(data_fit=0.8, mig=10.0, comig=5.0, seed_site=1.0, l1=1.0, gen_dist=0.5)
+        G = mach_util.get_genetic_distance_tensor_from_sim_adj_matrix(T, pruned_cluster_label_to_idx)
 
         best_T_edges, best_labeling, best_G_edges = vertex_labeling.gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites=unique_sites,
-                                                                                                weights=weights, p=r, node_idx_to_label=idx_to_label,
+                                                                                                weights=weights, p=r, node_idx_to_label=idx_to_label, G=G,
                                                                                                 max_iter=150, batch_size=64,
                                                                                                 custom_colors=custom_colors, visualize=False)
 
