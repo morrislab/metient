@@ -308,3 +308,20 @@ def get_adj_matrix_from_machina_tree(character_label_to_idx, tree_filename, remo
             node_i, node_j = nodes[0], nodes[1]
             edges.append((node_i, node_j))
     return _get_adj_matrix_from_machina_tree(edges, character_label_to_idx, remove_unseen_nodes, skip_polytomies)
+
+def get_genetic_distance_tensor_from_sim_adj_matrix(adj_matrix, character_label_to_idx):
+    '''
+    For MACHINA simulated data, get the genetic distances between nodes
+
+    '''
+
+    G = np.zeros(adj_matrix.shape)
+    idx_to_char_label = { v:k for k,v in character_label_to_idx.items() }
+
+    for i, adj_row in enumerate(adj_matrix):
+        for j, val in enumerate(adj_row):
+            if val == 1:
+                # This is the number of mutations the child node has accumulated compared to its parent
+                num_mutations = idx_to_char_label[j].count(";") + 1
+                G[i][j] = num_mutations
+    return torch.tensor(G, dtype = torch.float32)
