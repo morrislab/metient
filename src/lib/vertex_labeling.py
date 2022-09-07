@@ -128,7 +128,7 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, weights, alpha=100.0, verbo
 
     # Seeding site number
     # remove the same site transitions from the site adj matrix
-    site_adj_no_diag = torch.mul(site_adj, 1-torch.eye(site_adj.shape[0], site_adj.shape[1]).to(DEVICE))
+    site_adj_no_diag = torch.mul(site_adj, 1-torch.eye(site_adj.shape[0], site_adj.shape[1]))
     row_sums_site_adj = torch.sum(site_adj_no_diag, axis=1)
     # can only have a max of 1 for each site (it's either a seeding site or it's not)
     binarized_row_sums_site_adj = torch.sigmoid(alpha * (2*row_sums_site_adj - 1)) # sigmoid for soft thresholding
@@ -142,7 +142,7 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, weights, alpha=100.0, verbo
     # tells us if two nodes are (1) in the same site and (2) have parents in the same site
     # and (3) there's a path from node i to node j
     # TODO: this is computationally expensive, maybe we could cache path matrices we've calculated before?
-    P = vertex_labeling_util.get_path_matrix_tensor(A.numpy())
+    P = vertex_labeling_util.get_path_matrix_tensor(A, remove_self_loops=True)
     shared_path_and_par_and_self_color = torch.sum(torch.mul(P, shared_par_and_self_color), axis=1)
     repeated_temporal_migrations = torch.sum(torch.mul(shared_path_and_par_and_self_color, Y))
     binarized_site_adj = torch.sigmoid(alpha * (2 * site_adj - 1))
@@ -180,7 +180,7 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, weights, alpha=100.0, verbo
     return loss
 
 def sample_gumbel(shape, eps=1e-20):
-    G = torch.rand(shape).to(DEVICE)
+    G = torch.rand(shape)
     return -torch.log(-torch.log(G + eps) + eps)
 
 def gumbel_softmax_sample(logits, temperature):
@@ -208,8 +208,7 @@ def gumbel_softmax(logits, temperature, hard=False):
     y_soft = gumbel_softmax_sample(logits, temperature)
     if hard:
         _, k = y_soft.max(1)
-        y_hard = torch.zeros(shape, dtype=logits.dtype).to(DEVICE)
-        y_hard = y_hard.scatter_(1, torch.unsqueeze(k, 1).to(DEVICE), 1.0)
+        y_hard = torch.zeros(shape, dtype=logits.dtype).scatter_(1, torch.unsqueeze(k, 1), 1.0)
 
         # This cool bit of code achieves two things:
         # (1) makes the output value exactly one-hot (since we add then subtract y_soft value)
@@ -240,7 +239,7 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, temp, hard, weights
         # TODO: make helper functions for the U stuff
         U_i = U[i,:,:][:,1:] # don't include column for normal cells
         num_sites = U.shape[1]
-        L = torch.nn.functional.one_hot((U_i > U_CUTOFF).nonzero()[:,0], num_classes=num_sites).T.to(DEVICE)
+        L = torch.nn.functional.one_hot((U_i > U_CUTOFF).nonzero()[:,0], num_classes=num_sites).T
         # TODO: is this indexing the way to handle two latent vars?? probs not
         X_i = X[i,:,:] # internal labeling
         if p is None:
@@ -337,9 +336,14 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     num_sites = ref_matrix.shape[0]
     num_internal_nodes = T.shape[0]
 
-    print(f"Tensors are loaded onto {DEVICE}")
+    if torch.cuda.is_available():
+        torch.set_default_tensor_type('torch.cuda.FloatTensor')
+        print(f"Tensors are loaded onto GPU")
+    else:
+        torch.set_default_tensor_type('torch.FloatTensor')
+        print(f"Tensors are loaded onto CPU")
 
-    psi = -1 * torch.rand(batch_size, num_sites, num_internal_nodes + 1).to(DEVICE) # an extra column for normal cells
+    psi = -1 * torch.rand(batch_size, num_sites, num_internal_nodes + 1) # an extra column for normal cells
     psi.requires_grad = True # we're learning psi
 
     # If we don't know the anatomical site of the primary tumor, we need to learn it
@@ -351,20 +355,20 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
         assert(p.shape[0] == ref_matrix.shape[0]) # num_anatomical_sites
         num_nodes_to_label = num_internal_nodes - 1 # we don't need to learn the root labeling
 
-    X = -1 * torch.rand(batch_size, num_sites, num_nodes_to_label).to(DEVICE)
+    X = -1 * torch.rand(batch_size, num_sites, num_nodes_to_label)
     X.requires_grad = True # we're learning X (this is the vertex labeling V)
 
     # add a row of zeros to account for the non-cancerous root node
     B = torch.vstack([torch.zeros(B.shape[1]), B])
     # add a column of ones to indicate that every subclone has the non-cancerous mutations
-    B = torch.hstack ([torch.ones(B.shape[0]).reshape(-1,1), B]).to(DEVICE)
+    B = torch.hstack ([torch.ones(B.shape[0]).reshape(-1,1), B])
 
     # Put all tensors onto GPU if available
-    T = T.to(DEVICE)
-    ref_matrix = ref_matrix.to(DEVICE)
-    var_matrix = var_matrix.to(DEVICE)
-    if p != None: p = p.to(DEVICE)
-    if G != None: G = G.to(DEVICE)
+    # T = T.to(DEVICE)
+    # ref_matrix = ref_matrix.to(DEVICE)
+    # var_matrix = var_matrix.to(DEVICE)
+    # if p != None: p = p.to(DEVICE)
+    # if G != None: G = G.to(DEVICE)
 
     print(psi.is_cuda, X.is_cuda, B.is_cuda, T.is_cuda, ref_matrix.is_cuda, var_matrix.is_cuda)
 

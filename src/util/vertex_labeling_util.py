@@ -161,21 +161,48 @@ def plot_losses(losses):
     plt.ylabel("loss")
     plt.show()
 
-def get_path_matrix(T, remove_self_loops=False):
+# TODO: write unit tests for these
+# TODO: figure out why this isn't speeding things up :/
+#@np_array_cache
+# def get_path_matrix_tensor(A, remove_self_loops=False):
+#     '''
+#     A is a tensor adjacency matrix
+#     '''
+#     # Path matrix that tells us if path exists from node i to node j
+#     I = torch.eye(A.shape[0])
+#     print("A\n", A)
+#     print("I\n", I)
+#     # M is T with self loops.
+#     # Convert to bool to get more efficient matrix multiplicaton
+#     B = torch.logical_or(A,I)
+#     # Implementing Algorithm 1 here, which uses repeated squaring to efficiently calc path matrix:
+#     # https://courses.grainger.illinois.edu/cs598cci/sp2020/LectureNotes/lecture1.pdf
+#     k = np.ceil(np.log2(len(A)))
+#     for i in range(int(k)):
+#         B = torch.matmul(B, B)
+#     if remove_self_loops:
+#         B = torch.logical_xor(B,I)
+#     #P = B.astype(int)
+#     print("B\n", B)
+#     return B
+
+# TODO: pytorch doesn't have boolean matrix multiplication support
+# which is why I convert to numpy here, but this is inefficient
+def get_path_matrix_tensor(A, remove_self_loops=False):
+    '''
+    A is a tensor adjacency matrix
+    '''
+    A = A.numpy()
+
     # Path matrix that tells us if path exists from node i to node j
-    I = np.identity(T.shape[0])
-    # M is T with self loops.
-    # Convert to bool to get more efficient matrix multiplicaton
-    B = np.logical_or(T,I).astype(bool)
-    # Implementing Algorithm 1 here, which uses repeated squaring to efficiently calc path matrix:
-    # https://courses.grainger.illinois.edu/cs598cci/sp2020/LectureNotes/lecture1.pdf
-    k = np.ceil(np.log2(len(T)))
-    for i in range(int(k)):
-        B = np.dot(B, B)
+    I = np.identity(A.shape[0])
+    # A with self loops
+    M = np.logical_or(A,I)
+    # Path matrix that tells us if path exists from node i to node j
+    P = np.linalg.matrix_power(M, len(A) - 1)
     if remove_self_loops:
-        B = np.logical_xor(B,I)
-    P = B.astype(int)
-    return P
+        P = np.logical_xor(P,I)
+    return torch.tensor(P)
 
 def adj_matrix_hash(A):
     return hash((str(np.where(A == 1)[0]), str(np.where(A == 1)[1])))
@@ -197,15 +224,6 @@ def np_array_cache(function):
 
     return wrapped
 
-# TODO: figure out why this isn't speeding things up :/
-#@np_array_cache
-def get_path_matrix_tensor(A):
-    '''
-    A is a numpy adjacency matrix
-    '''
-    return torch.tensor(get_path_matrix(A, remove_self_loops=True), dtype = torch.float32)
-
-
 def get_mutation_matrix_tensor(A):
     '''
     A is a tensor adjacency matrix (where Aij = 1 if there is a path from i to j)
@@ -213,7 +231,7 @@ def get_mutation_matrix_tensor(A):
     returns a mutation matrix B, which is a subclone x mutation binary matrix, where Bij = 1
     if subclone i has mutation j.
     '''
-    return torch.tensor(get_path_matrix(A.numpy().T, remove_self_loops=False), dtype = torch.float32)
+    return get_path_matrix_tensor(A.T, remove_self_loops=False)
 
 def get_adj_matrix_from_edge_list(edge_list):
     T = []
