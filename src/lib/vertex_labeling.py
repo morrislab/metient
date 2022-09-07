@@ -240,7 +240,7 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, temp, hard, weights
         # TODO: make helper functions for the U stuff
         U_i = U[i,:,:][:,1:] # don't include column for normal cells
         num_sites = U.shape[1]
-        L = torch.nn.functional.one_hot((U_i > U_CUTOFF).nonzero()[:,0], num_classes=num_sites).T
+        L = torch.nn.functional.one_hot((U_i > U_CUTOFF).nonzero()[:,0], num_classes=num_sites).T.to(DEVICE)
         # TODO: is this indexing the way to handle two latent vars?? probs not
         X_i = X[i,:,:] # internal labeling
         if p is None:
@@ -363,6 +363,7 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     T = T.to(DEVICE)
     ref_matrix = ref_matrix.to(DEVICE)
     var_matrix = var_matrix.to(DEVICE)
+    if p != None: p = p.to(DEVICE)
     if G != None: G = G.to(DEVICE)
 
     print(psi.is_cuda, X.is_cuda, B.is_cuda, T.is_cuda, ref_matrix.is_cuda, var_matrix.is_cuda)
