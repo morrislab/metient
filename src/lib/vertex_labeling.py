@@ -19,7 +19,7 @@ U_CUTOFF = 0.05
 # TODO: better way to handle this?
 G_IDENTICAL_CLONE_VALUE = 1e-3
 
-DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# TODO put weights into an object
 
 class Weights:
     def __init__(self, data_fit=1.0, mig=1.0, comig=1.0, seed_site=1.0, l1=1.0, gen_dist=1.0):
@@ -142,7 +142,7 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, weights, alpha=100.0, verbo
     # tells us if two nodes are (1) in the same site and (2) have parents in the same site
     # and (3) there's a path from node i to node j
     # TODO: this is computationally expensive, maybe we could cache path matrices we've calculated before?
-    P = vertex_labeling_util.get_path_matrix_tensor(A, remove_self_loops=True)
+    P = vertex_labeling_util.get_path_matrix_tensor(A.numpy())
     shared_path_and_par_and_self_color = torch.sum(torch.mul(P, shared_par_and_self_color), axis=1)
     repeated_temporal_migrations = torch.sum(torch.mul(shared_path_and_par_and_self_color, Y))
     binarized_site_adj = torch.sigmoid(alpha * (2 * site_adj - 1))
@@ -336,16 +336,8 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     num_sites = ref_matrix.shape[0]
     num_internal_nodes = T.shape[0]
 
-    if torch.cuda.is_available():
-        torch.set_default_tensor_type('torch.cuda.FloatTensor')
-        print(f"Tensors are loaded onto GPU")
-    else:
-        torch.set_default_tensor_type('torch.FloatTensor')
-        print(f"Tensors are loaded onto CPU")
-
     psi = -1 * torch.rand(batch_size, num_sites, num_internal_nodes + 1) # an extra column for normal cells
     psi.requires_grad = True # we're learning psi
-
     # If we don't know the anatomical site of the primary tumor, we need to learn it
     num_nodes_to_label = -1
     if p is None:
@@ -362,15 +354,6 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     B = torch.vstack([torch.zeros(B.shape[1]), B])
     # add a column of ones to indicate that every subclone has the non-cancerous mutations
     B = torch.hstack ([torch.ones(B.shape[0]).reshape(-1,1), B])
-
-    # Put all tensors onto GPU if available
-    # T = T.to(DEVICE)
-    # ref_matrix = ref_matrix.to(DEVICE)
-    # var_matrix = var_matrix.to(DEVICE)
-    # if p != None: p = p.to(DEVICE)
-    # if G != None: G = G.to(DEVICE)
-
-    print(psi.is_cuda, X.is_cuda, B.is_cuda, T.is_cuda, ref_matrix.is_cuda, var_matrix.is_cuda)
 
     # Temperature and annealing
     temp = init_temp
