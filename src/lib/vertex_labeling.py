@@ -128,7 +128,7 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, weights, alpha=100.0, verbo
 
     # Seeding site number
     # remove the same site transitions from the site adj matrix
-    site_adj_no_diag = torch.mul(site_adj, 1-torch.eye(site_adj.shape[0], site_adj.shape[1]))
+    site_adj_no_diag = torch.mul(site_adj, 1-torch.eye(site_adj.shape[0], site_adj.shape[1]).to(DEVICE))
     row_sums_site_adj = torch.sum(site_adj_no_diag, axis=1)
     # can only have a max of 1 for each site (it's either a seeding site or it's not)
     binarized_row_sums_site_adj = torch.sigmoid(alpha * (2*row_sums_site_adj - 1)) # sigmoid for soft thresholding
