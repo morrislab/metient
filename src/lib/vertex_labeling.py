@@ -339,9 +339,9 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(f"Tensors are loaded onto {device}")
 
-    psi = -1 * torch.rand(batch_size, num_sites, num_internal_nodes + 1) # an extra column for normal cells
+    psi = -1 * torch.rand(batch_size, num_sites, num_internal_nodes + 1).to(device) # an extra column for normal cells
     psi.requires_grad = True # we're learning psi
-    psi.to(device)
+
     # If we don't know the anatomical site of the primary tumor, we need to learn it
     num_nodes_to_label = -1
     if p is None:
@@ -351,21 +351,19 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
         assert(p.shape[0] == ref_matrix.shape[0]) # num_anatomical_sites
         num_nodes_to_label = num_internal_nodes - 1 # we don't need to learn the root labeling
 
-    X = -1 * torch.rand(batch_size, num_sites, num_nodes_to_label)
+    X = -1 * torch.rand(batch_size, num_sites, num_nodes_to_label).to(device)
     X.requires_grad = True # we're learning X (this is the vertex labeling V)
-    X.to(device)
 
     # add a row of zeros to account for the non-cancerous root node
     B = torch.vstack([torch.zeros(B.shape[1]), B])
     # add a column of ones to indicate that every subclone has the non-cancerous mutations
-    B = torch.hstack ([torch.ones(B.shape[0]).reshape(-1,1), B])
-    B.to(device)
+    B = torch.hstack ([torch.ones(B.shape[0]).reshape(-1,1), B]).to(device)
 
     # Put all tensors onto GPU if available
-    T.to(device)
-    ref_matrix.to(device)
-    var_matrix.to(device)
-    if G != None: G.to(device)
+    T = T.to(device)
+    ref_matrix = ref_matrix.to(device)
+    var_matrix = var_matrix.to(device)
+    if G != None: G = G.to(device)
 
     print(psi.is_cuda, X.is_cuda, B.is_cuda, T.is_cuda, ref_matrix.is_cuda, var_matrix.is_cuda)
 
