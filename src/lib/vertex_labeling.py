@@ -208,7 +208,7 @@ def gumbel_softmax(logits, temperature, hard=False):
     y_soft = gumbel_softmax_sample(logits, temperature)
     if hard:
         _, k = y_soft.max(1)
-        y_hard = torch.zeros(shape, dtype=logits.dtype).scatter_(1, torch.unsqueeze(k, 1), 1.0).to(DEVICE)
+        y_hard = torch.zeros(shape, dtype=logits.dtype).scatter_(1, torch.unsqueeze(k, 1).to(DEVICE), 1.0).to(DEVICE)
 
         # This cool bit of code achieves two things:
         # (1) makes the output value exactly one-hot (since we add then subtract y_soft value)
