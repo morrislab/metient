@@ -19,7 +19,7 @@ U_CUTOFF = 0.05
 # TODO: better way to handle this?
 G_IDENTICAL_CLONE_VALUE = 1e-3
 
-# TODO put weights into an object
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Weights:
     def __init__(self, data_fit=1.0, mig=1.0, comig=1.0, seed_site=1.0, l1=1.0, gen_dist=1.0):
@@ -180,7 +180,7 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, weights, alpha=100.0, verbo
     return loss
 
 def sample_gumbel(shape, eps=1e-20):
-    G = torch.rand(shape)
+    G = torch.rand(shape).to(DEVICE)
     return -torch.log(-torch.log(G + eps) + eps)
 
 def gumbel_softmax_sample(logits, temperature):
@@ -336,10 +336,9 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     num_sites = ref_matrix.shape[0]
     num_internal_nodes = T.shape[0]
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    print(f"Tensors are loaded onto {device}")
+    print(f"Tensors are loaded onto {DEVICE}")
 
-    psi = -1 * torch.rand(batch_size, num_sites, num_internal_nodes + 1).to(device) # an extra column for normal cells
+    psi = -1 * torch.rand(batch_size, num_sites, num_internal_nodes + 1).to(DEVICE) # an extra column for normal cells
     psi.requires_grad = True # we're learning psi
 
     # If we don't know the anatomical site of the primary tumor, we need to learn it
@@ -351,19 +350,19 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
         assert(p.shape[0] == ref_matrix.shape[0]) # num_anatomical_sites
         num_nodes_to_label = num_internal_nodes - 1 # we don't need to learn the root labeling
 
-    X = -1 * torch.rand(batch_size, num_sites, num_nodes_to_label).to(device)
+    X = -1 * torch.rand(batch_size, num_sites, num_nodes_to_label).to(DEVICE)
     X.requires_grad = True # we're learning X (this is the vertex labeling V)
 
     # add a row of zeros to account for the non-cancerous root node
     B = torch.vstack([torch.zeros(B.shape[1]), B])
     # add a column of ones to indicate that every subclone has the non-cancerous mutations
-    B = torch.hstack ([torch.ones(B.shape[0]).reshape(-1,1), B]).to(device)
+    B = torch.hstack ([torch.ones(B.shape[0]).reshape(-1,1), B]).to(DEVICE)
 
     # Put all tensors onto GPU if available
-    T = T.to(device)
-    ref_matrix = ref_matrix.to(device)
-    var_matrix = var_matrix.to(device)
-    if G != None: G = G.to(device)
+    T = T.to(DEVICE)
+    ref_matrix = ref_matrix.to(DEVICE)
+    var_matrix = var_matrix.to(DEVICE)
+    if G != None: G = G.to(DEVICE)
 
     print(psi.is_cuda, X.is_cuda, B.is_cuda, T.is_cuda, ref_matrix.is_cuda, var_matrix.is_cuda)
 
