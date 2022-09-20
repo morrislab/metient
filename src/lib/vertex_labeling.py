@@ -22,12 +22,12 @@ G_IDENTICAL_CLONE_VALUE = 1e-3
 # TODO put weights into an object
 
 class Weights:
-    def __init__(self, data_fit=1.0, mig=1.0, comig=1.0, seed_site=1.0, l1=1.0, gen_dist=1.0):
+    def __init__(self, data_fit=1.0, mig=1.0, comig=1.0, seed_site=1.0, reg=1.0, gen_dist=1.0):
         self.data_fit = data_fit
         self.mig = mig
         self.comig = comig
         self.seed_site = seed_site
-        self.l1 = l1
+        self.reg = reg
         self.gen_dist = gen_dist
 
 class LabeledTree:
@@ -159,25 +159,27 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, weights, alpha=100.0, verbo
     if G != None:
     # Weigh by genetic distance
     # calculate if 2 nodes are in diff sites and there's an edge between them (i.e there is a migration edge)
-        R = torch.mul(-1*G, (1-X))
+        R = torch.mul(-1.0*G, (1-X))
         g = torch.sum(R)
 
     # Regularization to make some values of U -> 0
-    l1 = torch.sum(U)
+    # TODO: think about whether we should use l2 norm here
+    reg = torch.sum(U)
 
-    loss = weights.data_fit*nlglh + weights.mig*m + weights.seed_site*s + weights.comig*c + weights.l1*l1 + weights.gen_dist*g
+    loss = weights.data_fit*nlglh + weights.mig*m + weights.seed_site*s + weights.comig*c + weights.reg*reg + weights.gen_dist*g
 
+    loss_info = {"mig": m.item(), "comig": c.item(), "seed": s.item(), "nll": round(nlglh.item(), 3), "reg": reg.item(), "gen": 0 if g == 0 else round(g.item(), 3), "loss": loss}
     if verbose:
         print("Migration number:", m.item())
         print("Comigration number:", c.item())
         print("Seeding site number:", s.item())
         print("Neg log likelihood:", round(nlglh.item(), 3))
-        print("L1:", l1.item())
+        print("Reg:", reg.item())
         if g != 0:
-            print("Genetic distance:", g.item())
+            print("Genetic distance:", round(g.item(), 3))
         print("Loss:", round(loss.item(), 3))
 
-    return loss
+    return loss, loss_info
 
 def sample_gumbel(shape, eps=1e-20):
     G = torch.rand(shape)
@@ -282,7 +284,7 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, temp, hard, weights
     for idx in range(batch_size):
         V = vertex_labeling(idx, U, softmax_X, p)
         full_T, full_G = full_adj_matrix(idx, T, U, G)
-        loss = objective(V, full_T, ref_matrix, var_matrix, U[idx,:,:], B, full_G, weights)
+        loss, _ = objective(V, full_T, ref_matrix, var_matrix, U[idx,:,:], B, full_G, weights)
         losses_list.append(loss)
         V_list.append(V)
         full_trees_list.append(full_T)
@@ -291,7 +293,7 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, temp, hard, weights
     return torch.stack(losses_list), V_list, full_trees_list, full_branch_lengths_list
 
 def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, weights, node_idx_to_label, ordered_sites):
-    loss = objective(labeled_tree.labeling, labeled_tree.tree, ref_matrix, var_matrix, labeled_tree.U, B, labeled_tree.branch_lengths, weights, verbose=True)
+    loss, loss_info = objective(labeled_tree.labeling, labeled_tree.tree, ref_matrix, var_matrix, labeled_tree.U, B, labeled_tree.branch_lengths, weights, verbose=True)
     U_clipped = labeled_tree.U.detach().numpy()
     U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
     logger.debug(f"\nU > {U_CUTOFF}\n")
@@ -300,6 +302,7 @@ def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, weights, node_idx_t
     logger.debug(df)
     logger.debug("\nF_hat")
     logger.debug(labeled_tree.U @ B)
+    return loss_info
 
 def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, weights,
                                 p=None, node_idx_to_label=None, G=None,
@@ -336,6 +339,8 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     num_sites = ref_matrix.shape[0]
     num_internal_nodes = T.shape[0]
 
+    # We're learning psi, which is the mixture matrix U (U = softmax(psi)), and tells us the existence
+    # and antomical locations of the extant clones (U > U_CUTOFF)
     psi = -1 * torch.rand(batch_size, num_sites, num_internal_nodes + 1) # an extra column for normal cells
     psi.requires_grad = True # we're learning psi
     # If we don't know the anatomical site of the primary tumor, we need to learn it
@@ -347,8 +352,9 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
         assert(p.shape[0] == ref_matrix.shape[0]) # num_anatomical_sites
         num_nodes_to_label = num_internal_nodes - 1 # we don't need to learn the root labeling
 
+    # We're learning X, which is the vertex labeling of the internal nodes
     X = -1 * torch.rand(batch_size, num_sites, num_nodes_to_label)
-    X.requires_grad = True # we're learning X (this is the vertex labeling V)
+    X.requires_grad = True
 
     # add a row of zeros to account for the non-cancerous root node
     B = torch.vstack([torch.zeros(B.shape[1]), B])
@@ -365,6 +371,7 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     min_loss_labeled_trees = None
     losses = []
     max_patience_epochs = 20
+    early_stopping_ctr = 0
 
     for i in range(max_iter):
         optimizer.zero_grad()
@@ -411,7 +418,7 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
             if i == 0:
                 #print("*"*20 + " BEST TREE " + "*"*20+"\n")
                 best_tree = labeled_tree
-                print_tree_info(labeled_tree, ref_matrix, var_matrix, B, weights, node_idx_to_label, ordered_sites)
+                best_tree_loss_info = print_tree_info(labeled_tree, ref_matrix, var_matrix, B, weights, node_idx_to_label, ordered_sites)
                 best_tree_edges, best_tree_vertex_name_to_site_map = vertex_labeling_util.plot_tree(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, node_idx_to_label, show=visualize)
                 best_mig_graph_edges = vertex_labeling_util.plot_migration_graph(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, primary, show=visualize)
 
@@ -423,4 +430,4 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
                 vertex_labeling_util.plot_migration_graph(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, primary)
                 print("-"*100 + "\n")
 
-    return best_tree_edges, best_tree_vertex_name_to_site_map, best_mig_graph_edges
+    return best_tree_edges, best_tree_vertex_name_to_site_map, best_mig_graph_edges, best_tree_loss_info
