@@ -244,7 +244,8 @@ def _get_adj_matrix_from_machina_tree(tree_edges, character_label_to_idx, remove
                 pruned_character_label_to_idx[char_label] = i
                 i += 1
         if len(unseen_nodes) > 0:
-            print("Removing unseen nodes:", unseen_nodes, pruned_character_label_to_idx)
+            #print("Removing unseen nodes:", unseen_nodes, pruned_character_label_to_idx)
+            pass
 
     return T, pruned_character_label_to_idx if remove_unseen_nodes else character_label_to_idx
 
