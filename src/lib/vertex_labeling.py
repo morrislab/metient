@@ -163,12 +163,11 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, weights, alpha=100.0, verbo
         g = torch.sum(R)
 
     # Regularization to make some values of U -> 0
-    # TODO: think about whether we should use l2 norm here
     reg = torch.sum(U)
 
     loss = weights.data_fit*nlglh + weights.mig*m + weights.seed_site*s + weights.comig*c + weights.reg*reg + weights.gen_dist*g
 
-    loss_info = {"mig": m.item(), "comig": c.item(), "seed": s.item(), "nll": round(nlglh.item(), 3), "reg": reg.item(), "gen": 0 if g == 0 else round(g.item(), 3), "loss": loss}
+    loss_info = {"mig": m.item(), "comig": c.item(), "seed": s.item(), "nll": round(nlglh.item(), 3), "reg": reg.item(), "gen": 0 if g == 0 else round(g.item(), 3), "loss": loss.item()}
     if verbose:
         print("Migration number:", m.item())
         print("Comigration number:", c.item())
@@ -292,8 +291,8 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, temp, hard, weights
 
     return torch.stack(losses_list), V_list, full_trees_list, full_branch_lengths_list
 
-def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, weights, node_idx_to_label, ordered_sites):
-    loss, loss_info = objective(labeled_tree.labeling, labeled_tree.tree, ref_matrix, var_matrix, labeled_tree.U, B, labeled_tree.branch_lengths, weights, verbose=True)
+def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, weights, node_idx_to_label, ordered_sites, verbose):
+    loss, loss_info = objective(labeled_tree.labeling, labeled_tree.tree, ref_matrix, var_matrix, labeled_tree.U, B, labeled_tree.branch_lengths, weights, verbose=verbose)
     U_clipped = labeled_tree.U.detach().numpy()
     U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
     logger.debug(f"\nU > {U_CUTOFF}\n")
@@ -308,7 +307,7 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
                                 p=None, node_idx_to_label=None, G=None,
                                 max_iter=100, lr = 0.1, init_temp=20, final_temp=0.1,
                                 batch_size=128, custom_colors=None, primary=None,
-                                visualize=True, show_top_trees=False):
+                                visualize=True, show_top_trees=False, verbose=True):
     '''
     Args:
         T: Adjacency matrix (directed) of the internal nodes (shape: num_internal_nodes x num_internal_nodes)
@@ -418,14 +417,14 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
             if i == 0:
                 #print("*"*20 + " BEST TREE " + "*"*20+"\n")
                 best_tree = labeled_tree
-                best_tree_loss_info = print_tree_info(labeled_tree, ref_matrix, var_matrix, B, weights, node_idx_to_label, ordered_sites)
+                best_tree_loss_info = print_tree_info(labeled_tree, ref_matrix, var_matrix, B, weights, node_idx_to_label, ordered_sites, verbose)
                 best_tree_edges, best_tree_vertex_name_to_site_map = vertex_labeling_util.plot_tree(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, node_idx_to_label, show=visualize)
                 best_mig_graph_edges = vertex_labeling_util.plot_migration_graph(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, primary, show=visualize)
 
                 #print("-"*100 + "\n")
 
             elif show_top_trees:
-                print_tree_info(labeled_tree, ref_matrix, var_matrix, B, weights, node_idx_to_label, ordered_sites)
+                print_tree_info(labeled_tree, ref_matrix, var_matrix, B, weights, node_idx_to_label, ordered_sites, verbose)
                 vertex_labeling_util.plot_tree(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, node_idx_to_label)
                 vertex_labeling_util.plot_migration_graph(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, primary)
                 print("-"*100 + "\n")
