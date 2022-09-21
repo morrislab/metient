@@ -95,6 +95,7 @@ def _calc_llh(F_hat, R, V, omega_v, epsilon=1e-5):
     #P = torch.minimum(P, 1 - epsilon)
 
     bin_dist = Binomial(N, P)
+    print(V)
     F_llh = bin_dist.log_prob(V)
     #print("F_llh", F_llh.shape, "\n", F_llh)
     # TODO: why divide by np.log(2)
