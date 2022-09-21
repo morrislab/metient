@@ -78,7 +78,7 @@ def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=
                     if j in custom_node_idx_to_label:
                         full_node_idx_to_label_map[j] = custom_node_idx_to_label[j]
                     elif j not in custom_node_idx_to_label:
-                        site_idx = np.where(V[:,j] == 1)[0][0]
+                        site_idx = (V[:,j] == 1).nonzero()[0][0].item()
                         full_node_idx_to_label_map[j] = f"{custom_node_idx_to_label[i]}_{ordered_sites[site_idx]}"
                 else:
                     full_node_idx_to_label_map[i] = chr(i+65)
@@ -94,7 +94,7 @@ def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=
         patch = mpatches.Patch(color=idx_to_color(i), label=site)
         patches.append(patch)
 
-    color_map = { full_node_idx_to_label_map[i]:idx_to_color(np.where(V[:,i] == 1)[0][0]) for i in range(V.shape[1])}
+    color_map = { full_node_idx_to_label_map[i]:idx_to_color((V[:,i] == 1).nonzero()[0][0].item()) for i in range(V.shape[1])}
     G = nx.DiGraph()
     edges = []
     for i, adj_row in enumerate(T):
@@ -116,7 +116,7 @@ def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=
     if show:
         display(src)
 
-    vertex_name_to_site_map = { full_node_idx_to_label_map[i]:ordered_sites[np.where(V[:,i] == 1)[0][0]] for i in range(V.shape[1])}
+    vertex_name_to_site_map = { full_node_idx_to_label_map[i]:ordered_sites[(V[:,i] == 1).nonzero()[0][0].item()] for i in range(V.shape[1])}
     return edges, vertex_name_to_site_map
 
 def write_tree(tree_edge_list, output_filename):
