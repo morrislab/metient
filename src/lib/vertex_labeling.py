@@ -2,7 +2,6 @@
 import torch
 import logging
 import sys
-from scipy import stats
 import numpy as np
 
 from src.util import vertex_labeling_util
