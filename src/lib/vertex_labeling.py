@@ -370,7 +370,6 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     min_loss = torch.tensor(float("Inf"))
     optimizer = torch.optim.Adam([psi, X], lr=lr)
     k = 5
-    min_loss_labeled_trees = None
     losses = []
     max_patience_epochs = 20
     early_stopping_ctr = 0
@@ -381,6 +380,7 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
         # subclones in a given site should sum to 1
         U = torch.softmax(psi, dim=2)
         losses_tensor, _, _, _ = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, temp, hard, weights)
+        # TODO: better way to calc loss across trees?
         loss = torch.mean(losses_tensor)
         loss.backward()
         losses.append(loss.item())
@@ -388,32 +388,26 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
         temp -= decay # drop temperature
 
         with torch.no_grad():
-            losses_tensor, V, full_trees, full_branch_lengths = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, temp, hard, weights)
             min_loss_iter = torch.min(losses_tensor)
-
             if min_loss_iter < min_loss:
                 min_loss = min_loss_iter
-                early_stopping_ctr = 1
-                _, min_loss_indices = torch.topk(losses_tensor, k, largest=False, sorted=True)
-                min_loss_labeled_trees = dict()
-                for i in min_loss_indices:
-                    labeled_tree = LabeledTree(full_trees[i], V[i], U[i], full_branch_lengths[i])
-                    # If it's already in the dict, we've added an identical labeling+tree combo with a lower loss (due to U)
-                    if labeled_tree not in min_loss_labeled_trees:
-                        min_loss_labeled_trees[labeled_tree] = losses_tensor[i]
-
+                early_stopping_ctr = 0
             else:
                 early_stopping_ctr += 1
                 if early_stopping_ctr == max_patience_epochs:
                     break
 
-
     if visualize:
         vertex_labeling_util.plot_losses(losses)
 
     with torch.no_grad():
-        min_loss_labeled_trees_and_losses = [(tree, min_loss_labeled_trees[tree]) for tree in min_loss_labeled_trees]
-        min_loss_labeled_trees_and_losses.sort(key=lambda tup: tup[1])
+        losses_tensor, V, full_trees, full_branch_lengths = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, temp, hard, weights)
+        _, min_loss_indices = torch.topk(losses_tensor, k, largest=False, sorted=True)
+
+        min_loss_labeled_trees_and_losses = []
+        for i in min_loss_indices:
+            labeled_tree = LabeledTree(full_trees[i], V[i], U[i], full_branch_lengths[i])
+            min_loss_labeled_trees_and_losses.append((labeled_tree, losses_tensor[i]))
 
         for i, tup in enumerate(min_loss_labeled_trees_and_losses):
             labeled_tree = tup[0]
