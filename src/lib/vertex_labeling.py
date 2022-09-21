@@ -19,7 +19,10 @@ U_CUTOFF = 0.05
 # TODO: better way to handle this?
 G_IDENTICAL_CLONE_VALUE = 1e-3
 
-# TODO put weights into an object
+
+print("CUDA GPU:",torch.cuda.is_available())
+if torch.cuda.is_available():
+    torch.set_default_dtype(dtype)
 
 class Weights:
     def __init__(self, data_fit=1.0, mig=1.0, comig=1.0, seed_site=1.0, reg=1.0, gen_dist=1.0):
