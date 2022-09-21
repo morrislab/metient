@@ -167,7 +167,7 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, weights, alpha=100.0, verbo
 
     loss = weights.data_fit*nlglh + weights.mig*m + weights.seed_site*s + weights.comig*c + weights.reg*reg + weights.gen_dist*g
 
-    loss_info = {"mig": m.item(), "comig": c.item(), "seed": s.item(), "nll": round(nlglh.item(), 3), "reg": reg.item(), "gen": 0 if g == 0 else round(g.item(), 3), "loss": loss.item()}
+    loss_info = {"mig": m.item(), "comig": c.item(), "seeding": s.item(), "nll": round(nlglh.item(), 3), "reg": reg.item(), "gen": 0 if g == 0 else round(g.item(), 3), "loss": loss.item()}
     if verbose:
         print("Migration number:", m.item())
         print("Comigration number:", c.item())
