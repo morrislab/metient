@@ -5,6 +5,11 @@ import torch
 import copy
 from collections import OrderedDict
 
+print("CUDA GPU:",torch.cuda.is_available())
+if torch.cuda.is_available():
+    torch.set_default_tensor_type(torch.cuda.FloatTensor)
+
+
 def is_resolved_polytomy_cluster(cluster_label):
     '''
     In MACHINA simulated data, cluster labels with non-numeric components (e.g. M2_1

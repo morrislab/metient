@@ -8,6 +8,9 @@ from src.lib import vertex_labeling
 import src.util.machina_data_extraction_util as mach_util
 import src.util.vertex_labeling_util as vert_util
 
+print("CUDA GPU:",torch.cuda.is_available())
+if torch.cuda.is_available():
+    torch.set_default_tensor_type(torch.cuda.FloatTensor)
 
 def predict_vertex_labelings(cluster_fn, all_mut_trees_fn, ref_var_fn, site_mig_data_dir):
     cluster_label_to_idx = mach_util.get_cluster_label_to_idx(cluster_fn, ignore_polytomies=True)

@@ -22,6 +22,10 @@ import string
 from functools import wraps
 import hashlib
 
+print("CUDA GPU:",torch.cuda.is_available())
+if torch.cuda.is_available():
+    torch.set_default_tensor_type(torch.cuda.FloatTensor)
+
 def view_pydot(pdot):
     plt = Image(pdot.create_png())
     display(plt)
