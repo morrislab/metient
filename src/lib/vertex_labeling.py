@@ -145,7 +145,7 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, weights, alpha=100.0, verbo
     # tells us if two nodes are (1) in the same site and (2) have parents in the same site
     # and (3) there's a path from node i to node j
     # TODO: this is computationally expensive, maybe we could cache path matrices we've calculated before?
-    P = vertex_labeling_util.get_path_matrix_tensor(A.numpy())
+    P = vertex_labeling_util.get_path_matrix_tensor(A.cpu().numpy())
     shared_path_and_par_and_self_color = torch.sum(torch.mul(P, shared_par_and_self_color), axis=1)
     repeated_temporal_migrations = torch.sum(torch.mul(shared_path_and_par_and_self_color, Y))
     binarized_site_adj = torch.sigmoid(alpha * (2 * site_adj - 1))
