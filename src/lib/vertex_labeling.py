@@ -295,7 +295,7 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, temp, hard, weights
 
 def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, weights, node_idx_to_label, ordered_sites, verbose):
     loss, loss_info = objective(labeled_tree.labeling, labeled_tree.tree, ref_matrix, var_matrix, labeled_tree.U, B, labeled_tree.branch_lengths, weights, verbose=verbose)
-    U_clipped = labeled_tree.U.detach().numpy()
+    U_clipped = labeled_tree.U.cpu().detach().numpy()
     U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
     logger.debug(f"\nU > {U_CUTOFF}\n")
     col_labels = ["norm"] + [_truncated_cluster_name(node_idx_to_label[k]) if k in node_idx_to_label else "0" for k in range(U_clipped.shape[1] - 1)]
