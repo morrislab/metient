@@ -217,7 +217,7 @@ def get_mutation_matrix_tensor(A):
     returns a mutation matrix B, which is a subclone x mutation binary matrix, where Bij = 1
     if subclone i has mutation j.
     '''
-    return torch.tensor(get_path_matrix(A.numpy().T, remove_self_loops=False), dtype = torch.float32)
+    return torch.tensor(get_path_matrix(A.cpu().numpy().T, remove_self_loops=False), dtype = torch.float32)
 
 def get_adj_matrix_from_edge_list(edge_list):
     T = []
