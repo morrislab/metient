@@ -100,8 +100,6 @@ if __name__=="__main__":
 
             seeds = fnmatch.filter(os.listdir(site_mig_data_dir), 'seed*_0.95.tsv')
             seeds = [s.replace("_0.95.tsv", "").replace("seed", "") for s in seeds]
-            # TODO remove
-            seeds = [76, 907]
 
             for seed in seeds:
                 predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir)
