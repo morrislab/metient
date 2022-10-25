@@ -18,7 +18,7 @@ do
         do
     	    s=$(basename $f .tsv | sed -e s/reads_seed//g)
     	    echo Solving seed $s, pattern $p, anatomical sites $m...
-    	    $1 -a 0.001 -b 0.05 ${2}/${m}/$p/reads_seed${s}.tsv > ${2}/${m}_clustered_input/cluster_${p}_seed${s}.tsv 2> ${m}_clustered_input/cluster_${p}_seed${s}.txt
+    	    $1 -a 0.001 -b 0.05 ${2}/${m}/$p/reads_seed${s}.tsv > ${2}/${m}_clustered_input/cluster_${p}_seed${s}.tsv 2> ${2}/${m}_clustered_input/cluster_${p}_seed${s}.txt
         done
     done
 done
