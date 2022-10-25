@@ -176,7 +176,7 @@ def write(reads_filename, cluster_filename, out_directory, output_fn=None, clust
         ctable_cutoff['lb-'+sample]= ctable.apply(get_lb, args=[sample, corrected_confidence, True], axis=1)
         ctable_cutoff[sample]= ctable.apply(get_mean, args=[sample, corrected_confidence], axis=1)
 
-    rows = ["5 #anatomical sites\n5 #samples\n9 #mutations\n#sample_index\tsample_label\tanatomical_site_index\tanatomical_site_label\tcharacter_index\tcharacter_label\tf_lb\tf_ub\tref\tvar\n",]
+    rows = [f"{len(sample_labels)} #anatomical sites\n{len(sample_labels)} #samples\n{len(cluster_index_to_variant_indices)} #mutations\n#sample_index\tsample_label\tanatomical_site_index\tanatomical_site_label\tcharacter_index\tcharacter_label\tf_lb\tf_ub\tref\tvar\n",]
     for i, sam in enumerate(sample_labels):
         rows += list(ctable_cutoff.apply(print_char, args=[i, sam, cluster_index_to_variant_indices, use_char_idx_as_char_label], axis=1))
 

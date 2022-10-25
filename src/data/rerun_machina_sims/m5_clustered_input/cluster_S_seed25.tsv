@@ -1,6 +1,6 @@
 5 #anatomical sites
 5 #samples
-9 #mutations
+12 #mutations
 #sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	f_lb	f_ub	ref	var
 0	P	0	P	0	57	0.0	0.04784633698471555	206	0
 0	P	0	P	1	2;9;34;35;41;45;54	0.0	0.007082151195891772	1409	0
