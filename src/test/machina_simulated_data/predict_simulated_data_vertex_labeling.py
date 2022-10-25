@@ -94,9 +94,9 @@ if __name__=="__main__":
             print(out_dir)
             site_mig_data_dir = os.path.join(machina_sims_data_dir, site, mig_type)
 
-            seeds = fnmatch.filter(os.listdir(site_mig_data_dir), 'seed*_0.95.tsv')
-            seeds = [s.replace("_0.95.tsv", "").replace("seed", "") for s in seeds]
-
+            seeds = fnmatch.filter(os.listdir(site_mig_data_dir), 'reads_seed*.tsv')
+            seeds = [s.replace(".tsv", "").replace("reads_seed", "") for s in seeds]
+            print(seeds)
             for seed in seeds:
                 predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir)
                 # Are we IO bound or CPU bound? maybe we should use a thread pool...?
