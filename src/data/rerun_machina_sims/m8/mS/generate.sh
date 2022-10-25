@@ -10,7 +10,7 @@ fi
 
 for s in {0,2,3,4,5,7,8,9,10,12}
 do
-    $1 -kP 2 -k 1 -D 2e-7 -m 4 -p 0 -s $s -C 200 -E 0.001 -P 1 -o . -c ../../../sims/coloring.txt
+    $1 -kP 2 -k 1 -D 2e-7 -m 4 -p 0 -s $s -C 200 -E 0.001 -P 1 -o . -c ../../coloring.txt
 done
 
 

@@ -10,7 +10,7 @@ fi
 
 for s in {17,247,518,538,571,950,955,981,1140,2155}
 do
-    $1 -kP 2 -k 1 -D 2e-7 -m 4 -p 0 -s $s -C 200 -E 0.001 -P 1 -o . -c ../../../sims/coloring.txt
+    $1 -kP 2 -k 1 -D 2e-7 -m 4 -p 0 -s $s -C 200 -E 0.001 -P 1 -o . -c ../../coloring.txt
 done
 
 
