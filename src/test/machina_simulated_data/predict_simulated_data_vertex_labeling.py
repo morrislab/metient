@@ -72,10 +72,6 @@ if __name__=="__main__":
     sites = ["m8", "m5"]
     mig_types = ["M", "mS", "R", "S"]
 
-    # TODO: remove
-    sites = ["m5"]
-    mig_types = ["M"]
-
     machina_sims_data_dir = args.f
     run_name = args.n
 
