@@ -6,18 +6,39 @@ import fnmatch
 import numpy as np
 import pprint
 
+
 # plotting
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-sns.set(style="whitegrid")
+#sns.set(style="whitegrid")
 sns.set(font_scale=1.5)
+
+sns.set_style("whitegrid")
+sns.set_style("ticks")
+sns.despine()
 from matplotlib import rcParams
 rcParams.update({'figure.autolayout': True})
 pc_map = {'mS':0, 'pS': 1, 'mM': 2, 'pM': 3, 'mR': 4, 'pR': 5}
 
 from statannot import add_stat_annotation
 
+# TODO: This is in util/machina_data_extraction_util.py but there's an error being thrown 
+# anytime I import that file here:
+# OMP: Error #15: Initializing libiomp5.dylib, but found libomp.dylib already initialized.
+# Abort trap: 6
+def is_resolved_polytomy_cluster(cluster_label):
+    '''
+    In MACHINA simulated data, cluster labels with non-numeric components (e.g. M2_1
+    instead of 1;3;4) represent polytomies
+    '''
+    is_polytomy = False
+    for mut in cluster_label.split(";"):
+        if not mut.isnumeric() and (mut.startswith('M') or mut.startswith('P')):
+            is_polytomy = True
+    return is_polytomy
+
+# Taken from MACHINA 
 def get_mutations(edge_list, u):
     # find parent
     s = re.split("_|;|^", u)
@@ -90,7 +111,11 @@ def evaluate_seeding_clones(sim_clone_tree_fn, sim_vert_labeling_fn, pred_clone_
     seeding_clones_simulated = identify_seeding_clones(edges_simulated, mig_edges_simulated)
     edges_inferred, mig_edges_inferred = parse_clone_tree(pred_clone_tree_fn, pred_vert_labeling_fn)
     seeding_clones_inferred = identify_seeding_clones(edges_inferred, mig_edges_inferred)
-    # print("edges_simulated", edges_simulated)
+    #print("edges_simulated", edges_simulated)
+    contains_resolved_polytomy = False
+    for edge in edges_simulated:
+        if is_resolved_polytomy_cluster(edge[0]) or is_resolved_polytomy_cluster(edge[1]):
+            contains_resolved_polytomy = True
     # print("mig_edges_simulated", mig_edges_simulated)
     # print("seeding_clones_simulated", seeding_clones_simulated)
     # print("edges_inferred", edges_inferred)
@@ -103,7 +128,7 @@ def evaluate_seeding_clones(sim_clone_tree_fn, sim_vert_labeling_fn, pred_clone_
     else:
         F = 2.0 / ((1.0 / recall) + (1.0 / precision))
 
-    return recall, precision, F
+    return recall, precision, F, contains_resolved_polytomy
 
 def evaluate_migration_graph(sim_mig_graph_fn, predicted_mig_graph_fn):
     edge_set_G_simulated = set(parse_migration_graph(sim_mig_graph_fn))
@@ -132,20 +157,25 @@ def evaluate_migration_multigraph(sim_mig_graph_fn, predicted_mig_graph_fn):
 
     return recall_G2, precision_G2, F_G2
 
-def save_boxplot(df, y, fig_name):
+def save_boxplot(df, y, num_sites, fig_name):
     seeding_pattern_order = ["mS", "pS", "pM", "pR"]
     box_pairs = []
 
     for seeding_pattern in seeding_pattern_order:
-        box_pairs.append(((seeding_pattern, "SGD"),(seeding_pattern, "MACHINA")))
-    ax = sns.boxplot(x="seeding pattern", y=y, hue="method", data=df, order=seeding_pattern_order, palette=sns.color_palette("Set2"))
+        box_pairs.append(((seeding_pattern, "Gradient-based"),(seeding_pattern, "MACHINA")))
+    flierprops = dict(marker='o', markersize=5, markeredgecolor='black', markerfacecolor='grey', alpha=0.5)
+    ax = sns.boxplot(x="seeding pattern", y=y, hue="method", data=df, order=seeding_pattern_order, 
+                     palette=sns.color_palette("pastel"), flierprops=flierprops, linewidth=2)
     add_stat_annotation(ax, data=df, x="seeding pattern", y=y, hue="method",
                         box_pairs=box_pairs,
-                        test='t-test_welch', text_format='star', loc='inside', verbose=0, order=seeding_pattern_order, fontsize='large', comparisons_correction=None)
-    for patch in ax.artists:
-        r, g, b, a = patch.get_facecolor()
-        patch.set_facecolor((r, g, b, .6))
-    ax.set(ylim=(0.0, 1.1))
+                        test='t-test_welch', text_format='star', loc='inside', verbose=0, order=seeding_pattern_order, fontsize=18, comparisons_correction=None)
+    ax.set(ylim=(-0.1, 1.1))
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.set_xlabel('Seeding Pattern', fontsize=16, fontweight='bold')
+    ax.set_ylabel(y.capitalize(), fontsize=16, fontweight='bold')
+    ax.set_title(f"{num_sites} Anatomical Sites" , fontsize=16, fontweight='bold', y=1.1)
+    plt.legend(frameon=False, loc="lower right")
     ax.get_figure().savefig("../output_plots/"+fig_name)
     plt.clf()
 
@@ -205,6 +235,13 @@ def extract_minimum_loss_trees(loss_output_txt_fn, sites, mig_types):
     return(output)
 
 
+def get_min_loss_trees_df(df, site, mig_type, seed):
+
+    df = df.astype({'site': 'string', 'mig_type': 'string'})
+    subset = df[(df['site'] == site) & (df['mig_type'] == mig_type) & (df['seed'] == seed)]
+    subset = subset[(subset['loss'] == subset.loss.min())]
+    return [l-1 for l in list(subset.tree_num)]
+
 
 if __name__ == "__main__":
 
@@ -229,35 +266,39 @@ if __name__ == "__main__":
     loss_output_txt_fn = sys.argv[3]
     run_name = sys.argv[4]
 
-    min_loss_trees = extract_minimum_loss_trees(loss_output_txt_fn, sites, mig_types)
     i = 0
+
+    sgd_prediction_results_df = pd.read_csv(loss_output_txt_fn)
+    print(sgd_prediction_results_df.head())
 
     for site in sites:
         for mig_type in mig_types:
             true_site_mig_type_data_dir = os.path.join(mach_sim_data_dir, site, mig_type)
             predicted_site_mig_type_data_dir = os.path.join(predictions_data_dir, site, mig_type)
             filenames = fnmatch.filter(os.listdir(predicted_site_mig_type_data_dir), 'T_tree*.predicted.tree')
-            seeds = set([s[s.find("seed")+4:s.find(".predicted")] for s in filenames])
+            seeds = set([int(s[s.find("seed")+4:s.find(".predicted")]) for s in filenames])
 
             for seed in seeds:
                 seed_filenames = [f for f in filenames if seed == f[f.find("seed")+4:f.find(".predicted")]]
                 #trees = [t[t.find("tree")+4:t.find("_seed")] for t in filenames if seed == t[t.find("seed")+4:t.find(".predicted")]]
-
-                trees = min_loss_trees[site][mig_type][seed]
-                for tree in trees:
+                tree_nums = get_min_loss_trees_df(sgd_prediction_results_df, site, mig_type, seed)
+                for tree_num in tree_nums:
 
                     #print(f"Evaluating history for seed {seed} {site} {mig_type} tree {tree}")
 
-                    recall, precision, F = evaluate_seeding_clones(os.path.join(true_site_mig_type_data_dir, f"T_seed{seed}.tree"),
+                    recall, precision, F, contains_resolved_polytomy = evaluate_seeding_clones(os.path.join(true_site_mig_type_data_dir, f"T_seed{seed}.tree"),
                                                                    os.path.join(true_site_mig_type_data_dir, f"T_seed{seed}.vertex.labeling"),
-                                                                   os.path.join(predicted_site_mig_type_data_dir, f"T_tree{tree}_seed{seed}.predicted.tree"),
-                                                                   os.path.join(predicted_site_mig_type_data_dir, f"T_tree{tree}_seed{seed}.predicted.vertex.labeling"))
+                                                                   os.path.join(predicted_site_mig_type_data_dir, f"T_tree{tree_num}_seed{seed}.predicted.tree"),
+                                                                   os.path.join(predicted_site_mig_type_data_dir, f"T_tree{tree_num}_seed{seed}.predicted.vertex.labeling"))
+
+                    # if contains_resolved_polytomy:
+                    #     continue
 
                     recall_G, precision_G, F_G = evaluate_migration_graph(os.path.join(true_site_mig_type_data_dir, f"G_seed{seed}.tree"),
-                                                                          os.path.join(predicted_site_mig_type_data_dir, f"G_tree{tree}_seed{seed}.predicted.tree"))
+                                                                          os.path.join(predicted_site_mig_type_data_dir, f"G_tree{tree_num}_seed{seed}.predicted.tree"))
 
                     recall_G2, precision_G2, F_G2 = evaluate_migration_multigraph(os.path.join(true_site_mig_type_data_dir, f"G_seed{seed}.tree"),
-                                                                                  os.path.join(predicted_site_mig_type_data_dir, f"G_tree{tree}_seed{seed}.predicted.tree"))
+                                                                                  os.path.join(predicted_site_mig_type_data_dir, f"G_tree{tree_num}_seed{seed}.predicted.tree"))
 
 
                     scores = [recall, precision, F, recall_G, precision_G, F_G, recall_G2, precision_G2, F_G2]
@@ -279,14 +320,14 @@ if __name__ == "__main__":
     grad_m5_df = pd.DataFrame(grad_m5_f1_scores, columns=["seed", "seeding pattern",  "migrating clones F1 score", "migration graph F1 score"])
     grad_m8_df = pd.DataFrame(grad_m8_f1_scores, columns=["seed", "seeding pattern",  "migrating clones F1 score", "migration graph F1 score"])
 
-    grad_m5_df = grad_m5_df.groupby(['seeding pattern','seed']).mean().assign(method="SGD")
-    grad_m8_df = grad_m8_df.groupby(['seeding pattern','seed']).mean().assign(method="SGD")
+    grad_m5_df = grad_m5_df.groupby(['seeding pattern','seed']).mean().assign(method="Gradient-based")
+    grad_m8_df = grad_m8_df.groupby(['seeding pattern','seed']).mean().assign(method="Gradient-based")
 
-    print("\nSGD m5 avg F1 scores")
+    print("\nGradient-based m5 avg F1 scores")
     print(grad_m5_df)
     print(grad_m5_df.groupby('seeding pattern').mean())
 
-    print("\nSGD m8 avg F1 scores")
+    print("\nGradient-based m8 avg F1 scores")
     print(grad_m8_df)
     print(grad_m8_df.groupby('seeding pattern').mean())
 
@@ -313,8 +354,8 @@ if __name__ == "__main__":
     joint_m8_df = pd.concat([grad_m8_df, machina_m8_df]).reset_index()
     print(joint_m5_df.reset_index())
 
-    save_boxplot(joint_m5_df, "migration graph F1 score", f"m5_migration_graph_f1_scores_{run_name}.png")
-    save_boxplot(joint_m8_df, "migration graph F1 score", f"m8_migration_graph_f1_scores_{run_name}.png")
+    save_boxplot(joint_m5_df, "migration graph F1 score", 5, f"m5_migration_graph_f1_scores_{run_name}.png")
+    save_boxplot(joint_m8_df, "migration graph F1 score", 8, f"m8_migration_graph_f1_scores_{run_name}.png")
 
-    save_boxplot(joint_m5_df, "migrating clones F1 score", f"m5_migrating_clones_f1_scores_{run_name}.png")
-    save_boxplot(joint_m8_df, "migrating clones F1 score", f"m8_migrating_clones_f1_scores_{run_name}.png")
+    save_boxplot(joint_m5_df, "migrating clones F1 score", 5,  f"m5_migrating_clones_f1_scores_{run_name}.png")
+    save_boxplot(joint_m8_df, "migrating clones F1 score", 8,  f"m8_migrating_clones_f1_scores_{run_name}.png")

@@ -165,6 +165,32 @@ def plot_losses(losses):
     plt.ylabel("loss")
     plt.show()
 
+def plot_temps(temps):
+    plt.plot([x for x in range(len(temps))],temps, label="temp")
+    plt.xlabel("epoch")
+    plt.ylabel("temp")
+    plt.show()
+
+def plot_loss_components(loss_dicts, weights):
+    mig_losses = [weights.mig*e["mig"] for e in loss_dicts]
+    comig_losses = [weights.comig*e["comig"] for e in loss_dicts]
+    seed_losses = [weights.seed_site*e["seeding"] for e in loss_dicts]
+    data_fit_losses = [weights.data_fit*e["nll"] for e in loss_dicts]
+    reg_losses = [weights.reg*e["reg"] for e in loss_dicts]
+    total_losses = [e["loss"] for e in loss_dicts]
+
+    plt.plot([x for x in range(len(loss_dicts))],mig_losses, label="m")
+    plt.plot([x for x in range(len(loss_dicts))],comig_losses, label="c")
+    plt.plot([x for x in range(len(loss_dicts))],seed_losses, label="s")
+    plt.plot([x for x in range(len(loss_dicts))],data_fit_losses, label="nll")
+    plt.plot([x for x in range(len(loss_dicts))],reg_losses, label="reg")
+    plt.plot([x for x in range(len(loss_dicts))],total_losses, label="total_loss")
+
+    plt.xlabel("epoch")
+    plt.ylabel("loss")
+    plt.legend(loc="upper right")
+    plt.show()
+
 def get_path_matrix(T, remove_self_loops=False):
     # Path matrix that tells us if path exists from node i to node j
     I = np.identity(T.shape[0])

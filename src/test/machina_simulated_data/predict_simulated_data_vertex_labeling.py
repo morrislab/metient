@@ -43,12 +43,12 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
         primary_idx = unique_sites.index('P')
         r = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(unique_sites)).T
         # TODO: add these as args
-        weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=1.0, gen_dist=0.5)
+        weights = vertex_labeling.Weights(data_fit=1.0, mig=10.0, comig=5.0, seed_site=1.0, reg=1.0, gen_dist=0.5)
         G = mach_util.get_genetic_distance_tensor_from_sim_adj_matrix(T, pruned_cluster_label_to_idx)
 
         best_T_edges, best_labeling, best_G_edges, best_loss_info = vertex_labeling.gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites=unique_sites,
                                                                                                 weights=weights, p=r, node_idx_to_label=idx_to_label, G=G,
-                                                                                                max_iter=150, batch_size=64,
+                                                                                                max_iter=150, batch_size=16, init_temp=30, final_temp=0.01,
                                                                                                 custom_colors=custom_colors, visualize=False, verbose=False)
 
         vert_util.write_tree(best_T_edges, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.tree"))
@@ -64,16 +64,16 @@ if __name__=="__main__":
 
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('f', type=str, help="Directory containing machina simulated data")
-    parser.add_argument('n', type=str, help="Name of this run")
+    parser.add_argument('sim_data_dir', type=str, help="Directory containing machina simulated data")
+    parser.add_argument('run_name', type=str, help="Name of this run")
     parser.add_argument('--cores', '-c', type=int, default=1, help="Number of cores to use (default 1)")
     args = parser.parse_args()
 
     sites = ["m8", "m5"]
     mig_types = ["M", "mS", "R", "S"]
 
-    machina_sims_data_dir = args.f
-    run_name = args.n
+    machina_sims_data_dir = args.sim_data_dir
+    run_name = args.run_name
 
     predictions_dir = f"predictions_{run_name}"
     os.mkdir(predictions_dir)
@@ -98,7 +98,7 @@ if __name__=="__main__":
             seeds = [s.replace(".tsv", "").replace("reads_seed", "") for s in seeds]
             print(seeds)
             for seed in seeds:
-                predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir)
+                #predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir)
                 # Are we IO bound or CPU bound? maybe we should use a thread pool...?
                 futures.append(executor.submit(predict_vertex_labelings, machina_sims_data_dir, site, mig_type, seed, out_dir))
     print(len(futures))
@@ -106,11 +106,9 @@ if __name__=="__main__":
     print(futures)
     end_time = datetime.datetime.now()
 
-    print(results)
-
     results_df = pd.DataFrame(list(results))
     print(results_df.head())
-    results_df.to_csv(os.path.join(predictions_dir, f"results_{args.n}.txt"), sep=',', index=False)
+    results_df.to_csv(os.path.join(predictions_dir, f"results_{run_name}.txt"), sep=',', index=False)
  
     print(f"Finished running {len(results)} simulations.")
     print(f"End time: {end_time}. Time elapsed: {end_time - start_time}")
