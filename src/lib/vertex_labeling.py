@@ -14,10 +14,12 @@ logger = logging.getLogger('SGD')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s\n\r%(message)s', datefmt='%H:%M:%S')
 logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
+# TODO: how do we validate this
 U_CUTOFF = 0.05
 # TODO: better way to handle this?
-G_IDENTICAL_CLONE_VALUE = 1e-3
+G_IDENTICAL_CLONE_VALUE = -10.0
 
+from pprint import pprint
 
 print("CUDA GPU:",torch.cuda.is_available())
 if torch.cuda.is_available():
@@ -161,15 +163,15 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, weights, alpha=100.0, verbo
     if G != None:
     # Weigh by genetic distance
     # calculate if 2 nodes are in diff sites and there's an edge between them (i.e there is a migration edge)
-        R = torch.mul(-1.0*G, (1-X))
+        R = torch.mul(A, (1-X))
+        R = -1.0*torch.mul(R, G)
         g = torch.sum(R)
 
     # Regularization to make some values of U -> 0
     reg = torch.sum(U)
 
     loss = weights.data_fit*nlglh + weights.mig*m + weights.seed_site*s + weights.comig*c + weights.reg*reg + weights.gen_dist*g
-
-    loss_info = {"mig": m.item(), "comig": c.item(), "seeding": s.item(), "nll": round(nlglh.item(), 3), "reg": reg.item(), "gen": 0 if g == 0 else round(g.item(), 3), "loss": loss.item()}
+    loss_components = {"mig": m.item(), "comig": c.item(), "seeding": s.item(), "nll": round(nlglh.item(), 3), "reg": reg.item(), "gen": 0 if g == 0 else round(g.item(), 3), "loss": loss.item()}
     if verbose:
         print("Migration number:", m.item())
         print("Comigration number:", c.item())
@@ -177,10 +179,14 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, weights, alpha=100.0, verbo
         print("Neg log likelihood:", round(nlglh.item(), 3))
         print("Reg:", reg.item())
         if g != 0:
+            # print("G\n", torch.round(G, decimals=2))
+            # print("1-X\n", 1-X)
+            # print(torch.mul(A, 1-X))
+            # print("R\n", torch.round(R, decimals=2))
             print("Genetic distance:", round(g.item(), 3))
         print("Loss:", round(loss.item(), 3))
 
-    return loss, loss_info
+    return loss, loss_components
 
 def sample_gumbel(shape, eps=1e-20):
     G = torch.rand(shape)
@@ -219,7 +225,7 @@ def gumbel_softmax(logits, temperature, hard=False):
         y = y_hard - y_soft.detach() + y_soft
     else:
         y = y_soft
-    return y
+    return y, y_soft
 
 
 def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, temp, hard, weights):
@@ -279,22 +285,27 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, temp, hard, weights
     V_list = []
     full_trees_list = []
     full_branch_lengths_list = []
-    softmax_X = gumbel_softmax(X, temp, hard)
+    loss_components_list = []
+    softmax_X, softmax_X_soft = gumbel_softmax(X, temp, hard)
+    # print("softmax_X:\n", softmax_X[0].T)
+    # print("softmax_X_soft:\n", softmax_X_soft[0].T)
+
     # TODO: performance wise it is probably faster not to iterate like this but to
     # do the matrix operations together - although not sure if we can due to dimensionality issues?
     for idx in range(batch_size):
         V = vertex_labeling(idx, U, softmax_X, p)
         full_T, full_G = full_adj_matrix(idx, T, U, G)
-        loss, _ = objective(V, full_T, ref_matrix, var_matrix, U[idx,:,:], B, full_G, weights)
+        loss, loss_components = objective(V, full_T, ref_matrix, var_matrix, U[idx,:,:], B, full_G, weights)
         losses_list.append(loss)
+        loss_components_list.append(loss_components)
         V_list.append(V)
         full_trees_list.append(full_T)
         full_branch_lengths_list.append(full_G)
 
-    return torch.stack(losses_list), V_list, full_trees_list, full_branch_lengths_list
+    return torch.stack(losses_list), V_list, full_trees_list, full_branch_lengths_list, softmax_X_soft, loss_components_list
 
 def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, weights, node_idx_to_label, ordered_sites, verbose):
-    loss, loss_info = objective(labeled_tree.labeling, labeled_tree.tree, ref_matrix, var_matrix, labeled_tree.U, B, labeled_tree.branch_lengths, weights, verbose=verbose)
+    loss, loss_components = objective(labeled_tree.labeling, labeled_tree.tree, ref_matrix, var_matrix, labeled_tree.U, B, labeled_tree.branch_lengths, weights, verbose=verbose)
     U_clipped = labeled_tree.U.cpu().detach().numpy()
     U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
     logger.debug(f"\nU > {U_CUTOFF}\n")
@@ -303,13 +314,14 @@ def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, weights, node_idx_t
     logger.debug(df)
     logger.debug("\nF_hat")
     logger.debug(labeled_tree.U @ B)
-    return loss_info
+    return loss_components
 
 def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, weights,
                                 p=None, node_idx_to_label=None, G=None,
                                 max_iter=100, lr = 0.1, init_temp=20, final_temp=0.1,
                                 batch_size=128, custom_colors=None, primary=None,
-                                visualize=True, show_top_trees=False, verbose=True):
+                                visualize=True, show_top_trees=False, verbose=True,
+                                visualize_intermediates=False):
     '''
     Args:
         T: Adjacency matrix (directed) of the internal nodes (shape: num_internal_nodes x num_internal_nodes)
@@ -337,6 +349,11 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     assert(ref_matrix.shape[0] == var_matrix.shape[0] == len(ordered_sites))
     assert(ref_matrix.shape == var_matrix.shape)
 
+    # TODO: print this in predict_simulated_...
+    # print("weights:")
+    # pprint(vars(weights))
+    # print("max_iter:", max_iter, "lr:", lr, "init_temp:", init_temp, "final_temp:", final_temp, "batch_size:", batch_size)
+    
     num_sites = ref_matrix.shape[0]
     num_internal_nodes = T.shape[0]
 
@@ -372,35 +389,61 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     losses = []
     max_patience_epochs = 20
     early_stopping_ctr = 0
+    eps = 1e-2
+    anneal_rate = 0.003
+    last_loss = None
 
+    intermediate_data = []
+    # Optimize
+    temps = []
+
+    all_loss_components = []
     for i in range(max_iter):
         optimizer.zero_grad()
         # Using the softmax enforces that the row sums are 1, since the proprtions of
         # subclones in a given site should sum to 1
         U = torch.softmax(psi, dim=2)
-        losses_tensor, _, _, _ = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, temp, hard, weights)
+        losses_tensor, V, full_trees, full_branch_lengths, softmax_Xs, loss_components = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, temp, hard, weights)
         # TODO: better way to calc loss across trees?
         loss = torch.mean(losses_tensor)
         loss.backward()
         losses.append(loss.item())
+
+        d = {}
+        for key in loss_components[0]:
+            if key not in d:
+                d[key] = 0
+            for e in loss_components:
+                d[key] += e[key]
+        d = {key:d[key]/len(loss_components) for key in d} # calc averages across batch
+        all_loss_components.append(d)
+
         optimizer.step()
-        temp -= decay # drop temperature
+        # temp -= decay # drop temperature
+        
+        if i % 10 == 0:
+            temp = np.maximum(temp * np.exp(-anneal_rate * i), final_temp)
+        temps.append(temp)
 
         with torch.no_grad():
-            min_loss_iter = torch.min(losses_tensor)
-            if min_loss_iter < min_loss:
-                min_loss = min_loss_iter
-                early_stopping_ctr = 0
-            else:
-                early_stopping_ctr += 1
-                if early_stopping_ctr == max_patience_epochs:
-                    break
+            if i == 0:
+                last_loss = loss
+                continue
+            if abs(loss - last_loss) < eps:
+                break
+            last_loss = loss
 
+            if i % 20 == 0:
+                intermediate_data.append([losses_tensor, full_trees, V, U, full_branch_lengths, softmax_Xs])
+               
     if visualize:
         vertex_labeling_util.plot_losses(losses)
+        vertex_labeling_util.plot_loss_components(all_loss_components, weights)
+        vertex_labeling_util.plot_temps(temps)
+
 
     with torch.no_grad():
-        losses_tensor, V, full_trees, full_branch_lengths = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, temp, hard, weights)
+        losses_tensor, V, full_trees, full_branch_lengths, _, _ = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, temp, hard, weights)
         _, min_loss_indices = torch.topk(losses_tensor, k, largest=False, sorted=True)
 
         min_loss_labeled_trees_and_losses = []
@@ -411,7 +454,21 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
         for i, tup in enumerate(min_loss_labeled_trees_and_losses):
             labeled_tree = tup[0]
             if i == 0:
-                #print("*"*20 + " BEST TREE " + "*"*20+"\n")
+                
+                if visualize_intermediates:
+                    best_tree_idx = min_loss_indices[0]
+                    for itr, data in enumerate(intermediate_data):
+                        losses_tensor, full_trees, V, U, full_branch_lengths, soft_X = intermediate_data[itr][0], intermediate_data[itr][1], intermediate_data[itr][2], intermediate_data[itr][3], intermediate_data[itr][4], intermediate_data[itr][5]
+                        print("="*30 + " INTERMEDIATE TREE " + "="*30+"\n")
+                        print(f"Iteration: {itr*20}, Intermediate best tree idx {best_tree_idx}")
+                        print("soft_X", soft_X[0].T.shape, "\n", soft_X[best_tree_idx].T)
+                        labeled_tree = LabeledTree(full_trees[best_tree_idx], V[best_tree_idx], U[best_tree_idx], full_branch_lengths[best_tree_idx])
+                        print_tree_info(labeled_tree, ref_matrix, var_matrix, B, weights, node_idx_to_label, ordered_sites, verbose)
+                        vertex_labeling_util.plot_tree(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, node_idx_to_label)
+                        vertex_labeling_util.plot_migration_graph(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, primary)
+
+
+                if visualize: print("*"*30 + " BEST TREE " + "*"*30+"\n")
                 best_tree = labeled_tree
                 best_tree_loss_info = print_tree_info(labeled_tree, ref_matrix, var_matrix, B, weights, node_idx_to_label, ordered_sites, verbose)
                 best_tree_edges, best_tree_vertex_name_to_site_map = vertex_labeling_util.plot_tree(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, node_idx_to_label, show=visualize)
