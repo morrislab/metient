@@ -46,7 +46,7 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
         weights = vertex_labeling.Weights(data_fit=1.0, mig=10.0, comig=5.0, seed_site=1.0, reg=1.0, gen_dist=0.5)
         G = mach_util.get_genetic_distance_tensor_from_sim_adj_matrix(T, pruned_cluster_label_to_idx)
 
-        best_T_edges, best_labeling, best_G_edges, best_loss_info = vertex_labeling.gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites=unique_sites,
+        best_T_edges, best_labeling, best_G_edges, best_loss_info, time = vertex_labeling.gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites=unique_sites,
                                                                                                 weights=weights, p=r, node_idx_to_label=idx_to_label, G=G,
                                                                                                 max_iter=150, batch_size=16, init_temp=30, final_temp=0.01,
                                                                                                 custom_colors=custom_colors, visualize=False, verbose=False)
@@ -55,7 +55,7 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
         vert_util.write_tree_vertex_labeling(best_labeling, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.vertex.labeling"))
         vert_util.write_migration_graph(best_G_edges, os.path.join(out_dir, f"G_tree{tree_num}_seed{seed}.predicted.tree"))
         tree_num += 1
-        tree_info = {**{"site": site, "mig_type": mig_type, "seed":seed, "tree_num": tree_num}, **best_loss_info}
+        tree_info = {**{"site": site, "mig_type": mig_type, "seed":seed, "tree_num": tree_num, "time": time}, **best_loss_info}
         global results
         results.append(tree_info)
         print("results length", len(results))
@@ -103,7 +103,6 @@ if __name__=="__main__":
                 futures.append(executor.submit(predict_vertex_labelings, machina_sims_data_dir, site, mig_type, seed, out_dir))
     print(len(futures))
     concurrent.futures.wait(futures)
-    print(futures)
     end_time = datetime.datetime.now()
 
     results_df = pd.DataFrame(list(results))
