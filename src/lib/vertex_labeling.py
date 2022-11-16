@@ -3,6 +3,7 @@ import torch
 import logging
 import sys
 import numpy as np
+import datetime
 
 from src.util import vertex_labeling_util
 from torch.distributions.binomial import Binomial
@@ -397,6 +398,8 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     # Optimize
     temps = []
 
+    start_time = datetime.datetime.now()
+
     all_loss_components = []
     for i in range(max_iter):
         optimizer.zero_grad()
@@ -481,5 +484,8 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
                 vertex_labeling_util.plot_tree(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, node_idx_to_label)
                 vertex_labeling_util.plot_migration_graph(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, primary)
                 print("-"*100 + "\n")
+    time_elapsed = datetime.datetime.now() - start_time
+    if verbose:
+        print(f"Time elapsed: {time_elapsed}")
 
-    return best_tree_edges, best_tree_vertex_name_to_site_map, best_mig_graph_edges, best_tree_loss_info
+    return best_tree_edges, best_tree_vertex_name_to_site_map, best_mig_graph_edges, best_tree_loss_info, time_elapsed
