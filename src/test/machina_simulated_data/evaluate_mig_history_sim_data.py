@@ -268,8 +268,8 @@ if __name__ == "__main__":
 
     i = 0
 
-    sgd_prediction_results_df = pd.read_csv(loss_output_txt_fn)
-    print(sgd_prediction_results_df.head())
+    sgd_results_df = pd.read_csv(loss_output_txt_fn)
+    print(sgd_results_df.head())
 
     for site in sites:
         for mig_type in mig_types:
@@ -281,7 +281,7 @@ if __name__ == "__main__":
             for seed in seeds:
                 seed_filenames = [f for f in filenames if seed == f[f.find("seed")+4:f.find(".predicted")]]
                 #trees = [t[t.find("tree")+4:t.find("_seed")] for t in filenames if seed == t[t.find("seed")+4:t.find(".predicted")]]
-                tree_nums = get_min_loss_trees_df(sgd_prediction_results_df, site, mig_type, seed)
+                tree_nums = get_min_loss_trees_df(sgd_results_df, site, mig_type, seed)
                 for tree_num in tree_nums:
 
                     #print(f"Evaluating history for seed {seed} {site} {mig_type} tree {tree}")
@@ -324,11 +324,9 @@ if __name__ == "__main__":
     grad_m8_df = grad_m8_df.groupby(['seeding pattern','seed']).mean().assign(method="Gradient-based")
 
     print("\nGradient-based m5 avg F1 scores")
-    print(grad_m5_df)
     print(grad_m5_df.groupby('seeding pattern').mean())
 
     print("\nGradient-based m8 avg F1 scores")
-    print(grad_m8_df)
     print(grad_m8_df.groupby('seeding pattern').mean())
 
     # Load machina results
@@ -343,11 +341,9 @@ if __name__ == "__main__":
     machina_m8_df = machina_m8_df.groupby(['seeding pattern','seed']).mean().assign(method="MACHINA")
 
     print("MACHINA m5 avg F1 scores")
-    print(machina_m5_df)
     print(machina_m5_df.groupby('seeding pattern').mean())
 
     print("MACHINA m8 avg F1 scores")
-    print(machina_m8_df)
     print(machina_m8_df.groupby('seeding pattern').mean())
 
     joint_m5_df = pd.concat([grad_m5_df, machina_m5_df]).reset_index()
@@ -359,3 +355,26 @@ if __name__ == "__main__":
 
     save_boxplot(joint_m5_df, "migrating clones F1 score", 5,  f"m5_migrating_clones_f1_scores_{run_name}.png")
     save_boxplot(joint_m8_df, "migrating clones F1 score", 8,  f"m8_migrating_clones_f1_scores_{run_name}.png")
+
+    # Timing benchmarks
+    # TODO: put this in a different script
+    print(sgd_results_df['time'])
+    print(sgd_results_df.dtypes)
+    #sgd_results_df['time'] = pd.to_datetime(sgd_results_df['time'])
+    print(len(sgd_results_df[(sgd_results_df['site']=='m8') & (sgd_results_df['seed']==0) & (sgd_results_df['mig_type']=='S')]))
+    print(sgd_results_df.groupby(['site']).mean())
+    print("m8 trees", len(sgd_results_df[(sgd_results_df['site']=='m8') & ((sgd_results_df['mig_type']=='mS') | (sgd_results_df['mig_type']=='S'))]))
+    print("m5 trees", len(sgd_results_df[(sgd_results_df['site']=='m5')]))
+    print("m8 trees", len(sgd_results_df[(sgd_results_df['site']=='m8')]))
+
+    m5_total = 0.0
+    m8_total = 0.0
+    with open("pmh_ti_timing_8cores_11152022.txt", "r") as f:
+        for line in f:
+            if "Runtime" in line:
+                secs = float(line[line.find(":")+2:])
+                if "m5" in line:
+                    m5_total += secs
+                elif "m8" in line:
+                    m8_total += secs
+    print(m5_total/586, m8_total/581)
