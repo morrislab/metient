@@ -48,7 +48,7 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
 
         best_T_edges, best_labeling, best_G_edges, best_loss_info, time = vertex_labeling.gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites=unique_sites,
                                                                                                 weights=weights, p=r, node_idx_to_label=idx_to_label, G=G,
-                                                                                                max_iter=150, batch_size=16, init_temp=30, final_temp=0.01,
+                                                                                                max_iter=150, batch_size=32, init_temp=30, final_temp=0.01,
                                                                                                 custom_colors=custom_colors, visualize=False, verbose=False)
 
         vert_util.write_tree(best_T_edges, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.tree"))
