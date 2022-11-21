@@ -319,7 +319,7 @@ def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, weights, node_idx_t
 
 def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, weights,
                                 p=None, node_idx_to_label=None, G=None,
-                                max_iter=100, lr = 0.1, init_temp=20, final_temp=0.1,
+                                max_iter=200, lr = 0.1, init_temp=20, final_temp=0.1,
                                 batch_size=128, custom_colors=None, primary=None,
                                 visualize=True, show_top_trees=False, verbose=True,
                                 visualize_intermediates=False):
@@ -429,12 +429,12 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
         temps.append(temp)
 
         with torch.no_grad():
-            if i == 0:
-                last_loss = loss
-                continue
-            if abs(loss - last_loss) < eps:
-                break
-            last_loss = loss
+            # if i == 0:
+            #     last_loss = loss
+            #     continue
+            # if abs(loss - last_loss) < eps:
+            #     break
+            # last_loss = loss
 
             if i % 20 == 0:
                 intermediate_data.append([losses_tensor, full_trees, V, U, full_branch_lengths, softmax_Xs])
@@ -484,7 +484,7 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
                 vertex_labeling_util.plot_tree(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, node_idx_to_label)
                 vertex_labeling_util.plot_migration_graph(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, primary)
                 print("-"*100 + "\n")
-    time_elapsed = datetime.datetime.now() - start_time
+    time_elapsed = (datetime.datetime.now() - start_time).total_seconds()
     if verbose:
         print(f"Time elapsed: {time_elapsed}")
 
