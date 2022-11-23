@@ -366,15 +366,15 @@ if __name__ == "__main__":
     print("m8 trees", len(sgd_results_df[(sgd_results_df['site']=='m8') & ((sgd_results_df['mig_type']=='mS') | (sgd_results_df['mig_type']=='S'))]))
     print("m5 trees", len(sgd_results_df[(sgd_results_df['site']=='m5')]))
     print("m8 trees", len(sgd_results_df[(sgd_results_df['site']=='m8')]))
-
-    m5_total = 0.0
-    m8_total = 0.0
-    with open("pmh_ti_timing_8cores_11152022.txt", "r") as f:
-        for line in f:
-            if "Runtime" in line:
-                secs = float(line[line.find(":")+2:])
-                if "m5" in line:
-                    m5_total += secs
-                elif "m8" in line:
-                    m8_total += secs
-    print(m5_total/586, m8_total/581)
+    print(sgd_results_df["time"])
+    # m5_total = 0.0
+    # m8_total = 0.0
+    # with open("pmh_ti_timing_8cores_11152022.txt", "r") as f:
+    #     for line in f:
+    #         if "Runtime" in line:
+    #             secs = float(line[line.find(":")+2:])
+    #             if "m5" in line:
+    #                 m5_total += secs
+    #             elif "m8" in line:
+    #                 m8_total += secs
+    # print(m5_total/586, m8_total/581)
