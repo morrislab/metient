@@ -69,6 +69,7 @@ if __name__=="__main__":
 
     sites = ["m8"]
     mig_types = ["M"]
+    seeds = ['76', '7']
 
     machina_sims_data_dir = args.sim_data_dir
     run_name = args.run_name
@@ -80,22 +81,18 @@ if __name__=="__main__":
     print(f"Start time: {start_time}")
     print(f"Using {args.cores} cores.")
  
-    for site in sites:
-        os.mkdir(os.path.join(predictions_dir, site))
+    os.mkdir(os.path.join(predictions_dir, site))
 
-        for mig_type in mig_types:
-            out_dir = os.path.join(predictions_dir, site, mig_type)
-            os.mkdir(out_dir)
-            site_mig_data_dir = os.path.join(machina_sims_data_dir, site, mig_type)
+    out_dir = os.path.join(predictions_dir, site, mig_type)
+    os.mkdir(out_dir)
+    site_mig_data_dir = os.path.join(machina_sims_data_dir, site, mig_type)
 
-            seeds = fnmatch.filter(os.listdir(site_mig_data_dir), 'reads_seed*.tsv')
-            seeds = [s.replace(".tsv", "").replace("reads_seed", "") for s in seeds]
-            print(seeds)
-            # TODO: remove
-            for seed in seeds[:2]:
-                #predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir)
-                # Are we IO bound or CPU bound? maybe we should use a thread pool...?
-                cProfile.run("predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir)", sort="tottime")
+    print(seeds)
+    # TODO: remove
+    for seed in seeds[:2]:
+        #predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir)
+        # Are we IO bound or CPU bound? maybe we should use a thread pool...?
+        cProfile.run("predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir)", sort="tottime")
     end_time = datetime.datetime.now()
 
     results_df = pd.DataFrame(list(results))
