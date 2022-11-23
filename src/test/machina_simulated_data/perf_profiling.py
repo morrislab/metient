@@ -67,8 +67,8 @@ if __name__=="__main__":
     parser.add_argument('--cores', '-c', type=int, default=1, help="Number of cores to use (default 1)")
     args = parser.parse_args()
 
-    sites = ["m8"]
-    mig_types = ["M"]
+    site = "m8"
+    mig_type = "M"
     seeds = ['76', '7']
 
     machina_sims_data_dir = args.sim_data_dir
