@@ -1,3 +1,6 @@
 *.pyc
 src/test/machina_simulated_data/predictions_*
 src/test/machina_simulated_data/predict_*.txt
+src/test/machina_simulated_data/output_*.txt
+src/data/rerun_machina_sims/
+src/test/output_plots/
