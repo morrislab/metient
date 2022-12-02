@@ -1,0 +1,3 @@
+*.pyc
+src/test/machina_simulated_data/predictions_*
+src/test/machina_simulated_data/predict_*.txt

@@ -34,11 +34,12 @@ def predict_vertex_labelings(cluster_fn, all_mut_trees_fn, ref_var_fn, site_mig_
         r = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(unique_sites)).T
         weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=0.5)
 
-        best_T_edges, best_labeling, best_G_edges, best_loss_info = vertex_labeling.gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites=unique_sites,
+        best_T_edges, best_labeling, best_G_edges, best_loss_info,time = vertex_labeling.gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites=unique_sites,
                                                                                                 weights=weights, p=r, node_idx_to_label=idx_to_label,
                                                                                                 max_iter=100, batch_size=32,
                                                                                                 custom_colors=custom_colors, visualize=False)
 
+        print(f"Time elapsed {time}")
         tree_num += 1
 
 if __name__=="__main__":
