@@ -8,6 +8,8 @@ import datetime
 import concurrent.futures
 import multiprocessing
 import pandas as pd
+from pprint import pprint
+pprint(vars(your_object))
 
 from src.lib import vertex_labeling
 import src.util.machina_data_extraction_util as mach_util
@@ -58,6 +60,8 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
         tree_info = {**{"site": site, "mig_type": mig_type, "seed":seed, "tree_num": tree_num, "time": time}, **best_loss_info}
         global results
         results.append(tree_info)
+        if len(results) == 0:
+            print(weights)
         print("results length", len(results))
 
 if __name__=="__main__":
@@ -69,7 +73,8 @@ if __name__=="__main__":
     parser.add_argument('--cores', '-c', type=int, default=1, help="Number of cores to use (default 1)")
     args = parser.parse_args()
 
-    sites = ["m8", "m5"]
+    # TODO: change back
+    sites = ["m8_downsampled", "m5_downsampled", "m8_mut_rates"]
     mig_types = ["M", "mS", "R", "S"]
 
     machina_sims_data_dir = args.sim_data_dir
