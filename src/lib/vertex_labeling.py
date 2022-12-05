@@ -12,7 +12,7 @@ import pandas as pd
 pd.options.display.float_format = '{:,.3f}'.format
 
 logger = logging.getLogger('SGD')
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s\n\r%(message)s', datefmt='%H:%M:%S')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s\n\r%(message)s', datefmt='%H:%M:%S')
 logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
 # TODO: how do we validate this
