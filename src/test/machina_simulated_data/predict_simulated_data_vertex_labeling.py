@@ -9,7 +9,6 @@ import concurrent.futures
 import multiprocessing
 import pandas as pd
 from pprint import pprint
-pprint(vars(your_object))
 
 from src.lib import vertex_labeling
 import src.util.machina_data_extraction_util as mach_util
@@ -61,7 +60,7 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
         global results
         results.append(tree_info)
         if len(results) == 0:
-            print(weights)
+            pprint(vars(weights))
         print("results length", len(results))
 
 if __name__=="__main__":
