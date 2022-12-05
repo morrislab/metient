@@ -47,7 +47,7 @@ def plot_migration_graph(V, full_tree, ordered_sites, custom_colors, primary, sh
 
     G = nx.MultiDiGraph()
     for node, color in zip(ordered_sites, colors):
-        G.add_node(node, shape="box", color=color, fillcolor='white', fontname="Helvetica", penwidth=3.0)
+        G.add_node(node, shape="box", color=color, fillcolor='white', fontname="Corbel", penwidth=3.0)
 
     edges = []
     for i, adj_row in enumerate(migration_graph_no_diag):

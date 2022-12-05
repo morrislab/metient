@@ -12,7 +12,7 @@ import pandas as pd
 pd.options.display.float_format = '{:,.3f}'.format
 
 logger = logging.getLogger('SGD')
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s\n\r%(message)s', datefmt='%H:%M:%S')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s\n\r%(message)s', datefmt='%H:%M:%S')
 logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
 
 # TODO: how do we validate this
@@ -372,7 +372,8 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
         num_nodes_to_label = num_internal_nodes - 1 # we don't need to learn the root labeling
 
     # We're learning X, which is the vertex labeling of the internal nodes
-    X = -1 * torch.rand(batch_size, num_sites, num_nodes_to_label)
+    X = torch.rand(batch_size, num_sites, num_nodes_to_label)
+    X[:,0,:] = 1 #TODO: should we do this? or should we do LR scheduling
     X.requires_grad = True
 
     # add a row of zeros to account for the non-cancerous root node
