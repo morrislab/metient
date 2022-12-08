@@ -17,19 +17,10 @@ import src.util.vertex_labeling_util as vert_util
 results = []
 
 ### HYPERPARAMETERS ###
-# TODO: add these as args
-WEIGHTS = vertex_labeling.Weights(data_fit=1.0, mig=10.0, comig=5.0, seed_site=1.0, reg=1.0, gen_dist=0.5)
-print("Weights:")
-pprint(vars(WEIGHTS))
-BATCH_SIZE = 32
 INIT_TEMP = 30
 FINAL_TEMP = 0.01
-print(f"Batch size: {BATCH_SIZE}, init temp: {INIT_TEMP}, final temp: {FINAL_TEMP}")
 
-def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir):
-    #print("="*150)
-    #print(f"Predicting vertex labeling for {site} {mig_type} seed {seed}.")
-
+def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir, weights, batch_size, weight_init_primary):
     cluster_fn = os.path.join(machina_sims_data_dir, f"{site}_clustered_input", f"cluster_{mig_type}_seed{seed}.txt")
     all_mut_trees_fn = os.path.join(machina_sims_data_dir, f"{site}_mut_trees", f"mut_trees_{mig_type}_seed{seed}.txt")
     ref_var_fn = os.path.join(machina_sims_data_dir, f"{site}_clustered_input", f"cluster_{mig_type}_seed{seed}.tsv")
@@ -57,9 +48,10 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
         G = mach_util.get_genetic_distance_tensor_from_sim_adj_matrix(T, pruned_cluster_label_to_idx)
 
         best_T_edges, best_labeling, best_G_edges, best_loss_info, time = vertex_labeling.gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites=unique_sites,
-                                                                                                weights=WEIGHTS, p=r, node_idx_to_label=idx_to_label, G=G,
-                                                                                                max_iter=150, batch_size=BATCH_SIZE, init_temp=INIT_TEMP, final_temp=FINAL_TEMP,
-                                                                                                custom_colors=custom_colors, visualize=False, verbose=False)
+                                                                                                weights=weights, p=r, node_idx_to_label=idx_to_label, G=G,
+                                                                                                max_iter=150, batch_size=batch_size, init_temp=INIT_TEMP, final_temp=FINAL_TEMP,
+                                                                                                custom_colors=custom_colors, visualize=False, verbose=False, 
+                                                                                                weight_init_primary=weight_init_primary)
 
         vert_util.write_tree(best_T_edges, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.tree"))
         vert_util.write_tree_vertex_labeling(best_labeling, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.vertex.labeling"))
@@ -69,7 +61,7 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
         global results
         results.append(tree_info)
             
-        print("results length", len(results))
+        print("Number of seeds run:", len(results))
 
 if __name__=="__main__":
 
@@ -77,11 +69,28 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('sim_data_dir', type=str, help="Directory containing machina simulated data")
     parser.add_argument('run_name', type=str, help="Name of this run")
+
+    parser.add_argument('--data_fit', type=float, help="Weight on data fit", default=1.0)
+    parser.add_argument('--mig', type=float, help="Weight on migration number", default=1.0)
+    parser.add_argument('--comig', type=float, help="Weight on comigration number", default=1.0)
+    parser.add_argument('--seed', type=float, help="Weight on seeding site number", default=1.0)
+    parser.add_argument('--reg', type=float, help="Weight on regularization", default=1.0)
+    parser.add_argument('--gen', type=float, help="Weight on genetic distance", default=0.0)
+
+    parser.add_argument('--primary_weight', action='store_true', help="If passed, initialize weights higher to favor vertex labeling of primary for all internal nodes", default=False)
+    parser.add_argument('--bs', type=int, help="Batch size", default=32)
     parser.add_argument('--cores', '-c', type=int, default=1, help="Number of cores to use (default 1)")
     args = parser.parse_args()
 
     sites = ["m8", "m5"]
     mig_types = ["M", "mS", "R", "S"]
+    
+    weights = vertex_labeling.Weights(data_fit=args.data_fit, mig=args.mig, comig=args.comig, seed_site=args.seed, reg=args.reg, gen_dist=args.gen)
+    print("Weights:")
+    pprint(vars(weights))
+    batch_size = args.bs
+    print(f"Batch size: {batch_size}, init temp: {INIT_TEMP}, final temp: {FINAL_TEMP}")
+    print(f"Placing higher weight on primary vertex labeling for all internal nodes: {args.primary_weight}")
 
     machina_sims_data_dir = args.sim_data_dir
     run_name = args.run_name
@@ -111,8 +120,8 @@ if __name__=="__main__":
             for seed in seeds:
                 #predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir)
                 # Are we IO bound or CPU bound? maybe we should use a thread pool...?
-                futures.append(executor.submit(predict_vertex_labelings, machina_sims_data_dir, site, mig_type, seed, out_dir))
-    print(len(futures))
+                futures.append(executor.submit(predict_vertex_labelings, machina_sims_data_dir, site, mig_type, seed, out_dir, weights, batch_size, args.primary_weight))
+    print("Number of tasks:", len(futures))
     concurrent.futures.wait(futures)
     end_time = datetime.datetime.now()
 
