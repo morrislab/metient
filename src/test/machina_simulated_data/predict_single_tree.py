@@ -5,7 +5,7 @@ import torch
 import matplotlib
 
 from src.lib import vertex_labeling
-import src.util.machina_data_extraction_util as mach_util
+import src.util.data_extraction_util as data_util
 import src.util.vertex_labeling_util as vert_util
 
 print("CUDA GPU:",torch.cuda.is_available())
@@ -13,9 +13,9 @@ if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
 
 def predict_vertex_labelings(cluster_fn, all_mut_trees_fn, ref_var_fn, site_mig_data_dir):
-    cluster_label_to_idx = mach_util.get_cluster_label_to_idx(cluster_fn, ignore_polytomies=True)
+    cluster_label_to_idx = data_util.get_cluster_label_to_idx(cluster_fn, ignore_polytomies=True)
 
-    data = mach_util.get_adj_matrices_from_all_mutation_trees(all_mut_trees_fn, cluster_label_to_idx, is_sim_data=True)
+    data = data_util.get_adj_matrices_from_all_mutation_trees(all_mut_trees_fn, cluster_label_to_idx, is_sim_data=True)
     custom_colors = [matplotlib.colors.to_hex(c) for c in ['limegreen', 'royalblue', 'hotpink', 'grey', 'saddlebrown', 'darkorange', 'purple', 'red', 'black', 'black', 'black', 'black']]
     tree_num = 0
     for adj_matrix, pruned_cluster_label_to_idx in data:
@@ -24,7 +24,7 @@ def predict_vertex_labelings(cluster_fn, all_mut_trees_fn, ref_var_fn, site_mig_
         B = vert_util.get_mutation_matrix_tensor(T)
         idx_to_label = {v:k for k,v in pruned_cluster_label_to_idx.items()}
 
-        ref_matrix, var_matrix, unique_sites= mach_util.get_ref_var_matrices_from_machina_sim_data(ref_var_fn,
+        ref_matrix, var_matrix, unique_sites= data_util.get_ref_var_matrices_from_machina_sim_data(ref_var_fn,
                                                                                                    pruned_cluster_label_to_idx=pruned_cluster_label_to_idx,
                                                                                                    T=T)
 

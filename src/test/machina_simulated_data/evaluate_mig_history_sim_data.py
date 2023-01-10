@@ -348,33 +348,10 @@ if __name__ == "__main__":
 
     joint_m5_df = pd.concat([grad_m5_df, machina_m5_df]).reset_index()
     joint_m8_df = pd.concat([grad_m8_df, machina_m8_df]).reset_index()
-    print(joint_m5_df.reset_index())
+    #print(joint_m5_df.reset_index())
 
     save_boxplot(joint_m5_df, "migration graph F1 score", 5, f"m5_migration_graph_f1_scores_{run_name}.png")
     save_boxplot(joint_m8_df, "migration graph F1 score", 8, f"m8_migration_graph_f1_scores_{run_name}.png")
 
     save_boxplot(joint_m5_df, "migrating clones F1 score", 5,  f"m5_migrating_clones_f1_scores_{run_name}.png")
     save_boxplot(joint_m8_df, "migrating clones F1 score", 8,  f"m8_migrating_clones_f1_scores_{run_name}.png")
-
-    # Timing benchmarks
-    # TODO: put this in a different script
-    print(sgd_results_df['time'])
-    print(sgd_results_df.dtypes)
-    #sgd_results_df['time'] = pd.to_datetime(sgd_results_df['time'])
-    print(len(sgd_results_df[(sgd_results_df['site']=='m8') & (sgd_results_df['seed']==0) & (sgd_results_df['mig_type']=='S')]))
-    print(sgd_results_df.groupby(['site']).mean())
-    print("m8 trees", len(sgd_results_df[(sgd_results_df['site']=='m8') & ((sgd_results_df['mig_type']=='mS') | (sgd_results_df['mig_type']=='S'))]))
-    print("m5 trees", len(sgd_results_df[(sgd_results_df['site']=='m5')]))
-    print("m8 trees", len(sgd_results_df[(sgd_results_df['site']=='m8')]))
-    print(sgd_results_df["time"])
-    # m5_total = 0.0
-    # m8_total = 0.0
-    # with open("pmh_ti_timing_8cores_11152022.txt", "r") as f:
-    #     for line in f:
-    #         if "Runtime" in line:
-    #             secs = float(line[line.find(":")+2:])
-    #             if "m5" in line:
-    #                 m5_total += secs
-    #             elif "m8" in line:
-    #                 m8_total += secs
-    # print(m5_total/586, m8_total/581)
