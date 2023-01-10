@@ -11,7 +11,7 @@ import pandas as pd
 from pprint import pprint
 
 from src.lib import vertex_labeling
-import src.util.machina_data_extraction_util as mach_util
+import src.util.data_extraction_util as data_util
 import src.util.vertex_labeling_util as vert_util
 
 results = []
@@ -25,9 +25,9 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
     all_mut_trees_fn = os.path.join(machina_sims_data_dir, f"{site}_mut_trees", f"mut_trees_{mig_type}_seed{seed}.txt")
     ref_var_fn = os.path.join(machina_sims_data_dir, f"{site}_clustered_input", f"cluster_{mig_type}_seed{seed}.tsv")
 
-    cluster_label_to_idx = mach_util.get_cluster_label_to_idx(cluster_fn, ignore_polytomies=True)
+    cluster_label_to_idx = data_util.get_cluster_label_to_idx(cluster_fn, ignore_polytomies=True)
     
-    data = mach_util.get_adj_matrices_from_all_mutation_trees(all_mut_trees_fn, cluster_label_to_idx, is_sim_data=True)
+    data = data_util.get_adj_matrices_from_all_mutation_trees(all_mut_trees_fn, cluster_label_to_idx, is_sim_data=True)
     custom_colors = [matplotlib.colors.to_hex(c) for c in ['limegreen', 'royalblue', 'hotpink', 'grey', 'saddlebrown', 'darkorange', 'purple', 'red', 'black', 'black', 'black', 'black']]
     tree_num = 0
 
@@ -37,7 +37,7 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
         B = vert_util.get_mutation_matrix_tensor(T)
         idx_to_label = {v:k for k,v in pruned_cluster_label_to_idx.items()}
 
-        ref_matrix, var_matrix, unique_sites= mach_util.get_ref_var_matrices_from_machina_sim_data(ref_var_fn,
+        ref_matrix, var_matrix, unique_sites= data_util.get_ref_var_matrices_from_machina_sim_data(ref_var_fn,
                                                                                                    pruned_cluster_label_to_idx=pruned_cluster_label_to_idx,
                                                                                                    T=T)
 
@@ -45,7 +45,7 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
         primary_idx = unique_sites.index('P')
         r = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(unique_sites)).T
         
-        G = mach_util.get_genetic_distance_tensor_from_sim_adj_matrix(T, pruned_cluster_label_to_idx)
+        G = data_util.get_genetic_distance_tensor_from_sim_adj_matrix(T, pruned_cluster_label_to_idx)
 
         best_T_edges, best_labeling, best_G_edges, best_loss_info, time = vertex_labeling.gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites=unique_sites,
                                                                                                 weights=weights, p=r, node_idx_to_label=idx_to_label, G=G,
