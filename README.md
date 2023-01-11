@@ -6,7 +6,7 @@
 
 `$ cd met_history_prediction`
 
-`$ conda create -n met`
+`$ conda create -n "met" python=3.7.12 ipython`
 
 `$ conda activate met`
 
