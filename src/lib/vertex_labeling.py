@@ -1,43 +1,18 @@
 
 import torch
-import logging
 import sys
 import numpy as np
 import datetime
 
-from src.util import vertex_labeling_util
+from src.util import vertex_labeling_util as util
 from torch.distributions.binomial import Binomial
-
-import pandas as pd
-pd.options.display.float_format = '{:,.3f}'.format
-
-logger = logging.getLogger('SGD')
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s\n\r%(message)s', datefmt='%H:%M:%S')
-logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)
-
-# TODO: how do we validate this
-U_CUTOFF = 0.05
-# TODO: better way to handle this?
-G_IDENTICAL_CLONE_VALUE = -10.0
+from src.util.globals import *
 
 from pprint import pprint
 
 print("CUDA GPU:",torch.cuda.is_available())
 if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
-
-class PrintConfig:
-    def __init__(self, visualize=True, verbose=False, viz_intermeds=False, k_best_trees=1):
-        '''
-        visualize: bool, whether to visualize loss, best tree, and migration graph
-        verbose: bool, whether to print debug info
-        viz_intermeds: bool, whether to visualize intermediate solutions to best tree
-        k_best_trees: int, number of best tree solutions to visualize (if 1, only show best tree)
-        '''
-        self.visualize = visualize
-        self.verbose = verbose 
-        self.viz_intermeds = viz_intermeds
-        self.k_best_trees = k_best_trees
 
 class Weights:
     def __init__(self, data_fit=1.0, mig=1.0, comig=1.0, seed_site=1.0, reg=1.0, gen_dist=1.0, organotrop=1.0):
@@ -48,37 +23,6 @@ class Weights:
         self.reg = reg
         self.gen_dist = gen_dist
         self.organotrop = organotrop
-
-class LabeledTree:
-    def __init__(self, tree, labeling, U, branch_lengths):
-        self.tree = tree
-        self.labeling = labeling
-        self.U = U
-        self.branch_lengths = branch_lengths
-
-    # TODO: write unit tests for this
-    def __eq__(self, other):
-        return ( isinstance(other, LabeledTree) and
-               str(np.where(self.tree == 1)[0]) == str(np.where(other.tree == 1)[0]) and
-               str(np.where(self.tree == 1)[1]) == str(np.where(other.tree == 1)[1]) and
-               str(np.where(self.labeling == 1)[0]) == str(np.where(other.labeling == 1)[0]) and
-               str(np.where(self.labeling == 1)[1]) == str(np.where(other.labeling == 1)[0])
-               )
-
-    def __hash__(self):
-        hsh = hash((str(np.where(self.tree == 1)[0]), str(np.where(self.tree == 1)[1]),
-                    str(np.where(self.labeling == 1)[0]), str(np.where(self.labeling == 1)[1])))
-        return hsh
-
-def _truncated_cluster_name(cluster_name):
-    '''
-    Displays a max of two mutation names associated with the cluster (e.g. 9;15;19;23;26 -> 9;15)
-    Does nothing if the cluster name is not in above format
-    '''
-    assert(isinstance(cluster_name, str))
-    split_name = cluster_name.split(";")
-    truncated_name = ";".join(split_name) if len(split_name) <= 2 else ";".join(split_name[:2])
-    return truncated_name
 
 # Adapted from PairTree
 def _calc_llh(F_hat, R, V, omega_v, epsilon=1e-5):
@@ -163,7 +107,7 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter
     # tells us if two nodes are (1) in the same site and (2) have parents in the same site
     # and (3) there's a path from node i to node j
     # TODO: this is computationally expensive, maybe we could cache path matrices we've calculated before?
-    P = vertex_labeling_util.get_path_matrix_tensor(A.cpu().numpy())
+    P = util.get_path_matrix_tensor(A.cpu().numpy())
     shared_path_and_par_and_self_color = torch.sum(torch.mul(P, shared_par_and_self_color), axis=1)
     repeated_temporal_migrations = torch.sum(torch.mul(shared_path_and_par_and_self_color, Y))
     binarized_site_adj = torch.sigmoid(alpha * (2 * site_adj - 1))
@@ -338,83 +282,12 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weig
         full_branch_lengths_list.append(full_G)
 
     return torch.stack(losses_list), V_list, full_trees_list, full_branch_lengths_list, softmax_X_soft, loss_components_list
-
-def get_averaged_tree(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, max_iter):
-    '''
-    Returns an averaged tree over all (TODO: all or top k?) converged trees
-    by weighing each tree edge by the softmax of the likelihood of that tree 
-    '''
-    losses_tensor, V, full_trees, full_branch_lengths, _, _ = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, -1,  max_iter)
-    losses_tensor, min_loss_indices = torch.topk(losses_tensor, len(losses_tensor), largest=False, sorted=True)
-    print("losses tensor\n", losses_tensor)
-
-def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, 
-                    node_idx_to_label, ordered_sites, max_iter, print_config):
-    loss, loss_components = objective(labeled_tree.labeling, labeled_tree.tree, ref_matrix, var_matrix, labeled_tree.U, B, labeled_tree.branch_lengths, O, weights, -1, max_iter, print_config)
-    U_clipped = labeled_tree.U.cpu().detach().numpy()
-    U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
-    logger.debug(f"\nU > {U_CUTOFF}\n")
-    col_labels = ["norm"] + [_truncated_cluster_name(node_idx_to_label[k]) if k in node_idx_to_label else "0" for k in range(U_clipped.shape[1] - 1)]
-    df = pd.DataFrame(U_clipped, columns=col_labels, index=ordered_sites)
-    logger.debug(df)
-    logger.debug("\nF_hat")
-    logger.debug(labeled_tree.U @ B)
-    return loss_components
-
-def print_best_trees(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights,
-                    node_idx_to_label, ordered_sites, print_config, intermediate_data, 
-                    custom_colors, primary, max_iter):
-    losses_tensor, V, full_trees, full_branch_lengths, _, _ = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, -1, max_iter)
-    _, min_loss_indices = torch.topk(losses_tensor, print_config.k_best_trees, largest=False, sorted=True)
-    print("print_config.k_best_trees", print_config.k_best_trees)
-    min_loss_labeled_trees_and_losses = []
-    for i in min_loss_indices:
-        labeled_tree = LabeledTree(full_trees[i], V[i], U[i], full_branch_lengths[i])
-        min_loss_labeled_trees_and_losses.append((labeled_tree, losses_tensor[i]))
-
-    for i, tup in enumerate(min_loss_labeled_trees_and_losses):
-        labeled_tree = tup[0]
-        if i == 0:
-            
-            if print_config.viz_intermeds:
-
-                best_tree_idx = min_loss_indices[0]
-                for itr, data in enumerate(intermediate_data):
-                    losses_tensor, full_trees, V, U, full_branch_lengths, soft_X = intermediate_data[itr][0], intermediate_data[itr][1], intermediate_data[itr][2], intermediate_data[itr][3], intermediate_data[itr][4], intermediate_data[itr][5]
-                    print("="*30 + " INTERMEDIATE TREE " + "="*30+"\n")
-                    print(f"Iteration: {itr*20}, Intermediate best tree idx {best_tree_idx}")
-                    softx_df = pd.DataFrame(soft_X[best_tree_idx].cpu().detach().numpy().T, columns=ordered_sites, index=[node_idx_to_label[i] for i in range(1,len(node_idx_to_label))]) # skip first index (which is root, and we know the vert. label)
-                    print("soft_X\n", softx_df)
-                    
-
-                    labeled_tree = LabeledTree(full_trees[best_tree_idx], V[best_tree_idx], U[best_tree_idx], full_branch_lengths[best_tree_idx])
-                    print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, print_config, max_iter)
-                    vertex_labeling_util.plot_tree(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, node_idx_to_label)
-                    vertex_labeling_util.plot_migration_graph(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, primary)
-
-
-            if print_config.visualize: 
-                print("*"*30 + " BEST TREE " + "*"*30+"\n")
-
-            best_tree = labeled_tree
-            best_tree_loss_info = print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, max_iter, print_config)
-            best_tree_edges, best_tree_vertex_name_to_site_map = vertex_labeling_util.plot_tree(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, node_idx_to_label, show=print_config.visualize)
-            best_mig_graph_edges = vertex_labeling_util.plot_migration_graph(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, primary, show=print_config.visualize)
-
-            #print("-"*100 + "\n")
-
-        elif print_config.k_best_trees > 1:
-            print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, print_config)
-            vertex_labeling_util.plot_tree(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, node_idx_to_label)
-            vertex_labeling_util.plot_migration_graph(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, primary)
-            print("-"*100 + "\n")
-
-    return best_tree_edges, best_tree_vertex_name_to_site_map, best_mig_graph_edges, best_tree_loss_info
     
 def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, weights,
                                 print_config, p=None, node_idx_to_label=None, G=None, O=None,
                                 max_iter=200, lr=0.1, init_temp=20, final_temp=0.1,
-                                batch_size=128, custom_colors=None, primary=None):
+                                batch_size=128, custom_colors=None, primary=None, 
+                                weight_init_primary= False):
     '''
     Args:
         T: Adjacency matrix (directed) of the internal nodes (shape: num_internal_nodes x num_internal_nodes)
@@ -466,8 +339,8 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     X = torch.rand(batch_size, num_sites, num_nodes_to_label)
 
     # TODO: should we do this? or should we do LR scheduling
-    # if weight_init_primary:
-    #     X[:,0,:] = 1
+    if weight_init_primary:
+        X[:,0,:] = 1
 
     X.requires_grad = True
 
@@ -529,20 +402,23 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
                 intermediate_data.append([losses_tensor, full_trees, V, U, full_branch_lengths, softmax_Xs])
                
     if print_config.visualize:
-        #vertex_labeling_util.plot_losses(losses)
-        vertex_labeling_util.plot_loss_components(all_loss_components, weights)
-        #vertex_labeling_util.plot_temps(temps)
+        #util.plot_losses(losses)
+        util.plot_loss_components(all_loss_components, weights)
+        #util.plot_temps(temps)
 
     time_elapsed = (datetime.datetime.now() - start_time).total_seconds()
     if print_config.verbose:
         print(f"Time elapsed: {time_elapsed}")
 
     with torch.no_grad():
-        edges, vert_to_site_map, mig_graph_edges, loss_info = print_best_trees(U, X, T, ref_matrix, var_matrix, B, p, G,                                                                   O, temp, hard, weights, 
-                                                                               node_idx_to_label, ordered_sites,
-                                                                               print_config, intermediate_data, 
-                                                                               custom_colors, primary, max_iter)
+        losses_tensor, V, full_trees, full_branch_lengths, _, _ = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, -1, max_iter)
 
-        avg_tree = get_averaged_tree(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, max_iter)
+        edges, vert_to_site_map, mig_graph_edges, loss_info = util.print_best_trees(losses_tensor, V, U, full_trees,                                                                        full_branch_lengths, ref_matrix,                                                                        var_matrix, B, O, weights, 
+                                                                                    node_idx_to_label, ordered_sites,
+                                                                                    print_config, intermediate_data, 
+                                                                                    custom_colors, primary, max_iter)
+
+        avg_tree = util.print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_colors, ordered_sites)
+
 
     return edges, vert_to_site_map, mig_graph_edges, loss_info, time_elapsed
