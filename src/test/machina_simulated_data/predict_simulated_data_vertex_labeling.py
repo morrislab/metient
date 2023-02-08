@@ -46,11 +46,12 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
         r = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(unique_sites)).T
         
         G = data_util.get_genetic_distance_tensor_from_sim_adj_matrix(T, pruned_cluster_label_to_idx)
+        print_config = vertex_labeling.PrintConfig(visualize=False, verbose=False, viz_intermeds=False)
 
         best_T_edges, best_labeling, best_G_edges, best_loss_info, time = vertex_labeling.gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites=unique_sites,
                                                                                                 weights=weights, p=r, node_idx_to_label=idx_to_label, G=G,
                                                                                                 max_iter=150, batch_size=batch_size, init_temp=INIT_TEMP, final_temp=FINAL_TEMP,
-                                                                                                custom_colors=custom_colors, visualize=False, verbose=False, 
+                                                                                                custom_colors=custom_colors, print_config=print_config, 
                                                                                                 weight_init_primary=weight_init_primary)
 
         vert_util.write_tree(best_T_edges, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.tree"))

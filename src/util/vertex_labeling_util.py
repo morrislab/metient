@@ -1,9 +1,10 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import numpy as np
 import networkx as nx
 import numpy as np
+import matplotlib.colors as colors
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import itertools
 import pydot
 from networkx.drawing.nx_pydot import graphviz_layout
@@ -11,7 +12,6 @@ import random
 import torch
 from torch.autograd import Variable
 import sys
-import matplotlib.patches as mpatches
 import pydot
 from IPython.display import Image, display
 from networkx.drawing.nx_pydot import to_pydot
@@ -22,9 +22,50 @@ import string
 from functools import wraps
 import hashlib
 
+# TODO: this cyclical import is not great
+import src.lib.vertex_labeling as vert_label
+from src.util.globals import *
+
+import pandas as pd
+pd.options.display.float_format = '{:,.3f}'.format
+
 print("CUDA GPU:",torch.cuda.is_available())
 if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
+
+class PrintConfig:
+    def __init__(self, visualize=True, verbose=False, viz_intermeds=False, k_best_trees=1):
+        '''
+        visualize: bool, whether to visualize loss, best tree, and migration graph
+        verbose: bool, whether to print debug info
+        viz_intermeds: bool, whether to visualize intermediate solutions to best tree
+        k_best_trees: int, number of best tree solutions to visualize (if 1, only show best tree)
+        '''
+        self.visualize = visualize
+        self.verbose = verbose 
+        self.viz_intermeds = viz_intermeds
+        self.k_best_trees = k_best_trees
+
+class LabeledTree:
+    def __init__(self, tree, labeling, U, branch_lengths):
+        self.tree = tree
+        self.labeling = labeling
+        self.U = U
+        self.branch_lengths = branch_lengths
+
+    # TODO: write unit tests for this
+    def __eq__(self, other):
+        return ( isinstance(other, LabeledTree) and
+               str(np.where(self.tree == 1)[0]) == str(np.where(other.tree == 1)[0]) and
+               str(np.where(self.tree == 1)[1]) == str(np.where(other.tree == 1)[1]) and
+               str(np.where(self.labeling == 1)[0]) == str(np.where(other.labeling == 1)[0]) and
+               str(np.where(self.labeling == 1)[1]) == str(np.where(other.labeling == 1)[0])
+               )
+
+    def __hash__(self):
+        hsh = hash((str(np.where(self.tree == 1)[0]), str(np.where(self.tree == 1)[1]),
+                    str(np.where(self.labeling == 1)[0]), str(np.where(self.labeling == 1)[1])))
+        return hsh
 
 def view_pydot(pdot):
     plt = Image(pdot.create_png())
@@ -63,49 +104,193 @@ def plot_migration_graph(V, full_tree, ordered_sites, custom_colors, primary, sh
 
     return edges
 
-def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=None, show=True):
-    pastel_colors = plt.get_cmap("Set3").colors
-    assert(len(ordered_sites) < len(pastel_colors))
+def relabel_cluster(label, shorten):
+    if not shorten:
+        return label
 
-    # custom_node_idx_to_label only gives the internal node labels
-    full_node_idx_to_label_map = dict()
+    out = ""
+    # e.g. 1_M2 -> 1_M2
+    if len(label) <=4 :
+        out = label
+    # e.g. 1;3;6;19_M2 -> 1_M2
+    elif ";" in label and "_" in label:
+        out = label[:label.find(";")] + label[label.find("_"):]
+    # e.g. 100_M2 -> 100_M2
+    elif "_" in label:
+        out = label
+    # e.g. 2;14;15 -> 2;14
+    else:
+        out = ";".join(label.split(";")[:2])
+    return out.center(5)
+
+def tree_iterator(T):
+    '''
+    iterate an adjacency matrix, returning i and j for all values = 1
+    '''
     for i, adj_row in enumerate(T):
         for j, val in enumerate(adj_row):
             if val == 1:
-                if custom_node_idx_to_label != None:
-                    if i in custom_node_idx_to_label:
-                        full_node_idx_to_label_map[i] = custom_node_idx_to_label[i]
-                    if j in custom_node_idx_to_label:
-                        full_node_idx_to_label_map[j] = custom_node_idx_to_label[j]
-                    elif j not in custom_node_idx_to_label:
-                        site_idx = (V[:,j] == 1).nonzero()[0][0].item()
-                        full_node_idx_to_label_map[j] = f"{custom_node_idx_to_label[i]}_{ordered_sites[site_idx]}"
-                else:
-                    full_node_idx_to_label_map[i] = chr(i+65)
-                    full_node_idx_to_label_map[j] = chr(j+65)
+                yield i, j
 
-    def idx_to_color(idx):
-        if custom_colors != None:
-            return custom_colors[idx]
-        return pastel_colors[idx]
+def truncated_cluster_name(cluster_name):
+    '''
+    Displays a max of two mutation names associated with the cluster (e.g. 9;15;19;23;26 -> 9;15)
+    Does nothing if the cluster name is not in above format
+    '''
+    assert(isinstance(cluster_name, str))
+    split_name = cluster_name.split(";")
+    truncated_name = ";".join(split_name) if len(split_name) <= 2 else ";".join(split_name[:2])
+    return truncated_name
+
+def get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites, shorten_label=True):
+    '''
+    custom_node_idx_to_label only gives the internal node labels, so build a map of
+    node_idx to label for the leaf nodes (e.g. "0;9_P" or "5_liver")
+    '''
+    full_node_idx_to_label_map = dict()
+    for i, j in tree_iterator(T):
+        if custom_node_idx_to_label != None:
+            if i in custom_node_idx_to_label:
+                full_node_idx_to_label_map[i] = relabel_cluster(custom_node_idx_to_label[i], shorten_label)
+            if j in custom_node_idx_to_label:
+                full_node_idx_to_label_map[j] = relabel_cluster(custom_node_idx_to_label[j], shorten_label)
+            elif j not in custom_node_idx_to_label:
+                site_idx = (V[:,j] == 1).nonzero()[0][0].item()
+                full_node_idx_to_label_map[j] = relabel_cluster(f"{custom_node_idx_to_label[i]}_{ordered_sites[site_idx]}", shorten_label)
+        else:
+            full_node_idx_to_label_map[i] = chr(i+65)
+            full_node_idx_to_label_map[j] = chr(j+65)
+    return full_node_idx_to_label_map
+
+def print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_colors, ordered_sites):
+    '''
+    Returns an averaged tree over all (TODO: all or top k?) converged trees
+    by weighing each tree edge or vertex label by the softmax of the 
+    likelihood of that tree 
+    '''
+    _, min_loss_indices = torch.topk(losses_tensor, len(losses_tensor), largest=False, sorted=True)
+    # averaged tree edges are weighted by the average of the softmax of the negative log likelihoods
+    # TODO*: is this the right way to compute weights?
+    def softmaxed_losses(losses_tensor):
+        if not torch.is_tensor(losses_tensor):
+            losses_tensor = torch.tensor(losses_tensor)
+        return torch.softmax(-1.0*(torch.log2(losses_tensor)/ torch.log2(torch.tensor(1.1))), dim=0)
+
+    weights = torch.softmax(-1.0*(torch.log2(losses_tensor)/ torch.log2(torch.tensor(1.1))), dim=0)
+    print("losses tensor\n", losses_tensor, weights)
+
+    weighted_edges = dict() # { edge_0 : [loss_0, loss_1] }
+    weighted_node_colors = dict() # { node_0 : { anatomical_site_0 : [loss_0, loss_3]}}
+    for sln_idx in min_loss_indices:
+        loss = losses_tensor[sln_idx]
+        weight = weights[sln_idx]
+
+        full_tree_node_idx_to_label = get_full_tree_node_idx_to_label(V[sln_idx], full_trees[sln_idx], node_idx_to_label, ordered_sites)
+
+        for i, j in tree_iterator(full_trees[sln_idx]):
+            edge = full_tree_node_idx_to_label[i], full_tree_node_idx_to_label[j]
+            if edge not in weighted_edges:
+                weighted_edges[edge] = []
+            weighted_edges[edge].append(weight.item())
+
+        for node_idx in full_tree_node_idx_to_label:
+            site_idx = (V[sln_idx][:,node_idx] == 1).nonzero()[0][0].item()
+            node_label = full_tree_node_idx_to_label[node_idx]
+            if node_label not in weighted_node_colors:
+                weighted_node_colors[node_label] = dict()
+            if site_idx not in weighted_node_colors[node_label]:
+                weighted_node_colors[node_label][site_idx] = []
+            weighted_node_colors[node_label][site_idx].append(loss.item())
+    
+    avg_node_colors = dict()
+    for node_label in weighted_node_colors:
+        avg_node_colors[node_label] = dict()
+        avg_losses = []
+        ordered_labels = weighted_node_colors[node_label]
+        for site_idx in ordered_labels:
+            vals = weighted_node_colors[node_label][site_idx]
+            avg_losses.append(sum(vals)/len(vals))
+
+        #softmaxed = np.exp(softmaxed)/sum(np.exp(softmaxed))
+        softmaxed = softmaxed_losses(avg_losses)
+        for site_idx, soft in zip(ordered_labels, softmaxed):
+            avg_node_colors[node_label][site_idx] = soft
+    print("avg_node_colors\n", avg_node_colors)
+
+    avg_edges = dict()
+    for edge in weighted_edges:
+        avg_edges[edge] = sum(weighted_edges[edge])/len(weighted_edges[edge])
+
+    print("avg_edges\n", avg_edges)
+
+    plot_averaged_tree(avg_edges, avg_node_colors, ordered_sites, custom_colors, node_idx_to_label)
+
+def idx_to_color(custom_colors, idx, alpha=1.0):
+    if custom_colors != None:
+        rgb = colors.to_rgb(custom_colors[idx])
+        rgb_alpha = (rgb[0], rgb[1], rgb[2], alpha)
+        return colors.to_hex(rgb_alpha, keep_alpha=True)
+
+    pastel_colors = plt.get_cmap("Set3").colors
+    assert(idx < len(pastel_colors))
+    return pastel_colors[idx]
+
+def plot_averaged_tree(avg_edges, avg_node_colors, ordered_sites, custom_colors=None, custom_node_idx_to_label=None, show=True):
+
+    penwidth = 3.0
+    alpha = 0.7
+
+    max_edge_weight = max(list(avg_edges.values()))
+
+    def rescaled_edge_weight(edge_weight):
+        return (penwidth/max_edge_weight)*edge_weight
+    
+    patches = []
+    for i, site in enumerate(ordered_sites):
+        patch = mpatches.Patch(color=idx_to_color(custom_colors, i), label=site, alpha=alpha)
+        patches.append(patch)
+
+    G = nx.DiGraph()
+    for label_i, label_j in avg_edges.keys():
+        
+        node_i_color = ""
+        for site_idx in avg_node_colors[label_i]:
+            node_i_color += f"{idx_to_color(custom_colors, site_idx, alpha=alpha)};{avg_node_colors[label_i][site_idx]}:"
+        node_j_color = ""
+        for site_idx in avg_node_colors[label_j]:
+            node_j_color += f"{idx_to_color(custom_colors, site_idx, alpha=alpha)};{avg_node_colors[label_j][site_idx]}:"
+        G.add_node(label_i, style="wedged", fillcolor=node_i_color, color="none",
+            alpha=0.5, fontname = "helvetica-narrow", fontsize="12pt", fixedsize="true")
+        G.add_node(label_j, style="wedged", fillcolor=node_j_color, color="none",
+            alpha=0.5, fontname = "helvetica-narrow", fontsize="12pt", fixedsize="true")
+        print(label_i, label_j, avg_edges[(label_i, label_j)], rescaled_edge_weight(avg_edges[(label_i, label_j)]))
+        G.add_edge(label_i, label_j, color="#666666c2", penwidth=rescaled_edge_weight(avg_edges[(label_i, label_j)]), arrowsize=0.75)
+
+    assert(nx.is_tree(G))
+    dot = to_pydot(G).to_string()
+    src = Source(dot) # dot is string containing DOT notation of graph
+    if show:
+        display(src)
+
+def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=None, show=True):
+
+    full_node_idx_to_label_map = get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites)
 
     patches = []
     for i, site in enumerate(ordered_sites):
-        patch = mpatches.Patch(color=idx_to_color(i), label=site)
+        patch = mpatches.Patch(color=idx_to_color(custom_colors, i), label=site)
         patches.append(patch)
 
-    color_map = { full_node_idx_to_label_map[i]:idx_to_color((V[:,i] == 1).nonzero()[0][0].item()) for i in range(V.shape[1])}
+    color_map = { full_node_idx_to_label_map[i]:idx_to_color(custom_colors, (V[:,i] == 1).nonzero()[0][0].item()) for i in range(V.shape[1])}
     G = nx.DiGraph()
     edges = []
-    for i, adj_row in enumerate(T):
-        for j, val in enumerate(adj_row):
-            if val == 1:
-                label_i = full_node_idx_to_label_map[i]
-                label_j = full_node_idx_to_label_map[j]
-                edges.append((label_i, label_j))
-                G.add_node(label_i, color=color_map[label_i], penwidth=3)
-                G.add_node(label_j, color=color_map[label_j], penwidth=3)
-                G.add_edge(label_i, label_j, color=f'"{color_map[label_i]};0.5:{color_map[label_j]}"', penwidth=3)
+    for i, j in tree_iterator(T):
+        label_i = full_node_idx_to_label_map[i]
+        label_j = full_node_idx_to_label_map[j]
+        edges.append((label_i, label_j))
+        G.add_node(label_i, color=color_map[label_i], penwidth=3, fixedsize="true", fontname = "helvetica-narrow")
+        G.add_node(label_j, color=color_map[label_j], penwidth=3, fixedsize="true", fontname = "helvetica-narrow")
+        G.add_edge(label_i, label_j, color=f'"{color_map[label_i]};0.5:{color_map[label_j]}"', penwidth=3, arrowsize=0.75)
 
     assert(nx.is_tree(G))
 
@@ -190,6 +375,68 @@ def plot_loss_components(loss_dicts, weights):
     plt.ylabel("loss")
     plt.legend(loc="upper right")
     plt.show()
+
+def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, 
+                    node_idx_to_label, ordered_sites, max_iter, print_config):
+    loss, loss_components = vert_label.objective(labeled_tree.labeling, labeled_tree.tree, ref_matrix, var_matrix, labeled_tree.U, B, labeled_tree.branch_lengths, O, weights, -1, max_iter, print_config)
+    U_clipped = labeled_tree.U.cpu().detach().numpy()
+    U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
+    logger.debug(f"\nU > {U_CUTOFF}\n")
+    col_labels = ["norm"] + [truncated_cluster_name(node_idx_to_label[k]) if k in node_idx_to_label else "0" for k in range(U_clipped.shape[1] - 1)]
+    df = pd.DataFrame(U_clipped, columns=col_labels, index=ordered_sites)
+    logger.debug(df)
+    logger.debug("\nF_hat")
+    logger.debug(labeled_tree.U @ B)
+    return loss_components
+
+def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_matrix, var_matrix, B, O, weights,                 node_idx_to_label, ordered_sites, print_config, intermediate_data, custom_colors, 
+                     primary, max_iter):
+
+    _, min_loss_indices = torch.topk(losses_tensor, print_config.k_best_trees, largest=False, sorted=True)
+    print("print_config.k_best_trees", print_config.k_best_trees)
+    min_loss_labeled_trees_and_losses = []
+    for i in min_loss_indices:
+        labeled_tree = LabeledTree(full_trees[i], V[i], U[i], full_branch_lengths[i])
+        min_loss_labeled_trees_and_losses.append((labeled_tree, losses_tensor[i]))
+
+    for i, tup in enumerate(min_loss_labeled_trees_and_losses):
+        labeled_tree = tup[0]
+        if i == 0:
+            
+            if print_config.viz_intermeds:
+
+                best_tree_idx = min_loss_indices[0]
+                for itr, data in enumerate(intermediate_data):
+                    losses_tensor, full_trees, V, U, full_branch_lengths, soft_X = intermediate_data[itr][0], intermediate_data[itr][1], intermediate_data[itr][2], intermediate_data[itr][3], intermediate_data[itr][4], intermediate_data[itr][5]
+                    print("="*30 + " INTERMEDIATE TREE " + "="*30+"\n")
+                    print(f"Iteration: {itr*20}, Intermediate best tree idx {best_tree_idx}")
+                    softx_df = pd.DataFrame(soft_X[best_tree_idx].cpu().detach().numpy().T, columns=ordered_sites, index=[node_idx_to_label[i] for i in range(1,len(node_idx_to_label))]) # skip first index (which is root, and we know the vert. label)
+                    print("soft_X\n", softx_df)
+
+                    labeled_tree = LabeledTree(full_trees[best_tree_idx], V[best_tree_idx], U[best_tree_idx], full_branch_lengths[best_tree_idx])
+                    print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, print_config, max_iter)
+                    plot_tree(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, node_idx_to_label)
+                    plot_migration_graph(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, primary)
+
+
+            if print_config.visualize: 
+                print("*"*30 + " BEST TREE " + "*"*30+"\n")
+
+            best_tree = labeled_tree
+            best_tree_loss_info = print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, max_iter, print_config)
+            best_tree_edges, best_tree_vertex_name_to_site_map = plot_tree(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, node_idx_to_label, show=print_config.visualize)
+            best_mig_graph_edges = plot_migration_graph(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, primary, show=print_config.visualize)
+
+            #print("-"*100 + "\n")
+
+        elif print_config.k_best_trees > 1:
+            print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, print_config)
+            plot_tree(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, node_idx_to_label)
+            plot_migration_graph(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, primary)
+            print("-"*100 + "\n")
+
+    return best_tree_edges, best_tree_vertex_name_to_site_map, best_mig_graph_edges, best_tree_loss_info
+
 
 def get_path_matrix(T, remove_self_loops=False):
     # Path matrix that tells us if path exists from node i to node j

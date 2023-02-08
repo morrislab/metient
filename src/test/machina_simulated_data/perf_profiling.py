@@ -88,8 +88,7 @@ if __name__=="__main__":
     site_mig_data_dir = os.path.join(machina_sims_data_dir, site, mig_type)
 
     print(seeds)
-    # TODO: remove
-    for seed in seeds[:2]:
+    for seed in seeds:
         #predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir)
         # Are we IO bound or CPU bound? maybe we should use a thread pool...?
         cProfile.run("predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir)", sort="tottime")

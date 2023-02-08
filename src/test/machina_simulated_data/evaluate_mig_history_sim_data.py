@@ -23,8 +23,8 @@ pc_map = {'mS':0, 'pS': 1, 'mM': 2, 'pM': 3, 'mR': 4, 'pR': 5}
 
 from statannot import add_stat_annotation
 
-# TODO: This is in util/machina_data_extraction_util.py but there's an error being thrown 
-# anytime I import that file here:
+# This is in util/machina_data_extraction_util.py but there's an error being thrown 
+# anytime I import that file here, so for now it's staying here...
 # OMP: Error #15: Initializing libiomp5.dylib, but found libomp.dylib already initialized.
 # Abort trap: 6
 def is_resolved_polytomy_cluster(cluster_label):
@@ -56,6 +56,7 @@ def get_mutations(edge_list, u):
 
     return mutations
 
+# Taken from MACHINA 
 def parse_clone_tree(filename_T, filename_l):
     edges = []
     with open(filename_T) as f:
@@ -77,6 +78,7 @@ def parse_clone_tree(filename_T, filename_l):
 
     return edges, migration_edges
 
+# Taken from MACHINA 
 def identify_seeding_clones(edge_list, migration_edge_list):
     res = set()
     for (u,v) in migration_edge_list:
@@ -86,6 +88,7 @@ def identify_seeding_clones(edge_list, migration_edge_list):
 
     return res
 
+# Taken from MACHINA 
 def parse_migration_graph(filename_G):
     edges = []
     with open(filename_G) as f:
@@ -95,6 +98,7 @@ def parse_migration_graph(filename_G):
 
     return edges
 
+# Taken from MACHINA 
 def multi_graph_to_set(edge_list):
     count = {}
     res = set()
