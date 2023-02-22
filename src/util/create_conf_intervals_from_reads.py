@@ -43,6 +43,10 @@ def binomial_hpdr(n, N, pct, a=1, b=1, n_pbins=1e3):
     (mode, lower, upper)
 
     """
+    # no reference or variant reads, TODO: is this correct? I think 
+    # lb and ub for binomial 
+    if (n == 0 and N == 0):
+        return 0, 0, 0
     # fixed random variable object for posterior Beta distribution
     rv = beta(n+a, N-n+b)
     # determine the mode and standard deviation of the posterior
@@ -79,7 +83,6 @@ def binomial_hpdr(n, N, pct, a=1, b=1, n_pbins=1e3):
 def get_ub(row, sam, corrected_confidence):
     v=binomial_hpdr(row['var-'+sam], row['var-'+sam]+row['ref-'+sam], corrected_confidence)
     return v[2]
-
 
 def get_lb(row, sam, corrected_confidence, cutoff):
     v=binomial_hpdr(row['var-'+sam], row['var-'+sam]+row['ref-'+sam], corrected_confidence)
