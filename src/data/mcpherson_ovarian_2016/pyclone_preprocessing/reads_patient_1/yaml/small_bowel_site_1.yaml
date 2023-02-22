@@ -1,0 +1,5413 @@
+mutations:
+- id: 1:17090971
+  ref_counts: 394
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAABBBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAABBBBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAABBBBBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABBBBBBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBBBBBBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBBBBBBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAAAAAAAAAA
+    g_v: AAAAAAAAAAAAAAAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: EMC1:1:19570459
+  ref_counts: 991
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: THEMIS2:1:28208980
+  ref_counts: 493
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 134
+- id: 1:30503033
+  ref_counts: 12464
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 5158
+- id: NCDN:1:36026584
+  ref_counts: 33
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 0
+- id: LRP8:1:53722992
+  ref_counts: 766
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 0
+- id: LHX8:1:75626559
+  ref_counts: 2426
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 490
+- id: DNTTIP2:1:94341312
+  ref_counts: 1005
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 0
+- id: 1:111860642
+  ref_counts: 2030
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 989
+- id: 1:116093682
+  ref_counts: 24492
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 23
+- id: POLR3C:1:145598544
+  ref_counts: 1346
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 260
+- id: RPRD2:1:150432756
+  ref_counts: 4699
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 12
+- id: FAM63A:1:150974845
+  ref_counts: 286
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 33
+- id: S100A6:1:153507181
+  ref_counts: 67
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: AIM2:1:159043115
+  ref_counts: 2904
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 1298
+- id: C1orf226:1:162349725
+  ref_counts: 13427
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 9
+- id: 1:177620921
+  ref_counts: 4531
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: 1:178489866
+  ref_counts: 2091
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: 1:179041060
+  ref_counts: 608
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: CACNA1E:1:181646765
+  ref_counts: 17692
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 3
+- id: 1:204192694
+  ref_counts: 0
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: NFASC:1:204827669
+  ref_counts: 14876
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 1
+- id: HHAT:1:210827499
+  ref_counts: 1513
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 3
+- id: USH2A:1:216497022
+  ref_counts: 4904
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 2
+- id: WDR64:1:241949251
+  ref_counts: 14244
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 4597
+- id: RP11-278H7.4:1:244244154
+  ref_counts: 12907
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 2
+- id: OR2L13:1:248263077
+  ref_counts: 3093
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 429
+- id: OR2L13:1:248263097
+  ref_counts: 3501
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: 10:2069156
+  ref_counts: 7108
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 1208
+- id: 10:5190458
+  ref_counts: 12318
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 35
+- id: PFKFB3:10:6188390
+  ref_counts: 156
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 38
+- id: PROSER2-AS1:10:11919334
+  ref_counts: 13963
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAA
+    g_v: AAAAAAB
+    prior_weight: 1
+  var_counts: 4
+- id: SEPHS1:10:13370623
+  ref_counts: 7108
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAA
+    g_v: AAAAAAB
+    prior_weight: 1
+  var_counts: 10
+- id: OLAH:10:15113793
+  ref_counts: 1407
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAA
+    g_v: AAAAAAB
+    prior_weight: 1
+  var_counts: 720
+- id: NSUN6:10:18893386
+  ref_counts: 19030
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAA
+    g_v: AAAAAAB
+    prior_weight: 1
+  var_counts: 4
+- id: NEBL:10:21177043
+  ref_counts: 2192
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAA
+    g_v: AAAAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: SNORA40:10:23454000
+  ref_counts: 11879
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 7554
+- id: 10:25722476
+  ref_counts: 22
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 0
+- id: CHAT:10:50835688
+  ref_counts: 1655
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 359
+- id: ACTBP14:10:70778495
+  ref_counts: 17593
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 3
+- id: 10:91162736
+  ref_counts: 2014
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 24
+- id: 10:116076901
+  ref_counts: 12
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 0
+- id: 10:120568763
+  ref_counts: 2708
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 4
+- id: 10:121191039
+  ref_counts: 536
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 0
+- id: ADAM8:10:135084844
+  ref_counts: 4606
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 957
+- id: HPX:11:6462111
+  ref_counts: 703
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 2
+- id: 11:21925062
+  ref_counts: 18479
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 31
+- id: ELF5:11:34527558
+  ref_counts: 15345
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  var_counts: 0
+- id: 11:45044504
+  ref_counts: 10693
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: LRP4:11:46921474
+  ref_counts: 148
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 38
+- id: MYBPC3:11:47354176
+  ref_counts: 306
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 0
+- id: MS4A8:11:60482532
+  ref_counts: 1645
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 723
+- id: 11:62293141
+  ref_counts: 225
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 4
+- id: 11:62293860
+  ref_counts: 848
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 474
+- id: EHBP1L1:11:65352543
+  ref_counts: 0
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: CATSPER1:11:65792923
+  ref_counts: 139
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: 11:65803867
+  ref_counts: 20045
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 11
+- id: 11:71249415
+  ref_counts: 16
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 15
+- id: DGAT2:11:75495761
+  ref_counts: 1149
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 5
+- id: INTS4:11:77594999
+  ref_counts: 3870
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: DLG2:11:84613753
+  ref_counts: 20847
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 25
+- id: AP000857.2:11:84707865
+  ref_counts: 6892
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 4
+- id: 11:88009671
+  ref_counts: 1880
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 48
+- id: 11:102856321
+  ref_counts: 10509
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 2045
+- id: DYNC2H1:11:103104860
+  ref_counts: 2399
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 886
+- id: 11:104655006
+  ref_counts: 12642
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 4036
+- id: 11:110736134
+  ref_counts: 11605
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 1
+- id: 11:116560355
+  ref_counts: 13882
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 5938
+- id: RP11-820L6.1:11:122092838
+  ref_counts: 12713
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 1
+- id: OR4D5:11:123811181
+  ref_counts: 6674
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 2773
+- id: OR4D5:11:123811181
+  ref_counts: 606
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 265
+- id: 11:131041649
+  ref_counts: 13895
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 15
+- id: 11:132272963
+  ref_counts: 615
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 17
+- id: MANSC1:12:12496026
+  ref_counts: 794
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 247
+- id: C12orf60:12:14975954
+  ref_counts: 297
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: RERGL:12:18241878
+  ref_counts: 1748
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: 12:19940694
+  ref_counts: 7145
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: 12:29206177
+  ref_counts: 21186
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 14
+- id: 12:31033388
+  ref_counts: 11115
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 10460
+- id: BICD1:12:32459012
+  ref_counts: 3133
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 1399
+- id: SYT10:12:33559814
+  ref_counts: 11918
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 5326
+- id: SYT10:12:33559814
+  ref_counts: 2604
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 1194
+- id: AC079630.4:12:40610115
+  ref_counts: 10801
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 4719
+- id: RP11-923I11.4:12:52222861
+  ref_counts: 7231
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 3194
+- id: NR4A1:12:52451189
+  ref_counts: 370
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 48
+- id: KRT76:12:53162562
+  ref_counts: 755
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 127
+- id: 12:56498419
+  ref_counts: 115
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 40
+- id: MBD6:12:57920107
+  ref_counts: 227
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 58
+- id: 12:59609885
+  ref_counts: 9727
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: 12:67762232
+  ref_counts: 3023
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 12
+- id: 12:78376181
+  ref_counts: 21062
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 24
+- id: MGAT4C:12:87001380
+  ref_counts: 10100
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 5129
+- id: 12:90446226
+  ref_counts: 5793
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 2072
+- id: 12:95146019
+  ref_counts: 18548
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 6
+- id: FGD6:12:95604681
+  ref_counts: 1211
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 1266
+- id: HECTD4:12:112642427
+  ref_counts: 4538
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 5263
+- id: TBX3:12:115120949
+  ref_counts: 9
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAA
+    g_v: AAAAAAB
+    prior_weight: 1
+  var_counts: 19
+- id: 12:115357954
+  ref_counts: 14077
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAA
+    g_v: AAAAAAB
+    prior_weight: 1
+  var_counts: 2294
+- id: EP400:12:132471331
+  ref_counts: 369
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 159
+- id: 13:53912957
+  ref_counts: 5425
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 4709
+- id: DCT:13:95121133
+  ref_counts: 77
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: ADPRHL1:13:114087226
+  ref_counts: 8961
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 1234
+- id: NEMF:14:50307512
+  ref_counts: 2259
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: 14:75357804
+  ref_counts: 279
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 244
+- id: TTLL5:14:76126830
+  ref_counts: 22472
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 2
+- id: NRXN3:14:78742914
+  ref_counts: 11389
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 7695
+- id: 14:102551257
+  ref_counts: 855
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 192
+- id: 14:104528407
+  ref_counts: 14218
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 3078
+- id: AHNAK2:14:105406761
+  ref_counts: 1026
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: TJP1:15:30068461
+  ref_counts: 4733
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 1378
+- id: 15:35274384
+  ref_counts: 1002
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 647
+- id: PLA2G4D:15:42371826
+  ref_counts: 52
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 0
+- id: TTBK2:15:43069358
+  ref_counts: 3359
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 1
+- id: 15:53744915
+  ref_counts: 8747
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 2456
+- id: 15:58210374
+  ref_counts: 13172
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 0
+- id: AP3B2:15:83331891
+  ref_counts: 928
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 245
+- id: BNC1:15:83935821
+  ref_counts: 904
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 563
+- id: 15:95365187
+  ref_counts: 17065
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  var_counts: 0
+- id: LRRK1:15:101599691
+  ref_counts: 23355
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  var_counts: 4
+- id: LRRK1:15:101599693
+  ref_counts: 23312
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  var_counts: 4
+- id: TRAP1:16:3724366
+  ref_counts: 72
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 8
+- id: CTD-3032H12.2:16:54990054
+  ref_counts: 22216
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  var_counts: 8
+- id: CDH13:16:83813772
+  ref_counts: 1771
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  var_counts: 441
+- id: TNK1:17:7287847
+  ref_counts: 39
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: TP53:17:7574012
+  ref_counts: 4569
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 3695
+- id: CDK12:17:37721012
+  ref_counts: 6322
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 7060
+- id: CDK12:17:37721012
+  ref_counts: 246
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 249
+- id: AC102948.2:17:50963210
+  ref_counts: 9443
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 701
+- id: TBCD:17:80851948
+  ref_counts: 3648
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 0
+- id: 18:1463855
+  ref_counts: 3824
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 3
+- id: GAREM:18:29850212
+  ref_counts: 1528
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 347
+- id: NOL4:18:31673508
+  ref_counts: 1582
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 1158
+- id: SLC39A6:18:33689556
+  ref_counts: 1349
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 0
+- id: 18:45687292
+  ref_counts: 7259
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 69
+- id: 18:50944901
+  ref_counts: 11924
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 5919
+- id: LINGO3:19:2291065
+  ref_counts: 0
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: BEST2:19:12866749
+  ref_counts: 326
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 41
+- id: CYP4F22:19:15636340
+  ref_counts: 216
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 106
+- id: FAM129C:19:17648271
+  ref_counts: 524
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: MAMSTR:19:49217295
+  ref_counts: 102
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: ALLC:2:3743333
+  ref_counts: 660
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: DCDC2C:2:3825345
+  ref_counts: 12883
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 5961
+- id: 2:19563766
+  ref_counts: 12517
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 5989
+- id: AC068490.2:2:22680755
+  ref_counts: 11673
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 5185
+- id: PLB1:2:28825725
+  ref_counts: 3004
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 505
+- id: SPAST:2:32353532
+  ref_counts: 2074
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 353
+- id: 2:37999290
+  ref_counts: 10894
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: 2:54587524
+  ref_counts: 2005
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 1
+- id: SPTBN1:2:54849454
+  ref_counts: 2004
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 8
+- id: PAPOLG:2:61024280
+  ref_counts: 1465
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 2
+- id: PSD4:2:113956707
+  ref_counts: 0
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 0
+- id: AC093901.1:2:118934482
+  ref_counts: 922
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 516
+- id: 2:120473102
+  ref_counts: 3576
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 0
+- id: CNTNAP5:2:125405393
+  ref_counts: 186
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 74
+- id: 2:137238776
+  ref_counts: 18751
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 3051
+- id: 2:151278671
+  ref_counts: 20880
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 30
+- id: NOSTRIN:2:169664641
+  ref_counts: 17630
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 2932
+- id: TTN:2:179393076
+  ref_counts: 3815
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 4
+- id: CERKL:2:182412452
+  ref_counts: 3628
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 2
+- id: AC079354.1:2:202957845
+  ref_counts: 2703
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 4
+- id: FAM124B:2:225244580
+  ref_counts: 1896
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 0
+- id: ASB18:2:237150035
+  ref_counts: 320
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 260
+- id: COL6A3:2:238280920
+  ref_counts: 1515
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 4
+- id: AC104809.3:2:241873192
+  ref_counts: 14
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 0
+- id: PCSK2:20:17301464
+  ref_counts: 20765
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 1
+- id: SLC17A9:20:61594946
+  ref_counts: 0
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 2
+- id: YTHDF1:20:61834739
+  ref_counts: 163
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 53
+- id: 20:62879489
+  ref_counts: 5318
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 4196
+- id: 21:32611065
+  ref_counts: 20733
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 15
+- id: MORC3:21:37736412
+  ref_counts: 355
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 291
+- id: RBFOX2:22:36161499
+  ref_counts: 1211
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: 3:1385400
+  ref_counts: 3067
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 201
+- id: 3:7153652
+  ref_counts: 12425
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 4624
+- id: GRM7:3:7340614
+  ref_counts: 19948
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 7
+- id: LSAMP:3:117230193
+  ref_counts: 16095
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: 3:117641458
+  ref_counts: 14879
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 500
+- id: B4GALT4-AS1:3:118994408
+  ref_counts: 14688
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 12
+- id: 3:122756603
+  ref_counts: 14823
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 5
+- id: PLXNA1:3:126719575
+  ref_counts: 9446
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 8035
+- id: CPNE4:3:131436587
+  ref_counts: 11448
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 3329
+- id: PAQR9:3:142673517
+  ref_counts: 10871
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  var_counts: 1912
+- id: 3:147113881
+  ref_counts: 25
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  var_counts: 4
+- id: MED12L:3:150804770
+  ref_counts: 6
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAA
+    g_v: AAAAAAAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: SHOX2:3:157816006
+  ref_counts: 85
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAA
+    g_v: AAAAAAAAAB
+    prior_weight: 1
+  var_counts: 22
+- id: B3GALNT1:3:160818934
+  ref_counts: 1830
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAA
+    g_v: AAAAAAAAAB
+    prior_weight: 1
+  var_counts: 357
+- id: MECOM:3:169315121
+  ref_counts: 17612
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABBBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAAAA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  var_counts: 9
+- id: 3:169724979
+  ref_counts: 18373
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAA
+    g_v: AAAAAAAAAB
+    prior_weight: 1
+  var_counts: 3532
+- id: 3:180076138
+  ref_counts: 14797
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAAAA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  var_counts: 14
+- id: 3:184021144
+  ref_counts: 1933
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAAAA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  var_counts: 4
+- id: VPS8:3:184557502
+  ref_counts: 5192
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAAAA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  var_counts: 933
+- id: IGF2BP2:3:185467791
+  ref_counts: 19153
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAAAA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  var_counts: 18
+- id: HTT:4:3211580
+  ref_counts: 1336
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 2
+- id: CC2D2A:4:15518362
+  ref_counts: 421
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 321
+- id: 4:24264901
+  ref_counts: 20365
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 6
+- id: 4:27888426
+  ref_counts: 11956
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 9721
+- id: 4:29710270
+  ref_counts: 22774
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 16
+- id: 4:38628500
+  ref_counts: 11
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: GABRA4:4:46925771
+  ref_counts: 16837
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 13
+- id: RP11-629B11.4:4:74956340
+  ref_counts: 13564
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: USO1:4:76726328
+  ref_counts: 1784
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 377
+- id: RP11-689K5.3:4:82894622
+  ref_counts: 3905
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 1
+- id: 4:94762033
+  ref_counts: 12960
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  var_counts: 6080
+- id: BMPR1B:4:96073864
+  ref_counts: 746
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  var_counts: 202
+- id: STPG2:4:98271662
+  ref_counts: 13402
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  var_counts: 4757
+- id: QRFPR:4:122250834
+  ref_counts: 2450
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  var_counts: 4
+- id: KIAA1109:4:123192331
+  ref_counts: 2542
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  var_counts: 0
+- id: MFAP3L:4:170943584
+  ref_counts: 15819
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 3771
+- id: GLRA3:4:175654597
+  ref_counts: 6455
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 2659
+- id: 5:5792623
+  ref_counts: 16364
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 7
+- id: 5:18462878
+  ref_counts: 19241
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: CDH12:5:21755737
+  ref_counts: 3174
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 539
+- id: CDH9:5:26999639
+  ref_counts: 8990
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 7
+- id: ZFR:5:32385696
+  ref_counts: 6569
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: HCN1:5:45303922
+  ref_counts: 1742
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 762
+- id: CTD-2081C10.1:5:53086744
+  ref_counts: 431
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 117
+- id: VCAN:5:82817149
+  ref_counts: 2360
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: TMEM161B-AS1:5:87706042
+  ref_counts: 3468
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: 5:107276831
+  ref_counts: 18965
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 38
+- id: ANKHD1:5:139908987
+  ref_counts: 15409
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 1709
+- id: ANKHD1:5:139908987
+  ref_counts: 848
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 123
+- id: PDE6A:5:149324107
+  ref_counts: 1018
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 4
+- id: MFAP3:5:153432797
+  ref_counts: 1474
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: NIPAL4:5:156899387
+  ref_counts: 1524
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: AC008703.1:5:158884808
+  ref_counts: 8559
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 5
+- id: COL23A1:5:177688740
+  ref_counts: 1376
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAA
+    g_v: AAAAAAB
+    prior_weight: 1
+  var_counts: 2
+- id: RREB1:6:7229563
+  ref_counts: 34
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 54
+- id: MRPL42P2:6:16174173
+  ref_counts: 5817
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: RP3-522P13.2:6:25269981
+  ref_counts: 13166
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: SCAND3:6:28541420
+  ref_counts: 2442
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: ATAT1:6:30595274
+  ref_counts: 275
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 150
+- id: 6:34041111
+  ref_counts: 25
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: CMTR1:6:37426415
+  ref_counts: 1035
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: ZFAND3:6:37995120
+  ref_counts: 18379
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 16
+- id: TREML2:6:41162410
+  ref_counts: 2124
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 609
+- id: MCM3:6:52141151
+  ref_counts: 651
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 2
+- id: 6:56918610
+  ref_counts: 242
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 98
+- id: TTK:6:80747754
+  ref_counts: 1483
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 828
+- id: 6:85485658
+  ref_counts: 10773
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 7390
+- id: RNGTT:6:89594693
+  ref_counts: 4915
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 4784
+- id: ARHGAP18:6:129905199
+  ref_counts: 1786
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 8
+- id: 6:159331238
+  ref_counts: 2123
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 584
+- id: MLLT4:6:168352727
+  ref_counts: 19490
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 20
+- id: HDAC9:7:18801876
+  ref_counts: 2076
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 8
+- id: 7:46467231
+  ref_counts: 3568
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 51
+- id: ZPBP:7:50129237
+  ref_counts: 261
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: 7:51744614
+  ref_counts: 8941
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 5901
+- id: ZNF713:7:56007074
+  ref_counts: 1389
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 421
+- id: 7:93580433
+  ref_counts: 4733
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 1787
+- id: COL1A2:7:94037166
+  ref_counts: 1084
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: SMURF1:7:98636062
+  ref_counts: 1115
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 535
+- id: 7:100646172
+  ref_counts: 2249
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 304
+- id: MUC12:7:100658929
+  ref_counts: 870
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 467
+- id: ATXN7L1:7:105275139
+  ref_counts: 17469
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 10
+- id: 7:113219135
+  ref_counts: 6799
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 1493
+- id: NRF1:7:129297309
+  ref_counts: 703
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 333
+- id: RP11-2E11.9:7:130144604
+  ref_counts: 7285
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 5997
+- id: PRKAG2:7:151318252
+  ref_counts: 12828
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 10038
+- id: 8:5394162
+  ref_counts: 22970
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 21
+- id: 8:37024639
+  ref_counts: 12584
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 6327
+- id: RAB11FIP1:8:37720623
+  ref_counts: 2985
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 4
+- id: PRKDC:8:48869937
+  ref_counts: 770
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 2
+- id: LYN:8:56922615
+  ref_counts: 5946
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAA
+    g_v: AAAAAAAAB
+    prior_weight: 1
+  var_counts: 2184
+- id: RRS1:8:67342435
+  ref_counts: 241
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: 8:69130113
+  ref_counts: 14579
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  var_counts: 4
+- id: LACTB2:8:71553182
+  ref_counts: 7547
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  var_counts: 2
+- id: XKR9:8:71591570
+  ref_counts: 4934
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  var_counts: 1120
+- id: GDAP1:8:75239191
+  ref_counts: 14229
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  var_counts: 2906
+- id: LRRCC1:8:86048178
+  ref_counts: 3567
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  var_counts: 2
+- id: RP11-44N12.4:8:99914282
+  ref_counts: 15998
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAA
+    g_v: AAAAAAAAAB
+    prior_weight: 1
+  var_counts: 2934
+- id: 8:101724676
+  ref_counts: 1184
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAAAA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: DPYS:8:105382068
+  ref_counts: 8926
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAAAA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  var_counts: 2
+- id: RSPO2:8:108970383
+  ref_counts: 4247
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAAAA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: 8:114705239
+  ref_counts: 14315
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAAAAAA
+    g_v: AAAAAAAAAAAAAB
+    prior_weight: 1
+  var_counts: 8
+- id: 8:114991429
+  ref_counts: 18092
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAAAAAA
+    g_v: AAAAAAAAAAAAAB
+    prior_weight: 1
+  var_counts: 20
+- id: ZNF572:8:125989415
+  ref_counts: 5154
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAAAA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  var_counts: 2
+- id: 8:126928434
+  ref_counts: 936
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAAAAAA
+    g_v: AAAAAAAAAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: 8:134864841
+  ref_counts: 19485
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAAAA
+    g_v: AAAAAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: 8:138228010
+  ref_counts: 17590
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 2084
+- id: PTK2:8:141669763
+  ref_counts: 1324
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 2
+- id: GPT:8:145730498
+  ref_counts: 21
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 0
+- id: 9:1687034
+  ref_counts: 15139
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAA
+    g_v: AAAAB
+    prior_weight: 1
+  var_counts: 1
+- id: 9:18082990
+  ref_counts: 15299
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: ABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAA
+    g_v: AAB
+    prior_weight: 1
+  var_counts: 7271
+- id: 9:30325390
+  ref_counts: 17604
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAAABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AAABBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABBBB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAAAA
+    g_v: AAAAAB
+    prior_weight: 1
+  var_counts: 2
+- id: TRPM6:9:77359019
+  ref_counts: 1358
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 4
+- id: AUH:9:94123955
+  ref_counts: 6
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: 9:122354044
+  ref_counts: 18147
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 5
+- id: DENND1A:9:126345454
+  ref_counts: 143
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 95
+- id: FAM129B:9:130289573
+  ref_counts: 57
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 15
+- id: COQ4:9:131088175
+  ref_counts: 680
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 97
+- id: TTF1:9:135277011
+  ref_counts: 1229
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 4
+- id: TSC1:9:135772671
+  ref_counts: 18838
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: TSC1:9:135772671
+  ref_counts: 1498
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: 9:138874576
+  ref_counts: 207
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 2
+- id: ARSF:X:3007569
+  ref_counts: 1713
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 713
+- id: X:15780903
+  ref_counts: 3139
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: X:16268562
+  ref_counts: 13309
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 5262
+- id: DMD:X:31683995
+  ref_counts: 6915
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 3487
+- id: DMD:X:32509522
+  ref_counts: 3581
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 10
+- id: DMD:X:33215011
+  ref_counts: 10981
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 4799
+- id: CACNA1F:X:49075401
+  ref_counts: 1206
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 511
+- id: ZMYM3:X:70465276
+  ref_counts: 1215
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0
+- id: NAP1L2:X:72433430
+  ref_counts: 617
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 536
+- id: CXorf57:X:105855807
+  ref_counts: 2260
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: BB
+    prior_weight: 1
+  var_counts: 0
+- id: PASD1:X:150840090
+  ref_counts: 4461
+  states:
+  - g_n: AA
+    g_r: AA
+    g_v: AAAB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AA
+    g_v: AABB
+    prior_weight: 1
+  - g_n: AA
+    g_r: AAAA
+    g_v: AAAB
+    prior_weight: 1
+  var_counts: 0

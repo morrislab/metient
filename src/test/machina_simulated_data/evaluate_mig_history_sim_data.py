@@ -115,16 +115,10 @@ def evaluate_seeding_clones(sim_clone_tree_fn, sim_vert_labeling_fn, pred_clone_
     seeding_clones_simulated = identify_seeding_clones(edges_simulated, mig_edges_simulated)
     edges_inferred, mig_edges_inferred = parse_clone_tree(pred_clone_tree_fn, pred_vert_labeling_fn)
     seeding_clones_inferred = identify_seeding_clones(edges_inferred, mig_edges_inferred)
-    #print("edges_simulated", edges_simulated)
     contains_resolved_polytomy = False
     for edge in edges_simulated:
         if is_resolved_polytomy_cluster(edge[0]) or is_resolved_polytomy_cluster(edge[1]):
             contains_resolved_polytomy = True
-    # print("mig_edges_simulated", mig_edges_simulated)
-    # print("seeding_clones_simulated", seeding_clones_simulated)
-    # print("edges_inferred", edges_inferred)
-    # print("mig_edges_inferred", mig_edges_inferred)
-    # print("seeding_clones_inferred", seeding_clones_inferred)
     recall = float(len(seeding_clones_inferred & seeding_clones_simulated)) / float(len(seeding_clones_simulated))
     precision = float(len(seeding_clones_inferred & seeding_clones_simulated)) / float(len(seeding_clones_inferred))
     if recall == 0 or precision == 0:

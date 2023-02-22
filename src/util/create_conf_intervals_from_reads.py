@@ -1,5 +1,5 @@
 '''
-This module takes simulated read data and observed clusters from Machina
+This module takes read data and observed clusters from Machina
 (El Kebir et.al.; see: https://github.com/raphael-group/machina/tree/master/data/sims)
 and creates pooled confidence intervals from this data (pooled by mutation cluster)
 
@@ -18,6 +18,7 @@ import pandas as pd
 import numpy
 from scipy.stats import beta
 from scipy.stats import norm
+import csv
 
 CONFIDENCE = 0.95
 
@@ -112,22 +113,36 @@ def write(reads_filename, cluster_filename, out_directory, output_fn=None, clust
     useful in cases where the cluster labels get very long
     '''
 
-    read_data = pd.read_table(reads_filename, skiprows=3)
+
+    # find header row
+    with open(reads_filename, 'r') as f:
+        reader = csv.reader(f)
+        header_row_idx = next(idx for idx, row in enumerate(reader) if len(row) > 1)
+
+    # this is fragile but eh
+    if ".tsv" in reads_filename:
+        read_data = pd.read_table(reads_filename, skiprows=header_row_idx)
+    elif ".csv" in reads_filename:
+        read_data = pd.read_csv(reads_filename, skiprows=header_row_idx)
+    else:
+        raise ValueError("reads file must be csv or tsv")
+
     read_data['character_label'] = read_data['character_label'].astype(str)
     # Map variant IDs to observed clusters IDs
     variant_id_to_cluster_idx_map = {}
     cluster_index_to_variant_indices = {} # this will be saved as the character label
+    variants = []
     with open(cluster_filename) as f:
         for i,line in enumerate(f):
             if cluster_split_function != None:
-                var_indices = cluster_split_function(line.strip())
+                var_ids = cluster_split_function(line.strip())
             else:
-                var_indices = [x for x in line.strip().split(';') if x.isnumeric()]
-            for l in var_indices:
+                var_ids = [x for x in line.strip().split(';') if x.isnumeric()]
+            for l in var_ids:
                 variant_id_to_cluster_idx_map[l] = i
+                variants.append(l)
             cluster_index_to_variant_indices[i] = line.strip()
 
-    variants = read_data['character_label'].unique()
     # TODO: should this be per sample or per anatomical site
     sample_labels = read_data['anatomical_site_label'].unique()
 
@@ -181,8 +196,8 @@ def write(reads_filename, cluster_filename, out_directory, output_fn=None, clust
         rows += list(ctable_cutoff.apply(print_char, args=[i, sam, cluster_index_to_variant_indices, use_char_idx_as_char_label], axis=1))
 
     if output_fn == None:
-        basename = os.path.basename(reads_filename).replace("reads_", "").replace(".tsv", "")
-        output_fn = basename+"_"+str(CONFIDENCE)+".tsv"
+        basename = os.path.basename(reads_filename).replace("reads_", "").replace(".tsv", "").replace(".csv", "")
+        output_fn = f"{basename}_clustered_{CONFIDENCE}.tsv"
     with open(os.path.join(out_directory, output_fn), 'w') as f:
         for line in rows:
             f.write(line)

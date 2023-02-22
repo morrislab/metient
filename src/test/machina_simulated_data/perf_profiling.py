@@ -16,6 +16,8 @@ import src.util.vertex_labeling_util as vert_util
 import cProfile
 results = []
 
+print(logger)
+
 def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir):
     cluster_fn = os.path.join(machina_sims_data_dir, f"{site}_clustered_input", f"cluster_{mig_type}_seed{seed}.txt")
     all_mut_trees_fn = os.path.join(machina_sims_data_dir, f"{site}_mut_trees", f"mut_trees_{mig_type}_seed{seed}.txt")

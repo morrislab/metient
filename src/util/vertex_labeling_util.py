@@ -177,7 +177,7 @@ def print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_
         return torch.softmax(-1.0*(torch.log2(losses_tensor)/ torch.log2(torch.tensor(1.1))), dim=0)
 
     weights = torch.softmax(-1.0*(torch.log2(losses_tensor)/ torch.log2(torch.tensor(1.1))), dim=0)
-    print("losses tensor\n", losses_tensor, weights)
+    #print("losses tensor\n", losses_tensor, weights)
 
     weighted_edges = dict() # { edge_0 : [loss_0, loss_1] }
     weighted_node_colors = dict() # { node_0 : { anatomical_site_0 : [loss_0, loss_3]}}
@@ -215,13 +215,13 @@ def print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_
         softmaxed = softmaxed_losses(avg_losses)
         for site_idx, soft in zip(ordered_labels, softmaxed):
             avg_node_colors[node_label][site_idx] = soft
-    print("avg_node_colors\n", avg_node_colors)
+    #print("avg_node_colors\n", avg_node_colors)
 
     avg_edges = dict()
     for edge in weighted_edges:
         avg_edges[edge] = sum(weighted_edges[edge])/len(weighted_edges[edge])
 
-    print("avg_edges\n", avg_edges)
+    #print("avg_edges\n", avg_edges)
 
     plot_averaged_tree(avg_edges, avg_node_colors, ordered_sites, custom_colors, node_idx_to_label)
 
@@ -237,8 +237,8 @@ def idx_to_color(custom_colors, idx, alpha=1.0):
 
 def plot_averaged_tree(avg_edges, avg_node_colors, ordered_sites, custom_colors=None, custom_node_idx_to_label=None, show=True):
 
-    penwidth = 3.0
-    alpha = 0.7
+    penwidth = 2.0
+    alpha = 0.8
 
     max_edge_weight = max(list(avg_edges.values()))
 
@@ -251,6 +251,7 @@ def plot_averaged_tree(avg_edges, avg_node_colors, ordered_sites, custom_colors=
         patches.append(patch)
 
     G = nx.DiGraph()
+
     for label_i, label_j in avg_edges.keys():
         
         node_i_color = ""
@@ -259,12 +260,12 @@ def plot_averaged_tree(avg_edges, avg_node_colors, ordered_sites, custom_colors=
         node_j_color = ""
         for site_idx in avg_node_colors[label_j]:
             node_j_color += f"{idx_to_color(custom_colors, site_idx, alpha=alpha)};{avg_node_colors[label_j][site_idx]}:"
-        G.add_node(label_i, style="wedged", fillcolor=node_i_color, color="none",
-            alpha=0.5, fontname = "helvetica-narrow", fontsize="12pt", fixedsize="true")
-        G.add_node(label_j, style="wedged", fillcolor=node_j_color, color="none",
-            alpha=0.5, fontname = "helvetica-narrow", fontsize="12pt", fixedsize="true")
+        G.add_node(label_i, shape="circle", style="wedged", fillcolor=node_i_color, color="none",
+            alpha=0.5, fontname = "arial", fontsize="10pt", fixedsize="true", width=0.5)
+        G.add_node(label_j, shape="circle", style="wedged", fillcolor=node_j_color, color="none",
+            alpha=0.5, fontname = "arial", fontsize="10pt", fixedsize="true", width=0.5)
         print(label_i, label_j, avg_edges[(label_i, label_j)], rescaled_edge_weight(avg_edges[(label_i, label_j)]))
-        G.add_edge(label_i, label_j, color="#666666c2", penwidth=rescaled_edge_weight(avg_edges[(label_i, label_j)]), arrowsize=0.75)
+        G.add_edge(label_i, label_j, color="#black", penwidth=rescaled_edge_weight(avg_edges[(label_i, label_j)]), arrowsize=0.75, spline="ortho")
 
     assert(nx.is_tree(G))
     dot = to_pydot(G).to_string()
@@ -288,8 +289,8 @@ def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=
         label_i = full_node_idx_to_label_map[i]
         label_j = full_node_idx_to_label_map[j]
         edges.append((label_i, label_j))
-        G.add_node(label_i, color=color_map[label_i], penwidth=3, fixedsize="true", fontname = "helvetica-narrow")
-        G.add_node(label_j, color=color_map[label_j], penwidth=3, fixedsize="true", fontname = "helvetica-narrow")
+        G.add_node(label_i, shape="circle", color=color_map[label_i], penwidth=3, fixedsize="true", fontname = "helvetica-narrow", fontsize="10pt")
+        G.add_node(label_j, shape="circle", color=color_map[label_j], penwidth=3, fixedsize="true", fontname = "helvetica-narrow", fontsize="10pt")
         G.add_edge(label_i, label_j, color=f'"{color_map[label_i]};0.5:{color_map[label_j]}"', penwidth=3, arrowsize=0.75)
 
     assert(nx.is_tree(G))
@@ -386,7 +387,8 @@ def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights,
     df = pd.DataFrame(U_clipped, columns=col_labels, index=ordered_sites)
     logger.debug(df)
     logger.debug("\nF_hat")
-    logger.debug(labeled_tree.U @ B)
+    F_hat_df = pd.DataFrame((labeled_tree.U @ B).cpu().detach().numpy(), index=ordered_sites)
+    logger.debug(F_hat_df)
     return loss_components
 
 def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_matrix, var_matrix, B, O, weights,                 node_idx_to_label, ordered_sites, print_config, intermediate_data, custom_colors, 

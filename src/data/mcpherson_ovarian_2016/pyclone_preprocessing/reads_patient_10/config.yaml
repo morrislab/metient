@@ -1,0 +1,41 @@
+base_measure_params:
+  alpha: 1
+  beta: 1
+beta_binomial_precision_params:
+  prior:
+    rate: 0.001
+    shape: 1.0
+  proposal:
+    precision: 0.01
+  value: 1000
+concentration:
+  prior:
+    rate: 0.001
+    shape: 1.0
+  value: 1.0
+density: pyclone_beta_binomial
+init_method: disconnected
+num_iters: 10000
+samples:
+  right_ovary_site_1:
+    error_rate: 0.001
+    mutations_file: /Users/divyakoyyalagunta/Desktop/Cornell_Research/Morris_Lab/met_history_prediction/src/data/mcpherson_ovarian_2016/reads_patient_10/yaml/right_ovary_site_1.yaml
+    tumour_content:
+      value: 0.445713758
+  right_ovary_site_2:
+    error_rate: 0.001
+    mutations_file: /Users/divyakoyyalagunta/Desktop/Cornell_Research/Morris_Lab/met_history_prediction/src/data/mcpherson_ovarian_2016/reads_patient_10/yaml/right_ovary_site_2.yaml
+    tumour_content:
+      value: 0.696471269
+  right_ovary_site_3:
+    error_rate: 0.001
+    mutations_file: /Users/divyakoyyalagunta/Desktop/Cornell_Research/Morris_Lab/met_history_prediction/src/data/mcpherson_ovarian_2016/reads_patient_10/yaml/right_ovary_site_3.yaml
+    tumour_content:
+      value: 0.270728857
+  right_ovary_site_4:
+    error_rate: 0.001
+    mutations_file: /Users/divyakoyyalagunta/Desktop/Cornell_Research/Morris_Lab/met_history_prediction/src/data/mcpherson_ovarian_2016/reads_patient_10/yaml/right_ovary_site_4.yaml
+    tumour_content:
+      value: 0.323749037
+trace_dir: trace
+working_dir: /Users/divyakoyyalagunta/Desktop/Cornell_Research/Morris_Lab/met_history_prediction/src/data/mcpherson_ovarian_2016/reads_patient_10
