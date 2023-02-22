@@ -33,7 +33,7 @@ def _calc_llh(F_hat, R, V, omega_v, epsilon=1e-5):
         V: Variant matrix (num_samples x num_mutation_clusters)
     Returns:
         Data fit using the Binomial likelihood (p(x|F_hat)). See PairTree
-        supplement (9.3.2) for details.
+        supplement section 2.2 for details.
     '''
 
     N = R + V
@@ -238,7 +238,7 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weig
 
     def full_adj_matrix(i, T, U, G):
         '''
-        All values non-zero values of U represent extant clones (leaf nodes of the full tree).
+        All non-zero values of U represent extant clones (leaf nodes of the full tree).
         For each of these non-zero values, we add an edge from parent clone to extant clone.
         See MACHINA Supp. Fig. 23 for a visual.
         '''
@@ -340,7 +340,7 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
 
     # TODO: should we do this? or should we do LR scheduling
     if weight_init_primary:
-        X[:,0,:] = 1
+        X[:,0,:] = 3
 
     X.requires_grad = True
 
@@ -367,6 +367,7 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     temps = []
 
     start_time = datetime.datetime.now()
+
 
     all_loss_components = []
     for i in range(max_iter):
@@ -395,6 +396,14 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
         if i % 10 == 0:
             temp = np.maximum(temp * np.exp(-anneal_rate * i), final_temp)
         temps.append(temp)
+
+        if i % 20 == 0:
+            print(f"Iteration{i}")
+            print("node 40",  torch.linalg.norm(X.grad[:,:,4], ord=1))
+            print("node 3;6",  torch.linalg.norm(X.grad[:,:,3], ord=1))
+            print("node 55;61",  torch.linalg.norm(X.grad[:,:,6], ord=1))
+
+            print("psi \n", torch.linalg.norm(psi.grad[:,:,3], dim=1, ord=1))
 
         with torch.no_grad():
 
