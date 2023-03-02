@@ -284,7 +284,7 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weig
     return torch.stack(losses_list), V_list, full_trees_list, full_branch_lengths_list, softmax_X_soft, loss_components_list
     
 def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, weights,
-                                print_config, p=None, node_idx_to_label=None, G=None, O=None,
+                                print_config, node_idx_to_label, p=None, G=None, O=None,
                                 max_iter=200, lr=0.1, init_temp=20, final_temp=0.1,
                                 batch_size=128, custom_colors=None, primary=None, 
                                 weight_init_primary= False):
@@ -397,13 +397,13 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
             temp = np.maximum(temp * np.exp(-anneal_rate * i), final_temp)
         temps.append(temp)
 
-        if i % 20 == 0:
-            print(f"Iteration{i}")
-            print("node 40",  torch.linalg.norm(X.grad[:,:,4], ord=1))
-            print("node 3;6",  torch.linalg.norm(X.grad[:,:,3], ord=1))
-            print("node 55;61",  torch.linalg.norm(X.grad[:,:,6], ord=1))
+        # if i % 20 == 0:
+        #     print(f"Iteration{i}")
+        #     print("node 40",  torch.linalg.norm(X.grad[:,:,4], ord=1))
+        #     print("node 3;6",  torch.linalg.norm(X.grad[:,:,3], ord=1))
+        #     print("node 55;61",  torch.linalg.norm(X.grad[:,:,6], ord=1))
 
-            print("psi \n", torch.linalg.norm(psi.grad[:,:,3], dim=1, ord=1))
+        #     print("psi \n", torch.linalg.norm(psi.grad[:,:,3], dim=1, ord=1))
 
         with torch.no_grad():
 
