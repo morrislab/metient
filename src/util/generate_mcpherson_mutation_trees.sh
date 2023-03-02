@@ -7,7 +7,7 @@ fi
 
 for p in {1,2,3,4,7,9,10}
 do
-    echo Generating mutation tree for patient $...
-    $2 ${1}/patient${p}_clustered_0.95${s}.tsv > ${1}/patient${p}_mut_trees.txt
+    echo Generating mutation tree for patient ${p}...
+    $2 ${1}/patient${p}_clustered_0.95.tsv > ${1}/patient${p}_mut_trees.txt
     
 done
