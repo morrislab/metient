@@ -19,6 +19,8 @@ from graphviz import Source
 
 import string
 
+import pygraphviz as pgv
+
 from functools import wraps
 import hashlib
 
@@ -145,21 +147,18 @@ def truncated_cluster_name(cluster_name):
 def get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites, shorten_label=True):
     '''
     custom_node_idx_to_label only gives the internal node labels, so build a map of
-    node_idx to label for the leaf nodes (e.g. "0;9_P" or "5_liver")
+    node_idx to (label, is_leaf) 
+    e.g. ("0;9", False), ("0;9_P", True),  or ("5_liver", True) 
     '''
     full_node_idx_to_label_map = dict()
     for i, j in tree_iterator(T):
-        if custom_node_idx_to_label != None:
-            if i in custom_node_idx_to_label:
-                full_node_idx_to_label_map[i] = relabel_cluster(custom_node_idx_to_label[i], shorten_label)
-            if j in custom_node_idx_to_label:
-                full_node_idx_to_label_map[j] = relabel_cluster(custom_node_idx_to_label[j], shorten_label)
-            elif j not in custom_node_idx_to_label:
-                site_idx = (V[:,j] == 1).nonzero()[0][0].item()
-                full_node_idx_to_label_map[j] = relabel_cluster(f"{custom_node_idx_to_label[i]}_{ordered_sites[site_idx]}", shorten_label)
-        else:
-            full_node_idx_to_label_map[i] = chr(i+65)
-            full_node_idx_to_label_map[j] = chr(j+65)
+        if i in custom_node_idx_to_label:
+            full_node_idx_to_label_map[i] = (relabel_cluster(custom_node_idx_to_label[i], shorten_label), False)
+        if j in custom_node_idx_to_label:
+            full_node_idx_to_label_map[j] = (relabel_cluster(custom_node_idx_to_label[j], shorten_label), False)
+        elif j not in custom_node_idx_to_label:
+            site_idx = (V[:,j] == 1).nonzero()[0][0].item()
+            full_node_idx_to_label_map[j] = (relabel_cluster(f"{custom_node_idx_to_label[i]}_{ordered_sites[site_idx]}", shorten_label), True)
     return full_node_idx_to_label_map
 
 def print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_colors, ordered_sites):
@@ -188,14 +187,14 @@ def print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_
         full_tree_node_idx_to_label = get_full_tree_node_idx_to_label(V[sln_idx], full_trees[sln_idx], node_idx_to_label, ordered_sites)
 
         for i, j in tree_iterator(full_trees[sln_idx]):
-            edge = full_tree_node_idx_to_label[i], full_tree_node_idx_to_label[j]
+            edge = full_tree_node_idx_to_label[i][0], full_tree_node_idx_to_label[j][0]
             if edge not in weighted_edges:
                 weighted_edges[edge] = []
             weighted_edges[edge].append(weight.item())
 
         for node_idx in full_tree_node_idx_to_label:
             site_idx = (V[sln_idx][:,node_idx] == 1).nonzero()[0][0].item()
-            node_label = full_tree_node_idx_to_label[node_idx]
+            node_label, _ = full_tree_node_idx_to_label[node_idx]
             if node_label not in weighted_node_colors:
                 weighted_node_colors[node_label] = dict()
             if site_idx not in weighted_node_colors[node_label]:
@@ -235,21 +234,19 @@ def idx_to_color(custom_colors, idx, alpha=1.0):
     assert(idx < len(pastel_colors))
     return pastel_colors[idx]
 
+# TODO: make custom_node_idx_to_label a required argument
+
 def plot_averaged_tree(avg_edges, avg_node_colors, ordered_sites, custom_colors=None, custom_node_idx_to_label=None, show=True):
 
     penwidth = 2.0
-    alpha = 0.8
+    alpha = 1.0
 
     max_edge_weight = max(list(avg_edges.values()))
 
     def rescaled_edge_weight(edge_weight):
         return (penwidth/max_edge_weight)*edge_weight
     
-    patches = []
-    for i, site in enumerate(ordered_sites):
-        patch = mpatches.Patch(color=idx_to_color(custom_colors, i), label=site, alpha=alpha)
-        patches.append(patch)
-
+    
     G = nx.DiGraph()
 
     for label_i, label_j in avg_edges.keys():
@@ -260,20 +257,124 @@ def plot_averaged_tree(avg_edges, avg_node_colors, ordered_sites, custom_colors=
         node_j_color = ""
         for site_idx in avg_node_colors[label_j]:
             node_j_color += f"{idx_to_color(custom_colors, site_idx, alpha=alpha)};{avg_node_colors[label_j][site_idx]}:"
-        G.add_node(label_i, shape="circle", style="wedged", fillcolor=node_i_color, color="none",
-            alpha=0.5, fontname = "arial", fontsize="10pt", fixedsize="true", width=0.5)
-        G.add_node(label_j, shape="circle", style="wedged", fillcolor=node_j_color, color="none",
-            alpha=0.5, fontname = "arial", fontsize="10pt", fixedsize="true", width=0.5)
+        is_leaf = False
+        print(label_i, node_i_color)
+        print(label_j, node_j_color)
+
+        G.add_node(label_i, xlabel=label_i, label="", shape="circle", fillcolor=node_i_color, 
+                    color="none", penwidth=3, style="wedged",
+                    fixedsize="true", height=0.35, fontname="verdana", 
+                    fontsize="10pt")
+        G.add_node(label_j, xlabel="" if is_leaf else label_j, label="", shape="circle", 
+                    fillcolor=node_j_color, color="none", 
+                    penwidth=3, style="solid" if is_leaf else "wedged",
+                    fixedsize="true", height=0.35, fontname="verdana", 
+                    fontsize="10pt")
+
+        # G.add_node(label_i, shape="circle", style="wedged", fillcolor=node_i_color, color="none",
+        #     alpha=0.5, fontname = "arial", fontsize="10pt", fixedsize="true", width=0.5)
+        # G.add_node(label_j, shape="circle", style="wedged", fillcolor=node_j_color, color="none",
+        #     alpha=0.5, fontname = "arial", fontsize="10pt", fixedsize="true", width=0.5)
         print(label_i, label_j, avg_edges[(label_i, label_j)], rescaled_edge_weight(avg_edges[(label_i, label_j)]))
-        G.add_edge(label_i, label_j, color="#black", penwidth=rescaled_edge_weight(avg_edges[(label_i, label_j)]), arrowsize=0.75, spline="ortho")
+        # G.add_edge(label_i, label_j, color="#black", penwidth=rescaled_edge_weight(avg_edges[(label_i, label_j)]), arrowsize=0.75, spline="ortho")
+        style = "dashed" if is_leaf else "solid"
+        penwidth = 2 if is_leaf else 2.5
+        xlabel = "" if is_leaf else label_j
+        G.add_edge(label_i, label_j,
+                    color=f'"grey"', 
+                    penwidth=rescaled_edge_weight(avg_edges[(label_i, label_j)]), arrowsize=0, fontname="verdana", 
+                    fontsize="10pt", style=style)
 
     assert(nx.is_tree(G))
     dot = to_pydot(G).to_string()
+    # we have to use graphviz in order to get multi-color edges :/
+    dot = to_pydot(G).to_string()
+    # hack since there doesn't seem to be API to modify graph attributes...
+    dot_lines = dot.split("\n")
+    dot_lines.insert(1, 'graph[splines=false]; nodesep=0.7; ranksep=0.6; forcelabels=true;')
+    dot = ("\n").join(dot_lines)
     src = Source(dot) # dot is string containing DOT notation of graph
     if show:
         display(src)
 
+def generate_legend_dot(ordered_sites, custom_colors, node_options):
+    legend = nx.DiGraph()
+    # this whole reversed business is to get the primary at the top of the legend...
+    for i, site in enumerate(reversed(ordered_sites)):
+        color = idx_to_color(custom_colors, len(ordered_sites)-1-i)
+        legend.add_node(i, shape="plaintext", style="solid", label=f"{site}\r", 
+                        width=0.3, height=0.2, fixedsize="true",
+                        fontname="verdana", fontsize="10pt")
+        legend.add_node(f"{i}_circle", fillcolor=color, color=color, 
+                        style="filled", height=0.2, **node_options)
+
+    legend_dot = to_pydot(legend).to_string()
+    legend_dot = legend_dot.replace("strict digraph", "subgraph cluster_legend")
+    legend_dot = legend_dot.split("\n")
+    legend_dot.insert(1, 'rankdir="LR";{rank=source;'+" ".join(str(i) for i in range(len(ordered_sites))) +"}")
+    legend_dot = ("\n").join(legend_dot)
+    return legend_dot
+
+
 def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=None, show=True):
+
+    # (1) Create full directed graph 
+    full_node_idx_to_label_map = get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites)
+
+    color_map = { full_node_idx_to_label_map[i][0]:idx_to_color(custom_colors, (V[:,i] == 1).nonzero()[0][0].item()) for i in range(V.shape[1])}
+    G = nx.DiGraph()
+    node_options = {"label":"", "shape": "circle", "penwidth":3, 
+                    "fontname":"verdana", "fontsize":"10pt",
+                    "fixedsize":"true"}
+    edges = []
+    for i, j in tree_iterator(T):
+        label_i, _ = full_node_idx_to_label_map[i]
+        label_j, is_leaf = full_node_idx_to_label_map[j]
+        edges.append((label_i, label_j))
+        G.add_node(label_i, xlabel=label_i, fillcolor=color_map[label_i], 
+                    color=color_map[label_i], style="filled", height=0.25, **node_options)
+        G.add_node(label_j, xlabel="" if is_leaf else label_j, fillcolor=color_map[label_j], 
+                    color=color_map[label_j], style="solid" if is_leaf else "filled", 
+                    height=0.25, **node_options)
+
+        style = "dashed" if is_leaf else "solid"
+        penwidth = 4 if is_leaf else 4.5
+        xlabel = "" if is_leaf else label_j
+        G.add_edge(label_i, label_j,
+                    color=f'"{color_map[label_i]};0.5:{color_map[label_j]}"', 
+                    penwidth=penwidth, arrowsize=0, fontname="verdana", 
+                    fontsize="10pt", style=style)
+
+    # Add edge from normal to root 
+    root_idx = get_root_index(T)
+    root_label = full_node_idx_to_label_map[root_idx][0]
+    G.add_node("normal", label="", xlabel=root_label, penwidth=3, style="invis")
+    G.add_edge("normal", root_label, label="", 
+                color=f'"{color_map[root_label]}"', 
+                penwidth=4, arrowsize=0, fontname="verdana", 
+                fontsize="10pt", style="solid")
+
+    assert(nx.is_tree(G))
+
+    # (2) Create legend
+    #legend_dot = generate_legend_dot(ordered_sites, custom_colors, node_options)
+
+    # we have to use graphviz in order to get multi-color edges :/
+    dot = to_pydot(G).to_string().split("\n")
+    # hack since there doesn't seem to be API to modify graph attributes...
+    dot.insert(1, 'graph[splines=false]; nodesep=0.7; ranksep=0.6; forcelabels=true;')
+    #dot.insert(2, legend_dot)
+    dot = ("\n").join(dot)
+
+    if show:
+        src = Source(dot) # dot is string containing DOT notation of graph
+        display(src)
+
+    vertex_name_to_site_map = { full_node_idx_to_label_map[i]:ordered_sites[(V[:,i] == 1).nonzero()[0][0].item()] for i in range(V.shape[1])}
+    return edges, vertex_name_to_site_map
+
+# TODO: remove
+def plot_tree_deprecated(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=None, show=True):
 
     full_node_idx_to_label_map = get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites)
 
@@ -289,11 +390,11 @@ def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=
         label_i = full_node_idx_to_label_map[i]
         label_j = full_node_idx_to_label_map[j]
         edges.append((label_i, label_j))
-        G.add_node(label_i, shape="circle", color=color_map[label_i], penwidth=3, fixedsize="true", fontname = "helvetica-narrow", fontsize="10pt")
-        G.add_node(label_j, shape="circle", color=color_map[label_j], penwidth=3, fixedsize="true", fontname = "helvetica-narrow", fontsize="10pt")
+        G.add_node(label_i, shape="circle", color=color_map[label_i], penwidth=3, fixedsize="true", fontname = "verdana", fontsize="10pt")
+        G.add_node(label_j, shape="circle", color=color_map[label_j], penwidth=3, fixedsize="true", fontname = "verdana", fontsize="10pt")
         G.add_edge(label_i, label_j, color=f'"{color_map[label_i]};0.5:{color_map[label_j]}"', penwidth=3, arrowsize=0.75)
 
-    assert(nx.is_tree(G))
+    #assert(nx.is_tree(G))
 
     nodes = [full_node_idx_to_label_map[i] for i in range(len(T))]
 
@@ -304,6 +405,19 @@ def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=
 
     vertex_name_to_site_map = { full_node_idx_to_label_map[i]:ordered_sites[(V[:,i] == 1).nonzero()[0][0].item()] for i in range(V.shape[1])}
     return edges, vertex_name_to_site_map
+
+def get_root_index(T):
+    '''
+    returns the root idx (node with no inbound edges) from adjacency matrix T
+    '''
+
+    candidates = set([x for x in range(len(T))])
+    for i, j in tree_iterator(T):
+        candidates.remove(j)
+    msg = "More than one" if len(candidates) > 1 else "No"
+    assert(len(candidates) == 1, f"{msg} root node detected")
+
+    return list(candidates)[0]
 
 def write_tree(tree_edge_list, output_filename):
     '''

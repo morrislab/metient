@@ -1,4 +1,5 @@
 
+import numpy as np
 
 def load_input_data(ssm_filename, params_filename):
     variants = inputparser.load_ssms(ssm_filename)
@@ -89,11 +90,14 @@ def get_B(clusters, parents, ordered_variant_ids):
             B[cidx][vidx] = 1
     return B
 
-def get_adj_matrix_from_parents(parents):
-    T = util.convert_parents_to_adjmatrix(parents)
+def get_adj_matrix_from_pairtree_tree(parents):
+    K = len(parents) + 1
+    T = np.eye(K)
+    T[parents,np.arange(1, K)] = 1
     I = np.identity(T.shape[0])
     T = np.logical_xor(T,I).astype(int) # remove self-loops
     # remove the normal subclone
     T = np.delete(T, 0, 0)
     T = np.delete(T, 0, 1)
     return T
+
