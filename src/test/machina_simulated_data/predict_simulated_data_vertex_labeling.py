@@ -29,7 +29,7 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
     tree_num = 0
 
     for adj_matrix, pruned_cluster_label_to_idx in data:
-        #print(f"Tree {tree_num}")
+        print(f"Tree {tree_num}")
         T = torch.tensor(adj_matrix, dtype = torch.float32)
         B = vert_util.get_mutation_matrix_tensor(T)
         idx_to_label = {v:k for k,v in pruned_cluster_label_to_idx.items()}
@@ -87,7 +87,7 @@ if __name__=="__main__":
     predictions_dir = f"predictions_{run_name}"
     os.mkdir(predictions_dir)
 
-    sys.stdout = open(os.path.join(predictions_dir, f"output__{run_name}.txt"), 'w')
+    sys.stdout = open(os.path.join(predictions_dir, f"output_{run_name}.txt"), 'w')
 
     sites = ["m8", "m5"]
     mig_types = ["M", "mS", "R", "S"]
@@ -97,9 +97,7 @@ if __name__=="__main__":
     pprint(vars(weights))
     batch_size = args.bs
     print(f"Batch size: {batch_size}")
-    print(f"Placing higher weight on primary vertex labeling for all internal nodes: {args.primary_weight}")
-
-    
+    print(f"Placing higher weight on primary vertex labeling for all internal nodes: {args.primary_weight}"
 
     start_time = datetime.datetime.now()
     print(f"Start time: {start_time}")
