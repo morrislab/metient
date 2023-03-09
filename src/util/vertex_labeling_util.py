@@ -106,7 +106,7 @@ def plot_migration_graph(V, full_tree, ordered_sites, custom_colors, primary, sh
 
     return edges
 
-def relabel_cluster(label, shorten):
+def relabel_cluster(label, shorten, pad):
     if not shorten:
         return label
 
@@ -123,7 +123,10 @@ def relabel_cluster(label, shorten):
     # e.g. 2;14;15 -> 2;14
     else:
         out = ";".join(label.split(";")[:2])
-    return out.center(5)
+    if pad:
+        return out.center(5)
+    else:
+        return out
 
 def tree_iterator(T):
     '''
@@ -144,7 +147,7 @@ def truncated_cluster_name(cluster_name):
     truncated_name = ";".join(split_name) if len(split_name) <= 2 else ";".join(split_name[:2])
     return truncated_name
 
-def get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites, shorten_label=True):
+def get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites, shorten_label=True, pad=False):
     '''
     custom_node_idx_to_label only gives the internal node labels, so build a map of
     node_idx to (label, is_leaf) 
@@ -153,12 +156,12 @@ def get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_site
     full_node_idx_to_label_map = dict()
     for i, j in tree_iterator(T):
         if i in custom_node_idx_to_label:
-            full_node_idx_to_label_map[i] = (relabel_cluster(custom_node_idx_to_label[i], shorten_label), False)
+            full_node_idx_to_label_map[i] = (relabel_cluster(custom_node_idx_to_label[i], shorten_label, pad), False)
         if j in custom_node_idx_to_label:
-            full_node_idx_to_label_map[j] = (relabel_cluster(custom_node_idx_to_label[j], shorten_label), False)
+            full_node_idx_to_label_map[j] = (relabel_cluster(custom_node_idx_to_label[j], shorten_label, pad), False)
         elif j not in custom_node_idx_to_label:
             site_idx = (V[:,j] == 1).nonzero()[0][0].item()
-            full_node_idx_to_label_map[j] = (relabel_cluster(f"{custom_node_idx_to_label[i]}_{ordered_sites[site_idx]}", shorten_label), True)
+            full_node_idx_to_label_map[j] = (relabel_cluster(f"{custom_node_idx_to_label[i]}_{ordered_sites[site_idx]}", shorten_label, pad), True)
     return full_node_idx_to_label_map
 
 def print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_colors, ordered_sites):
@@ -319,12 +322,12 @@ def generate_legend_dot(ordered_sites, custom_colors, node_options):
 def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=None, show=True):
 
     # (1) Create full directed graph 
-    full_node_idx_to_label_map = get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites)
-
+    full_node_idx_to_label_map = get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites,
+                                                                shorten_label=True, pad=False)
     color_map = { full_node_idx_to_label_map[i][0]:idx_to_color(custom_colors, (V[:,i] == 1).nonzero()[0][0].item()) for i in range(V.shape[1])}
     G = nx.DiGraph()
     node_options = {"label":"", "shape": "circle", "penwidth":3, 
-                    "fontname":"verdana", "fontsize":"10pt",
+                    "fontname":"verdana", "fontsize":"9pt",
                     "fixedsize":"true"}
     edges = []
     for i, j in tree_iterator(T):
@@ -343,7 +346,7 @@ def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=
         G.add_edge(label_i, label_j,
                     color=f'"{color_map[label_i]};0.5:{color_map[label_j]}"', 
                     penwidth=penwidth, arrowsize=0, fontname="verdana", 
-                    fontsize="10pt", style=style)
+                    fontsize="12pt", style=style)
 
     # Add edge from normal to root 
     root_idx = get_root_index(T)
@@ -373,7 +376,7 @@ def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=
     vertex_name_to_site_map = { full_node_idx_to_label_map[i]:ordered_sites[(V[:,i] == 1).nonzero()[0][0].item()] for i in range(V.shape[1])}
     return edges, vertex_name_to_site_map
 
-# TODO: remove
+# TODO: make this a diff option to display
 def plot_tree_deprecated(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=None, show=True):
 
     full_node_idx_to_label_map = get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites)
@@ -530,7 +533,7 @@ def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_m
                     print("soft_X\n", softx_df)
 
                     labeled_tree = LabeledTree(full_trees[best_tree_idx], V[best_tree_idx], U[best_tree_idx], full_branch_lengths[best_tree_idx])
-                    print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, print_config, max_iter)
+                    print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, max_iter, print_config)
                     plot_tree(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, node_idx_to_label)
                     plot_migration_graph(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, primary)
 
@@ -546,7 +549,7 @@ def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_m
             #print("-"*100 + "\n")
 
         elif print_config.k_best_trees > 1:
-            print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, print_config)
+            print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, max_iter, print_config)
             plot_tree(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, node_idx_to_label)
             plot_migration_graph(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, primary)
             print("-"*100 + "\n")
