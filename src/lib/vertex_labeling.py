@@ -291,7 +291,7 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weig
     
 def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, weights,
                                 print_config, node_idx_to_label, p=None, G=None, O=None,
-                                max_iter=200, lr=0.1, init_temp=20, final_temp=0.1,
+                                max_iter=200, lr=0.1, init_temp=30, final_temp=0.01,
                                 batch_size=128, custom_colors=None, primary=None, 
                                 weight_init_primary= False):
     '''
