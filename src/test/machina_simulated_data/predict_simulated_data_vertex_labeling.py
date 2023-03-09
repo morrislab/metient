@@ -96,7 +96,7 @@ if __name__=="__main__":
     print("Weights:")
     pprint(vars(weights))
     batch_size = args.bs
-    print(f"Batch size: {batch_size}, init temp: {INIT_TEMP}, final temp: {FINAL_TEMP}")
+    print(f"Batch size: {batch_size}")
     print(f"Placing higher weight on primary vertex labeling for all internal nodes: {args.primary_weight}")
 
     
