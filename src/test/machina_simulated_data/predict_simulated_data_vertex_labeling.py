@@ -16,9 +16,6 @@ import src.util.vertex_labeling_util as vert_util
 
 results = []
 
-### HYPERPARAMETERS ###
-INIT_TEMP = 30
-FINAL_TEMP = 0.01
 
 def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir, weights, batch_size, weight_init_primary):
     cluster_fn = os.path.join(machina_sims_data_dir, f"{site}_clustered_input", f"cluster_{mig_type}_seed{seed}.txt")
@@ -48,17 +45,18 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
         G = data_util.get_genetic_distance_tensor_from_sim_adj_matrix(T, pruned_cluster_label_to_idx)
         print_config = vertex_labeling.PrintConfig(visualize=False, verbose=False, viz_intermeds=False)
 
-        best_T_edges, best_labeling, best_G_edges, best_loss_info, time = vertex_labeling.gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites=unique_sites,
-                                                                                                weights=weights, p=r, node_idx_to_label=idx_to_label, G=G,
-                                                                                                max_iter=150, batch_size=batch_size, init_temp=INIT_TEMP, final_temp=FINAL_TEMP,
-                                                                                                custom_colors=custom_colors, print_config=print_config, 
-                                                                                                weight_init_primary=weight_init_primary)
+        T_edges, labeling, G_edges, loss_info, time = vertex_labeling.gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, 
+                                                                                                 ordered_sites=unique_sites,
+                                                                                                 weights=weights, p=r, node_idx_to_label=idx_to_label, 
+                                                                                                 G=G, max_iter=150, batch_size=batch_size, 
+                                                                                                 custom_colors=custom_colors, print_config=print_config, 
+                                                                                                 weight_init_primary=weight_init_primary)
 
-        vert_util.write_tree(best_T_edges, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.tree"))
-        vert_util.write_tree_vertex_labeling(best_labeling, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.vertex.labeling"))
-        vert_util.write_migration_graph(best_G_edges, os.path.join(out_dir, f"G_tree{tree_num}_seed{seed}.predicted.tree"))
+        vert_util.write_tree(T_edges, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.tree"))
+        vert_util.write_tree_vertex_labeling(labeling, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.vertex.labeling"))
+        vert_util.write_migration_graph(G_edges, os.path.join(out_dir, f"G_tree{tree_num}_seed{seed}.predicted.tree"))
         tree_num += 1
-        tree_info = {**{"site": site, "mig_type": mig_type, "seed":seed, "tree_num": tree_num, "time": time}, **best_loss_info}
+        tree_info = {**{"site": site, "mig_type": mig_type, "seed":seed, "tree_num": tree_num, "time": time}, **loss_info}
         global results
         results.append(tree_info)
             
@@ -83,6 +81,14 @@ if __name__=="__main__":
     parser.add_argument('--cores', '-c', type=int, default=1, help="Number of cores to use (default 1)")
     args = parser.parse_args()
 
+    machina_sims_data_dir = args.sim_data_dir
+    run_name = args.run_name
+
+    predictions_dir = f"predictions_{run_name}"
+    os.mkdir(predictions_dir)
+
+    sys.stdout = open(os.path.join(predictions_dir, f"output__{run_name}.txt"), 'w')
+
     sites = ["m8", "m5"]
     mig_types = ["M", "mS", "R", "S"]
     
@@ -93,11 +99,7 @@ if __name__=="__main__":
     print(f"Batch size: {batch_size}, init temp: {INIT_TEMP}, final temp: {FINAL_TEMP}")
     print(f"Placing higher weight on primary vertex labeling for all internal nodes: {args.primary_weight}")
 
-    machina_sims_data_dir = args.sim_data_dir
-    run_name = args.run_name
-
-    predictions_dir = f"predictions_{run_name}"
-    os.mkdir(predictions_dir)
+    
 
     start_time = datetime.datetime.now()
     print(f"Start time: {start_time}")
