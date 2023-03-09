@@ -135,14 +135,20 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter
         o = torch.sum(organ_penalty)
 
     # Regularization to make some values of U -> 0
+    # TODO: this is not a normal matrix norm, but works very well here...
     reg = torch.sum(U)
 
     lam1, lam2 = 1.0, 1.0
+    # TODO: decide whether to keep this LR schedule or not
     if epoch != -1: # to evaluate loss values after training is done   
         # l = max(0.01, 1.0/(1.0+np.exp(-1.0*(epoch-20))))
-        l = (epoch+1)*(1.0/max_iter)
-        lam1 = 1.0 - l
-        lam2 = l
+        if epoch < max_iter/2:
+            lam1, lam2 = 1.0, 0.0
+        else:
+            lam1, lam2 = 0.0, 1.0
+        # l = (epoch+1)*(1.0/max_iter)
+        # lam1 = 1.0 - l
+        # lam2 = l
         # if epoch % 50 == 0:
         #     print(f"epoch {epoch}, lam1: {lam1}, lam2: {lam2}")
 
@@ -359,7 +365,7 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     max_patience_epochs = 20
     early_stopping_ctr = 0
     eps = 1e-2
-    anneal_rate = 0.003
+    anneal_rate = 0.002
     last_loss = None
 
     intermediate_data = []
@@ -391,7 +397,7 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
         all_loss_components.append(d)
 
         optimizer.step()
-        # temp -= decay # drop temperature
+        #temp -= decay # drop temperature
         
         if i % 10 == 0:
             temp = np.maximum(temp * np.exp(-anneal_rate * i), final_temp)
@@ -407,13 +413,13 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
 
         with torch.no_grad():
 
-            if i % 20 == 0:
+            if i % 10 == 0:
                 intermediate_data.append([losses_tensor, full_trees, V, U, full_branch_lengths, softmax_Xs])
                
     if print_config.visualize:
         #util.plot_losses(losses)
         util.plot_loss_components(all_loss_components, weights)
-        #util.plot_temps(temps)
+        util.plot_temps(temps)
 
     time_elapsed = (datetime.datetime.now() - start_time).total_seconds()
     if print_config.verbose:
