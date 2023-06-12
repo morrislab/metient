@@ -1,29 +1,29 @@
 	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad
-198	0	I-H-103207-T2-1-D1-1	0	left adrenal	3	BRAF_p.V600E_non_synonymous_codon_7:140453136	67.0	20.0	primary_disease	adrenal
-199	0	I-H-103207-T2-1-D1-1	0	left adrenal	2	BCOR_p.E1073*_stop_gained_X:39930247	96.0	0.0	primary_disease	adrenal
-200	0	I-H-103207-T2-1-D1-1	0	left adrenal	1	ALK_p.F1245I_non_synonymous_codon_2:29436860	140.0	0.0	primary_disease	adrenal
-202	0	I-H-103207-T2-1-D1-1	0	left adrenal	0	ALK_p.F1174L_non_synonymous_codon_2:29443695	146.0	0.0	primary_disease	adrenal
-207	1	I-H-103207-T3-1-D1-1	1	brain, right frontal	0	ALK_p.F1174L_non_synonymous_codon_2:29443695	98.0	50.0	distant_metastasis	CNS
-208	1	I-H-103207-T3-1-D1-1	1	brain, right frontal	3	BRAF_p.V600E_non_synonymous_codon_7:140453136	96.0	0.0	distant_metastasis	CNS
-209	1	I-H-103207-T3-1-D1-1	1	brain, right frontal	1	ALK_p.F1245I_non_synonymous_codon_2:29436860	138.0	0.0	distant_metastasis	CNS
-210	1	I-H-103207-T3-1-D1-1	1	brain, right frontal	2	BCOR_p.E1073*_stop_gained_X:39930247	86.0	17.0	distant_metastasis	CNS
-214	2	I-H-103207-T4-1-D1-1	2	brain, cerebellum	1	ALK_p.F1245I_non_synonymous_codon_2:29436860	158.0	0.0	distant_metastasis	CNS
-215	2	I-H-103207-T4-1-D1-1	2	brain, cerebellum	0	ALK_p.F1174L_non_synonymous_codon_2:29443695	116.0	80.0	distant_metastasis	CNS
-219	2	I-H-103207-T4-1-D1-1	2	brain, cerebellum	3	BRAF_p.V600E_non_synonymous_codon_7:140453136	92.0	0.0	distant_metastasis	CNS
-220	2	I-H-103207-T4-1-D1-1	2	brain, cerebellum	2	BCOR_p.E1073*_stop_gained_X:39930247	73.0	38.0	distant_metastasis	CNS
-226	3	I-H-103207-T5-1-D1-1	3	left lung lower lobe	2	BCOR_p.E1073*_stop_gained_X:39930247	102.0	0.0	distant_metastasis	lung
-229	3	I-H-103207-T5-1-D1-1	3	left lung lower lobe	1	ALK_p.F1245I_non_synonymous_codon_2:29436860	72.0	23.0	distant_metastasis	lung
-234	3	I-H-103207-T5-1-D1-1	3	left lung lower lobe	3	BRAF_p.V600E_non_synonymous_codon_7:140453136	88.0	0.0	distant_metastasis	lung
-235	3	I-H-103207-T5-1-D1-1	3	left lung lower lobe	0	ALK_p.F1174L_non_synonymous_codon_2:29443695	116.0	1.0	distant_metastasis	lung
-238	4	I-H-103207-T6-1-D1-1	4	liver	0	ALK_p.F1174L_non_synonymous_codon_2:29443695	121.0	0.0	distant_metastasis	liver
-240	4	I-H-103207-T6-1-D1-1	4	liver	2	BCOR_p.E1073*_stop_gained_X:39930247	82.0	0.0	distant_metastasis	liver
-244	4	I-H-103207-T6-1-D1-1	4	liver	3	BRAF_p.V600E_non_synonymous_codon_7:140453136	84.0	0.0	distant_metastasis	liver
-247	4	I-H-103207-T6-1-D1-1	4	liver	1	ALK_p.F1245I_non_synonymous_codon_2:29436860	73.0	35.0	distant_metastasis	liver
-254	5	I-H-103207-T8-1-D1-1	5	right lung lower lobe	0	ALK_p.F1174L_non_synonymous_codon_2:29443695	117.0	1.0	distant_metastasis	lung
-264	5	I-H-103207-T8-1-D1-1	5	right lung lower lobe	2	BCOR_p.E1073*_stop_gained_X:39930247	70.0	1.0	distant_metastasis	lung
-266	5	I-H-103207-T8-1-D1-1	5	right lung lower lobe	3	BRAF_p.V600E_non_synonymous_codon_7:140453136	102.0	0.0	distant_metastasis	lung
-267	5	I-H-103207-T8-1-D1-1	5	right lung lower lobe	1	ALK_p.F1245I_non_synonymous_codon_2:29436860	81.0	15.0	distant_metastasis	lung
-268	6	I-H-103207-T9-1-D1-1	0	left adrenal	1	ALK_p.F1245I_non_synonymous_codon_2:29436860	82.0	1.0	primary_disease	adrenal
-269	6	I-H-103207-T9-1-D1-1	0	left adrenal	3	BRAF_p.V600E_non_synonymous_codon_7:140453136	73.0	0.0	primary_disease	adrenal
-270	6	I-H-103207-T9-1-D1-1	0	left adrenal	2	BCOR_p.E1073*_stop_gained_X:39930247	86.0	1.0	primary_disease	adrenal
-274	6	I-H-103207-T9-1-D1-1	0	left adrenal	0	ALK_p.F1174L_non_synonymous_codon_2:29443695	150.0	1.0	primary_disease	adrenal
+198	0	I-H-103207-T2-1-D1-1	0	left adrenal	1	BRAF_p.V600E_non_synonymous_codon_7:140453136	67.0	20.0	primary_disease	adrenal
+199	0	I-H-103207-T2-1-D1-1	0	left adrenal	0	BCOR_p.E1073*_stop_gained_X:39930247	96.0	0.0	primary_disease	adrenal
+200	0	I-H-103207-T2-1-D1-1	0	left adrenal	2	ALK_p.F1245I_non_synonymous_codon_2:29436860	140.0	0.0	primary_disease	adrenal
+202	0	I-H-103207-T2-1-D1-1	0	left adrenal	3	ALK_p.F1174L_non_synonymous_codon_2:29443695	146.0	0.0	primary_disease	adrenal
+207	1	I-H-103207-T3-1-D1-1	1	brain, right frontal	3	ALK_p.F1174L_non_synonymous_codon_2:29443695	98.0	50.0	distant_metastasis	CNS
+208	1	I-H-103207-T3-1-D1-1	1	brain, right frontal	1	BRAF_p.V600E_non_synonymous_codon_7:140453136	96.0	0.0	distant_metastasis	CNS
+209	1	I-H-103207-T3-1-D1-1	1	brain, right frontal	2	ALK_p.F1245I_non_synonymous_codon_2:29436860	138.0	0.0	distant_metastasis	CNS
+210	1	I-H-103207-T3-1-D1-1	1	brain, right frontal	0	BCOR_p.E1073*_stop_gained_X:39930247	86.0	17.0	distant_metastasis	CNS
+214	2	I-H-103207-T4-1-D1-1	2	brain, cerebellum	2	ALK_p.F1245I_non_synonymous_codon_2:29436860	158.0	0.0	distant_metastasis	CNS
+215	2	I-H-103207-T4-1-D1-1	2	brain, cerebellum	3	ALK_p.F1174L_non_synonymous_codon_2:29443695	116.0	80.0	distant_metastasis	CNS
+219	2	I-H-103207-T4-1-D1-1	2	brain, cerebellum	1	BRAF_p.V600E_non_synonymous_codon_7:140453136	92.0	0.0	distant_metastasis	CNS
+220	2	I-H-103207-T4-1-D1-1	2	brain, cerebellum	0	BCOR_p.E1073*_stop_gained_X:39930247	73.0	38.0	distant_metastasis	CNS
+226	3	I-H-103207-T5-1-D1-1	3	left lung lower lobe	0	BCOR_p.E1073*_stop_gained_X:39930247	102.0	0.0	distant_metastasis	lung
+229	3	I-H-103207-T5-1-D1-1	3	left lung lower lobe	2	ALK_p.F1245I_non_synonymous_codon_2:29436860	72.0	23.0	distant_metastasis	lung
+234	3	I-H-103207-T5-1-D1-1	3	left lung lower lobe	1	BRAF_p.V600E_non_synonymous_codon_7:140453136	88.0	0.0	distant_metastasis	lung
+235	3	I-H-103207-T5-1-D1-1	3	left lung lower lobe	3	ALK_p.F1174L_non_synonymous_codon_2:29443695	116.0	1.0	distant_metastasis	lung
+238	4	I-H-103207-T6-1-D1-1	4	liver	3	ALK_p.F1174L_non_synonymous_codon_2:29443695	121.0	0.0	distant_metastasis	liver
+240	4	I-H-103207-T6-1-D1-1	4	liver	0	BCOR_p.E1073*_stop_gained_X:39930247	82.0	0.0	distant_metastasis	liver
+244	4	I-H-103207-T6-1-D1-1	4	liver	1	BRAF_p.V600E_non_synonymous_codon_7:140453136	84.0	0.0	distant_metastasis	liver
+247	4	I-H-103207-T6-1-D1-1	4	liver	2	ALK_p.F1245I_non_synonymous_codon_2:29436860	73.0	35.0	distant_metastasis	liver
+254	5	I-H-103207-T8-1-D1-1	5	right lung lower lobe	3	ALK_p.F1174L_non_synonymous_codon_2:29443695	117.0	1.0	distant_metastasis	lung
+264	5	I-H-103207-T8-1-D1-1	5	right lung lower lobe	0	BCOR_p.E1073*_stop_gained_X:39930247	70.0	1.0	distant_metastasis	lung
+266	5	I-H-103207-T8-1-D1-1	5	right lung lower lobe	1	BRAF_p.V600E_non_synonymous_codon_7:140453136	102.0	0.0	distant_metastasis	lung
+267	5	I-H-103207-T8-1-D1-1	5	right lung lower lobe	2	ALK_p.F1245I_non_synonymous_codon_2:29436860	81.0	15.0	distant_metastasis	lung
+268	6	I-H-103207-T9-1-D1-1	0	left adrenal	2	ALK_p.F1245I_non_synonymous_codon_2:29436860	82.0	1.0	primary_disease	adrenal
+269	6	I-H-103207-T9-1-D1-1	0	left adrenal	1	BRAF_p.V600E_non_synonymous_codon_7:140453136	73.0	0.0	primary_disease	adrenal
+270	6	I-H-103207-T9-1-D1-1	0	left adrenal	0	BCOR_p.E1073*_stop_gained_X:39930247	86.0	1.0	primary_disease	adrenal
+274	6	I-H-103207-T9-1-D1-1	0	left adrenal	3	ALK_p.F1174L_non_synonymous_codon_2:29443695	150.0	1.0	primary_disease	adrenal

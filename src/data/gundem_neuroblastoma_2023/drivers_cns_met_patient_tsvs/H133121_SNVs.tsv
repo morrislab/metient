@@ -1,7 +1,7 @@
 	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad
-1105	0	I-H-133121-T4-1-D1-2	0	right retroperitoneal	0	ALK_p.R1275Q_non_synonymous_codon_2:29432664	80.0	0.0	primary_disease	retroperitoneal
-1106	0	I-H-133121-T4-1-D1-2	0	right retroperitoneal	1	ALK_p.F1174L_non_synonymous_codon_2:29443695	538.0	15.0	primary_disease	retroperitoneal
-1110	1	I-H-133121-T5-1-D1-2	1	brain, parietal	0	ALK_p.R1275Q_non_synonymous_codon_2:29432664	113.0	38.0	distant_metastasis	CNS
-1115	1	I-H-133121-T5-1-D1-2	1	brain, parietal	1	ALK_p.F1174L_non_synonymous_codon_2:29443695	167.0	0.0	distant_metastasis	CNS
-1117	2	I-H-133121-T6-1-D1-2	2	brain, temporal	1	ALK_p.F1174L_non_synonymous_codon_2:29443695	158.0	1.0	distant_metastasis	CNS
-1119	2	I-H-133121-T6-1-D1-2	2	brain, temporal	0	ALK_p.R1275Q_non_synonymous_codon_2:29432664	82.0	47.0	distant_metastasis	CNS
+1105	0	I-H-133121-T4-1-D1-2	0	right retroperitoneal	1	ALK_p.R1275Q_non_synonymous_codon_2:29432664	80.0	0.0	primary_disease	retroperitoneal
+1106	0	I-H-133121-T4-1-D1-2	0	right retroperitoneal	0	ALK_p.F1174L_non_synonymous_codon_2:29443695	538.0	15.0	primary_disease	retroperitoneal
+1110	1	I-H-133121-T5-1-D1-2	1	brain, parietal	1	ALK_p.R1275Q_non_synonymous_codon_2:29432664	113.0	38.0	distant_metastasis	CNS
+1115	1	I-H-133121-T5-1-D1-2	1	brain, parietal	0	ALK_p.F1174L_non_synonymous_codon_2:29443695	167.0	0.0	distant_metastasis	CNS
+1117	2	I-H-133121-T6-1-D1-2	2	brain, temporal	0	ALK_p.F1174L_non_synonymous_codon_2:29443695	158.0	1.0	distant_metastasis	CNS
+1119	2	I-H-133121-T6-1-D1-2	2	brain, temporal	1	ALK_p.R1275Q_non_synonymous_codon_2:29432664	82.0	47.0	distant_metastasis	CNS

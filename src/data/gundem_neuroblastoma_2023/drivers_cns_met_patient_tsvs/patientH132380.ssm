@@ -1,2 +1,2 @@
 id	name	var_reads	total_reads	var_read_prob
-m0	HRAS_p.D69Y_non_synonymous_codon_11:533851	0.0,7.0	93.0,87.0	0.5,0.5
+m0	HRAS_p.D69Y_non_synonymous_codon_11:533851	0,7	93,87	0.5,0.5
