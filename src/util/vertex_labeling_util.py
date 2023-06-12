@@ -36,7 +36,7 @@ if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
 
 class PrintConfig:
-    def __init__(self, visualize=True, verbose=False, viz_intermeds=False, k_best_trees=1):
+    def __init__(self, visualize=True, verbose=False, viz_intermeds=False, k_best_trees=1, save_imgs=False):
         '''
         visualize: bool, whether to visualize loss, best tree, and migration graph
         verbose: bool, whether to print debug info
@@ -47,6 +47,7 @@ class PrintConfig:
         self.verbose = verbose 
         self.viz_intermeds = viz_intermeds
         self.k_best_trees = k_best_trees
+        self.save_imgs = save_imgs
 
 class LabeledTree:
     def __init__(self, tree, labeling, U, branch_lengths):
@@ -90,7 +91,7 @@ def plot_migration_graph(V, full_tree, ordered_sites, custom_colors, primary, sh
 
     G = nx.MultiDiGraph()
     for node, color in zip(ordered_sites, colors):
-        G.add_node(node, shape="box", color=color, fillcolor='white', fontname="Corbel", penwidth=3.0)
+        G.add_node(node, shape="box", color=color, fillcolor='white', fontname="Lato", penwidth=3.0)
 
     edges = []
     for i, adj_row in enumerate(migration_graph_no_diag):
@@ -103,6 +104,15 @@ def plot_migration_graph(V, full_tree, ordered_sites, custom_colors, primary, sh
     dot = nx.nx_pydot.to_pydot(G)
     if show:
         view_pydot(dot)
+
+    # TODO pass in printconfig save option 
+    dot_lines = dot.to_string().split("\n")
+    dot_lines.insert(1, 'dpi=300;size=2.5;')
+    dot = ("\n").join(dot_lines)
+    
+    dot = pydot.graph_from_dot_data(dot)[0]
+
+    #dot.write_png('mig_graph.png')
 
     return edges
 
@@ -164,7 +174,7 @@ def get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_site
             full_node_idx_to_label_map[j] = (relabel_cluster(f"{custom_node_idx_to_label[i]}_{ordered_sites[site_idx]}", shorten_label, pad), True)
     return full_node_idx_to_label_map
 
-def print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_colors, ordered_sites):
+def print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_colors, ordered_sites, print_config):
     '''
     Returns an averaged tree over all (TODO: all or top k?) converged trees
     by weighing each tree edge or vertex label by the softmax of the 
@@ -225,7 +235,7 @@ def print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_
 
     #print("avg_edges\n", avg_edges)
 
-    plot_averaged_tree(avg_edges, avg_node_colors, ordered_sites, custom_colors, node_idx_to_label)
+    plot_averaged_tree(avg_edges, avg_node_colors, ordered_sites, custom_colors, node_idx_to_label, show=print_config.visualize)
 
 def idx_to_color(custom_colors, idx, alpha=1.0):
     if custom_colors != None:
@@ -261,35 +271,32 @@ def plot_averaged_tree(avg_edges, avg_node_colors, ordered_sites, custom_colors=
         for site_idx in avg_node_colors[label_j]:
             node_j_color += f"{idx_to_color(custom_colors, site_idx, alpha=alpha)};{avg_node_colors[label_j][site_idx]}:"
         is_leaf = False
-        print(label_i, node_i_color)
-        print(label_j, node_j_color)
 
         G.add_node(label_i, xlabel=label_i, label="", shape="circle", fillcolor=node_i_color, 
                     color="none", penwidth=3, style="wedged",
-                    fixedsize="true", height=0.35, fontname="verdana", 
+                    fixedsize="true", height=0.35, fontname="Lato", 
                     fontsize="10pt")
         G.add_node(label_j, xlabel="" if is_leaf else label_j, label="", shape="circle", 
                     fillcolor=node_j_color, color="none", 
                     penwidth=3, style="solid" if is_leaf else "wedged",
-                    fixedsize="true", height=0.35, fontname="verdana", 
+                    fixedsize="true", height=0.35, fontname="Lato", 
                     fontsize="10pt")
 
         # G.add_node(label_i, shape="circle", style="wedged", fillcolor=node_i_color, color="none",
         #     alpha=0.5, fontname = "arial", fontsize="10pt", fixedsize="true", width=0.5)
         # G.add_node(label_j, shape="circle", style="wedged", fillcolor=node_j_color, color="none",
         #     alpha=0.5, fontname = "arial", fontsize="10pt", fixedsize="true", width=0.5)
-        print(label_i, label_j, avg_edges[(label_i, label_j)], rescaled_edge_weight(avg_edges[(label_i, label_j)]))
+        #print(label_i, label_j, avg_edges[(label_i, label_j)], rescaled_edge_weight(avg_edges[(label_i, label_j)]))
         # G.add_edge(label_i, label_j, color="#black", penwidth=rescaled_edge_weight(avg_edges[(label_i, label_j)]), arrowsize=0.75, spline="ortho")
         style = "dashed" if is_leaf else "solid"
         penwidth = 2 if is_leaf else 2.5
         xlabel = "" if is_leaf else label_j
         G.add_edge(label_i, label_j,
                     color=f'"grey"', 
-                    penwidth=rescaled_edge_weight(avg_edges[(label_i, label_j)]), arrowsize=0, fontname="verdana", 
+                    penwidth=rescaled_edge_weight(avg_edges[(label_i, label_j)]), arrowsize=0, fontname="Lato", 
                     fontsize="10pt", style=style)
 
     assert(nx.is_tree(G))
-    dot = to_pydot(G).to_string()
     # we have to use graphviz in order to get multi-color edges :/
     dot = to_pydot(G).to_string()
     # hack since there doesn't seem to be API to modify graph attributes...
@@ -307,7 +314,7 @@ def generate_legend_dot(ordered_sites, custom_colors, node_options):
         color = idx_to_color(custom_colors, len(ordered_sites)-1-i)
         legend.add_node(i, shape="plaintext", style="solid", label=f"{site}\r", 
                         width=0.3, height=0.2, fixedsize="true",
-                        fontname="verdana", fontsize="10pt")
+                        fontname="Lato", fontsize="10pt")
         legend.add_node(f"{i}_circle", fillcolor=color, color=color, 
                         style="filled", height=0.2, **node_options)
 
@@ -319,21 +326,32 @@ def generate_legend_dot(ordered_sites, custom_colors, node_options):
     return legend_dot
 
 
-def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=None, show=True):
+def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx_to_label=None, show=True):
 
     # (1) Create full directed graph 
+    # these labels are used for display in plotting
+    display_node_idx_to_label_map = get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites,
+                                                            shorten_label=True, pad=False)
+    # these labels are returned in this function, sued for writing out full vertex names to file
     full_node_idx_to_label_map = get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites,
-                                                                shorten_label=True, pad=False)
-    color_map = { full_node_idx_to_label_map[i][0]:idx_to_color(custom_colors, (V[:,i] == 1).nonzero()[0][0].item()) for i in range(V.shape[1])}
+                                                                shorten_label=False, pad=False)
+
+
+    color_map = { display_node_idx_to_label_map[i][0]:idx_to_color(custom_colors, (V[:,i] == 1).nonzero()[0][0].item()) for i in range(V.shape[1])}
     G = nx.DiGraph()
     node_options = {"label":"", "shape": "circle", "penwidth":3, 
-                    "fontname":"verdana", "fontsize":"9pt",
+                    "fontname":"Lato", "fontsize":"14pt",
                     "fixedsize":"true"}
+
+    # TODO: come up w better scaling mechanism for genetic distance
+    if gen_dist != None:
+        gen_dist = gen_dist / torch.min(gen_dist[gen_dist>0])
+        gen_dist = torch.clamp(gen_dist, max=2) # for visualization purposes
     edges = []
     for i, j in tree_iterator(T):
-        label_i, _ = full_node_idx_to_label_map[i]
-        label_j, is_leaf = full_node_idx_to_label_map[j]
-        edges.append((label_i, label_j))
+        label_i, _ = display_node_idx_to_label_map[i]
+        label_j, is_leaf = display_node_idx_to_label_map[j]
+        
         G.add_node(label_i, xlabel=label_i, fillcolor=color_map[label_i], 
                     color=color_map[label_i], style="filled", height=0.25, **node_options)
         G.add_node(label_j, xlabel="" if is_leaf else label_j, fillcolor=color_map[label_j], 
@@ -343,19 +361,24 @@ def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=
         style = "dashed" if is_leaf else "solid"
         penwidth = 4 if is_leaf else 4.5
         xlabel = "" if is_leaf else label_j
+
+        # We're iterating through i,j of the full tree (including leaf nodes),
+        # while G only has genetic distances between internal nodes
+        minlen = gen_dist[i, j].item() if (gen_dist != None and i < len(gen_dist) and j < len(gen_dist)) else 1.0
+        #print(i, j, minlen)
         G.add_edge(label_i, label_j,
                     color=f'"{color_map[label_i]};0.5:{color_map[label_j]}"', 
-                    penwidth=penwidth, arrowsize=0, fontname="verdana", 
-                    fontsize="12pt", style=style)
+                    penwidth=penwidth, arrowsize=0, style=style, minlen=minlen)
+
+        edges.append((full_node_idx_to_label_map[i][0], full_node_idx_to_label_map[j][0]))
 
     # Add edge from normal to root 
     root_idx = get_root_index(T)
-    root_label = full_node_idx_to_label_map[root_idx][0]
+    root_label = display_node_idx_to_label_map[root_idx][0]
     G.add_node("normal", label="", xlabel=root_label, penwidth=3, style="invis")
     G.add_edge("normal", root_label, label="", 
                 color=f'"{color_map[root_label]}"', 
-                penwidth=4, arrowsize=0, fontname="verdana", 
-                fontsize="10pt", style="solid")
+                penwidth=4, arrowsize=0, style="solid")
 
     assert(nx.is_tree(G))
 
@@ -365,15 +388,17 @@ def plot_tree(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=
     # we have to use graphviz in order to get multi-color edges :/
     dot = to_pydot(G).to_string().split("\n")
     # hack since there doesn't seem to be API to modify graph attributes...
-    dot.insert(1, 'graph[splines=false]; nodesep=0.7; ranksep=0.6; forcelabels=true;')
+    dot.insert(1, 'graph[splines=false]; nodesep=0.7; ranksep=0.6; forcelabels=true; dpi=200; size=2.5;')
     #dot.insert(2, legend_dot)
     dot = ("\n").join(dot)
-
+    
+    dot = pydot.graph_from_dot_data(dot)[0]
     if show:
-        src = Source(dot) # dot is string containing DOT notation of graph
-        display(src)
+        view_pydot(dot)
 
-    vertex_name_to_site_map = { full_node_idx_to_label_map[i]:ordered_sites[(V[:,i] == 1).nonzero()[0][0].item()] for i in range(V.shape[1])}
+    #dot.write_png('labeled_tree.png')
+
+    vertex_name_to_site_map = { full_node_idx_to_label_map[i][0]:ordered_sites[(V[:,i] == 1).nonzero()[0][0].item()] for i in range(V.shape[1])}
     return edges, vertex_name_to_site_map
 
 # TODO: make this a diff option to display
@@ -393,8 +418,8 @@ def plot_tree_deprecated(V, T, ordered_sites, custom_colors=None, custom_node_id
         label_i = full_node_idx_to_label_map[i]
         label_j = full_node_idx_to_label_map[j]
         edges.append((label_i, label_j))
-        G.add_node(label_i, shape="circle", color=color_map[label_i], penwidth=3, fixedsize="true", fontname = "verdana", fontsize="10pt")
-        G.add_node(label_j, shape="circle", color=color_map[label_j], penwidth=3, fixedsize="true", fontname = "verdana", fontsize="10pt")
+        G.add_node(label_i, shape="circle", color=color_map[label_i], penwidth=3, fixedsize="true", fontname = "Lato", fontsize="10pt")
+        G.add_node(label_j, shape="circle", color=color_map[label_j], penwidth=3, fixedsize="true", fontname = "Lato", fontsize="10pt")
         G.add_edge(label_i, label_j, color=f'"{color_map[label_i]};0.5:{color_map[label_j]}"', penwidth=3, arrowsize=0.75)
 
     #assert(nx.is_tree(G))
@@ -496,65 +521,75 @@ def plot_loss_components(loss_dicts, weights):
 
 def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, 
                     node_idx_to_label, ordered_sites, max_iter, print_config):
-    loss, loss_components = vert_label.objective(labeled_tree.labeling, labeled_tree.tree, ref_matrix, var_matrix, labeled_tree.U, B, labeled_tree.branch_lengths, O, weights, -1, max_iter, print_config)
+    loss, loss_components = vert_label.objective(labeled_tree.labeling, labeled_tree.tree, ref_matrix, var_matrix, 
+                                                 labeled_tree.U, B, labeled_tree.branch_lengths, O, weights, -1, 
+                                                 max_iter, "constant", print_config=print_config)
     U_clipped = labeled_tree.U.cpu().detach().numpy()
     U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
     logger.debug(f"\nU > {U_CUTOFF}\n")
     col_labels = ["norm"] + [truncated_cluster_name(node_idx_to_label[k]) if k in node_idx_to_label else "0" for k in range(U_clipped.shape[1] - 1)]
     df = pd.DataFrame(U_clipped, columns=col_labels, index=ordered_sites)
-    logger.debug(df)
+    logger.info(df)
     logger.debug("\nF_hat")
     F_hat_df = pd.DataFrame((labeled_tree.U @ B).cpu().detach().numpy(), index=ordered_sites)
     logger.debug(F_hat_df)
     return loss_components
 
-def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_matrix, var_matrix, B, O, weights,                 node_idx_to_label, ordered_sites, print_config, intermediate_data, custom_colors, 
+def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_matrix, var_matrix, B, O, G,
+                     weights, node_idx_to_label, ordered_sites, print_config, intermediate_data, custom_colors, 
                      primary, max_iter):
 
+    def _visualize_intermediate_trees(best_tree_idx):
+        '''
+        Visualizes the best tree at intermediate iterations. This shows how the vertex labeling
+        gets changed over iterations as the loss converges.
+        '''
+        for itr, data in enumerate(intermediate_data):
+            losses_tensor, full_trees, V, U, full_branch_lengths, soft_X = intermediate_data[itr][0], intermediate_data[itr][1], intermediate_data[itr][2], intermediate_data[itr][3], intermediate_data[itr][4], intermediate_data[itr][5]
+            print("="*30 + " INTERMEDIATE TREE " + "="*30+"\n")
+            print(f"Iteration: {itr*20}, Intermediate best tree idx {best_tree_idx}")
+            softx_df = pd.DataFrame(soft_X[best_tree_idx].cpu().detach().numpy().T, columns=ordered_sites, index=[node_idx_to_label[i] for i in range(1,len(node_idx_to_label))]) # skip first index (which is root, and we know the vert. label)
+            print("soft_X\n", softx_df)
+
+            labeled_tree = LabeledTree(full_trees[best_tree_idx], V[best_tree_idx], U[best_tree_idx], full_branch_lengths[best_tree_idx])
+            print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, max_iter, print_config)
+            plot_tree(labeled_tree.labeling, labeled_tree.tree, G, ordered_sites, custom_colors, node_idx_to_label, show=print_config.visualize)
+            plot_migration_graph(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, primary)
+
+    # Get the top k trees
     _, min_loss_indices = torch.topk(losses_tensor, print_config.k_best_trees, largest=False, sorted=True)
-    print("print_config.k_best_trees", print_config.k_best_trees)
     min_loss_labeled_trees_and_losses = []
     for i in min_loss_indices:
         labeled_tree = LabeledTree(full_trees[i], V[i], U[i], full_branch_lengths[i])
         min_loss_labeled_trees_and_losses.append((labeled_tree, losses_tensor[i]))
 
+
     for i, tup in enumerate(min_loss_labeled_trees_and_losses):
         labeled_tree = tup[0]
-        if i == 0:
-            
+        
+        if i == 0: # Best tree
+
             if print_config.viz_intermeds:
-
                 best_tree_idx = min_loss_indices[0]
-                for itr, data in enumerate(intermediate_data):
-                    losses_tensor, full_trees, V, U, full_branch_lengths, soft_X = intermediate_data[itr][0], intermediate_data[itr][1], intermediate_data[itr][2], intermediate_data[itr][3], intermediate_data[itr][4], intermediate_data[itr][5]
-                    print("="*30 + " INTERMEDIATE TREE " + "="*30+"\n")
-                    print(f"Iteration: {itr*20}, Intermediate best tree idx {best_tree_idx}")
-                    softx_df = pd.DataFrame(soft_X[best_tree_idx].cpu().detach().numpy().T, columns=ordered_sites, index=[node_idx_to_label[i] for i in range(1,len(node_idx_to_label))]) # skip first index (which is root, and we know the vert. label)
-                    print("soft_X\n", softx_df)
-
-                    labeled_tree = LabeledTree(full_trees[best_tree_idx], V[best_tree_idx], U[best_tree_idx], full_branch_lengths[best_tree_idx])
-                    print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, max_iter, print_config)
-                    plot_tree(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, node_idx_to_label)
-                    plot_migration_graph(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, primary)
-
+                _visualize_intermediate_trees(best_tree_idx)
 
             if print_config.visualize: 
-                print("*"*30 + " BEST TREE " + "*"*30+"\n")
+                print("*"*40 + " BEST TREE LABELING" + "*"*40+"\n")
 
             best_tree = labeled_tree
             best_tree_loss_info = print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, max_iter, print_config)
-            best_tree_edges, best_tree_vertex_name_to_site_map = plot_tree(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, node_idx_to_label, show=print_config.visualize)
+            best_tree_edges, best_tree_verices_to_sites_map = plot_tree(best_tree.labeling, best_tree.tree, G, ordered_sites, custom_colors, node_idx_to_label, show=print_config.visualize)
+            #_, _ = plot_tree_deprecated(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, node_idx_to_label, show=print_config.visualize)
             best_mig_graph_edges = plot_migration_graph(best_tree.labeling, best_tree.tree, ordered_sites, custom_colors, primary, show=print_config.visualize)
-
-            #print("-"*100 + "\n")
+            print("-"*100 + "\n")
 
         elif print_config.k_best_trees > 1:
             print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, max_iter, print_config)
-            plot_tree(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, node_idx_to_label)
+            plot_tree(labeled_tree.labeling, labeled_tree.tree, G, ordered_sites, custom_colors, node_idx_to_label, show=print_config.visualize)
             plot_migration_graph(labeled_tree.labeling, labeled_tree.tree, ordered_sites, custom_colors, primary)
             print("-"*100 + "\n")
 
-    return best_tree_edges, best_tree_vertex_name_to_site_map, best_mig_graph_edges, best_tree_loss_info
+    return best_tree_edges, best_tree_verices_to_sites_map, best_mig_graph_edges, best_tree_loss_info
 
 
 def get_path_matrix(T, remove_self_loops=False):

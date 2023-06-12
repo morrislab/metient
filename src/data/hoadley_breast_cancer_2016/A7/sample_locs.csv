@@ -1,0 +1,7 @@
+sample_id,location_id,x,y
+breast,breast,205,660
+brain,brain,293,126
+kidney,kidney,440,835
+liver,liver,244,806
+lung,lung,405,624
+rib,rib,290,450

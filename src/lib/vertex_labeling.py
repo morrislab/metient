@@ -68,7 +68,7 @@ def _calc_llh(F_hat, R, V, omega_v, epsilon=1e-5):
     #print("nlglh", nlglh)
     return (F_llh, llh_per_sample, nlglh)
 
-def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter, print_config=None):
+def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter, lr_sched, print_config=None):
     '''
     Args:
         V: Vertex labeling of the full tree (num_sites x num_nodes)
@@ -121,7 +121,7 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter
     F_llh, llh_per_sample, nlglh = _calc_llh(F_hat, ref_matrix, var_matrix, omega_v)
 
     g = 0
-    if G != None:
+    if G != None and weights.gen_dist != 0:
     # Weigh by genetic distance
     # calculate if 2 nodes are in diff sites and there's an edge between them (i.e there is a migration edge)
         R = torch.mul(A, (1-X))
@@ -129,7 +129,7 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter
         g = torch.sum(R)
 
     o = 0
-    if O != None:
+    if O != None and weights.organotrop != 0:
         #organ_penalty = torch.mul((1 - O) , site_adj_no_diag)
         organ_penalty = -1.0*torch.mul(O, site_adj_no_diag)
         o = torch.sum(organ_penalty)
@@ -139,20 +139,22 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter
     reg = torch.sum(U)
 
     lam1, lam2 = 1.0, 1.0
-    # TODO: decide whether to keep this LR schedule or not
-    if epoch != -1: # to evaluate loss values after training is done   
-        # l = max(0.01, 1.0/(1.0+np.exp(-1.0*(epoch-20))))
-        if epoch < max_iter/2:
-            lam1, lam2 = 1.0, 0.0
-        else:
-            lam1, lam2 = 0.0, 1.0
-        # l = (epoch+1)*(1.0/max_iter)
-        # lam1 = 1.0 - l
-        # lam2 = l
-        # if epoch % 50 == 0:
-        #     print(f"epoch {epoch}, lam1: {lam1}, lam2: {lam2}")
+    if epoch != -1: # to evaluate loss values after training is done
+        if lr_sched == "step":   
+            if epoch < max_iter/2:
+                lam1, lam2 = 1.0, 0.0
+            else:
+                lam1, lam2 = 0.0, 1.0
+        elif lr_sched == "em": 
+            if ((epoch//20) % 2 == 0):
+                lam1, lam2 = 1.0, 0.0
+            else:
+                lam1, lam2 = 0.0, 1.0
+        elif lr_sched == "linear":
+            l = (epoch+1)*(1.0/max_iter)
+            lam1 = 1.0 - l
+            lam2 = l
 
-    # sigmoid-like schedule, learns leaf nodes first and then vertex labeling
     loss = (lam1*(weights.data_fit*nlglh + weights.reg*reg)) + (lam2*(weights.mig*m + weights.seed_site*s + weights.comig*c + weights.gen_dist*g + weights.organotrop*o))
 
     loss_components = {"mig": m.item(), "comig": c.item(), "seeding": s.item(), "nll": round(nlglh.item(), 3), "reg": reg.item(), "gen": 0 if g == 0 else round(g.item(), 3), "loss": loss.item()}
@@ -167,10 +169,6 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter
 
         if o != 0:
             print("Organotropism penalty:", round(o.item(), 3))
-            print("site_adj_no_diag\n", site_adj_no_diag)
-            print("(1 - O)", (1 - O))
-            print("O\n", O)
-            print("organ_penalty\n", organ_penalty)
         print("Loss:", round(loss.item(), 3))
 
     return loss, loss_components
@@ -215,7 +213,7 @@ def gumbel_softmax(logits, temperature, hard=False):
     return y, y_soft
 
 
-def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, epoch, max_iter):
+def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, epoch, max_iter, lr_sched):
     '''
     Takes latent variables U and X (both of size batch_size x num_internal_nodes x num_sites)
     and computes loss for each gumbel-softmax estimated training example.
@@ -280,7 +278,7 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weig
     for idx in range(batch_size):
         V = vertex_labeling(idx, U, softmax_X, p)
         full_T, full_G = full_adj_matrix(idx, T, U, G)
-        loss, loss_components = objective(V, full_T, ref_matrix, var_matrix, U[idx,:,:], B, full_G, O, weights, epoch, max_iter)
+        loss, loss_components = objective(V, full_T, ref_matrix, var_matrix, U[idx,:,:], B, full_G, O, weights, epoch, max_iter, lr_sched)
         losses_list.append(loss)
         loss_components_list.append(loss_components)
         V_list.append(V)
@@ -293,7 +291,7 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
                                 print_config, node_idx_to_label, p=None, G=None, O=None,
                                 max_iter=200, lr=0.1, init_temp=30, final_temp=0.01,
                                 batch_size=128, custom_colors=None, primary=None, 
-                                weight_init_primary= False):
+                                weight_init_primary=False, lr_sched="constant"):
     '''
     Args:
         T: Adjacency matrix (directed) of the internal nodes (shape: num_internal_nodes x num_internal_nodes)
@@ -312,12 +310,18 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
         Lower values indicate lower branch lengths, i.e. more genetically similar.
         weight_init_primary: whether to initialize weights higher to favor vertex labeling of primary for all internal nodes
         O: Matrix of organotropism values between sites (shape: num_anatomical_sites x  num_anatomical_sites).
-
+        lr_sched: how to weight the tasks of (1) leaf node inference and (2) internal vertex labeling. options:
+            "constant": default, (1) and (2) weighted equally at each epoch
+            "step": (1) has weight=1 for first half of epochs and (2) has weight=0, and then we flip the weights for the last half of training
+            "em": (1) has weight=1 and (2) has weight=0 for 20 epochs, and we flip every 20 epochs (kind of like E-M)
+            "linear": (1) decreases linearly while (2) increases linearly at the same rate (1/max_iter)
     Returns:
-        Corresponding info on the best learned tree:
+        Corresponding info on the *best* tree:
         (1) edges of the tree (e.g. [('0', '1'), ('1', '2;3')])
         (2) vertex labeling as a dictionary (e.g. {'0': 'P', '1;3': 'M1'}),
         (3) edges for the migration graph (e.g. [('P', 'M1')])
+        (4) dictionary w/ loss values for each component of the loss
+        (5) how long (in sec) the algorithm took to run
     '''
     assert(T.shape[0] == T.shape[1] == B.shape[0])
     assert(ref_matrix.shape[1] == var_matrix.shape[1] == B.shape[1])
@@ -346,7 +350,7 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
 
     # TODO: should we do this? or should we do LR scheduling
     if weight_init_primary:
-        X[:,0,:] = 3
+        X[:,0,:] = 5
 
     X.requires_grad = True
 
@@ -374,14 +378,13 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
 
     start_time = datetime.datetime.now()
 
-
     all_loss_components = []
     for i in range(max_iter):
         optimizer.zero_grad()
         # Using the softmax enforces that the row sums are 1, since the proprtions of
         # subclones in a given site should sum to 1
         U = torch.softmax(psi, dim=2)
-        losses_tensor, V, full_trees, full_branch_lengths, softmax_Xs, loss_components = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, i, max_iter)
+        losses_tensor, V, full_trees, full_branch_lengths, softmax_Xs, loss_components = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, i, max_iter, lr_sched)
         # TODO: better way to calc loss across trees?
         loss = torch.mean(losses_tensor)
         loss.backward()
@@ -398,24 +401,16 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
 
         optimizer.step()
         #temp -= decay # drop temperature
-        
+
         if i % 10 == 0:
-            temp = np.maximum(temp * np.exp(-anneal_rate * i), final_temp)
+            if lr_sched != "step" or (lr_sched == "step" and i > max_iter/2):
+                temp = np.maximum(temp * np.exp(-anneal_rate * i), final_temp)
         temps.append(temp)
 
-        # if i % 20 == 0:
-        #     print(f"Iteration{i}")
-        #     print("node 40",  torch.linalg.norm(X.grad[:,:,4], ord=1))
-        #     print("node 3;6",  torch.linalg.norm(X.grad[:,:,3], ord=1))
-        #     print("node 55;61",  torch.linalg.norm(X.grad[:,:,6], ord=1))
-
-        #     print("psi \n", torch.linalg.norm(psi.grad[:,:,3], dim=1, ord=1))
-
         with torch.no_grad():
-
-            if i % 10 == 0:
+            if i % 20 == 0:
                 intermediate_data.append([losses_tensor, full_trees, V, U, full_branch_lengths, softmax_Xs])
-               
+
     if print_config.visualize:
         #util.plot_losses(losses)
         util.plot_loss_components(all_loss_components, weights)
@@ -426,14 +421,15 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
         print(f"Time elapsed: {time_elapsed}")
 
     with torch.no_grad():
-        losses_tensor, V, full_trees, full_branch_lengths, _, _ = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, -1, max_iter)
+        losses_tensor, V, full_trees, full_branch_lengths, _, _ = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, -1, max_iter, lr_sched)
 
-        edges, vert_to_site_map, mig_graph_edges, loss_info = util.print_best_trees(losses_tensor, V, U, full_trees,                                                                        full_branch_lengths, ref_matrix,                                                                        var_matrix, B, O, weights, 
+        edges, vert_to_site_map, mig_graph_edges, loss_info = util.print_best_trees(losses_tensor, V, U, full_trees,                                                                        full_branch_lengths, ref_matrix,                                                                        var_matrix, B, O, G, weights, 
                                                                                     node_idx_to_label, ordered_sites,
                                                                                     print_config, intermediate_data, 
                                                                                     custom_colors, primary, max_iter)
 
-        avg_tree = util.print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_colors, ordered_sites)
+        avg_tree = util.print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_colors,
+                                            ordered_sites, print_config)
 
 
     return edges, vert_to_site_map, mig_graph_edges, loss_info, time_elapsed

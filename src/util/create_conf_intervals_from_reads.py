@@ -7,7 +7,6 @@ Confidence intervals can  be obtained by first pooling for each sample
 the read counts of the mutations that belong to the same cluster followed by
 using a beta distribution (see MACHINA supplement A.1.2 for more info).
 
-Author: Divya Koyyalagunta
 Jul 21, 2022
 
 '''

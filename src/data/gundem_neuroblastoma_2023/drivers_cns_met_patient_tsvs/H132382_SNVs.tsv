@@ -1,0 +1,3 @@
+	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad
+864	0	I-H-132382-T3-1-D1-2	0	retroperitoneal	0	FGFR1_p.N577K_non_synonymous_codon_8:38274849	82.0	0.0	primary_disease	retroperitoneal
+869	1	I-H-132382-T4-1-D1-2	1	brain	0	FGFR1_p.N577K_non_synonymous_codon_8:38274849	45.0	34.0	distant_metastasis	CNS
