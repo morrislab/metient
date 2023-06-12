@@ -1,4 +1,0 @@
-	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad
-811	0	I-H-132379-T4-1-D1-2	0	left adrenal	0	ARID1A_p.Y551fs*68_frameshift_variant_1:27057936	88.0	0.0	primary_disease	adrenal
-819	1	I-H-132379-T5-1-D1-2	1	brain, left temporal	0	ARID1A_p.Y551fs*68_frameshift_variant_1:27057936	91.0	0.0	distant_metastasis	CNS
-829	2	I-H-132379-T6-1-D1-2	2	brain, left frontal	0	ARID1A_p.Y551fs*68_frameshift_variant_1:27057936	39.0	32.0	distant_metastasis	CNS

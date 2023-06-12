@@ -1,5 +1,0 @@
-id	name	var_reads	total_reads	var_read_prob
-m0	ALK_p.F1245V_non_synonymous_codon_2:29436860	3,30,32	80,68,76	0.5,0.5,0.5
-m1	BRCA2_p.E2220*_stop_gained_13:32915150	0,28,0	94,82,77	0.5,0.5,0.5
-m2	ARID1A_p.R391fs*8_frameshift_variant_1:27056173	0,39,44	61,50,54	0.5,0.5,0.5
-m3	TERT_nan_promoter_5:1295228	3,15,29	76,39,53	0.5,0.5,0.5
