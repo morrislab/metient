@@ -290,6 +290,9 @@ def get_adj_matrices_from_all_mutation_trees(mut_trees_filename, character_label
         out.append((adj_matrix, pruned_char_label_to_idx))
     return out
 
+def test():
+    print("passed")
+
 # TODO: take out skip polytomies functionality?
 def get_adj_matrix_from_machina_tree(character_label_to_idx, tree_filename, remove_unseen_nodes=True, skip_polytomies=False):
     '''
@@ -316,14 +319,13 @@ def get_adj_matrix_from_machina_tree(character_label_to_idx, tree_filename, remo
             edges.append((node_i, node_j))
     return _get_adj_matrix_from_machina_tree(edges, character_label_to_idx, remove_unseen_nodes, skip_polytomies)
 
-def get_genetic_distance_tensor_from_sim_adj_matrix(adj_matrix, character_label_to_idx, split_char):
+def get_genetic_distance_tensor_from_adj_matrix(adj_matrix, character_label_to_idx, split_char, normalize=True):
     '''
     Get the genetic distances between nodes by counting the number of mutations between
     parent and child. character_label_to_idx's keys are expected to be cluster names with
     the mutations in that cluster (e.g. 'ENAM:4:71507837_DLG1:3:196793590'). split_char
     indicates what the mutations in the cluster name are split by.
     '''
-
     G = np.zeros(adj_matrix.shape)
     idx_to_char_label = { v:k for k,v in character_label_to_idx.items() }
 
@@ -333,6 +335,9 @@ def get_genetic_distance_tensor_from_sim_adj_matrix(adj_matrix, character_label_
                 # This is the number of mutations the child node has accumulated compared to its parent
                 num_mutations = idx_to_char_label[j].count(split_char) + 1
                 G[i][j] = num_mutations
+
+    if normalize:
+        G = G / np.max(G)
     return torch.tensor(G, dtype = torch.float32)
 
 

@@ -155,26 +155,42 @@ def evaluate_migration_multigraph(sim_mig_graph_fn, predicted_mig_graph_fn):
 
     return recall_G2, precision_G2, F_G2
 
-def save_boxplot(df, y, num_sites, fig_name):
-    seeding_pattern_order = ["mS", "pS", "pM", "pR"]
-    box_pairs = []
+def save_boxplot(joint_m5_df, joint_m8_df, run_name):
+    fig, axes = plt.subplots(2, 2, figsize=(10, 10), dpi=200)
+    ys = ["migration graph F1 score", "migrating clones F1 score"]
 
-    for seeding_pattern in seeding_pattern_order:
-        box_pairs.append(((seeding_pattern, "Gradient-based"),(seeding_pattern, "MACHINA")))
-    flierprops = dict(marker='o', markersize=5, markeredgecolor='black', markerfacecolor='grey', alpha=0.5)
-    ax = sns.boxplot(x="seeding pattern", y=y, hue="method", data=df, order=seeding_pattern_order, 
-                     palette=sns.color_palette("pastel"), flierprops=flierprops, linewidth=2)
-    add_stat_annotation(ax, data=df, x="seeding pattern", y=y, hue="method",
-                        box_pairs=box_pairs,
-                        test='t-test_welch', text_format='star', loc='inside', verbose=0, order=seeding_pattern_order, fontsize=18, comparisons_correction=None)
-    ax.set(ylim=(-0.1, 1.1))
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.set_xlabel('Seeding Pattern', fontsize=16, fontweight='bold')
-    ax.set_ylabel(y.capitalize(), fontsize=16, fontweight='bold')
-    ax.set_title(f"{num_sites} Anatomical Sites" , fontsize=16, fontweight='bold', y=1.1)
-    plt.legend(frameon=False, loc="lower right")
-    ax.get_figure().savefig("../output_plots/"+fig_name)
+    seeding_pattern_order = ["mS", "pS", "pM", "pR"]
+
+    i = 0
+    for y in ys:
+        for num_sites, df in [(5, joint_m5_df), (8, joint_m8_df)]:
+
+            box_pairs = []
+            for seeding_pattern in seeding_pattern_order:
+                box_pairs.append(((seeding_pattern, "Metient"),(seeding_pattern, "MACHINA")))
+            flierprops = dict(marker='o', markersize=5, markeredgecolor='black', markerfacecolor='darkgrey')
+            pos = str(np.binary_repr(i, width=2))
+            ax = axes[int(pos[0]),int(pos[1])]
+            sns.boxplot(ax=ax, x="seeding pattern", y=y, hue="method", data=df, order=seeding_pattern_order, 
+                        palette={"Metient":"#2496c8ff", "MACHINA":"#ff915fff"}, flierprops=flierprops, linewidth=1.5)
+            add_stat_annotation(ax, data=df, x="seeding pattern", y=y, hue="method",
+                                box_pairs=box_pairs,
+                                test='t-test_welch', text_format='star', loc='inside', verbose=0, order=seeding_pattern_order, fontsize=18, comparisons_correction=None)
+            ax.set(ylim=(-0.1, 1.1))
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.set_xlabel('Seeding Pattern', fontsize=16,)
+            ax.set_ylabel(y.capitalize(), fontsize=16,)
+            ax.set_title(f"{num_sites} Anatomical Sites" , fontsize=16, y=1.1)
+            ax.get_legend().remove()
+
+            i += 1
+
+    lines, labels = fig.axes[0].get_legend_handles_labels()
+    
+    fig.suptitle("F1-scores on Simulated Data",  fontweight='bold')
+    fig.legend(lines, labels, ncol=2, loc='upper right', bbox_to_anchor=(.75, 0.98), frameon=False, fontsize=20)
+    ax.get_figure().savefig("../output_plots/"+f"all_f1_scores_{run_name}.png")
     plt.clf()
 
 def load_machina_results(machina_results_dir):
@@ -318,8 +334,8 @@ if __name__ == "__main__":
     grad_m5_df = pd.DataFrame(grad_m5_f1_scores, columns=["seed", "seeding pattern",  "migrating clones F1 score", "migration graph F1 score"])
     grad_m8_df = pd.DataFrame(grad_m8_f1_scores, columns=["seed", "seeding pattern",  "migrating clones F1 score", "migration graph F1 score"])
 
-    grad_m5_df = grad_m5_df.groupby(['seeding pattern','seed']).mean().assign(method="Gradient-based")
-    grad_m8_df = grad_m8_df.groupby(['seeding pattern','seed']).mean().assign(method="Gradient-based")
+    grad_m5_df = grad_m5_df.groupby(['seeding pattern','seed']).mean().assign(method="Metient")
+    grad_m8_df = grad_m8_df.groupby(['seeding pattern','seed']).mean().assign(method="Metient")
 
     print("\nGradient-based m5 avg F1 scores")
     print(grad_m5_df.groupby('seeding pattern').mean())
@@ -348,8 +364,4 @@ if __name__ == "__main__":
     joint_m8_df = pd.concat([grad_m8_df, machina_m8_df]).reset_index()
     #print(joint_m5_df.reset_index())
 
-    save_boxplot(joint_m5_df, "migration graph F1 score", 5, f"m5_migration_graph_f1_scores_{run_name}.png")
-    save_boxplot(joint_m8_df, "migration graph F1 score", 8, f"m8_migration_graph_f1_scores_{run_name}.png")
-
-    save_boxplot(joint_m5_df, "migrating clones F1 score", 5,  f"m5_migrating_clones_f1_scores_{run_name}.png")
-    save_boxplot(joint_m8_df, "migrating clones F1 score", 8,  f"m8_migrating_clones_f1_scores_{run_name}.png")
+    save_boxplot(joint_m5_df, joint_m8_df, run_name)

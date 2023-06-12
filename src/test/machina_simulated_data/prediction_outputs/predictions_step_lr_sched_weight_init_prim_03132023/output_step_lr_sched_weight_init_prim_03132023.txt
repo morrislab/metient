@@ -1,0 +1,32 @@
+Weights:
+{'data_fit': 1.0, 'mig': 10.0, 'comig': 5.0, 'seed_site': 1.0, 'reg': 1.0, 'gen_dist': 0.5, 'organotrop': 1.0}
+Batch size: 32
+Learning rate schedule: step
+Placing higher weight on primary vertex labeling for all internal nodes: True
+Start time: 2023-03-13 16:35:42.003844
+Using 8 cores.
+predictions_step_lr_sched_weight_init_prim_03132023/m8/M
+['76', '7', '216', '239', '172', '243', '241', '35', '19', '45']
+predictions_step_lr_sched_weight_init_prim_03132023/m8/mS
+['5', '4', '7', '3', '2', '0', '10', '12', '9', '8']
+predictions_step_lr_sched_weight_init_prim_03132023/m8/R
+['981', '1070', '10046', '30342', '905', '157', '383', '10157', '394', '9']
+predictions_step_lr_sched_weight_init_prim_03132023/m8/S
+['5', '2', '0', '12', '37', '23', '35', '31', '69', '54']
+predictions_step_lr_sched_weight_init_prim_03132023/m5/M
+['565', '76', '512', '473', '907', '694', '865', '534', '209', '545']
+predictions_step_lr_sched_weight_init_prim_03132023/m5/mS
+['5', '4', '7', '3', '2', '0', '10', '12', '9', '8']
+predictions_step_lr_sched_weight_init_prim_03132023/m5/R
+['981', '571', '955', '950', '1140', '17', '538', '518', '2155', '247']
+predictions_step_lr_sched_weight_init_prim_03132023/m5/S
+['49', '62', '17', '23', '35', '25', '31', '32', '40', '81']
+Number of tasks: 80
+  site mig_type seed  tree_num    time    mig  comig  seeding   nll   reg    gen    loss
+0   m8        M    7         1 110.280 15.000  7.000    1.000 1.449 8.000 25.000 207.949
+1   m8        M   35         1 113.293 15.000  8.000    1.000 1.185 9.000  0.000 201.185
+2   m8        M   76         1 115.596 15.000  8.000    1.000 1.578 9.000 36.000 219.578
+3   m8        M  241         1 113.429 16.000  8.000    2.000 1.265 8.000 40.000 231.265
+4   m8        M  216         1 113.693 16.000  7.000    1.000 1.193 8.000 68.000 239.193
+Finished running 80 simulations.
+End time: 2023-03-13 16:55:55.748064. Time elapsed: 0:20:13.744220
