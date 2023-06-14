@@ -1,16 +1,29 @@
 
 import numpy as np
 
-def load_input_data(ssm_filename, params_filename):
-    variants = inputparser.load_ssms(ssm_filename)
-    params = inputparser.load_params(params_filename)
-    if 'garbage' not in params:
-        params['garbage'] = []
-    if 'clusters' not in params or len(params['clusters']) == 0:
-        params['clusters'] = [[vid] for vid in variants.keys() if vid not in params['garbage']]
-    supervars = clustermaker.make_cluster_supervars(params['clusters'], variants)
-    supervars = [supervars[vid] for vid in common.sort_vids(supervars.keys())]
-    return variants, params, supervars
+# Adapted from pairtree 
+def get_adj_matrix_from_parents(parents):
+    K = len(parents) + 1
+    T = np.eye(K)
+    T[parents,np.arange(1, K)] = 1
+    I = np.identity(T.shape[0])
+    T = np.logical_xor(T,I).astype(int) # remove self-loops
+    # remove the normal subclone
+    T = np.delete(T, 0, 0)
+    T = np.delete(T, 0, 1)
+    return T
+
+def get_adj_matrices_from_pairtree_results(pairtee_results_fn):
+    results = np.load(pairtee_results_fn)
+    parent_vectors = results['struct']
+    llhs = results['llh']
+    adj_matrices = []
+
+    data = []
+    for parents_vector, llh in zip(parent_vectors, llhs):
+        adj_matrix = get_adj_matrix_from_parents(parents_vector)
+        data.append((adj_matrix, llh))
+    return data
 
 # Adapted from pairtree lib/vaf_plotter.py
 def _get_F_matrix(clustered_vars, num_variants, num_samples, should_correct_vaf):
@@ -89,15 +102,4 @@ def get_B(clusters, parents, ordered_variant_ids):
             vidx = ordered_variant_ids.index(variant)
             B[cidx][vidx] = 1
     return B
-
-def get_adj_matrix_from_pairtree_tree(parents):
-    K = len(parents) + 1
-    T = np.eye(K)
-    T[parents,np.arange(1, K)] = 1
-    I = np.identity(T.shape[0])
-    T = np.logical_xor(T,I).astype(int) # remove self-loops
-    # remove the normal subclone
-    T = np.delete(T, 0, 0)
-    T = np.delete(T, 0, 1)
-    return T
 
