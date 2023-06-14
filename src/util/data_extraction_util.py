@@ -150,13 +150,15 @@ def get_ref_var_matrices_from_real_data(tsv_filepath):
     mutation clusters, so this would map 'pink' to n, if pink is the nth node in the adjacency matrix)
     '''
 
+    header_row_idx = -1
     with open(tsv_filepath) as f:
         tsv = csv.reader(f, delimiter="\t", quotechar='"')
         # Take a pass over the tsv to collect some metadata
         num_clusters = 0
         num_samples = 0
         for i, row in enumerate(tsv):
-            if i == 3:
+            if '#sample_index' in row: # is header row
+                header_row_idx = i
                 sample_idx = row.index('#sample_index')
                 ref_idx = row.index('ref')
                 var_idx = row.index('var')
@@ -164,7 +166,7 @@ def get_ref_var_matrices_from_real_data(tsv_filepath):
                 site_label_idx = row.index('anatomical_site_label')
                 character_label_idx = row.index('character_label')
 
-            if i > 3:
+            else:
                 num_clusters = max(num_clusters, int(row[mut_cluster_idx]))
                 num_samples = max(num_samples, int(row[sample_idx]))
         # 0 indexing
@@ -178,9 +180,9 @@ def get_ref_var_matrices_from_real_data(tsv_filepath):
     with open(tsv_filepath) as f:
         tsv = csv.reader(f, delimiter="\t", quotechar='"')
         for i, row in enumerate(tsv):
-            if i < 4: continue
-            R[int(row[sample_idx]), int(row[mut_cluster_idx])] = int(row[ref_idx])
-            V[int(row[sample_idx]), int(row[mut_cluster_idx])] = int(row[var_idx])
+            if i <= header_row_idx: continue
+            R[int(float(row[sample_idx])), int(float(row[mut_cluster_idx]))] = int(float(row[ref_idx]))
+            V[int(float(row[sample_idx])), int(float(row[mut_cluster_idx]))] = int(float(row[var_idx]))
 
             # collect additional metadata
             # doing this as a list instead of a set so we preserve the order

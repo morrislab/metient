@@ -1,0 +1,3 @@
+id	name	var_reads	total_reads	var_read_prob
+m0	ATRX_p.R250*_stop_gained_X:76940000	21,20,23	31,28,32	0.5,0.5,0.5
+m1	ALK_p.R1275Q_non_synonymous_codon_2:29432664	50,40,35	145,140,111	0.5,0.5,0.5

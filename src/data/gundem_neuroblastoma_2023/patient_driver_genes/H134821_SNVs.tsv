@@ -1,0 +1,28 @@
+	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad
+146	0	E-H-131233-T1-1-D1-1	0	right adrenal	1	MTOR_p.S2215Y_non_synonymous_codon_1:11184573	40.0	0.0	primary_disease	adrenal
+149	0	E-H-131233-T1-1-D1-1	0	right adrenal	0	PIK3CA_p.H1047L_non_synonymous_codon_3:178952085	20.0	15.0	primary_disease	adrenal
+150	0	E-H-131233-T1-1-D1-1	0	right adrenal	2	BRCA2_p.E2981*_stop_gained_13:32953640	41.0	0.0	primary_disease	adrenal
+1281	1	I-H-134821-T10-3-D1-1	0	right adrenal	1	MTOR_p.S2215Y_non_synonymous_codon_1:11184573	88.0	0.0	primary_disease	adrenal
+1282	1	I-H-134821-T10-3-D1-1	0	right adrenal	2	BRCA2_p.E2981*_stop_gained_13:32953640	64.0	0.0	primary_disease	adrenal
+1284	1	I-H-134821-T10-3-D1-1	0	right adrenal	0	PIK3CA_p.H1047L_non_synonymous_codon_3:178952085	36.0	22.0	primary_disease	adrenal
+1286	2	I-H-134821-T12-3-D1-1	1	cervical lymph node	2	BRCA2_p.E2981*_stop_gained_13:32953640	113.0	0.0	local_disease	cervical
+1287	2	I-H-134821-T12-3-D1-1	1	cervical lymph node	0	PIK3CA_p.H1047L_non_synonymous_codon_3:178952085	41.0	32.0	local_disease	cervical
+1289	2	I-H-134821-T12-3-D1-1	1	cervical lymph node	1	MTOR_p.S2215Y_non_synonymous_codon_1:11184573	91.0	0.0	local_disease	cervical
+1290	3	I-H-134821-T13-3-D1-1	2	thoracic lymph node	1	MTOR_p.S2215Y_non_synonymous_codon_1:11184573	86.0	1.0	local_disease	thoracic
+1292	3	I-H-134821-T13-3-D1-1	2	thoracic lymph node	2	BRCA2_p.E2981*_stop_gained_13:32953640	82.0	0.0	local_disease	thoracic
+1293	3	I-H-134821-T13-3-D1-1	2	thoracic lymph node	0	PIK3CA_p.H1047L_non_synonymous_codon_3:178952085	44.0	23.0	local_disease	thoracic
+1294	4	I-H-134821-T14-3-D1-1	3	right cervical	1	MTOR_p.S2215Y_non_synonymous_codon_1:11184573	93.0	0.0	local_disease	cervical
+1295	4	I-H-134821-T14-3-D1-1	3	right cervical	2	BRCA2_p.E2981*_stop_gained_13:32953640	73.0	0.0	local_disease	cervical
+1296	4	I-H-134821-T14-3-D1-1	3	right cervical	0	PIK3CA_p.H1047L_non_synonymous_codon_3:178952085	36.0	20.0	local_disease	cervical
+1298	5	I-H-134821-T15-3-D1-1	4	cervical	0	PIK3CA_p.H1047L_non_synonymous_codon_3:178952085	38.0	17.0	local_disease	cervical
+1299	5	I-H-134821-T15-3-D1-1	4	cervical	1	MTOR_p.S2215Y_non_synonymous_codon_1:11184573	77.0	1.0	local_disease	cervical
+1301	5	I-H-134821-T15-3-D1-1	4	cervical	2	BRCA2_p.E2981*_stop_gained_13:32953640	72.0	0.0	local_disease	cervical
+1302	6	I-H-134821-T16-3-D1-1	5	small intestine	0	PIK3CA_p.H1047L_non_synonymous_codon_3:178952085	81.0	0.0	local_disease	abdominal
+1303	6	I-H-134821-T16-3-D1-1	5	small intestine	2	BRCA2_p.E2981*_stop_gained_13:32953640	87.0	0.0	local_disease	abdominal
+1304	6	I-H-134821-T16-3-D1-1	5	small intestine	1	MTOR_p.S2215Y_non_synonymous_codon_1:11184573	89.0	1.0	local_disease	abdominal
+1305	7	I-H-134821-T17-3-D1-1	6	pancreas	2	BRCA2_p.E2981*_stop_gained_13:32953640	64.0	21.0	local_disease	pancreas
+1306	7	I-H-134821-T17-3-D1-1	6	pancreas	0	PIK3CA_p.H1047L_non_synonymous_codon_3:178952085	53.0	0.0	local_disease	pancreas
+1307	7	I-H-134821-T17-3-D1-1	6	pancreas	1	MTOR_p.S2215Y_non_synonymous_codon_1:11184573	74.0	30.0	local_disease	pancreas
+1309	8	I-H-134821-T18-3-D1-1	7	hilar lymph node	0	PIK3CA_p.H1047L_non_synonymous_codon_3:178952085	52.0	0.0	local_disease	thoracic
+1310	8	I-H-134821-T18-3-D1-1	7	hilar lymph node	1	MTOR_p.S2215Y_non_synonymous_codon_1:11184573	49.0	19.0	local_disease	thoracic
+1311	8	I-H-134821-T18-3-D1-1	7	hilar lymph node	2	BRCA2_p.E2981*_stop_gained_13:32953640	108.0	0.0	local_disease	thoracic

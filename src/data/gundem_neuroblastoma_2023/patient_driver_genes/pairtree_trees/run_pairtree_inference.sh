@@ -1,12 +1,11 @@
 #!/bin/bash
 if [ ! $# -eq 4 ]
 then
-    echo "Usage: $0 <ssm_data_dir> <output_dir> <pairtree_executable> <plottree_executable>" >&4
+    echo "Usage: $0 <ssm_data_dir> <output_dir> <pairtree_executable> <plottree_executable>"
     exit 1
 fi
 
-
-for f in ${1}/reads_seed*.tsv
+for f in ${1}/*.ssm
 do
     p=$(basename $f .ssm | sed -e s/ssm//g)
     echo Inferring tree for $p...

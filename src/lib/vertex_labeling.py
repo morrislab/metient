@@ -4,7 +4,9 @@ import sys
 import numpy as np
 import datetime
 
-from src.util import vertex_labeling_util as util
+from src.util import vertex_labeling_util as vert_util
+from src.util import plotting_util as plot_util
+
 from torch.distributions.binomial import Binomial
 from src.util.globals import *
 
@@ -107,7 +109,7 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter
     # tells us if two nodes are (1) in the same site and (2) have parents in the same site
     # and (3) there's a path from node i to node j
     # TODO: this is computationally expensive, maybe we could cache path matrices we've calculated before?
-    P = util.get_path_matrix_tensor(A.cpu().numpy())
+    P = vert_util.get_path_matrix_tensor(A.cpu().numpy())
     shared_path_and_par_and_self_color = torch.sum(torch.mul(P, shared_par_and_self_color), axis=1)
     repeated_temporal_migrations = torch.sum(torch.mul(shared_path_and_par_and_self_color, Y))
     binarized_site_adj = torch.sigmoid(alpha * (2 * site_adj - 1))
@@ -412,9 +414,8 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
                 intermediate_data.append([losses_tensor, full_trees, V, U, full_branch_lengths, softmax_Xs])
 
     if print_config.visualize:
-        #util.plot_losses(losses)
-        util.plot_loss_components(all_loss_components, weights)
-        util.plot_temps(temps)
+        plot_util.plot_loss_components(all_loss_components, weights)
+        plot_util.plot_temps(temps)
 
     time_elapsed = (datetime.datetime.now() - start_time).total_seconds()
     if print_config.verbose:
@@ -423,12 +424,12 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     with torch.no_grad():
         losses_tensor, V, full_trees, full_branch_lengths, _, _ = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, -1, max_iter, lr_sched)
 
-        edges, vert_to_site_map, mig_graph_edges, loss_info = util.print_best_trees(losses_tensor, V, U, full_trees,                                                                        full_branch_lengths, ref_matrix,                                                                        var_matrix, B, O, G, weights, 
+        edges, vert_to_site_map, mig_graph_edges, loss_info = plot_util.print_best_trees(losses_tensor, V, U, full_trees,                                                                        full_branch_lengths, ref_matrix,                                                                        var_matrix, B, O, G, weights, 
                                                                                     node_idx_to_label, ordered_sites,
                                                                                     print_config, intermediate_data, 
                                                                                     custom_colors, primary, max_iter)
 
-        avg_tree = util.print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_colors,
+        avg_tree = plot_util.print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_colors,
                                             ordered_sites, print_config)
 
 

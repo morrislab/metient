@@ -1,0 +1,9 @@
+	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad
+105	0	E-H-131222-T1-1-D1-1	0	right pleural	1	MTOR_p.V2006F_non_synonymous_codon_1:11188078	33.0	0.0	primary_disease	thoracic
+106	0	E-H-131222-T1-1-D1-1	0	right pleural	0	ATRX_p.E555*_stop_gained_X:76939085	2.0	16.0	primary_disease	thoracic
+964	1	I-H-132387-T5-1-D1-2	0	right pleural	1	MTOR_p.V2006F_non_synonymous_codon_1:11188078	102.0	0.0	primary_disease	thoracic
+969	1	I-H-132387-T5-1-D1-2	0	right pleural	0	ATRX_p.E555*_stop_gained_X:76939085	2.0	32.0	primary_disease	thoracic
+970	2	I-H-132387-T6-1-D1-2	1	paraspinal at T8-T9	1	MTOR_p.V2006F_non_synonymous_codon_1:11188078	104.0	0.0	local_disease	thoracic
+974	2	I-H-132387-T6-1-D1-2	1	paraspinal at T8-T9	0	ATRX_p.E555*_stop_gained_X:76939085	5.0	28.0	local_disease	thoracic
+979	3	I-H-132387-T7-1-D1-2	2	cervical paraspinal at C3	1	MTOR_p.V2006F_non_synonymous_codon_1:11188078	68.0	29.0	local_disease	cervical
+980	3	I-H-132387-T7-1-D1-2	2	cervical paraspinal at C3	0	ATRX_p.E555*_stop_gained_X:76939085	8.0	28.0	local_disease	cervical

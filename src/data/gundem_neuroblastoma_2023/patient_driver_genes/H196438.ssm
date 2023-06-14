@@ -1,0 +1,4 @@
+id	name	var_reads	total_reads	var_read_prob
+m0	EPHA3_p.R274L_nan_3:89390072	33,0	122,381	0.5,0.5
+m1	ARID1B_c.2037+3A>G_nan_6:157256713	26,103	97,245	0.5,0.5
+m2	KLF4_p.S468*_nan_9:110248069	0,154	86,681	0.5,0.5

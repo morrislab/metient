@@ -1,0 +1,7 @@
+	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad
+129	0	E-H-131228-T1-1-D1-1	0	right pelvic	1	ERBB3_p.L441M_non_synonymous_codon_12:56487175	23.0	6.0	primary_disease	pelvic
+1720	0	E-H-131228-T1-1-D1-1	0	right pelvic	2	NOTCH3_p.SP1264RT_non_synonymous_codon_19:15289678	7.0	0.0	primary_disease	pelvic
+1721	0	E-H-131228-T1-1-D1-1	0	right pelvic	0	PAK1_p.S155_N157del_inframe_codon_loss_11:77085378	36.0	0.0	primary_disease	pelvic
+1722	1	P-0017728-T01-IM6	1	left posterior mediastinal	0	PAK1_p.S155_N157del_inframe_codon_loss_11:77085378	662.0	188.0	distant_metastasis	thoracic
+1724	1	P-0017728-T01-IM6	1	left posterior mediastinal	2	NOTCH3_p.SP1264RT_non_synonymous_codon_19:15289678	608.0	301.0	distant_metastasis	thoracic
+3144	1	P-0017728-T01-IM6	1	left posterior mediastinal	1	ERBB3_p.L441M_non_synonymous_codon_12:56487175	593.0	181.0	distant_metastasis	thoracic

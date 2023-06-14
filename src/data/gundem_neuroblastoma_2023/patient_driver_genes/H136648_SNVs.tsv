@@ -1,0 +1,3 @@
+	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad
+1447	0	IID_H136648_T01_01_WG01	0	left retroperitoneal	0	KRAS_p.K117N_non_synonymous_codon_12:25378647	110.0	74.0	local_disease	retroperitoneal
+1859	1	P-0035532-T01-IM6	1	left adrenal	0	KRAS_p.K117N_non_synonymous_codon_12:25378647	231.0	349.0	primary_disease	adrenal

@@ -1,0 +1,9 @@
+id	name	var_reads	total_reads	var_read_prob
+m0	PTPRT_p.X1398_non_synonymous_codon_20:40710659	0,0,110	54,789,467	0.5,0.5,0.5
+m1	ARID1A_p.G931V_non_synonymous_codon_1:27092771	0,0,202	32,789,825	0.5,0.5,0.5
+m2	SMARCA4_p.F1234_K1237del_inframe_codon_loss_19:11144117	0,163,250	12,631,507	0.5,0.5,0.5
+m3	ATRX_p.A1690D_non_synonymous_codon_X:76888760	8,227,495	10,592,674	0.5,0.5,0.5
+m4	FAT1_p.D2931N_non_synonymous_codon_4:187538949	10,249,348	22,826,962	0.5,0.5,0.5
+m5	EGFR_p.T847S_non_synonymous_codon_7:55259481	0,0,44	48,789,1143	0.5,0.5,0.5
+m6	TMPRSS2_p.Y453*_stop_gained_21:42840389	11,203,291	28,655,550	0.5,0.5,0.5
+m7	IRS2_p.A1296T_non_synonymous_codon_13:110434515	7,159,156	7,322,403	0.5,0.5,0.5

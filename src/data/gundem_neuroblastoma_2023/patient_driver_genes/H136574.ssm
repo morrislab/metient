@@ -1,0 +1,9 @@
+id	name	var_reads	total_reads	var_read_prob
+m0	ERBB4_p.Y875*_stop_gained_2:212295688	0,0,18	71,579,164	0.5,0.5,0.5
+m1	CYSLTR2_p.G55E_non_synonymous_codon_13:49281117	0,0,29	90,1064,194	0.5,0.5,0.5
+m2	GRIN2A_p.G939A_non_synonymous_codon_16:9858585	0,0,19	100,444,137	0.5,0.5,0.5
+m3	TGFBR2_p.K355N_non_synonymous_codon_3:30713665	0,1,28	136,483,143	0.5,0.5,0.5
+m4	MSH2_p.A600S_non_synonymous_codon_2:47702202	4,0,53	103,681,126	0.5,0.5,0.5
+m5	DOT1L_p.X489_non_synonymous_codon_19:2211212	0,0,37	154,669,603	0.5,0.5,0.5
+m6	AXL_p.P301L_non_synonymous_codon_19:41743967	0,1,31	136,871,383	0.5,0.5,0.5
+m7	KMT2B_p.T186P_non_synonymous_codon_19:36210805	1,0,35	175,1117,461	0.5,0.5,0.5

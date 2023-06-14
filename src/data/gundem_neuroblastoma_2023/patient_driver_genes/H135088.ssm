@@ -1,0 +1,9 @@
+id	name	var_reads	total_reads	var_read_prob
+m0	BRD4_p.P1033A_non_synonymous_codon_19:15353783	0,0,52,0	75,534,553,647	0.5,0.5,0.5,0.5
+m1	MYCL_p.A272S_non_synonymous_codon_1:40363415	0,0,0,93	110,948,917,970	0.5,0.5,0.5,0.5
+m2	KMT2B_p.G2247R_non_synonymous_codon_19:36224189	23,0,0,116	129,916,873,729	0.5,0.5,0.5,0.5
+m3	ALK_p.F1174L_non_synonymous_codon_2:29443695	39,426,497,366	107,762,841,686	0.5,0.5,0.5,0.5
+m4	IKZF1_p.V107G_non_synonymous_codon_7:50444390	0,0,0,54	149,697,1177,893	0.5,0.5,0.5,0.5
+m5	MED12_p.T1830A_non_synonymous_codon_X:70356816	0,0,51,0	54,879,460,453	0.5,0.5,0.5,0.5
+m6	BRCA2_p.E1879*_stop_gained_13:32914127	51,120,589,246	114,481,1307,551	0.5,0.5,0.5,0.5
+m7	KMT2B_p.V814M_non_synonymous_codon_19:36212689	0,0,53,0	101,1043,986,972	0.5,0.5,0.5,0.5

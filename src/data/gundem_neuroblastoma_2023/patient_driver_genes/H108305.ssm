@@ -1,0 +1,4 @@
+id	name	var_reads	total_reads	var_read_prob
+m0	PGR_p.E271D_non_synonymous_codon_11:100998989	46,336	58,538	0.5,0.5
+m1	NF1_p.H2376Y_non_synonymous_codon_17:29670090	9,1	82,1082	0.5,0.5
+m2	KMT2D_p.Q3745_H3746insQ_inframe_codon_gain_12:49427250	24,1	85,554	0.5,0.5
