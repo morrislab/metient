@@ -150,12 +150,15 @@ def get_ref_var_matrices_from_real_data(tsv_filepath):
     mutation clusters, so this would map 'pink' to n, if pink is the nth node in the adjacency matrix)
     '''
 
+
+    # Get metadata
     header_row_idx = -1
     with open(tsv_filepath) as f:
         tsv = csv.reader(f, delimiter="\t", quotechar='"')
         # Take a pass over the tsv to collect some metadata
         num_clusters = 0
         num_samples = 0
+
         for i, row in enumerate(tsv):
             if '#sample_index' in row: # is header row
                 header_row_idx = i
@@ -165,14 +168,19 @@ def get_ref_var_matrices_from_real_data(tsv_filepath):
                 mut_cluster_idx = row.index('character_index')
                 site_label_idx = row.index('anatomical_site_label')
                 character_label_idx = row.index('character_label')
+                break
 
-            else:
-                num_clusters = max(num_clusters, int(row[mut_cluster_idx]))
-                num_samples = max(num_samples, int(row[sample_idx]))
+        assert (header_row_idx != -1), "No header provided in csv file"
+
+        for i, row in enumerate(tsv):
+            num_clusters = max(num_clusters, int(row[mut_cluster_idx]))
+            num_samples = max(num_samples, int(row[sample_idx]))
         # 0 indexing
         num_clusters += 1
         num_samples += 1
 
+
+    # Build R and V matrices
     character_label_to_idx = dict()
     R = np.zeros((num_samples, num_clusters))
     V = np.zeros((num_samples, num_clusters))
@@ -343,40 +351,42 @@ def get_genetic_distance_tensor_from_adj_matrix(adj_matrix, character_label_to_i
     return torch.tensor(G, dtype = torch.float32)
 
 
-def get_organotropism_matrix(ordered_sites, site_to_msk_met_map, msk_met_fn):
+def get_organotropism_matrix_from_msk_met(ordered_sites, cancer_type, frequency_csv, site_to_msk_met_map=None):
     '''
     Args:
         ordered_sites: array of the anatomical site names (e.g. ["breast", "lung"])
         with length =  num_anatomical_sites) where the order matches the order of sites
         in the ref_matrix and var_matrix
-        site_to_msk_met_map: dictionary mapping site names to MSK-MET site names
+        cancer_type: cancer type name, which is used as the 
+        frequency_csv: csv with frequency of metastasis by cancer type
+        site_to_msk_met_map: dictionary mapping site names to MSK-MET site names. if
+        not provided, the names used in the ordered_sites array are used
 
     Returns:
-        matrix of size len(ordered_sites) x len(ordered_sites) with the frequency with which
-        site i seeds site j (as taken from MSK-MET data)
+        array of size len(ordered_sites) with the frequency with which
+        primary cancer type seeds site i
     '''
 
-    freq_df = pd.read_csv(msk_met_fn)
+    freq_df = pd.read_csv(frequency_csv)
+    if (cancer_type not in list(freq_df['Cancer Type'])):
+        raise ValueError(f"{cancer_type} is not in MSK-MET data as a primary cancer type")
 
-    organotrop_mat = np.zeros((len(ordered_sites), len(ordered_sites)))
+    if site_to_msk_met_map != None:
+        for site in ordered_sites:
+            if (site not in site_to_msk_met_map):
+                raise ValueError(f"{site} not in provided site_to_msk_met_map")
+        mapped_sites = [site_to_msk_met_map[site] for site in ordered_sites]
+    else:
+        mapped_sites = ordered_sites
 
-    # TODO: handle site i and site j differently since those are diff labels in MSK-MET
-    for site in ordered_sites:
-        assert(site in site_to_msk_met_map)
+    for site in mapped_sites:
+        if (site not in list(freq_df.columns)):
+            raise ValueError(f"{site} not in MSK-MET metastatic sites")
 
-    mapped_sites = [site_to_msk_met_map[site] for site in ordered_sites]
-    for i, start in enumerate(mapped_sites):
-        for j, dest in enumerate(mapped_sites):
-            missing_val = False
-            if start not in list(freq_df['Primary Tumor Site']):
-                print(f"{start} not in MSK-MET as primary tumor")
-                missing_val = True
-            if dest not in list(freq_df.columns):
-                print(f"{dest} not in MSK-MET as metastatic site")
-                missing_val = True
-            if missing_val or (freq_df[freq_df['Primary Tumor Site']==start][dest].item() == 0.0):
-                organotrop_mat[i,j] = -1.0 # TODO: what do we do when primary or met are not in db
-            else:
-                organotrop_mat[i,j] = freq_df[freq_df['Primary Tumor Site']==start][dest].item()
+    organotrop_arr = np.zeros(len(ordered_sites))
+    met_freqs = freq_df[freq_df['Cancer Type']==cancer_type]
 
-    return torch.tensor(organotrop_mat, dtype = torch.float32)
+    for i, metastatic_site in enumerate(mapped_sites):
+        organotrop_arr[i] = met_freqs[metastatic_site].item()
+
+    return torch.tensor(organotrop_arr, dtype = torch.float32)

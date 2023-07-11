@@ -9,8 +9,8 @@ def get_adj_matrix_from_parents(parents):
     I = np.identity(T.shape[0])
     T = np.logical_xor(T,I).astype(int) # remove self-loops
     # remove the normal subclone
-    T = np.delete(T, 0, 0)
-    T = np.delete(T, 0, 1)
+    #T = np.delete(T, 0, 0)
+    #T = np.delete(T, 0, 1)
     return T
 
 def get_adj_matrices_from_pairtree_results(pairtee_results_fn):

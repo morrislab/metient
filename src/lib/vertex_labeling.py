@@ -70,7 +70,7 @@ def _calc_llh(F_hat, R, V, omega_v, epsilon=1e-5):
     #print("nlglh", nlglh)
     return (F_llh, llh_per_sample, nlglh)
 
-def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter, lr_sched, print_config=None):
+def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter, lr_sched):
     '''
     Args:
         V: Vertex labeling of the full tree (num_sites x num_nodes)
@@ -81,7 +81,7 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter
         B: Mutation matrix (shape: num_internal_nodes x num_mutation_clusters)
         G: Matrix of genetic distances between internal nodes (shape: num_internal_nodes x num_internal_nodes).
         Lower values indicate lower branch lengths, i.e. more genetically similar.
-        O: Matrix of organotropism values between sites (shape: num_anatomical_sites x  num_anatomical_sites).
+        O: Array of frequencies with which the primary cancer type seeds site i (shape: num_anatomical_sites).
 
     Returns:
         Loss to score this tree and labeling combo.
@@ -132,8 +132,11 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter
 
     o = 0
     if O != None and weights.organotrop != 0:
-        #organ_penalty = torch.mul((1 - O) , site_adj_no_diag)
-        organ_penalty = -1.0*torch.mul(O, site_adj_no_diag)
+        # the organotropism frequencies can only be used on the first 
+        # row, which is for the migrations from primary cancer site to
+        # other metastatic sites (we don't have frequencies for every 
+        # site to site migration)
+        organ_penalty = -1.0*torch.mul(O, site_adj_no_diag[0,:])
         o = torch.sum(organ_penalty)
 
     # Regularization to make some values of U -> 0
@@ -159,19 +162,7 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter
 
     loss = (lam1*(weights.data_fit*nlglh + weights.reg*reg)) + (lam2*(weights.mig*m + weights.seed_site*s + weights.comig*c + weights.gen_dist*g + weights.organotrop*o))
 
-    loss_components = {"mig": m.item(), "comig": c.item(), "seeding": s.item(), "nll": round(nlglh.item(), 3), "reg": reg.item(), "gen": 0 if g == 0 else round(g.item(), 3), "loss": loss.item()}
-    if print_config and print_config.verbose:
-        print("Migration number:", m.item())
-        print("Comigration number:", c.item())
-        print("Seeding site number:", s.item())
-        print("Neg log likelihood:", round(nlglh.item(), 3))
-        print("Reg:", reg.item())
-        if g != 0:
-            print("Genetic distance:", round(g.item(), 3))
-
-        if o != 0:
-            print("Organotropism penalty:", round(o.item(), 3))
-        print("Loss:", round(loss.item(), 3))
+    loss_components = {"mig": m.item(), "comig": c.item(), "seeding": s.item(), "nll": round(nlglh.item(), 3), "reg": reg.item(), "organo": 0 if o == 0 else round(o.item(), 3), "gen": 0 if g == 0 else round(g.item(), 3), "loss": round(loss.item(), 3)}
 
     return loss, loss_components
 
@@ -318,19 +309,27 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
             "em": (1) has weight=1 and (2) has weight=0 for 20 epochs, and we flip every 20 epochs (kind of like E-M)
             "linear": (1) decreases linearly while (2) increases linearly at the same rate (1/max_iter)
     Returns:
+        # TODO: return info for k best trees
         Corresponding info on the *best* tree:
         (1) edges of the tree (e.g. [('0', '1'), ('1', '2;3')])
         (2) vertex labeling as a dictionary (e.g. {'0': 'P', '1;3': 'M1'}),
         (3) edges for the migration graph (e.g. [('P', 'M1')])
         (4) dictionary w/ loss values for each component of the loss
-        (5) how long (in sec) the algorithm took to run
+        (5) how long (in seconds) the algorithm took to run
     '''
-    assert(T.shape[0] == T.shape[1] == B.shape[0])
-    assert(ref_matrix.shape[1] == var_matrix.shape[1] == B.shape[1])
-    assert(ref_matrix.shape[0] == var_matrix.shape[0] == len(ordered_sites))
-    assert(ref_matrix.shape == var_matrix.shape)
 
-    
+    # TODO: test these assertions
+    if not (T.shape[0] == T.shape[1] == B.shape[0]):
+        raise ValueError(f"Number of tree nodes should be consistent (T.shape[0] == T.shape[1] == B.shape[0])")
+    if ref_matrix.shape != var_matrix.shape:
+        raise ValueError(f"ref_matrix and var_matrix must have identical shape, got {ref_matrix.shape} and {var_matrix.shape}")
+    if not (ref_matrix.shape[1] == var_matrix.shape[1] == B.shape[1]):
+        raise ValueError(f"Number of mutations/mutation clusters should be consistent (ref_matrix.shape[1] == var_matrix.shape[1] == B.shape[1])")
+    if not (ref_matrix.shape[0] == var_matrix.shape[0] == len(ordered_sites)):   
+        raise ValueError(f"Length of ordered_sites should be equal to ref_matrix and var_matrix dim 0")
+    if not vert_util.is_tree(T):
+        raise ValueError("Adjacency matrix T is empty or not a tree.")
+
     num_sites = ref_matrix.shape[0]
     num_internal_nodes = T.shape[0]
 

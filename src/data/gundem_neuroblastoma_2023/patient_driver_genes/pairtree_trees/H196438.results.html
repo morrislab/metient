@@ -1,0 +1,1274 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>H196438 tree</title>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script>(function() {function f(a){var c=[],b=Math.pow(a+16,3)/1560896;b=b>g?b:a/k;for(var d=0;3>d;){var e=d++,h=l[e][0],w=l[e][1];e=l[e][2];for(var x=0;2>x;){var y=x++,z=(632260*e-126452*w)*b+126452*y;c.push({b:(284517*h-94839*e)*b/z,a:((838422*e+769860*w+731718*h)*a*b-769860*y*a)/z})}}return c}function m(a){a=f(a);for(var c=Infinity,b=0;b<a.length;){var d=a[b];++b;c=Math.min(c,Math.abs(d.a)/Math.sqrt(Math.pow(d.b,2)+1))}return c}
+function n(a,c){c=c/360*Math.PI*2;a=f(a);for(var b=Infinity,d=0;d<a.length;){var e=a[d];++d;e=e.a/(Math.sin(c)-e.b*Math.cos(c));0<=e&&(b=Math.min(b,e))}return b}function p(a,c){for(var b=0,d=0,e=a.length;d<e;){var h=d++;b+=a[h]*c[h]}return b}function q(a){return.0031308>=a?12.92*a:1.055*Math.pow(a,.4166666666666667)-.055}function r(a){return.04045<a?Math.pow((a+.055)/1.055,2.4):a/12.92}function t(a){return[q(p(l[0],a)),q(p(l[1],a)),q(p(l[2],a))]}
+function u(a){a=[r(a[0]),r(a[1]),r(a[2])];return[p(v[0],a),p(v[1],a),p(v[2],a)]}function A(a){var c=a[0],b=a[1];a=c+15*b+3*a[2];0!=a?(c=4*c/a,a=9*b/a):a=c=NaN;b=b<=g?b/B*k:116*Math.pow(b/B,.3333333333333333)-16;return 0==b?[0,0,0]:[b,13*b*(c-C),13*b*(a-D)]}function E(a){var c=a[0];if(0==c)return[0,0,0];var b=a[1]/(13*c)+C;a=a[2]/(13*c)+D;c=8>=c?B*c/k:B*Math.pow((c+16)/116,3);b=0-9*c*b/((b-4)*a-b*a);return[b,c,(9*c-15*a*c-a*b)/(3*a)]}
+function F(a){var c=a[0],b=a[1],d=a[2];a=Math.sqrt(b*b+d*d);1E-8>a?b=0:(b=180*Math.atan2(d,b)/Math.PI,0>b&&(b=360+b));return[c,a,b]}function G(a){var c=a[1],b=a[2]/360*2*Math.PI;return[a[0],Math.cos(b)*c,Math.sin(b)*c]}function H(a){var c=a[0],b=a[1];a=a[2];if(99.9999999<a)return[100,0,c];if(1E-8>a)return[0,0,c];b=n(a,c)/100*b;return[a,b,c]}function I(a){var c=a[0],b=a[1];a=a[2];if(99.9999999<c)return[a,0,100];if(1E-8>c)return[a,0,0];var d=n(c,a);return[a,b/d*100,c]}
+function J(a){var c=a[0],b=a[1];a=a[2];if(99.9999999<a)return[100,0,c];if(1E-8>a)return[0,0,c];b=m(a)/100*b;return[a,b,c]}function K(a){var c=a[0],b=a[1];a=a[2];if(99.9999999<c)return[a,0,100];if(1E-8>c)return[a,0,0];var d=m(c);return[a,b/d*100,c]}function L(a){for(var c="#",b=0;3>b;){var d=b++;d=Math.round(255*a[d]);var e=d%16;c+=M.charAt((d-e)/16|0)+M.charAt(e)}return c}
+function N(a){a=a.toLowerCase();for(var c=[],b=0;3>b;){var d=b++;c.push((16*M.indexOf(a.charAt(2*d+1))+M.indexOf(a.charAt(2*d+2)))/255)}return c}function O(a){return t(E(G(a)))}function P(a){return F(A(u(a)))}function Q(a){return O(H(a))}function R(a){return I(P(a))}function S(a){return O(J(a))}function T(a){return K(P(a))}
+var l=[[3.240969941904521,-1.537383177570093,-.498610760293],[-.96924363628087,1.87596750150772,.041555057407175],[.055630079696993,-.20397695888897,1.056971514242878]],v=[[.41239079926595,.35758433938387,.18048078840183],[.21263900587151,.71516867876775,.072192315360733],[.019330818715591,.11919477979462,.95053215224966]],B=1,C=.19783000664283,D=.46831999493879,k=903.2962962,g=.0088564516,M="0123456789abcdef";
+window.hsluv={hsluvToRgb:Q,rgbToHsluv:R,hpluvToRgb:S,rgbToHpluv:T,hsluvToHex:function(a){return L(Q(a))},hexToHsluv:function(a){return R(N(a))},hpluvToHex:function(a){return L(S(a))},hexToHpluv:function(a){return T(N(a))},lchToHpluv:K,hpluvToLch:J,lchToHsluv:I,hsluvToLch:H,lchToLuv:G,luvToLch:F,xyzToLuv:A,luvToXyz:E,xyzToRgb:t,rgbToXyz:u,lchToRgb:O,rgbToLch:P};})();
+</script>
+<script>function Util() {
+}
+
+Util.sort_ints = function(arr) {
+  var converted = arr.map(function(a) {
+    return parseInt(a, 10);
+  });
+  return converted.sort();
+}
+
+Util.hex2rgb = function(colour) {
+  return {
+    r: parseInt(colour.substring(1, 3), 16),
+    g: parseInt(colour.substring(3, 5), 16),
+    b: parseInt(colour.substring(5, 7), 16)
+  };
+}
+
+Util.blend_colours = function(base_colour, alpha, bgcolour) {
+  base_colour = Util.hex2rgb(base_colour);
+  bgcolour = Util.hex2rgb(bgcolour);
+
+  var rgb = {};
+  Object.keys(base_colour).forEach(function(channel) {
+    rgb[channel] = Math.round(alpha*base_colour[channel] + (1 - alpha)*bgcolour[channel]);
+    rgb[channel] = rgb[channel].toString(16).padStart(2, "0");
+  });
+  var hex = '#' + rgb.r + rgb.g + rgb.b;
+  return hex;
+}
+
+Util.transpose = function(mat) {
+  let M = mat.length;
+  let N = mat[0].length;
+  let T = [];
+
+  for(let n = 0; n < N; n++) {
+    T.push([]);
+    for(let m = 0; m < M; m++) {
+      T[n].push(mat[m][n]);
+    }
+  }
+  return T;
+}
+
+Util.find_clonal = function(parents) {
+  let clonal = [];
+  for(var idx = 0; idx < parents.length; idx++) {
+    if(parents[idx] === 0) {
+      clonal.push(idx + 1);
+    }
+  }
+  return new Set(clonal);
+}
+
+Util.calc_ccf = function(phi, parents) {
+  let S = phi[0].length;
+  let clonal = Util.find_clonal(parents);
+  let clonal_phi = [];
+
+  for(let sidx = 0; sidx < S; sidx++) {
+    clonal_phi.push(0);
+    clonal.forEach(cidx => clonal_phi[sidx] += phi[cidx][sidx]);
+    console.assert(clonal_phi[sidx] <= 1);
+  }
+
+  let ccf = phi.slice(1).map(P_k => {
+    return P_k.map((P_ks, sidx) => P_ks / clonal_phi[sidx]);
+  });
+
+  return ccf;
+}
+
+
+function ColourAssigner() {
+}
+
+ColourAssigner._assign_from_palette = function(num_colours, scale_name) {
+  let scales = {
+    tableau10: d3.schemeTableau10,
+    dark24: ['#2E91E5', '#E15F99', '#1CA71C', '#FB0D0D', '#DA16FF', '#222A2A', '#B68100', '#750D86', '#EB663B', '#511CFB', '#00A08B', '#FB00D1', '#FC0080', '#B2828D', '#6C7C32', '#778AAE', '#862A16', '#A777F1', '#620042', '#1616A7', '#DA60CA', '#6C4516', '#0D2A63', '#AF0038'],
+    alphabet: ['#2E91E5', '#E15F99', '#1CA71C', '#FB0D0D', '#DA16FF', '#222A2A', '#B68100', '#750D86', '#EB663B', '#511CFB', '#00A08B', '#FB00D1', '#FC0080', '#B2828D', '#6C7C32', '#778AAE', '#862A16', '#A777F1', '#620042', '#1616A7', '#DA60CA', '#6C4516', '#0D2A63', '#AF0038'],
+  };
+  let scale = scale_name ? scales[scale_name] : scales.tableau10;
+
+  var colours = [];
+  // Start at cidx=1 rather than cidx=0 to keep colouring of phi matrix
+  // consistent with what it was in past versions.
+  for(var cidx = 1; colours.length < num_colours; cidx++) {
+    if(cidx === scale.length) {
+      cidx = 0;
+    }
+    colours.push(scale[cidx]);
+  }
+  return colours;
+}
+
+ColourAssigner._assign_from_husl = function(N) {
+  let colours = [];
+  let first_hue = 0.01;
+  for(let idx = 0; idx < N; idx++) {
+    let hue = 360*(first_hue + ((idx+1)/N)*(1 - first_hue));
+    // Docs: https://github.com/hsluv/hsluv/tree/master/javascript
+    colours.push(hsluv.hsluvToHex([hue, 66, 56]));
+  }
+  shuffle(colours);
+  return colours;
+}
+
+ColourAssigner.assign_colours = function(N, use_husl=false) {
+  if(use_husl) {
+    return ColourAssigner._assign_from_husl(N);
+  } else {
+    return ColourAssigner._assign_from_palette(N);
+  }
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function resize_svg(elems) {
+  elems.nodes().forEach(function(svg) {
+    var box = svg.getBBox();
+    // Padding is necessary, as `getBBox` doesn't account for borders around
+    // nodes -- these would otherwise be clipped off.
+    var padding = 6;
+    var viewbox = [box.x - 0.5*padding, box.y - 0.5*padding, box.width + padding, box.height + padding];
+    svg.setAttribute('viewBox', viewbox.join(' '));
+    svg.setAttribute('width', viewbox[2]);
+    svg.setAttribute('height', viewbox[3]);
+  });
+}
+</script>
+<script>function highlight_labels(cell, should_highlight) {
+  var row = cell.closest('tr');
+  var tbl = cell.closest('table');
+  var col_idx = Array.from(row.children).indexOf(cell);
+  var col_label = tbl.querySelector('thead tr').children[col_idx];
+  var row_label = row.children[0];
+
+  for(let elem of [col_label, row_label]) {
+    var cls = 'highlighted';
+    if(elem.classList.contains(cls)) {
+      elem.classList.remove(cls);
+    } else {
+      elem.classList.add(cls);
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('table.matrix td').forEach((cell) => {
+    cell.addEventListener('mouseenter', (E) => {
+      highlight_labels(E.target, true);
+      E.preventDefault();
+    });
+    cell.addEventListener('mouseleave', (E) => {
+      highlight_labels(E.target, false);
+      E.preventDefault();
+    });
+  });
+});
+</script>
+<script>function PhiMatrix() {
+}
+
+PhiMatrix.prototype.plot = function(phi, parents, sampnames, container, orientation, remove_normal=false) {
+  // Note that if `remove_normal = false`, you can set `parents = null` when
+  // calling this function.
+
+  var popnames = phi.map(function(d, i) { return 'Pop. ' + i; });
+  var popcolours = ColourAssigner.assign_colours(phi.length);
+  var sampcolours = null;
+
+  // By doing this operation after initializing `popnames` and `popcolours`, we
+  // keep colours and names consistent regardless of whether `remove_normal` is
+  // set.
+  if (remove_normal) {
+    phi = Util.calc_ccf(phi, parents);
+    popnames = popnames.slice(1);
+    popcolours = popcolours.slice(1);
+  }
+
+  if(orientation === 'samples_as_rows') {
+    let phi_T = Util.transpose(phi);
+    (new MatrixBar()).plot(phi_T, sampnames, sampcolours, popnames, popcolours, container);
+  } else {
+    (new MatrixBar()).plot(phi, popnames, popcolours, sampnames, sampcolours, container);
+  }
+}
+
+function ErrorCalculator() {
+}
+
+ErrorCalculator.calc_error = function(phi, phi_hat) {
+  var error = [];
+  for(var i = 0; i < phi.length; i++) {
+    error.push([]);
+    for(var j = 0; j < phi[i].length; j++) {
+      error[i].push(Math.abs(phi[i][j] - phi_hat[i][j]));
+    }
+  }
+  return error;
+}
+
+ErrorCalculator.calc_total_error = function(error) {
+  var total = 0;
+  for(var i = 0; i < error.length; i++) {
+    for(var j = 0; j < error[i].length; j++) {
+      total += error[i][j];
+    }
+  }
+  return total;
+}
+
+function PhiInterleavedMatrix() {
+}
+
+PhiInterleavedMatrix.prototype.plot = function(phi, phi_hat, sampnames, container, orientation) {
+  var error = ErrorCalculator.calc_error(phi, phi_hat);
+  var total_error = ErrorCalculator.calc_total_error(error);
+  d3.select(container).append('h3').text('Total error: ' + total_error.toFixed(2));
+
+  var pop_colours = ColourAssigner.assign_colours(phi.length);
+  var interleaved = [];
+  var row_labels = [];
+  var row_colours = [];
+  for(var i = 0; i < phi.length; i++) {
+    interleaved.push(phi_hat[i]);
+    interleaved.push(phi[i]);
+    interleaved.push(error[i]);
+
+    row_labels.push('Pop. ' + i + ' data');
+    row_labels.push('Pop. ' + i + ' tree');
+    row_labels.push('Pop. ' + i + ' error');
+
+    row_colours.push(pop_colours[i]);
+    row_colours.push(pop_colours[i]);
+    row_colours.push('#000000');
+  }
+
+  var sampcolours = null;
+  if(orientation === 'samples_as_rows') {
+    let interleaved_T = Util.transpose(interleaved);
+    (new MatrixBar()).plot(interleaved_T, sampnames, sampcolours, row_labels, row_colours, container);
+  } else {
+    (new MatrixBar()).plot(interleaved, row_labels, row_colours, sampnames, sampcolours, container);
+  }
+}
+
+function MatrixBar() {
+}
+
+MatrixBar.prototype._calc_label_width = function(labels) {
+  var max_length = 0;
+  var char_width = 15;
+  for(let label of labels) {
+    if(label.length > max_length) {
+      max_length = label.length;
+    }
+  }
+  return char_width * max_length;
+}
+
+MatrixBar.prototype.plot = function(mat, row_labels, row_colours, col_labels, col_colours, container) {
+  var num_rows = mat.length;
+  var num_cols = mat[0].length;
+  var cell_size = 50;
+  var row_label_width = this._calc_label_width(row_labels);
+  var col_label_height = this._calc_label_width(col_labels);
+  var font_size = '16px';
+  var label_padding = 10;
+
+  if(row_labels.length !== num_rows) {
+    throw "Wrong number of row labels";
+  }
+  if(col_labels.length !== num_cols) {
+    throw "Wrong number of col labels";
+  }
+
+  var svg = d3.select(container).append('svg:svg')
+    .attr('width', row_label_width + num_cols * cell_size)
+    .attr('height', col_label_height + num_rows * cell_size);
+  var cl = svg.append('svg:g')
+    .attr('transform', function(d, i) { return 'translate(' + (row_label_width + 0.5 * cell_size) + ',' + (col_label_height - label_padding) + ')'; })
+    .selectAll('text')
+    .data(col_labels)
+    .enter()
+    .append('svg:text')
+    .attr('transform', function(d, i) { return 'translate(' + i * cell_size + ',0) rotate(270)'; })
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('font-size', font_size)
+    .attr('font-weight', 'bold')
+    .text(function(d, i) { return d; });
+  if(col_colours && col_colours.length === num_cols) {
+    cl.attr('fill', function(d, i) { return col_colours[i]; });
+  } else {
+    cl.attr('fill', '#000');
+  }
+
+  var rows = svg.selectAll('g.rows')
+    .data(mat)
+    .enter()
+    .append('svg:g')
+    .attr('class', 'rows')
+    .attr('transform', function(d, i) { return 'translate(' + row_label_width + ',' + (col_label_height + (i * cell_size)) + ')'; });
+
+  let rl = rows.append('text')
+    .attr('x', -label_padding)
+    .attr('y', 0.5 * cell_size)
+    .attr('dominant-baseline', 'middle')
+    .attr('text-anchor', 'end')
+    .attr('font-size', font_size)
+    .attr('font-weight', 'bold')
+    .text(function(d, i) { return row_labels[i]; });
+  if(row_colours && row_colours.length === num_rows) {
+    rl.attr('fill', function(d, i) { return row_colours[i]; });
+  }
+
+  rows.selectAll('rect')
+    .data((d, i) => d.map(function(val, col_idx) { return { val: val, col_idx: col_idx, row_idx: i}; }))
+    .enter()
+    .append('svg:rect')
+    .attr('width', cell_size)
+    .attr('height', function(d) { return d.val*cell_size; })
+    .attr('x', function(d) { return d.col_idx * cell_size; })
+    .attr('y', function(d) { return (1 - d.val)*cell_size; })
+    .attr('fill', function(d) {
+      // col_colours overrides row_colours.
+      if(col_colours && col_colours.length == num_cols) {
+        return col_colours[d.col_idx];
+      } else if(row_colours && row_colours.length == num_rows) {
+        return row_colours[d.row_idx];
+      }
+      return '#000';
+    }).attr('fill-opacity', function(d) { return 1.0; });
+}
+</script>
+<script>function VafMatrix(container) {
+  container = document.querySelector(container);
+  this._configure_toggles(container);
+  this._configure_filter(container);
+}
+
+VafMatrix.prototype._configure_toggles = function(container) {
+  container.querySelectorAll('.vafmatrix_toggles .btn').forEach((btn) => {
+    btn.addEventListener('click', (event) => {
+      var E = event.target;
+      for(let cls of E.classList) {
+        if(cls.startsWith('toggle_')) {
+          var toggle_type = cls.replace(/^toggle_/, '');
+        }
+      }
+
+      var targets = container.querySelectorAll('.matrix tbody tr.' + toggle_type);
+      var is_active = E.classList.contains('active');
+      if(is_active) {
+        E.classList.remove('active');
+        E.classList.remove('btn-primary');
+        E.classList.add('btn-outline-primary');
+        var new_display = 'none';
+      } else {
+        E.classList.add('active');
+        E.classList.remove('btn-outline-primary');
+        E.classList.add('btn-primary');
+        var new_display = '';
+      }
+      for(let target of targets) {
+        target.style.display = new_display;
+      }
+    });
+  });
+}
+
+VafMatrix.prototype._filter_rows = function(container, targets) {
+  var rows = container.querySelectorAll('.matrix tbody tr');
+  if(targets.length === 0) {
+    for(let row of rows) { row.style.display = ''; }
+    return;
+  }
+
+  rows.forEach((row) => {
+    var tid = row.querySelector('.id').textContent.trim();
+    if(targets.includes(tid)) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+
+VafMatrix.prototype._configure_filter = function(container) {
+  var filter = container.querySelector('.filter');
+  var self = this;
+  filter.addEventListener('keydown', (E) => {
+    if(E.which === 13) {
+      E.preventDefault();
+      var targets = filter.value.trim().split(',');
+      targets = targets.map((T) => { return T.trim(); });
+      targets = targets.filter((T) => { return T !== ''; });
+      self._filter_rows(container, targets);
+    }
+  });
+}
+
+</script>
+<script>// 'letters' or 'digits'
+var LABEL_TYPE = 'digits';
+// 'circle' or 'square'
+var NODE_TYPE = 'circle';
+
+// Following two functions from https://stackoverflow.com/a/18473154.
+function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+  // Add 90 degrees to rotate coordinate system so that arcs start at the
+  // bottom of the circle and rotate clockwise.
+  var angleInRadians = (angleInDegrees + 90) * Math.PI/180.0;
+  return {
+    x: centerX + (radius * Math.cos(angleInRadians)),
+    y: centerY + (radius * Math.sin(angleInRadians))
+  };
+}
+
+function describeArc(x, y, radius, startAngle, endAngle) {
+  var start = polarToCartesian(x, y, radius, startAngle);
+  var end = polarToCartesian(x, y, radius, endAngle);
+  var largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+  var d = [
+    "M", start.x, start.y,
+    "A", radius, radius, 0, largeArcFlag, 1, end.x, end.y,
+    "L", x, y,
+    "L", start.x, start.y,
+  ].join(" ");
+
+  return d;
+}
+
+function describeRect(x, y, width, height) {
+  var d = [
+    "M", x, y,
+    "H", x + width,
+    "V", y + height,
+    "H", x,
+    "Z"
+  ].join(" ");
+  return d;
+}
+
+function TreePlotter() {
+}
+
+TreePlotter.prototype._calculate_max_depth = function(root) {
+  var _calc_max_depth = function(node) {
+    if(!node.hasOwnProperty('children')) {
+      return 0;
+    }
+    var max_depth = 0;
+    node.children.forEach(function(child) {
+      var nd = _calc_max_depth(child);
+      if(nd > max_depth)
+        max_depth = nd;
+    });
+    return 1 + max_depth;
+  };
+  return _calc_max_depth(root);
+}
+
+TreePlotter.prototype._label_node = function(node_id) {
+  if(LABEL_TYPE === 'digits') {
+    return node_id;
+  }
+  // Restrict to valid alphabet range.
+  if(node_id < 1 || node_id > 26) {
+    return node_id;
+  }
+  var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  return letters[node_id - 1];
+}
+
+TreePlotter.prototype._draw_tree = function(root, container, sampnames, samp_colours, pop_colours, bg_colour) {
+  // horiz_padding should be set to the maximum radius of a node, so a node
+  // drawn on a boundry won't go over the canvas edge. Since max_area = 8000,
+  // we have horiz_padding = sqrt(8000 / pi) =~ 51.
+  var horiz_padding = 51;
+  var max_depth = this._calculate_max_depth(root);
+  var m = [10, horiz_padding, 10, horiz_padding],
+      w = Math.max(150, 120*max_depth - m[1] - m[3]),
+      h = 430 - m[0] - m[2],
+      i = 0;
+
+  // Compute the new tree layout.
+  var tree = d3.tree().size([h, w]);
+  root = tree(d3.hierarchy(root));
+  root.descendants().sort(function(a, b) {
+    return d3.ascending(parseInt(a.data.name, 10), parseInt(b.data.name, 10));
+  });
+  var svg = container.append('svg:svg')
+      .attr('width', w + m[1] + m[3])
+      .attr('height', h + m[0] + m[2]);
+  svg.append('svg:defs')
+    .append('svg:marker')
+    .attr('id', 'arrowhead')
+    .attr('orient', 'auto')
+    .attr('markerWidth', 10)
+    .attr('markerHeight', 10)
+    .attr('markerUnits', 'strokeWidth')
+    .attr('refX', 0)
+    .attr('refY', 3)
+    .append('svg:path')
+    .attr('d', 'M0,0 L0,6 L9,3 z');
+  var vis = svg.append('svg:g')
+      .attr('transform', 'translate(' + m[3] + ',' + m[0] + ')');
+
+  // Update the nodes.
+  var node = vis.selectAll('g.node')
+      .data(root.descendants(), function(d) { return d.data.name; });
+
+  var self = this;
+  // Enter any new nodes at the parent's previous position.
+  var nodeEnter = node.enter().append('svg:g');
+  nodeEnter.attr('class', 'population')
+    .attr('transform', function(d) { return 'translate(' + d.y + ',' + d.x + ')'; });
+
+  if(NODE_TYPE === 'circle') {
+    nodeEnter.append('svg:circle')
+      .attr('class', 'outline')
+      .attr('r', function(d) { return d.data.radius; });
+  } else {
+    nodeEnter.append('svg:rect')
+      .attr('class', 'outline')
+      .attr('x', function(d) { return -d.data.radius; })
+      .attr('y', function(d) { return -d.data.radius; })
+      .attr('width', function(d) { return 2*d.data.radius; })
+      .attr('height', function(d) { return 2*d.data.radius; });
+  }
+
+  var choose_colour = function(node_idx, slice_idx, phi) {
+    if(samp_colours !== null) {
+      let [samp_name, base_colour] = samp_colours[slice_idx];
+      let samp_idx = sampnames.indexOf(samp_name);
+      let opacity = phi[samp_idx];
+      return Util.blend_colours(base_colour, opacity, bg_colour);
+    } else if(pop_colours !== null) {
+      return pop_colours[node_idx];
+    } else {
+      return '#428bca';
+    }
+  };
+
+  var slices = (samp_colours === null) ? 1 : samp_colours.length;
+  var add_slice = function(slice_idx, total_slices) {
+    if(!(0 <= slice_idx && slice_idx < total_slices)) {
+      throw "wrong number of slices: " + slice_idx + ", " + total_slices;
+    }
+    nodeEnter.append('svg:path')
+      .attr('d', function(d) {
+        if (NODE_TYPE === 'circle') {
+          var deg = 360 / total_slices;
+          // Without this, Chrome will draw nothing when there's only a single slice.
+          deg = Math.min(deg, 359.9);
+          var start = slice_idx * deg;
+          var end = (slice_idx + 1)*deg;
+          return describeArc(0, 0, d.data.radius, start, end);
+        } else {
+          var total_width = 2*d.data.radius;
+          var slice_width = total_width / total_slices;
+          var x = -d.data.radius + (slice_idx * slice_width);
+          return describeRect(x, -d.data.radius, slice_width, 2*d.data.radius);
+        }
+      }).attr('fill', function(d, i) {
+        return choose_colour(d.data.name, slice_idx, d.data.phi);
+      });
+  };
+  for(var idx = 0; idx < slices; idx++) {
+    add_slice(idx, slices);
+  }
+  /*nodeEnter.append('svg:path')
+    .attr('class', 'divider')
+    .attr('stroke', '#aaa')
+    .attr('d', function(d) { return 'M 0 -' + d.data.radius + ' V ' + d.data.radius; });*/
+
+  nodeEnter.append('svg:text')
+      .attr('font-size', '30')
+      .attr('dominant-baseline', 'central')
+      .attr('text-anchor', 'middle')
+      .text(function(d) { return self._label_node(d.data.name); });
+
+  // Update the links.
+  var link = vis.selectAll('path.link')
+      .data(root.links(), function(d) { return d.target.data.name; });
+
+  // Enter any new links at the parent's previous position.
+  var arrowhead_width = 14;
+  link.enter()
+    .insert('svg:path', 'g')
+    .attr('marker-end', 'url(#arrowhead)')
+    .attr('class', 'link')
+    .attr('d', d3.linkHorizontal().source(function(d) {
+      return [d.source.y + d.source.data.radius, d.source.x];
+    }).target(function(d) {
+      return [d.target.y - d.source.data.radius - arrowhead_width, d.target.x];
+    }));
+}
+
+TreePlotter.prototype._generate_tree_struct = function(parents, phi, root_id) {
+  var _add_node = function(node_id, struct) {
+    struct.name = node_id;
+    struct.radius = Math.sqrt(2000 / Math.PI);
+    struct.phi = phi[node_id];
+
+    var children = [];
+    for(var idx = 0; idx < parents.length; idx++) {
+      if(parents[idx] === node_id) {
+        children.push(idx + 1);
+      }
+    }
+
+    struct.children = [];
+    children.forEach(function(child_id) {
+      var child = {};
+      struct.children.push(child);
+      _add_node(child_id, child);
+    });
+  };
+
+  var root = {};
+  _add_node(root_id, root);
+  return root;
+}
+
+TreePlotter.prototype.plot = function(root_id, parents, phi, sampnames, samp_colours, pop_colours, remove_normal, container) {
+  container = d3.select(container).append('div');
+  var bg_colour = '#ffffff';
+
+  var root = this._generate_tree_struct(parents, phi, root_id);
+  this._draw_tree(root, container, sampnames, samp_colours, pop_colours, bg_colour);
+  resize_svg(container.selectAll('svg'));
+}
+
+</script>
+<script>function EtaPlotter() {
+  this._col_width = 50;
+  this._col_height = 500;
+  this._legend_spacing = 60;
+  this._font_size = 16;
+  this._legend_font_size = 14;
+  this._bar_label_font_size = 14;
+  this._label_padding = 10;
+  this._legend_splotch_size = 30;
+  this._legend_padding = 5;
+  this._legend_splotch_spacing = 20;
+  this._col_space = 10;
+  this._diversity_idx_height = 50;
+  this._diversity_idx_spacing = 15;
+  this._diversity_idx_legend_width = this._legend_splotch_size;
+  this._small_pop_threshold = 0.05;
+}
+
+EtaPlotter.prototype._calc_label_width = function(labels) {
+  var max_length = 0;
+  var char_width = 15;
+  for(let label of labels) {
+    if(label.length > max_length) {
+      max_length = label.length;
+    }
+  }
+  return char_width * max_length;
+}
+
+EtaPlotter.prototype._calc_cum_on_axis0 = function(mat) {
+  var K = mat.length;
+  var S = mat[0].length;
+  var S_range = Array.from(Array(S).keys());
+
+  var cum = [S_range.map(d => 0)];
+  for(let k = 1; k < K; k++) {
+    cum.push(S_range.map(s => cum[k - 1][s] + mat[k - 1][s]));
+  }
+  return cum;
+}
+
+EtaPlotter.prototype._calc_cum = function(A) {
+  let cum = [0];
+  for(var idx = 1; idx < A.length; idx++) {
+    cum.push(cum[idx - 1] + A[idx - 1]);
+  }
+  return cum;
+}
+
+EtaPlotter.prototype._plot_etas = function(svg, eta, pop_labels, samp_labels, col_widths, col_spacing, pop_colours, col_label_height, y_offset) {
+  let self = this;
+  let K = eta.length;
+  let S = eta[0].length;
+  let K_range = Array.from(Array(K).keys());
+  let S_range = Array.from(Array(S).keys());
+  let eta_cum = this._calc_cum_on_axis0(eta);
+  let cum_col_spacing = this._calc_cum(col_spacing);
+  let cum_col_widths = this._calc_cum(col_widths);
+
+  if(samp_labels.length !== S) {
+    throw "Wrong number of samp labels";
+  }
+
+  // Setting `pointer-events` to `none` is *critical*. Without this, mousemove
+  // and other mouse events will be delivered to the tooltip element, rather
+  // than the underlying SVG's rect elements, such that the tooltip will often
+  // never display, since its opacity is never changed from 0.
+  let tooltip = d3.select('body').append('div')
+    .attr('class', 'tooltip bs-tooltip-right')
+    .style('pointer-events', 'none')
+    .attr('role', 'tooltip')
+    .style('opacity', 0);
+  let tooltip_inner = tooltip.append('div').attr('class', 'tooltip-inner');
+
+  let _make_percent = V => (V < 0.01 ? '< 1%' : Math.round(100*V) + '%');
+
+  let cl = svg.append('svg:g')
+    .attr('class', 'col_labels')
+    .attr('transform', 'translate(0,' + (col_label_height - self._label_padding) + ')')
+    .selectAll('text')
+    .data(samp_labels)
+    .join('svg:text')
+    .attr('transform', function(d, i) { return 'translate(' + (0.5*col_widths[i] + cum_col_widths[i] + cum_col_spacing[i]) + ',0) rotate(270)'; })
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('font-size', this._font_size)
+    .attr('font-weight', 'bold')
+    .text(function(d, i) { return d; });
+
+  let cols = svg.append('svg:g')
+    .attr('class', 'cols')
+    .attr('transform', 'translate(0,' + y_offset + ')')
+    .selectAll('g.col')
+    .data(S_range)
+    .join('svg:g')
+    .attr('class', 'col')
+    .attr('transform', function(d, i) {
+      return 'translate(' + (cum_col_widths[i] + cum_col_spacing[i]) + ',0)';
+    });
+
+  cols.selectAll('rect')
+    .data(function(sidx) { return K_range.map(function(k) { return {k: k, s: sidx}; }); })
+    .join('svg:rect')
+    .attr('width', d => col_widths[d.s])
+    .attr('height', d => eta[d.k][d.s] * self._col_height)
+    .attr('x', 0)
+    .attr('y', function(d, i) { return eta_cum[d.k][d.s] * self._col_height; })
+    .attr('fill-opacity', function(d) { return 1.0; })
+    .attr('fill', function(d, i) { return pop_colours[i]; })
+    .on('mousemove', function(d, i) {
+      tooltip.style('opacity', 0.9).style('top', (d3.event.pageY - 10) + 'px').style('left', (d3.event.pageX + 10) + 'px');
+      tooltip_inner.text(pop_labels[i] + ': ' + _make_percent(eta[d.k][d.s]));
+    }).on('mouseout', function(d) {
+      tooltip.style('opacity', 0);
+    });
+
+  let bar_labels = cols.selectAll('text')
+    .data(function(sidx) { return K_range.map(function(k) { return {k: k, s: sidx}; }); })
+    .join('svg:text')
+    // I subtract 0.5*self._bar_label_font_size here to get the vertical
+    // alignment of the two text lines approximately correct. I'm not sure the
+    // math is right, but it produces a (mostly?) correct visual result.
+    .style('pointer-events', 'none') // Pass events through to underlying `rect`.
+    .attr('y', function(d) { return (0.5*eta[d.k][d.s] + eta_cum[d.k][d.s])*self._col_height - 0.5*self._bar_label_font_size; })
+    .attr('display', function(d) { return eta[d.k][d.s]*self._col_height >= 2.0*self._bar_label_font_size ? 'inline' : 'none'})
+    .attr('font-size', this._bar_label_font_size)
+    .attr('dominant-baseline', 'central')
+    .attr('text-anchor', 'middle');
+
+  bar_labels.append('tspan')
+    .attr('x', d => 0.5*col_widths[d.s])
+    .text(function(d, i) { return pop_labels[i] });
+  bar_labels.append('tspan')
+    .attr('x', d => 0.5*col_widths[d.s])
+    .attr('dy', 1.2*this._bar_label_font_size)
+    .text((d, i) => _make_percent(eta[d.k][d.s]));
+}
+
+EtaPlotter.prototype._add_pop_legend = function(svg, pop_labels, pop_colours, x_offset, y_offset) {
+  let self = this;
+  let legend = svg.append('svg:g')
+    .attr('transform', 'translate(' + x_offset + ',' + y_offset + ')')
+    .selectAll('g.label')
+    .data(pop_labels)
+    .join('svg:g')
+    .attr('transform', function(d, i) { return 'translate(0,' + i*self._legend_splotch_size + ')'; })
+    .attr('class', 'label');
+  legend
+    .append('svg:rect')
+    .attr('width', this._legend_splotch_size)
+    .attr('height', this._legend_splotch_size)
+    .attr('x', 0)
+    .attr('y', -0.5*this._legend_splotch_size)
+    .attr('fill-opacity', 1.0)
+    .attr('fill', function(d, i) { return pop_colours[i]; });
+  legend
+    .append('svg:text')
+    .attr('font-size', this._legend_font_size)
+    .attr('x', this._legend_splotch_size + this._legend_padding)
+    .attr('dominant-baseline', 'central')
+    .text(function(d) { return d; });
+}
+
+EtaPlotter.prototype._remove_small_pops = function(eta, pop_labels, threshold) {
+  let K = eta.length;
+  let S = eta[0].length;
+
+  for(let k = K - 1; k >= 0; k--) {
+    let remove_k = true;
+    for(let s = 0; s < S; s++) {
+      if(eta[k][s] >= threshold) {
+        remove_k = false;
+        break;
+      }
+    }
+    if(remove_k) {
+      eta.splice(k, 1);
+      pop_labels.splice(k, 1);
+    }
+  }
+}
+
+EtaPlotter.prototype._plot_diversity_indices = function(svg, cdi, cmdi, y_offset, col_widths, col_spacing, colour) {
+  let self = this;
+  let cum_col_width = this._calc_cum(col_widths);
+  let cum_col_spacing = this._calc_cum(col_spacing);
+
+  let container = svg.append('svg:g')
+    .attr('class', 'diversity_idx_bars')
+    .attr('transform', 'translate(0,' + y_offset + ')');
+
+  let max_cdi = Math.max(...cdi);
+  let max_cmdi = Math.max(...cmdi);
+  let div_idxs = new Map([
+    ['cdi', cdi.map(C => C / max_cdi)],
+    ['cmdi', cmdi.map(C => C / max_cmdi)],
+  ]);
+  let y_offsets = new Map([['cdi', 0], ['cmdi', self._diversity_idx_height + self._diversity_idx_spacing]]);
+
+  div_idxs.forEach((val, key) => {
+    container.selectAll('.' + key)
+      .data(val)
+      .join('svg:rect')
+      .attr('class', key)
+      .attr('x', (d, i) => cum_col_width[i] + cum_col_spacing[i])
+      .attr('y', V => (1 - V)*self._diversity_idx_height + y_offsets.get(key))
+      .attr('width', (d, i) => col_widths[i])
+      .attr('height', V => V*self._diversity_idx_height)
+      .attr('fill', V => colour(V));
+  });
+}
+
+EtaPlotter.prototype._ramp = function(colour, n = 256) {
+  const canvas = d3.create('canvas') .attr('width', 1) .attr('height', n)
+    .node();
+  const context = canvas.getContext("2d");
+  for (let i = 0; i < n; ++i) {
+    context.fillStyle = colour(1 - i/(n - 1));
+    context.fillRect(0, i, 1, 1);
+  }
+  return canvas;
+}
+
+EtaPlotter.prototype._make_diversity_idx_legend = function(svg, colour, x_offset, y_offset) {
+  let scale = d3.scaleSequential([0, 100], colour);
+
+  let legend = svg.append('svg:g')
+    .attr('class', 'diversity_idx_legend')
+    .attr('transform', 'translate(' + x_offset + ',' + y_offset + ')');
+
+  let legend_offsets = new Map([
+    ['cdi', 0],
+    ['cmdi', this._diversity_idx_height + this._diversity_idx_spacing]
+  ]);
+  let labels = new Map([
+    ['cdi', 'Clone'],
+    ['cmdi', 'Clone and mutation'],
+  ]);
+
+  legend_offsets.forEach((Y, key) => {
+    legend.append('image')
+      .attr('x', 0)
+      .attr('y', Y)
+      .attr('width', this._diversity_idx_legend_width)
+      .attr('height', this._diversity_idx_height)
+      .attr('preserveAspectRatio', 'none')
+      .attr('xlink:href', this._ramp(scale.interpolator()).toDataURL());
+
+    let axis_scale = d3.scaleLinear()
+      .domain([0, 1])
+      .range([this._diversity_idx_height, 0]);
+    let font_size = 0.9*this._legend_font_size;
+
+    let label = legend.append('svg:g');
+    label.append('svg:text').text(labels.get(key));
+    label.append('svg:text').attr('dy', font_size).text('diversity index');
+    label.selectAll('text')
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('dominant-baseline', 'hanging')
+      .attr('font-size', font_size);
+    let label_offset = 0.5*(this._diversity_idx_height - label.node().getBoundingClientRect().height);
+    label.attr('transform', 'translate(' + (this._diversity_idx_legend_width + 2*this._legend_padding) + ',' + (Y + label_offset) + ')');
+
+    legend.append('g')
+      .attr('transform', 'translate(' + (this._diversity_idx_legend_width + this._legend_padding) + ',' + Y + ')')
+      .call(d3.axisRight(axis_scale)
+        .ticks(1)
+        .tickSize(5)
+      ).call(g => g.selectAll('text').attr('font-size', font_size));
+  });
+}
+
+EtaPlotter.prototype._renormalize_eta = function(eta) {
+  let K = eta.length;
+  let S = eta[0].length;
+
+  for(let s = 0; s < S; s++) {
+    let eta_s_sum = eta.reduce((sum, cur) => sum + cur[s], 0);
+    for(let k = 0; k < K; k++) {
+      eta[k][s] /= eta_s_sum;
+    }
+  }
+}
+
+EtaPlotter.prototype._add_yaxis = function(svg, height, yoffset) {
+  let scale = d3.scaleLinear()
+    .domain([0, 1])
+    .range([height, 0]);
+  let axis = d3.axisLeft(scale)
+    .tickFormat(x => Math.round(100*x) + '%');
+  let container = svg.append('g')
+    .attr('transform', 'translate(-10,' + yoffset + ')');
+  container.append('text')
+    .attr('text-anchor', 'middle')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -0.5*height)
+    .attr('y', -60)
+    .attr('font-size', this._bar_label_font_size)
+    .text('Population frequency');
+  container.append('g')
+    .call(axis)
+    .selectAll('text')
+    .attr('font-size', this._bar_label_font_size);
+}
+
+EtaPlotter.prototype.plot = function(eta, cdi, cmdi, samp_labels, container, remove_small_pops=false, remove_normal=false) {
+  let self = this;
+  let pop_labels =  Array.from(Array(eta.length).keys()).map(idx => 'Pop. ' + idx);
+
+  if(remove_normal) {
+    eta = eta.slice(1);
+    pop_labels = pop_labels.slice(1);
+  }
+  if(remove_small_pops) {
+    this._remove_small_pops(eta, pop_labels, this._small_pop_threshold);
+  }
+  this._renormalize_eta(eta);
+
+  let K = eta.length;
+  let S = eta[0].length;
+  let K_range = Array.from(Array(K).keys());
+  let S_range = Array.from(Array(S).keys());
+
+  this._col_height = Math.max(this._col_height, K*this._legend_splotch_size);
+  let pop_colours = ColourAssigner.assign_colours(K);
+  let pop_label_width = this._calc_label_width(pop_labels);
+  let col_label_height = this._calc_label_width(samp_labels);
+
+  let col_widths = samp_labels.map(label => (label.indexOf('Xeno') > -1 ? self._col_width : 2*self._col_width));
+  let total_col_widths = col_widths.reduce((sum, cur) => sum + cur, 0);
+
+  let col_spacing = S_range.map(s => self._col_space);
+  col_spacing[S - 1] = 0;
+  let total_col_spacing = col_spacing.reduce((sum, cur) => sum + cur, 0);
+
+  let bar_y_offset = 2*this._diversity_idx_height + 2*this._diversity_idx_spacing + col_label_height;
+  let legend_x_offset = total_col_widths + this._legend_splotch_spacing + total_col_spacing;
+  let legend_y_offset = bar_y_offset + 0.5*this._legend_splotch_size;
+  let legend_width = this._legend_splotch_size + this._legend_padding + pop_label_width;
+
+  let svg = d3.select(container).append('svg:svg');
+
+  let diversity_idx_colour = d3.interpolateViridis;
+  this._plot_etas(
+    svg,
+    eta,
+    pop_labels,
+    samp_labels,
+    col_widths,
+    col_spacing,
+    pop_colours,
+    col_label_height,
+    bar_y_offset
+  );
+  this._plot_diversity_indices(
+    svg,
+    cdi,
+    cmdi,
+    col_label_height,
+    col_widths,
+    col_spacing,
+    diversity_idx_colour,
+  );
+  this._add_pop_legend(
+    svg,
+    pop_labels,
+    pop_colours,
+    legend_x_offset,
+    legend_y_offset
+  );
+  this._make_diversity_idx_legend(
+    svg,
+    diversity_idx_colour,
+    legend_x_offset,
+    col_label_height,
+  );
+  this._add_yaxis(
+    svg,
+    this._col_height,
+    bar_y_offset
+  );
+
+  resize_svg(svg);
+}
+</script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+<style type="text/css">.population path {
+  stroke-width: 1.5px;
+}
+
+.population .outline {
+  fill: none;
+  stroke: #000;
+  stroke-width: 2px;
+}
+
+.population {
+  cursor: pointer;
+}
+
+.divider {
+  stroke: #aaa;
+  stroke-width: 2px;
+  stroke-dasharray: 5, 5;
+}
+
+.population text {
+  font-size: 1.8em;
+  font-weight: 900;
+  font-family: sans-serif;
+  paint-order: stroke;
+
+  /* White text with black outline */
+  stroke: #0a0a0a;
+  fill: #fff;
+  stroke-width: 6px;
+
+}
+
+.population text.nooutline {
+  /* Black text */
+  stroke: none;
+  fill: #000;
+}
+
+.link {
+  fill: none;
+  stroke: #383838;
+  stroke-width: 1.5px;
+}
+
+#arrowhead {
+  fill: #383838;
+}
+</style>
+<style type="text/css">.matrix, .matrix td {
+  padding: 5px; margin: 0;
+  border-collapse: collapse;
+}
+
+.matrix span {
+  visibility: hidden;
+}
+
+.matrix td:hover > span {
+  visibility: visible;
+}
+
+.matrix th {
+  font-weight: bold;
+}
+</style>
+<style type="text/css">.container { margin: 30px; } td, th, table { padding: 5px; margin: 0; border-collapse: collapse; font-weight: normal; } span { visibility: hidden; } td:hover > span { visibility: visible; } .highlighted { background-color: black !important; color: white; }</style>
+</head><body><main>
+<h1>H196438</h1>
+
+  <script type="text/javascript">
+  var tree_json = '{"phi": [[1.0, 0.9999999999999999], [0.5388037224679747, 8.232946129282936e-11], [0.538803722467986, 0.840816324142689], [0.0, 0.45227606461086667]], "phi_hat": [[1.0, 1.0], [0.5409836065573771, 0.0], [0.5360824742268041, 0.8408163265306122], [0.0, 0.4522760646108664]], "eta": [[0.461196277532014, 0.15918367585731089], [0.5388037224679747, 8.232946129282938e-11], [1.1324274851176597e-14, 0.38854025944949294], [0.0, 0.4522760646108667]], "llh": -11.187717862138914, "nlglh": 2.690077513095448, "prob": 0.6037257821839884, "count": 141439, "parents": [2, 0, 2], "samples": ["IID_H196438_T03_01_WG01", "P-0034889-T01-IM6"], "cdi": [9.8520830309912e-13, 0.9958511708683432], "cmdi": [1.0000000000009641, 1.5337523172980876], "sdi": [-0.0, 1.0], "visible_sampidxs": null, "samp_colours": null, "pop_colours": null}';
+  var results = JSON.parse(tree_json);
+
+  if(results.visible_sampidxs !== null) {
+    results.visible_eta = results.eta.map(function(E) { return results.visible_sampidxs.map(function(idx) { return E[idx]; }); });
+    results.visible_cdi = results.visible_sampidxs.map(function(idx) { return results.cdi[idx]; });
+    results.visible_cmdi = results.visible_sampidxs.map(function(idx) { return results.cmdi[idx]; });
+    results.visible_sdi = results.visible_sampidxs.map(function(idx) { return results.sdi[idx]; });
+    results.visible_phi = results.phi.map(function(P) { return results.visible_sampidxs.map(function(idx) { return P[idx]; }); });
+    results.visible_samps = results.visible_sampidxs.map(function(idx) { return results.samples[idx]; });
+  } else {
+    results.visible_eta = results.eta;
+    results.visible_cdi = results.cdi;
+    results.visible_cmdi = results.cmdi;
+    results.visible_sdi = results.sdi;
+    results.visible_phi = results.phi;
+    results.visible_samps = results.samples;
+  }
+  </script>
+
+  <div id="trees" class="container"><h2>Tree</h2></div>
+  <script type="text/javascript">document.addEventListener("DOMContentLoaded", () => { 
+    var container = '#trees';
+    d3.select(container).append('h3').text('tidx=' + 0 + ' nlglh=' + results.nlglh.toFixed(3) + ' prob=' + results.prob.toFixed(3));
+    if(results.samp_colours) {
+      d3.select(container).append('h6').text('Sample colours:');
+      var colour_list = d3.select(container).append('ul');
+      results.samp_colours.forEach(function(pair) { colour_list.append('li').style('color', pair[1]).text(pair[0]); });
+    }
+    (new TreePlotter()).plot(
+      0,
+      results.parents,
+      results.phi,
+      results.samples,
+      results.samp_colours,
+      results.pop_colours,
+      'false',
+      container
+    );
+   });</script>
+  
+
+    <div id="eta_matrix" class="container"><h2>Population frequencies</h2></div>
+    <script type="text/javascript">document.addEventListener("DOMContentLoaded", () => { 
+    (new EtaPlotter()).plot(results.visible_eta, results.visible_cdi, results.visible_cmdi, results.visible_samps, '#eta_matrix', false, false);
+     });</script>
+    
+
+    <div id="phi_matrix" class="container"><h2>Tree-constrained subclonal frequencies</h2></div>
+    <script type="text/javascript">document.addEventListener("DOMContentLoaded", () => { 
+      (new PhiMatrix()).plot(results.visible_phi, results.parents, results.visible_samps, '#phi_matrix', 'populations_as_rows', false);
+     });</script>
+    
+
+    <div id="phi_hat_matrix" class="container"><h2>Data-implied subclonal frequencies</h2></div>
+    <script type="text/javascript">document.addEventListener("DOMContentLoaded", () => { 
+      (new PhiMatrix()).plot(results.phi_hat, results.parents, results.samples, '#phi_hat_matrix', 'populations_as_rows', false, false);
+     });</script>
+    
+
+    <div id="phi_interleaved_matrix" class="container"><h2>Interleaved subclonal frequencies</h2></div>
+    <script type="text/javascript">document.addEventListener("DOMContentLoaded", () => { (new PhiInterleavedMatrix()).plot(results.phi, results.phi_hat, results.samples, '#phi_interleaved_matrix', 'populations_as_rows'); });</script>
+    
+<div id="diversity_indices" class="container"><h2>Diversity indices</h2>
+<div>                        <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script src="https://cdn.plot.ly/plotly-2.18.0.min.js"></script>                <div id="a27a1ea7-9efb-4669-b1cc-7a99d3a84c45" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("a27a1ea7-9efb-4669-b1cc-7a99d3a84c45")) {                    Plotly.newPlot(                        "a27a1ea7-9efb-4669-b1cc-7a99d3a84c45",                        [{"name":"cdi","x":["IID_H196438_T03_01_WG01","P-0034889-T01-IM6"],"y":[9.8520830309912e-13,0.9958511708683432],"type":"bar"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmapgl":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmapgl"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"xaxis":{"title":{"text":"Sample"}},"yaxis":{"title":{"text":"Clone diversity index<br>(bits)"}}},                        {"responsive": true}                    )                };                            </script>        </div>
+<div>                        <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script src="https://cdn.plot.ly/plotly-2.18.0.min.js"></script>                <div id="a7b6fbcb-9fd8-457d-8cdd-a767be3a0c44" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("a7b6fbcb-9fd8-457d-8cdd-a767be3a0c44")) {                    Plotly.newPlot(                        "a7b6fbcb-9fd8-457d-8cdd-a767be3a0c44",                        [{"name":"cmdi","x":["IID_H196438_T03_01_WG01","P-0034889-T01-IM6"],"y":[1.0000000000009641,1.5337523172980876],"type":"bar"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmapgl":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmapgl"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"xaxis":{"title":{"text":"Sample"}},"yaxis":{"title":{"text":"Clone and mutation diversity index<br>(bits)"}}},                        {"responsive": true}                    )                };                            </script>        </div>
+<div>                        <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script src="https://cdn.plot.ly/plotly-2.18.0.min.js"></script>                <div id="1820d8e9-406f-4a6b-951d-7943b6b32a5d" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("1820d8e9-406f-4a6b-951d-7943b6b32a5d")) {                    Plotly.newPlot(                        "1820d8e9-406f-4a6b-951d-7943b6b32a5d",                        [{"name":"sdi","x":["IID_H196438_T03_01_WG01","P-0034889-T01-IM6"],"y":[-0.0,1.0],"type":"bar"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmapgl":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmapgl"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"xaxis":{"title":{"text":"Sample"}},"yaxis":{"title":{"text":"Shannon diversity index<br>(bits)"}}},                        {"responsive": true}                    )                };                            </script>        </div>
+</div>
+<h2>VAFs (corrected)</h2>
+<style>#vafmatrix_GEMgafJf .matrix td, #vafmatrix_GEMgafJf .matrix { padding: 5px; margin: 0; border-collapse: collapse; } #vafmatrix_GEMgafJf .matrix th { writing-mode: vertical-lr; transform: rotate(180deg); font-weight: normal !important; } #vafmatrix_GEMgafJf .matrix span { visibility: hidden; } #vafmatrix_GEMgafJf .matrix td:hover > span { visibility: visible; }</style>
+<div id="vafmatrix_GEMgafJf">
+<p><input type="text" class="filter" placeholder="s0,s1,..."></p>
+<div class="vafmatrix_toggles btn-group" data-toggle="buttons">
+<button type="button" class="btn btn-primary active toggle_phi shadow-none" data-toggle="button" aria-pressed="true">&phi;</button>
+<button type="button" class="btn btn-primary active toggle_supervar shadow-none" data-toggle="button" aria-pressed="true">Supervariants</button>
+<button type="button" class="btn btn-primary active toggle_cluster_member shadow-none" data-toggle="button" aria-pressed="true">Cluster members</button>
+<button type="button" class="btn btn-primary active toggle_garbage shadow-none" data-toggle="button" aria-pressed="true">Garbage</button>
+</div>
+<br><br><br>
+<table class="matrix"><thead><tr>
+<th>ID</th><th>Name</th><th>Cluster</th><th>IID_H196438_T03_01_WG01</th><th>P-0034889-T01-IM6</th>
+</tr></thead><tbody>
+<script type="text/javascript">new VafMatrix("#vafmatrix_GEMgafJf");</script>
+<tr class="phi" style="background-color: rgb(141,211,199)"><td class="id">P1</td><td class="name">P1</td><td class="cluster">1</td><td style="background-color: rgb(255, 117, 117)"><span>0.54 (nan/nan)<br>[nan, nan]</span></td><td style="background-color: rgb(255, 254, 254)"><span>0.00 (nan/nan)<br>[nan, nan]</span></td></tr>
+<tr class="supervar" style="background-color: rgb(141,211,199)"><td class="id">S1</td><td class="name">S1</td><td class="cluster">1</td><td style="background-color: rgb(255, 117, 117)"><span>0.54 (33/122)<br>[0.42, 0.66]</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00 (0/381)<br>[0.00, 0.01]</span></td></tr>
+<tr class="cluster_member" style="background-color: rgb(141,211,199)"><td class="id">m0</td><td class="name">EPHA3_p.R274L_nan_3:89390072</td><td class="cluster">1</td><td style="background-color: rgb(255, 117, 117)"><span>0.54 (33/122)<br>[0.42, 0.66]</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00 (0/381)<br>[0.00, 0.01]</span></td></tr>
+<tr class="phi" style="background-color: rgb(255,255,179)"><td class="id">P2</td><td class="name">P2</td><td class="cluster">2</td><td style="background-color: rgb(255, 117, 117)"><span>0.54 (nan/nan)<br>[nan, nan]</span></td><td style="background-color: rgb(255, 40, 40)"><span>0.84 (nan/nan)<br>[nan, nan]</span></td></tr>
+<tr class="supervar" style="background-color: rgb(255,255,179)"><td class="id">S2</td><td class="name">S2</td><td class="cluster">2</td><td style="background-color: rgb(255, 118, 118)"><span>0.54 (26/97)<br>[0.40, 0.67]</span></td><td style="background-color: rgb(255, 40, 40)"><span>0.84 (103/245)<br>[0.77, 0.90]</span></td></tr>
+<tr class="cluster_member" style="background-color: rgb(255,255,179)"><td class="id">m1</td><td class="name">ARID1B_c.2037+3A>G_nan_6:157256713</td><td class="cluster">2</td><td style="background-color: rgb(255, 118, 118)"><span>0.54 (26/97)<br>[0.40, 0.67]</span></td><td style="background-color: rgb(255, 40, 40)"><span>0.84 (103/245)<br>[0.77, 0.90]</span></td></tr>
+<tr class="phi" style="background-color: rgb(190,186,218)"><td class="id">P3</td><td class="name">P3</td><td class="cluster">3</td><td style="background-color: rgb(255, 255, 255)"><span>0.00 (nan/nan)<br>[nan, nan]</span></td><td style="background-color: rgb(255, 139, 139)"><span>0.45 (nan/nan)<br>[nan, nan]</span></td></tr>
+<tr class="supervar" style="background-color: rgb(190,186,218)"><td class="id">S3</td><td class="name">S3</td><td class="cluster">3</td><td style="background-color: rgb(255, 255, 255)"><span>0.00 (0/86)<br>[0.00, 0.06]</span></td><td style="background-color: rgb(255, 139, 139)"><span>0.45 (154/681)<br>[0.40, 0.51]</span></td></tr>
+<tr class="cluster_member" style="background-color: rgb(190,186,218)"><td class="id">m2</td><td class="name">KLF4_p.S468*_nan_9:110248069</td><td class="cluster">3</td><td style="background-color: rgb(255, 255, 255)"><span>0.00 (0/86)<br>[0.00, 0.06]</span></td><td style="background-color: rgb(255, 139, 139)"><span>0.45 (154/681)<br>[0.40, 0.51]</span></td></tr>
+</tbody></table></div>
+<h2>ML relations</h2>
+<table class="matrix"><thead>
+<tr><th style="background-color: transparent"></th><th style="background-color: transparent">S3</th><th style="background-color: transparent">S1</th><th style="background-color: transparent">S2</th></tr>
+</thead><tbody>
+<tr><th style="background-color: transparent">S3</th><td style="background-color: rgb(55,126,184)"><span>1.00</span></td><td style="background-color: rgb(255,127,0)"><span>4.00</span></td><td style="background-color: rgb(152,78,163)"><span>3.00</span></td></tr>
+<tr><th style="background-color: transparent">S1</th><td style="background-color: rgb(255,127,0)"><span>4.00</span></td><td style="background-color: rgb(55,126,184)"><span>1.00</span></td><td style="background-color: rgb(152,78,163)"><span>3.00</span></td></tr>
+<tr><th style="background-color: transparent">S2</th><td style="background-color: rgb(77,175,74)"><span>2.00</span></td><td style="background-color: rgb(77,175,74)"><span>2.00</span></td><td style="background-color: rgb(55,126,184)"><span>1.00</span></td></tr>
+</tbody></table>
+<br><table class="matrix"><tbody>
+<tr><td style="background-color: rgb(228,26,28)">garbage</td></tr>
+<tr><td style="background-color: rgb(55,126,184)">cocluster</td></tr>
+<tr><td style="background-color: rgb(77,175,74)">A_B</td></tr>
+<tr><td style="background-color: rgb(152,78,163)">B_A</td></tr>
+<tr><td style="background-color: rgb(255,127,0)">diff_branches</td></tr>
+</tbody></table>
+<h2>garbage</h2>
+<table class="matrix"><thead>
+<tr><th style="background-color: transparent"></th><th style="background-color: transparent">S3</th><th style="background-color: transparent">S1</th><th style="background-color: transparent">S2</th></tr>
+</thead><tbody>
+<tr><th style="background-color: transparent">S3</th><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td></tr>
+<tr><th style="background-color: transparent">S1</th><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td></tr>
+<tr><th style="background-color: transparent">S2</th><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td></tr>
+</tbody></table>
+<h2>cocluster</h2>
+<table class="matrix"><thead>
+<tr><th style="background-color: transparent"></th><th style="background-color: transparent">S3</th><th style="background-color: transparent">S1</th><th style="background-color: transparent">S2</th></tr>
+</thead><tbody>
+<tr><th style="background-color: transparent">S3</th><td style="background-color: rgb(255, 0, 0)"><span>1.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td></tr>
+<tr><th style="background-color: transparent">S1</th><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 0, 0)"><span>1.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td></tr>
+<tr><th style="background-color: transparent">S2</th><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 0, 0)"><span>1.00</span></td></tr>
+</tbody></table>
+<h2>A_B</h2>
+<table class="matrix"><thead>
+<tr><th style="background-color: transparent"></th><th style="background-color: transparent">S2</th><th style="background-color: transparent">S1</th><th style="background-color: transparent">S3</th></tr>
+</thead><tbody>
+<tr><th style="background-color: transparent">S2</th><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 79, 79)"><span>0.69</span></td><td style="background-color: rgb(255, 0, 0)"><span>1.00</span></td></tr>
+<tr><th style="background-color: transparent">S1</th><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td></tr>
+<tr><th style="background-color: transparent">S3</th><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td></tr>
+</tbody></table>
+<h2>B_A</h2>
+<table class="matrix"><thead>
+<tr><th style="background-color: transparent"></th><th style="background-color: transparent">S2</th><th style="background-color: transparent">S1</th><th style="background-color: transparent">S3</th></tr>
+</thead><tbody>
+<tr><th style="background-color: transparent">S2</th><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td></tr>
+<tr><th style="background-color: transparent">S1</th><td style="background-color: rgb(255, 79, 79)"><span>0.69</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td></tr>
+<tr><th style="background-color: transparent">S3</th><td style="background-color: rgb(255, 0, 0)"><span>1.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td></tr>
+</tbody></table>
+<h2>diff_branches</h2>
+<table class="matrix"><thead>
+<tr><th style="background-color: transparent"></th><th style="background-color: transparent">S1</th><th style="background-color: transparent">S2</th><th style="background-color: transparent">S3</th></tr>
+</thead><tbody>
+<tr><th style="background-color: transparent">S1</th><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 176, 176)"><span>0.31</span></td><td style="background-color: rgb(255, 0, 0)"><span>1.00</span></td></tr>
+<tr><th style="background-color: transparent">S2</th><td style="background-color: rgb(255, 176, 176)"><span>0.31</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td></tr>
+<tr><th style="background-color: transparent">S3</th><td style="background-color: rgb(255, 0, 0)"><span>1.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td><td style="background-color: rgb(255, 255, 255)"><span>0.00</span></td></tr>
+</tbody></table>
+<h2>Cluster stats</h2>
+<table class="table table-striped table-hover">
+<thead><tr><th>Cluster</th><th>Members</th><th>Deviation</th></tr></thead><tbody>
+<tr><td>1</td><td>1</td><td>0.000</td></tr>
+<tr><td>2</td><td>1</td><td>0.000</td></tr>
+<tr><td>3</td><td>1</td><td>0.000</td></tr>
+<tr><td>Garbage</td><td>0</td><td>&mdash;</td></tr>
+<tr><td>Total</td><td>3</td><td>&mdash;</td></tr>
+</tbody></table>
+</main></body></html>
