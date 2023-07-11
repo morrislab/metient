@@ -181,7 +181,7 @@ def save_boxplot(joint_m5_df, joint_m8_df, run_name):
             ax.spines['right'].set_visible(False)
             ax.set_xlabel('Seeding Pattern', fontsize=16,)
             ax.set_ylabel(y.capitalize(), fontsize=16,)
-            ax.set_title(f"{num_sites} Anatomical Sites" , fontsize=16, y=1.1)
+            ax.set_title(f"{num_sites} Anatomical Sites", fontsize=16, y=1.1)
             ax.get_legend().remove()
 
             i += 1

@@ -2,8 +2,6 @@ import numpy as np
 import torch
 import networkx as nx
 
-# TODO: this cyclical import is not great
-import src.lib.vertex_labeling as vert_label
 from src.util.globals import *
 
 import pandas as pd
@@ -95,3 +93,11 @@ def get_adj_matrix_from_edge_list(edge_list):
     for edge in edge_list:
         T[ord(edge[0]) - 65][ord(edge[1]) - 65] = 1
     return torch.tensor(T, dtype = torch.float32)
+
+
+def is_tree(adj_matrix):
+    rows, cols = np.where(adj_matrix == 1)
+    edges = zip(rows.tolist(), cols.tolist())
+    g = nx.Graph()
+    g.add_edges_from(edges)
+    return (not nx.is_empty(g) and nx.is_tree(g))
