@@ -1,5 +1,10 @@
 
 import numpy as np
+import torch
+from src.util import plotting_util as plt_util
+
+# TODO: make more assertions on uniqueness and completeness of input csvs
+
 
 # Adapted from pairtree 
 def get_adj_matrix_from_parents(parents):
@@ -9,8 +14,9 @@ def get_adj_matrix_from_parents(parents):
     I = np.identity(T.shape[0])
     T = np.logical_xor(T,I).astype(int) # remove self-loops
     # remove the normal subclone
-    #T = np.delete(T, 0, 0)
-    #T = np.delete(T, 0, 1)
+    root_idx = plt_util.get_root_index(T)
+    T = np.delete(T, root_idx, 0)
+    T = np.delete(T, root_idx, 1)
     return T
 
 def get_adj_matrices_from_pairtree_results(pairtee_results_fn):
@@ -22,7 +28,7 @@ def get_adj_matrices_from_pairtree_results(pairtee_results_fn):
     data = []
     for parents_vector, llh in zip(parent_vectors, llhs):
         adj_matrix = get_adj_matrix_from_parents(parents_vector)
-        data.append((adj_matrix, llh))
+        data.append((torch.tensor(adj_matrix, dtype = torch.float32), llh))
     return data
 
 # Adapted from pairtree lib/vaf_plotter.py

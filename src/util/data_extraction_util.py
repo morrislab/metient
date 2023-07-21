@@ -6,6 +6,8 @@ import copy
 from collections import OrderedDict
 import pandas as pd
 
+# TODO: make more assertions on uniqueness and completeness of input csvs
+
 print("CUDA GPU:",torch.cuda.is_available())
 if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
@@ -146,8 +148,8 @@ def get_ref_var_matrices_from_real_data(tsv_filepath):
     (1) R matrix (num_samples x num_clusters) with the # of reference reads for each sample+cluster,
     (2) V matrix (num_samples x num_clusters) with the # of variant reads for each sample+cluster,
     (3) unique anatomical sites from the patient's data,
-    (4) dictionary mapping character_label to index (machina uses diff labels for each dataset to represent
-    mutation clusters, so this would map 'pink' to n, if pink is the nth node in the adjacency matrix)
+    (4) dictionary mapping index to character_label (based on input tsv, gives the index for each mutation name,
+    where these indices are used in R matrix, V matrix
     '''
 
 
@@ -200,7 +202,8 @@ def get_ref_var_matrices_from_real_data(tsv_filepath):
             if row[character_label_idx] not in character_label_to_idx:
                 character_label_to_idx[row[character_label_idx]] = int(row[mut_cluster_idx])
 
-    return torch.tensor(R, dtype=torch.float32), torch.tensor(V, dtype=torch.float32), list(unique_sites), character_label_to_idx
+    idx_to_character_label = {v:k for k,v in character_label_to_idx.items()}
+    return torch.tensor(R, dtype=torch.float32), torch.tensor(V, dtype=torch.float32), list(unique_sites), idx_to_character_label
 
 def _get_adj_matrix_from_machina_tree(tree_edges, character_label_to_idx, remove_unseen_nodes=True, skip_polytomies=False):
     '''

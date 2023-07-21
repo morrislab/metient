@@ -11,8 +11,8 @@ from torch.distributions.binomial import Binomial
 from src.util.globals import *
 
 from pprint import pprint
+import os
 
-print("CUDA GPU:",torch.cuda.is_available())
 if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
 
@@ -216,7 +216,8 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weig
 
     batch_size = U.shape[0]
 
-    def vertex_labeling(i, U, X, p):
+    # TODO test indexing in this function
+    def vertex_labeling(i, U, X, p, T):
         '''
         Get the ith example of the inputs U and X (both of size batch_size x num_internal_nodes x num_sites)
         to get the anatomical sites of the leaf nodes and the internal nodes (respectively). If the root labeling
@@ -231,7 +232,16 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weig
         X_i = X[i,:,:] # internal labeling
         if p is None:
             return torch.hstack((X_i, L))
-        return torch.hstack((p, X_i, L))
+        # p needs to be placed at the index of the root node
+        full_vert_labeling = torch.hstack((X_i, L))
+        # Index where vector p should be inserted
+        root_idx = plot_util.get_root_index(T)
+        # Split the tensor into two parts at the specified index
+        left_part = full_vert_labeling[:, :root_idx]
+        right_part = full_vert_labeling[:, root_idx:]
+
+        # Concatenate the left part, new column, and right part along the second dimension
+        return torch.cat((left_part, p, right_part), dim=1)
 
     def full_adj_matrix(i, T, U, G):
         '''
@@ -269,7 +279,7 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weig
     # TODO: performance wise it is probably faster not to iterate like this but to
     # do the matrix operations together - although not sure if we can due to dimensionality issues?
     for idx in range(batch_size):
-        V = vertex_labeling(idx, U, softmax_X, p)
+        V = vertex_labeling(idx, U, softmax_X, p, T)
         full_T, full_G = full_adj_matrix(idx, T, U, G)
         loss, loss_components = objective(V, full_T, ref_matrix, var_matrix, U[idx,:,:], B, full_G, O, weights, epoch, max_iter, lr_sched)
         losses_list.append(loss)
@@ -280,29 +290,42 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weig
 
     return torch.stack(losses_list), V_list, full_trees_list, full_branch_lengths_list, softmax_X_soft, loss_components_list
     
-def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, weights,
-                                print_config, node_idx_to_label, p=None, G=None, O=None,
-                                max_iter=200, lr=0.1, init_temp=30, final_temp=0.01,
-                                batch_size=128, custom_colors=None, primary=None, 
-                                weight_init_primary=False, lr_sched="constant"):
+def get_migration_history(T, ref_matrix, var_matrix, ordered_sites, p, node_idx_to_label,
+                          weights, print_config, output_dir, run_name, 
+                          G=None, O=None, max_iter=200, lr=0.1, init_temp=40, final_temp=0.01,
+                          batch_size=64, custom_colors=None, weight_init_primary=True, lr_sched="step"):
     '''
     Args:
         T: Adjacency matrix (directed) of the internal nodes (shape: num_internal_nodes x num_internal_nodes)
+        
         ref_matrix: Reference matrix (num_anatomical_sites x num_mutation_clusters), i.e., num. reads that map to reference allele
+        
         var_matrix: Variant matrix (num_anatomical_sites x num_mutation_clusters), i.e., num. reads that map to variant allele
-        B: Mutation matrix (shape: num_internal_nodes x num_mutation_clusters)
-        ordered_sites: array of the anatomical site names (e.g. ["breast", "lung_met"])
-        with length =  num_anatomical_sites) where the order matches the order of sites
-        in the ref_matrix and var_matrix
+        
+        ordered_sites: array of the anatomical site names (e.g. ["breast", "lung_met"]) with length =  num_anatomical_sites) and 
+        the order matches the order of sites in the ref_matrix and var_matrix
+        
         weights: Weight object for how much to penalize each component of the loss
+        
         print_config: PrintConfig object with options on how to visualize output
+        
+        node_idx_to_label: dictionary mapping vertex indices (corresponding to their index in T) to custom labels
+
         p: one-hot vector (shape: num_anatomical_sites x 1) indicating the location
         of the primary tumor (root vertex must be labeled with the primary)
-        node_idx_to_label: dictionary mapping vertex indices (corresponding to their index in T) to custom labels
+        
+        output_dir: path for where to save output trees to
+
+        run_name: e.g. patient name
+
+    Optional:
         G: Matrix of genetic distances between internal nodes (shape: num_internal_nodes x num_internal_nodes).
         Lower values indicate lower branch lengths, i.e. more genetically similar.
-        weight_init_primary: whether to initialize weights higher to favor vertex labeling of primary for all internal nodes
+        
         O: Matrix of organotropism values between sites (shape: num_anatomical_sites x  num_anatomical_sites).
+
+        weight_init_primary: whether to initialize weights higher to favor vertex labeling of primary for all internal nodes
+        
         lr_sched: how to weight the tasks of (1) leaf node inference and (2) internal vertex labeling. options:
             "constant": default, (1) and (2) weighted equally at each epoch
             "step": (1) has weight=1 for first half of epochs and (2) has weight=0, and then we flip the weights for the last half of training
@@ -319,20 +342,23 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
     '''
 
     # TODO: test these assertions
-    if not (T.shape[0] == T.shape[1] == B.shape[0]):
-        raise ValueError(f"Number of tree nodes should be consistent (T.shape[0] == T.shape[1] == B.shape[0])")
+    if not (T.shape[0] == T.shape[1]):
+        raise ValueError(f"Number of tree nodes should be consistent (T.shape[0] == T.shape[1])")
     if ref_matrix.shape != var_matrix.shape:
         raise ValueError(f"ref_matrix and var_matrix must have identical shape, got {ref_matrix.shape} and {var_matrix.shape}")
-    if not (ref_matrix.shape[1] == var_matrix.shape[1] == B.shape[1]):
-        raise ValueError(f"Number of mutations/mutation clusters should be consistent (ref_matrix.shape[1] == var_matrix.shape[1] == B.shape[1])")
+    if not (ref_matrix.shape[1] == var_matrix.shape[1] == T.shape[0]):
+        raise ValueError(f"Number of mutations/mutation clusters should be consistent (ref_matrix.shape[1] == var_matrix.shape[1] == T.shape[0])")
     if not (ref_matrix.shape[0] == var_matrix.shape[0] == len(ordered_sites)):   
         raise ValueError(f"Length of ordered_sites should be equal to ref_matrix and var_matrix dim 0")
     if not vert_util.is_tree(T):
         raise ValueError("Adjacency matrix T is empty or not a tree.")
+    if not os.path.isdir(output_dir):
+        raise ValueError(f"{output_dir} does not exist.")
 
+    B = vert_util.get_mutation_matrix_tensor(T)
     num_sites = ref_matrix.shape[0]
     num_internal_nodes = T.shape[0]
-
+    # TODO: BUG: can't assume that index 0 represents the root!
     # We're learning psi, which is the mixture matrix U (U = softmax(psi)), and tells us the existence
     # and antomical locations of the extant clones (U > U_CUTOFF)
     psi = -1 * torch.rand(batch_size, num_sites, num_internal_nodes + 1) # an extra column for normal cells
@@ -345,13 +371,18 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
         assert(p.shape[1] == 1)
         assert(p.shape[0] == ref_matrix.shape[0]) # num_anatomical_sites
         num_nodes_to_label = num_internal_nodes - 1 # we don't need to learn the root labeling
+        prim_site_idx = torch.nonzero(p)[0][0]
+        primary_site_label = ordered_sites[prim_site_idx]
 
     # We're learning X, which is the vertex labeling of the internal nodes
     X = torch.rand(batch_size, num_sites, num_nodes_to_label)
-
-    # TODO: should we do this? or should we do LR scheduling
+    
     if weight_init_primary:
-        X[:,0,:] = 5
+        if p is None: raise ValueError(f"Cannot use weight_init_primary flag without inputting p vector ")
+        prim_site_idx = torch.nonzero(p)[0][0]
+        X[:,prim_site_idx,:] = 5
+        # TODO: applying softmax on iterations where we're not learning vertex labeling
+        # lessens the effect of this weight initialization
 
     X.requires_grad = True
 
@@ -421,15 +452,18 @@ def gumbel_softmax_optimization(T, ref_matrix, var_matrix, B, ordered_sites, wei
         print(f"Time elapsed: {time_elapsed}")
 
     with torch.no_grad():
-        losses_tensor, V, full_trees, full_branch_lengths, _, _ = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, -1, max_iter, lr_sched)
 
+        losses_tensor, V, full_trees, full_branch_lengths, _, _ = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, -1, max_iter, lr_sched)
+        _, best_tree_idx = torch.topk(losses_tensor, 1, largest=False, sorted=True)
         edges, vert_to_site_map, mig_graph_edges, loss_info = plot_util.print_best_trees(losses_tensor, V, U, full_trees,                                                                        full_branch_lengths, ref_matrix,                                                                        var_matrix, B, O, G, weights, 
                                                                                     node_idx_to_label, ordered_sites,
                                                                                     print_config, intermediate_data, 
-                                                                                    custom_colors, primary, max_iter)
+                                                                                    custom_colors, primary_site_label, 
+                                                                                    max_iter, output_dir, run_name)
 
         avg_tree = plot_util.print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_colors,
                                             ordered_sites, print_config)
 
+       
 
     return edges, vert_to_site_map, mig_graph_edges, loss_info, time_elapsed
