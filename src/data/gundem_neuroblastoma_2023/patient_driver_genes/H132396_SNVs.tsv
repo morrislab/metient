@@ -1,4 +1,0 @@
-	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad
-1035	0	I-H-132396-T5-1-D1-2	0	right adrenal	0	NF1_p.W2229*_stop_gained_17:29664880	88.0	0.0	primary_disease	adrenal
-1041	1	I-H-132396-T6-1-D1-2	1	right colonic	0	NF1_p.W2229*_stop_gained_17:29664880	55.0	0.0	local_disease	abdominal
-1054	2	I-H-132396-T7-1-D1-2	2	retropancreatic paraspinal L1	0	NF1_p.W2229*_stop_gained_17:29664880	23.0	16.0	local_disease	retroperitoneal

@@ -1,6 +1,0 @@
-	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad
-905	0	I-H-132384-T10-1-D1-2	0	diaphram lymph node 0	0	ALK_p.R1275Q_non_synonymous_codon_2:29432664	89.0	0.0	local_disease	thoracic
-915	1	I-H-132384-T11-1-D1-2	1	right adrenal 1	0	ALK_p.R1275Q_non_synonymous_codon_2:29432664	111.0	0.0	primary_disease	adrenal
-922	2	I-H-132384-T12-1-D1-2	2	right adrenal 2	0	ALK_p.R1275Q_non_synonymous_codon_2:29432664	105.0	0.0	primary_disease	adrenal
-926	3	I-H-132384-T13-1-D1-2	3	left cervical 3	0	ALK_p.R1275Q_non_synonymous_codon_2:29432664	103.0	0.0	local_disease	cervical
-928	4	I-H-132384-T15-1-D1-2	4	chest wall at T10-T12 4	0	ALK_p.R1275Q_non_synonymous_codon_2:29432664	73.0	12.0	local_disease	thoracic

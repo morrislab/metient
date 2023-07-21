@@ -1,0 +1,9 @@
+	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad	sample_type	purity	ploidy	sampling_time_months_from_dx
+0	0	E-H-131235-T1-1-D1-1	0	retroperitoneal - D 0	0	ATRX_p.N428fs*5_frameshift_variant_X:76939468	11.0	10.0	primary_disease	retroperitoneal	diagnosis	0.74	2.65	0.866666667
+1	1	I-H-132388-T7-1-D1-2	1	retroperitoneal - D 1	0	ATRX_p.N428fs*5_frameshift_variant_X:76939468	17.0	25.0	primary_disease	retroperitoneal	diagnosis	0.48	2.6	0.866666667
+2	2	I-H-132388-T8-1-D1-2	2	right adrenal - TR 2	0	ATRX_p.N428fs*5_frameshift_variant_X:76939468	18.0	19.0	primary_disease	adrenal	t-resection	0.62	2.65	3.366666667
+3	3	I-H-132388-T9-1-D1-2	3	left axillary lymph node - R 3	0	ATRX_p.N428fs*5_frameshift_variant_X:76939468	40.0	4.0	distant_metastasis	thoracic	relapse	0.14	2.8	8.333333333
+4	0	E-H-131235-T1-1-D1-1	0	retroperitoneal - D 0	1	PIK3CA_p.H1047R_non_synonymous_codon_3:178952085;NF1_p.Y692*_stop_gained_17:29553527	51.0	3.0	primary_disease	retroperitoneal	diagnosis	0.74	2.65	0.866666667
+5	1	I-H-132388-T7-1-D1-2	1	retroperitoneal - D 1	1	PIK3CA_p.H1047R_non_synonymous_codon_3:178952085;NF1_p.Y692*_stop_gained_17:29553527	169.0	3.0	primary_disease	retroperitoneal	diagnosis	0.48	2.6	0.866666667
+6	2	I-H-132388-T8-1-D1-2	2	right adrenal - TR 2	1	PIK3CA_p.H1047R_non_synonymous_codon_3:178952085;NF1_p.Y692*_stop_gained_17:29553527	137.0	0.0	primary_disease	adrenal	t-resection	0.62	2.65	3.366666667
+7	3	I-H-132388-T9-1-D1-2	3	left axillary lymph node - R 3	1	PIK3CA_p.H1047R_non_synonymous_codon_3:178952085;NF1_p.Y692*_stop_gained_17:29553527	150.0	0.0	distant_metastasis	thoracic	relapse	0.14	2.8	8.333333333

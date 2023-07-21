@@ -1,7 +1,0 @@
-	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad
-287	0	I-H-108305-T1-1-D1-1	0	left pelvic lymph node	0	PGR_p.E271D_non_synonymous_codon_11:100998989	12.0	46.0	local_disease	pelvic
-288	0	I-H-108305-T1-1-D1-1	0	left pelvic lymph node	1	NF1_p.H2376Y_non_synonymous_codon_17:29670090	73.0	9.0	local_disease	pelvic
-289	0	I-H-108305-T1-1-D1-1	0	left pelvic lymph node	2	KMT2D_p.Q3745_H3746insQ_inframe_codon_gain_12:49427250	61.0	24.0	local_disease	pelvic
-1700	1	P-0004932-T01-IM5	1	left adrenal	0	PGR_p.E271D_non_synonymous_codon_11:100998989	202.0	336.0	primary_disease	adrenal
-1701	1	P-0004932-T01-IM5	1	left adrenal	2	KMT2D_p.Q3745_H3746insQ_inframe_codon_gain_12:49427250	553.0	1.0	primary_disease	adrenal
-1704	1	P-0004932-T01-IM5	1	left adrenal	1	NF1_p.H2376Y_non_synonymous_codon_17:29670090	1081.0	1.0	primary_disease	adrenal

@@ -1,3 +1,0 @@
-	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad
-835	0	I-H-132380-T4-1-D1-2	0	adrenal	0	HRAS_p.D69Y_non_synonymous_codon_11:533851	93.0	0.0	primary_disease	adrenal
-840	1	I-H-132380-T5-1-D1-2	1	brain	0	HRAS_p.D69Y_non_synonymous_codon_11:533851	80.0	7.0	distant_metastasis	CNS

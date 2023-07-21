@@ -7,7 +7,6 @@ from src.util.globals import *
 import pandas as pd
 pd.options.display.float_format = '{:,.3f}'.format
 
-print("CUDA GPU:",torch.cuda.is_available())
 if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
 

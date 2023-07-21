@@ -1,4 +1,0 @@
-	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad
-1012	0	I-H-132392-T6-1-D1-2	0	retroperitoneal lymph node	0	PPM1D_p.E451*_stop_gained_17:58740446	149.0	0.0	primary_disease	retroperitoneal
-1015	1	I-H-132392-T7-1-D1-2	1	peripancreatic	0	PPM1D_p.E451*_stop_gained_17:58740446	103.0	0.0	primary_disease	retroperitoneal
-1025	2	I-H-132392-T8-1-D1-2	2	left paraaortic lymph node	0	PPM1D_p.E451*_stop_gained_17:58740446	108.0	25.0	local_disease	retroperitoneal

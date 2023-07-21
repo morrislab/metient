@@ -1,0 +1,7 @@
+	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad	sample_type	purity	ploidy	sampling_time_months_from_dx
+0	0	I-H-132374-T4-1-D1-2	0	retroperitoneal - D	0	ALK_p.F1245V_non_synonymous_codon_2:29436860;ARID1A_p.R391fs*8_frameshift_variant_1:27056173;TERT_nan_promoter_5:1295228	211.0	6.0	primary_disease	retroperitoneal	diagnosis	0.94	2.3	0.0
+1	1	I-H-132374-T5-1-D1-2	1	lung - FR	0	ALK_p.F1245V_non_synonymous_codon_2:29436860;ARID1A_p.R391fs*8_frameshift_variant_1:27056173;TERT_nan_promoter_5:1295228	73.0	84.0	distant_metastasis	lung	frelapse	0.91	2.15	21.93333333
+2	2	I-H-132374-T6-1-D1-2	2	brain - R	0	ALK_p.F1245V_non_synonymous_codon_2:29436860;ARID1A_p.R391fs*8_frameshift_variant_1:27056173;TERT_nan_promoter_5:1295228	78.0	105.0	distant_metastasis	CNS	relapse	0.98	2.18	12.46666667
+3	0	I-H-132374-T4-1-D1-2	0	retroperitoneal - D	1	BRCA2_p.E2220*_stop_gained_13:32915150	94.0	0.0	primary_disease	retroperitoneal	diagnosis	0.94	2.3	0.0
+4	1	I-H-132374-T5-1-D1-2	1	lung - FR	1	BRCA2_p.E2220*_stop_gained_13:32915150	54.0	28.0	distant_metastasis	lung	frelapse	0.91	2.15	21.93333333
+5	2	I-H-132374-T6-1-D1-2	2	brain - R	1	BRCA2_p.E2220*_stop_gained_13:32915150	77.0	0.0	distant_metastasis	CNS	relapse	0.98	2.18	12.46666667

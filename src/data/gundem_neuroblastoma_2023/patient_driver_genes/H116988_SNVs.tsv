@@ -1,3 +1,0 @@
-	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad
-448	0	I-H-116988-T1-1-D1-1	0	right adrenal	0	PIK3CA_p.C420R_non_synonymous_codon_3:178927980	48.0	39.0	primary_disease	adrenal
-451	1	I-H-116988-T2-1-D1-1	1	sacral lumbar spinal	0	PIK3CA_p.C420R_non_synonymous_codon_3:178927980	48.0	49.0	local_disease	pelvic

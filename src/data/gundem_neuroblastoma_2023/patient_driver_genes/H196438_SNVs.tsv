@@ -1,7 +1,0 @@
-	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad
-1539	0	IID_H196438_T03_01_WG01	0	right mediastinal	0	EPHA3_p.R274L_nan_3:89390072	89.0	33.0	local_disease	thoracic
-1540	0	IID_H196438_T03_01_WG01	0	right mediastinal	1	ARID1B_c.2037+3A>G_nan_6:157256713	71.0	26.0	local_disease	thoracic
-1541	0	IID_H196438_T03_01_WG01	0	right mediastinal	2	KLF4_p.S468*_nan_9:110248069	86.0	0.0	local_disease	thoracic
-1821	1	P-0034889-T01-IM6	1	left supraclavicular lymph node	0	EPHA3_p.R274L_nan_3:89390072	381.0	0.0	primary_disease	thoracic
-1824	1	P-0034889-T01-IM6	1	left supraclavicular lymph node	2	KLF4_p.S468*_nan_9:110248069	527.0	154.0	primary_disease	thoracic
-1825	1	P-0034889-T01-IM6	1	left supraclavicular lymph node	1	ARID1B_c.2037+3A>G_nan_6:157256713	142.0	103.0	primary_disease	thoracic
