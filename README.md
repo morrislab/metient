@@ -33,7 +33,7 @@ ref_var_fn = "/path/to/ref/var/tsv"
 tree_fn = "/path/to/tree/results/npz"
 output_dir = "/path/to/save/outputs"
 run_name = "patient_id"
-primary_site = "primary"
+primary_site = "primary" # Specify anatomical site label of primary site
 weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0)
 print_config = plot_util.PrintConfig(visualize=True, verbose=False, viz_intermeds=False, k_best_trees=4)
 
