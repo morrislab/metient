@@ -21,12 +21,12 @@ ref_matrix, var_matrix, unique_sites, idx_to_cluster_label = data_util.get_ref_v
 # Process input trees (this is for PairTree or Orchard trees)
 tree_data = pt_util.get_adj_matrices_from_pairtree_results(os.path.join(data_dir, "orchard_trees", f"{patient_id}.results.npz"))
 
-# Specify anatomical site label of primary site (if known)
+# Specify anatomical site label of primary site
 primary_site = "left adrenal - D"
 
 # Enumerate all possible trees (if there are multiple) and run migration history analysis
 for i, (T, llh) in enumerate(tree_data):
-    print(f"TREE {i}, llh {llh}")
+    print(f"Solving migration history for tree {i}")
     if not vert_util.is_tree(T):
         print("Invalid tree was provided, skipping: \n", T)
         continue
@@ -39,5 +39,5 @@ for i, (T, llh) in enumerate(tree_data):
     weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=0.0)
     print_config = plot_util.PrintConfig(visualize=False, verbose=False, viz_intermeds=False, k_best_trees=4)
     vertex_labeling.get_migration_history(T, ref_matrix, var_matrix, unique_sites, p, idx_to_cluster_label, weights,
-                                          print_config, output_dir, patient_id)
+                                          print_config, output_dir, patient_id, batch_size=64, max_iter=200)
 
