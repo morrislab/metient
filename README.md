@@ -13,6 +13,7 @@ python setup.py install
 
 ## Test your installation
 ```python
+cd src
 python example.py
 ```
 If everything goes well with installation, you should have output saved at `src/metient_example_outputs/H103207_clustered.png`
