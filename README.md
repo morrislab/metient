@@ -2,17 +2,18 @@
 
 ## Installation
 
-```
+```bash
 git clone git@github.com:divyakoyy/met_history_prediction.git
 cd met_history_prediction
 conda create -n "met" python=3.7.12 ipython
 conda activate met
-conda install -c conda-forge --file requirements.txt
+pip3 install -r requirements.txt
 python setup.py install
 ```
 
 ## Test your installation
-```python
+```bash
+cd src
 python example.py
 ```
 If everything goes well with installation, you should have output saved at `src/metient_example_outputs/H103207_clustered.png`
