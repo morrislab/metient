@@ -5,7 +5,7 @@
 ```bash
 git clone git@github.com:divyakoyy/met_history_prediction.git
 cd met_history_prediction
-conda create -n "met" python=3.7.12 ipython
+conda create -n "met" python=3.8.8 ipython
 conda activate met
 pip3 install -r requirements.txt
 python setup.py install
