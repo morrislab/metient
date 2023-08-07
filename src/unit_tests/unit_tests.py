@@ -1,9 +1,12 @@
 import unittest
 import torch
+import os
 
 from src.util import vertex_labeling_util as vert_util
 from src.util import data_extraction_util as data_util
 from src.util import plotting_util as plot_util
+from src.util import pairtree_data_extraction_util as pt_util
+
 
 class TestLabeledTree(unittest.TestCase):
 
@@ -69,7 +72,7 @@ class TestLabeledTree(unittest.TestCase):
 
 class TestOrganotropismDataExtraction(unittest.TestCase):
 	def test_msk_met_extraction(self):
-		csv_fn = '../data/msk_met/msk_met_freq_by_cancer_type.csv'
+		csv_fn = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/msk_met/msk_met_freq_by_cancer_type.csv')
 		bad_site_map = dict()
 		bad_site_map_2 = {
 						  "breast": "Breast",
@@ -137,5 +140,80 @@ class TestSeedingPatternFromMigrationGraph(unittest.TestCase):
 		self.assertTrue(plot_util.is_cyclic(G))
 		self.assertEqual(plot_util.get_seeding_pattern_from_migration_graph(G), "polyclonal reseeding")
 
+
+import glob
+import pandas as pd
+import pyreadr
+import json
+
+class TestTRACERxPreprocessing(unittest.TestCase):
+
+	def _test_patient_tsv(self, patient_id, patient_tsv_dir, true_patient_data):
+
+		def _region_sum_to_ref_var_count(region_sum):
+			'''
+			Args:
+				region_sum: from TRACERx input mutTableAll.cloneInfo.20220726.rda RegionSum 
+				column, e.g. R_LN1:40/168;BR_LN2:64/276;BR_LN3:47/235;SU_FLN1:96/518
+
+			Returns:
+				dictionary mapping sample name to tuple of (ref, total) counts
+			'''
+			d = dict()
+			region_sum_values = region_sum.split(";")
+			for sample_info in region_sum_values:
+				items = sample_info.split(":")
+				counts = items[1].split("/")
+				d[items[0]] = int(counts[0]), int(counts[1])
+			return d
+
+		# Load preprocessed data
+		patient_df = pd.read_csv(os.path.join(patient_tsv_dir, f"{patient_id}_SNVs.tsv"), sep="\t")
+		ssm_df = pd.read_csv(os.path.join(patient_tsv_dir, f"{patient_id}.ssm"), sep="\t")
+		params_json = json.load(open(os.path.join(patient_tsv_dir, f"{patient_id}.params.json")))
+		json_sample_names = params_json['samples']
+		#print(params_json['samples'])
+		#print(ssm_df['var_reads'])
+		sample_names = patient_df['sample_label'].unique()
+		mut_names = patient_df['character_label'].unique()
+		anatomical_site_names = patient_df['anatomical_site_label'].unique()
+
+		self.assertEqual(len(sample_names), len(json_sample_names))
+		self.assertEqual(len(sample_names), len(anatomical_site_names))
+		self.assertEqual(len(patient_df), len(sample_names)*len(mut_names))
+
+		true_patient_data = true_patient_data[true_patient_data['patient_id']==patient_id]
+		for _, row in patient_df.iterrows():
+			mut = (":").join(row['character_label'].split(":")[1:])
+			sample = ("_").join(row['sample_label'].split("_")[1:])
+
+			ssm_row = ssm_df[ssm_df['name'] == row['character_label']]
+			json_sample_index = json_sample_names.index(row['sample_label'])
+
+			# e.g. R_LN1:40/168;BR_LN2:64/276;BR_LN3:47/235;SU_FLN1:96/518
+			true_mut_subset = true_patient_data[(true_patient_data['mutation_id']==f"{patient_id}:{mut}")]['RegionSum'].iloc[0]
+			true_sample_to_counts = _region_sum_to_ref_var_count(true_mut_subset)
+			
+			# Check tsvs
+			self.assertEqual(true_sample_to_counts[sample][0], row['var'])
+			self.assertEqual(true_sample_to_counts[sample][1], row['var']+row['ref'])
+
+			# Check ssm
+			ssm_var_count = int(ssm_row['var_reads'].item().split(",")[json_sample_index])
+			ssm_total_count = int(ssm_row['total_reads'].item().split(",")[json_sample_index])
+			self.assertEqual(true_sample_to_counts[sample][0], ssm_var_count)
+			self.assertEqual(true_sample_to_counts[sample][1], ssm_total_count)
+
+
+	def test_tsvs(self):
+		tracerx_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/tracerx_nsclc")
+		patient_tsv_dir = os.path.join(tracerx_dir, "patient_tsvs")
+		true_patient_data = pyreadr.read_r(os.path.join(tracerx_dir, 'mutTableAll.cloneInfo.20220726.rda'))['mutTableAll']
+		sample_info_df = pd.read_csv(os.path.join(tracerx_dir,"sample_overview_original.txt"), sep="\t")
+		patients = true_patient_data['patient_id'].unique()
+		print(len(patients), "patients")
+		for patient in patients:
+			print(patient)
+			self._test_patient_tsv(patient, patient_tsv_dir, true_patient_data)
 
 unittest.main()

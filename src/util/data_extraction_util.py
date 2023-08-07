@@ -66,7 +66,7 @@ def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_cluster_labe
     '''
     tsv_filepath: path to tsv for machina simulated data (generated from create_conf_intervals_from_reads.py)
 
-    tsv is expected to have columns: ['#sample_index', 'sample_label', '#anatomical_site_index',
+    tsv is expected to have columns: ['#sample_index', 'sample_label', 'anatomical_site_index',
     'anatomical_site_label', 'character_index', 'character_label', 'f_lb', 'f_ub', 'ref', 'var']
 
     pruned_cluster_label_to_idx:  dictionary mapping the cluster label to index which corresponds to

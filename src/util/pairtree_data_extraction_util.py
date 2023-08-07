@@ -2,9 +2,69 @@
 import numpy as np
 import torch
 from src.util import plotting_util as plt_util
+import os
 
 # TODO: make more assertions on uniqueness and completeness of input csvs
 
+import json
+
+# TODO: rename pairtree_data_extraction_util -> pairtree_util
+
+
+# TODO: write unit tests for this
+def write_pairtree_inputs(patient_data, patient_id, output_dir):
+    '''
+    Args:
+        patient_data: pandas DataFrame with at least columns: [character_label, character_index
+        sample_label, var, ref]. character_label = name of mutation (e.g. "KCTD15:19:34584166:C"),
+        character_index = unique index for each character label, sample_label = name of the sample,
+        (e.g. "tumor1_region1"), var = variant allele read count, ref = reference allele read count
+        
+        patient_id: used to name the output files
+        
+    Outputs:
+        Saves ssm and params.json files to output_dir as needed to run PairTree and/or Orchard. 
+        See "Input Files" section here: https://github.com/morrislab/pairtree
+    
+    '''
+    header = ["id", "name", "var_reads", "total_reads", "var_read_prob"]
+
+    mutation_names = list(patient_data['character_label'].unique())
+    mutation_ids  = list(patient_data['character_index'].unique())
+    sample_names = list(patient_data['sample_label'].unique())
+
+    mut_name_to_mut_id = {}
+    with open(os.path.join(output_dir, f"{patient_id}.ssm"), "w") as f:
+
+        f.write("\t".join(header))
+        f.write("\n")
+        for i, mut in zip(mutation_ids, mutation_names):
+            mut_name_to_mut_id[mut] = f"m{i}"
+            row = [f"m{i}", mut]
+            mut_patient_subset = patient_data[patient_data['character_label'] == mut]
+            var_reads = []
+            total_reads = []
+            var_read_probs = []
+            for sample in sample_names:
+                mut_patient_sample = mut_patient_subset[mut_patient_subset['sample_label'] == sample]
+                var = int(mut_patient_sample['var'].values[0])
+                ref = int(mut_patient_sample['ref'].values[0])
+                var_reads.append(str(var))
+                total_reads.append(str(var+ref))
+                # TODO: Add CNA and incorporate ploidy, for now assume no CNA and diploid cells
+                # var_read_prob = M/N, where N = 2 + (K - 2) * p (with K being the copy number 
+                # at that locus, and p being the fraction of cells which have a copy number of 
+                # K at the locus containing M. p is the purity of the sample if the copy number 
+                # abberation is clonal)
+                var_read_probs.append(str(0.5))
+
+            row += [",".join(var_reads), ",".join(total_reads), ",".join(var_read_probs)]
+            f.write("\t".join(row))
+            f.write("\n")
+    json_data = {"samples": sample_names, "clusters": [[mut_name_to_mut_id[name]] for name in mutation_names], "garbage": []}
+
+    with open(os.path.join(output_dir, f"{patient_id}.params.json"), 'w', encoding='utf-8') as f:
+        json.dump(json_data, f, ensure_ascii=False)
 
 # Adapted from pairtree 
 def get_adj_matrix_from_parents(parents):
