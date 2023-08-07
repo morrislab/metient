@@ -310,6 +310,7 @@ def get_migration_history(T, ref_matrix, var_matrix, ordered_sites, p, node_idx_
         print_config: PrintConfig object with options on how to visualize output
         
         node_idx_to_label: dictionary mapping vertex indices (corresponding to their index in T) to custom labels
+        for plotting
 
         p: one-hot vector (shape: num_anatomical_sites x 1) indicating the location
         of the primary tumor (root vertex must be labeled with the primary)
