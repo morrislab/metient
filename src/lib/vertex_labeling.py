@@ -26,6 +26,75 @@ class Weights:
         self.gen_dist = gen_dist
         self.organotrop = organotrop
 
+def _ancestral_labeling_objective(V, A, G, O, weights):
+    '''
+    Args:
+        V: Vertex labeling of the full tree (num_sites x num_nodes)
+        A: Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
+        G: Matrix of genetic distances between internal nodes (shape: num_internal_nodes x num_internal_nodes).
+        Lower values indicate lower branch lengths, i.e. more genetically similar.
+        O: Array of frequencies with which the primary cancer type seeds site i (shape: num_anatomical_sites).
+        weights: Weights object
+
+    Returns:
+        Loss to score the ancestral vertex labeling of the given tree. This combines (1) migration number, (2) seeding site
+        number, (3) comigration number, and optionally (4) genetic distance and (5) organotropism.
+    '''
+
+    # 1. Migration number
+    VA = V @ A
+    site_adj = VA @ V.T
+    m = torch.sum(site_adj) - torch.trace(site_adj)
+
+    # 2. Seeding site number
+    # remove the same site transitions from the site adj matrix
+    site_adj_no_diag = torch.mul(site_adj, 1-torch.eye(site_adj.shape[0], site_adj.shape[1]))
+    row_sums_site_adj = torch.sum(site_adj_no_diag, axis=1)
+    # can only have a max of 1 for each site (it's either a seeding site or it's not)
+    alpha = 100.0
+    binarized_row_sums_site_adj = torch.sigmoid(alpha * (2*row_sums_site_adj - 1)) # sigmoid for soft thresholding
+    s = torch.sum(binarized_row_sums_site_adj)
+
+    # 3. Comigration number
+    W = VA.T @ VA # W tells us if two nodes' parents are the same color
+    X = V.T @ V # X tells us if two nodes are the same color
+    Y = torch.sum(torch.mul(VA.T, 1-V.T), axis=1) # Y has a 1 for every node where its parent has a diff color
+    shared_par_and_self_color = torch.mul(W, X)
+    # tells us if two nodes are (1) in the same site and (2) have parents in the same site
+    # and (3) there's a path from node i to node j
+    # TODO: this is computationally expensive, maybe we could cache path matrices we've calculated before?
+    P = vert_util.get_path_matrix_tensor(A.cpu().numpy())
+    shared_path_and_par_and_self_color = torch.sum(torch.mul(P, shared_par_and_self_color), axis=1)
+    repeated_temporal_migrations = torch.sum(torch.mul(shared_path_and_par_and_self_color, Y))
+    binarized_site_adj = torch.sigmoid(alpha * (2 * site_adj - 1))
+    c = torch.sum(binarized_site_adj) - torch.trace(binarized_site_adj) + repeated_temporal_migrations
+
+    # 4. Genetic distance
+    g = 0
+    if G != None and weights.gen_dist != 0:
+        # calculate if 2 nodes are in diff sites and there's an edge between them (i.e there is a migration edge)
+        R = torch.mul(A, (1-X))
+        R = -1.0*torch.mul(R, G)
+        g = torch.sum(R)
+
+    # 5. Organotropism
+    o = 0
+    if O != None and weights.organotrop != 0:
+        # the organotropism frequencies can only be used on the first 
+        # row, which is for the migrations from primary cancer site to
+        # other metastatic sites (we don't have frequencies for every 
+        # site to site migration)
+        organ_penalty = -1.0*torch.mul(O, site_adj_no_diag[0,:])
+        o = torch.sum(organ_penalty)
+
+
+    # Combine all 5 components with their weights
+    vertex_labeling_loss = (weights.mig*m + weights.seed_site*s + weights.comig*c + weights.gen_dist*g + weights.organotrop*o)
+    loss_components = {"mig": m.item(), "comig": c.item(), "seeding": s.item(), 
+                       "organo": 0 if o == 0 else round(o.item(), 3), "gen": 0 if g == 0 else round(g.item(), 3)}
+
+    return vertex_labeling_loss, loss_components
+
 # Adapted from PairTree
 def _calc_llh(F_hat, R, V, omega_v, epsilon=1e-5):
     '''
@@ -40,15 +109,12 @@ def _calc_llh(F_hat, R, V, omega_v, epsilon=1e-5):
 
     N = R + V
     S, K = F_hat.shape
-    #print("K", K)
-    #print("omega V\n", omega_v)
 
     for matrix in V, N, omega_v:
         assert(matrix.shape == (S, K-1))
 
     # TODO: how do we make sure the non-cancerous root clone subclonal frequencies here are 1
     #assert(np.allclose(1, phi[0]))
-    #print("F_hat", F_hat.shape, "\n", F_hat)
     P = torch.mul(omega_v, F_hat[:,1:])
     #print("P", P.shape, "\n", P)
 
@@ -67,8 +133,32 @@ def _calc_llh(F_hat, R, V, omega_v, epsilon=1e-5):
     # TODO: why the division by K-1 and S?
     llh_per_sample = -torch.sum(F_llh, axis=1) / (K-1)
     nlglh = torch.sum(llh_per_sample) / S
-    #print("nlglh", nlglh)
     return (F_llh, llh_per_sample, nlglh)
+
+def _subclonal_presence_objective(ref_matrix, var_matrix, omega_v, U, B, weights):
+    '''
+    Args:
+        ref_matrix: Reference matrix (num_anatomical_sites x num_mutation_clusters). Num. reads that map to reference allele
+        var_matrix: Variant matrix (num_anatomical_sites x num_mutation_clusters). Num. reads that map to variant allele
+        U: Mixture matrix (num_sites x num_internal_nodes)
+        B: Mutation matrix (shape: num_internal_nodes x num_mutation_clusters)
+        weights: Weights object
+
+    Returns:
+        Loss to score the ancestral vertex labeling of the given tree. This combines (1) migration number, (2) seeding site
+        number, (3) comigration number, and optionally (4) genetic distance and (5) organotropism.
+    '''
+    # 1. Data fit
+    F_hat = (U @ B)
+    F_llh, llh_per_sample, nlglh = _calc_llh(F_hat, ref_matrix, var_matrix, omega_v)
+
+    # 2. Regularization to make some values of U -> 0
+    # TODO: this is not a normal matrix norm, but works very well here...
+    reg = torch.sum(U)
+
+    subclonal_presence_loss = (weights.data_fit*nlglh + weights.reg*reg)
+    loss_components = {"nll": round(nlglh.item(), 3), "reg": reg.item()}
+    return subclonal_presence_loss, loss_components
 
 def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter, lr_sched):
     '''
@@ -82,66 +172,20 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter
         G: Matrix of genetic distances between internal nodes (shape: num_internal_nodes x num_internal_nodes).
         Lower values indicate lower branch lengths, i.e. more genetically similar.
         O: Array of frequencies with which the primary cancer type seeds site i (shape: num_anatomical_sites).
+        weights: Weights object
+        epoch: number of current epoch, used to determine weighting in different learning rate schemes
+        max_iter: the maximum number of iterations to be run
+        lr_sched: how to weight the two tasks, see 'get_migration_history(...)' for documentation
 
     Returns:
         Loss to score this tree and labeling combo.
     '''
 
-    # Migration number
-    VA = V @ A
-    site_adj = VA @ V.T
-    m = torch.sum(site_adj) - torch.trace(site_adj)
-
-    # Seeding site number
-    # remove the same site transitions from the site adj matrix
-    site_adj_no_diag = torch.mul(site_adj, 1-torch.eye(site_adj.shape[0], site_adj.shape[1]))
-    row_sums_site_adj = torch.sum(site_adj_no_diag, axis=1)
-    # can only have a max of 1 for each site (it's either a seeding site or it's not)
-    alpha = 100.0
-    binarized_row_sums_site_adj = torch.sigmoid(alpha * (2*row_sums_site_adj - 1)) # sigmoid for soft thresholding
-    s = torch.sum(binarized_row_sums_site_adj)
-
-    # Comigration number
-    W = VA.T @ VA # W tells us if two nodes' parents are the same color
-    X = V.T @ V # X tells us if two nodes are the same color
-    Y = torch.sum(torch.mul(VA.T, 1-V.T), axis=1) # Y has a 1 for every node where its parent has a diff color
-    shared_par_and_self_color = torch.mul(W, X)
-    # tells us if two nodes are (1) in the same site and (2) have parents in the same site
-    # and (3) there's a path from node i to node j
-    # TODO: this is computationally expensive, maybe we could cache path matrices we've calculated before?
-    P = vert_util.get_path_matrix_tensor(A.cpu().numpy())
-    shared_path_and_par_and_self_color = torch.sum(torch.mul(P, shared_par_and_self_color), axis=1)
-    repeated_temporal_migrations = torch.sum(torch.mul(shared_path_and_par_and_self_color, Y))
-    binarized_site_adj = torch.sigmoid(alpha * (2 * site_adj - 1))
-    c = torch.sum(binarized_site_adj) - torch.trace(binarized_site_adj) + repeated_temporal_migrations
-
-    # Data fit
-    F_hat = (U @ B)
+    ancestral_labeling_loss, loss_dict_a = _ancestral_labeling_objective(V, A, G, O, weights)
 
     # TODO: don't hardcode omega_v here (omegas are all 1/2 since we're assuming there are no CNAs)
     omega_v = torch.ones(ref_matrix.shape) * 0.5
-    F_llh, llh_per_sample, nlglh = _calc_llh(F_hat, ref_matrix, var_matrix, omega_v)
-
-    g = 0
-    if G != None and weights.gen_dist != 0:
-    # Weigh by genetic distance
-    # calculate if 2 nodes are in diff sites and there's an edge between them (i.e there is a migration edge)
-        R = torch.mul(A, (1-X))
-        R = -1.0*torch.mul(R, G)
-        g = torch.sum(R)
-
-    o = 0
-    if O != None and weights.organotrop != 0:
-        # the organotropism frequencies can only be used on the first 
-        # row, which is for the migrations from primary cancer site to
-        # other metastatic sites (we don't have frequencies for every 
-        # site to site migration)
-        organ_penalty = -1.0*torch.mul(O, site_adj_no_diag[0,:])
-        o = torch.sum(organ_penalty)
-
-    # Regularization to make some values of U -> 0
-    # TODO: this is not a normal matrix norm, but works very well here...
-    reg = torch.sum(U)
+    subclonal_presence_loss, loss_dict_b = _subclonal_presence_objective(ref_matrix, var_matrix, omega_v, U, B, weights)
 
     lam1, lam2 = 1.0, 1.0
     if epoch != -1: # to evaluate loss values after training is done
@@ -160,9 +204,10 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter
             lam1 = 1.0 - l
             lam2 = l
 
-    loss = (lam1*(weights.data_fit*nlglh + weights.reg*reg)) + (lam2*(weights.mig*m + weights.seed_site*s + weights.comig*c + weights.gen_dist*g + weights.organotrop*o))
+    loss = (lam1*subclonal_presence_loss) + (lam2*ancestral_labeling_loss)
 
-    loss_components = {"mig": m.item(), "comig": c.item(), "seeding": s.item(), "nll": round(nlglh.item(), 3), "reg": reg.item(), "organo": 0 if o == 0 else round(o.item(), 3), "gen": 0 if g == 0 else round(g.item(), 3), "loss": round(loss.item(), 3)}
+
+    loss_components = {**loss_dict_a, **loss_dict_b, **{"loss": round(loss.item(), 3)}}
 
     return loss, loss_components
 

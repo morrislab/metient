@@ -3,6 +3,7 @@ import numpy as np
 import torch
 from src.util import plotting_util as plt_util
 import os
+import pandas as pd
 
 # TODO: make more assertions on uniqueness and completeness of input csvs
 
@@ -11,7 +12,6 @@ import json
 # TODO: rename pairtree_data_extraction_util -> pairtree_util
 
 
-# TODO: write unit tests for this
 def write_pairtree_inputs(patient_data, patient_id, output_dir):
     '''
     Args:
@@ -65,6 +65,111 @@ def write_pairtree_inputs(patient_data, patient_id, output_dir):
 
     with open(os.path.join(output_dir, f"{patient_id}.params.json"), 'w', encoding='utf-8') as f:
         json.dump(json_data, f, ensure_ascii=False)
+
+def _get_cluster_id(mut_id, clusters):
+    '''
+    Given mut_id = 'm1' and clusters= [['m1'], ['m0', 'm2']], returns 1 
+    '''
+    for i, cluster in enumerate(clusters):
+        if mut_id in cluster:
+            return i
+    
+    print(f"mut id {mut_id} not found")
+    return None
+
+def write_pooled_tsv_from_pairtree_clusters(tsv_fn, ssm_fn, clustered_params_json_fn, 
+                                            aggregation_rules, output_dir, patient_id,
+                                            cluster_sep=";"):
+
+    '''
+    After clustering with PairTree (see: https://github.com/morrislab/pairtree#clustering-mutations),
+    prepares tsvs by pooling mutations belonging to the same cluster
+
+    Args:
+        tsv_fn: path to tsv with reqiured columns: [#sample_index, sample_label, 
+        character_index, character_label, anatomical_site_index, anatomical_site_label, 
+        ref, var]
+
+        ssm_fn: SSM file used for input into pairtree (see: https://github.com/morrislab/pairtree#input-files)
+
+        clustered_params_json_fn: output params.json file from running PairTree clustervars
+        (see: https://github.com/morrislab/pairtree#clustering-mutations)
+
+        aggregation_rules: dictionary indicating how to aggregate any extra columns that are not in 
+        the required columns (specificied above). e.g. "first" aggregation rules can be used for columns shared by a sample, sicne we are 
+        aggregating within a sample. 
+
+        output_dir: where to save clustered tsv
+
+        patient_id: name of patient used in tsv filename
+
+        cluster_sep: string that separates names of mutations when creating a cluster name.
+        e.g. cluster name for mutations ABC:4:3 and DEF:1:2 with cluster_sep=";" will be 
+        "ABC:4:3;DEF:1:2"
+    
+    Outputs:
+
+        Saves pooled tsv at {output_dir}/{patient_id}_clustered_SNVs.tsv
+
+    '''
+
+    required_cols = ["#sample_index", "sample_label", "anatomical_site_index", "anatomical_site_label", 
+                     "character_index", "character_label", "ref","var"]
+
+
+    df = pd.read_csv(tsv_fn, delimiter="\t", index_col=0)
+    all_cols = required_cols + list(aggregation_rules.keys())
+
+    if not (set(required_cols).issubset(df.columns)):
+        raise ValueError(f"Input tsv needs required columns: {required_cols}")
+
+    if not set(all_cols) == set(df.columns):
+        print(set(df.columns))
+        missing_columns = set(df.columns) - set(all_cols)
+        raise ValueError(f"Aggregation rules are required for all columns, missing rules for: {missing_columns}")
+    
+    # 1. Get mapping between mutation names and pairtree mutation_ids
+    mut_name_to_id = dict()
+    with open(ssm_fn) as f:
+        for i, line in enumerate(f):
+            if i == 0: continue
+            items = line.split("\t")
+            if items[1] not in mut_name_to_id:
+                mut_name_to_id[items[1]] = items[0]
+                
+    # 2. Get pairtree cluster assignments
+    with open(clustered_params_json_fn) as f:
+        cluster_json = json.loads(f.read())
+    cluster_assignments = []
+    for mut_name in df['character_label']:
+        cluster_assignments.append(_get_cluster_id(mut_name_to_id[mut_name], cluster_json['clusters']))
+    df['cluster'] = cluster_assignments
+    
+    # 3. Pool reference and variant allele counts from all mutations within a cluster
+    pooled_df = df.drop(['character_label', 'character_index', '#sample_index', 'anatomical_site_index'], axis=1)
+    
+    ref_var_rules = {'ref': np.sum, 'var': np.sum, 'anatomical_site_label':'first'}
+
+    pooled_df = pooled_df.groupby(['cluster', 'sample_label'], as_index=False).agg({**ref_var_rules, **aggregation_rules})
+    # 4. Add new names for clustered mutations
+    mut_id_to_name = {v:k for k,v in mut_name_to_id.items()}
+    cluster_id_to_cluster_name = dict()
+    for i, cluster in enumerate(cluster_json['clusters']):
+        cluster_comps = []
+        for mut in cluster:
+            cluster_comps.append(mut_id_to_name[mut])
+        cluster_id_to_cluster_name[i] = cluster_sep.join(cluster_comps)
+    
+    pooled_df['character_label'] = pooled_df.apply(lambda row: cluster_id_to_cluster_name[row['cluster']], axis=1)
+    
+    # Add indices for mutations, samples and anatomical sites as needed for input format
+    pooled_df['character_index'] = pooled_df.apply(lambda row: list(pooled_df['character_label'].unique()).index(row["character_label"]), axis=1)
+    pooled_df['anatomical_site_index'] = pooled_df.apply(lambda row: list(pooled_df['anatomical_site_label'].unique()).index(row["anatomical_site_label"]), axis=1)
+    pooled_df['#sample_index'] = pooled_df.apply(lambda row: list(pooled_df['sample_label'].unique()).index(row["sample_label"]), axis=1)    
+    
+    pooled_df = pooled_df[all_cols]
+    output_fn = os.path.join(output_dir, f"{patient_id}_clustered_SNVs.tsv")
+    pooled_df.to_csv(output_fn, sep="\t")
 
 # Adapted from pairtree 
 def get_adj_matrix_from_parents(parents):
