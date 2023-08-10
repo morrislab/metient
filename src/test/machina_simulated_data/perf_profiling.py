@@ -51,9 +51,9 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
                                                                                                 max_iter=150, batch_size=32, init_temp=30, final_temp=0.01,
                                                                                                 custom_colors=custom_colors, visualize=False, verbose=False)
 
-        vert_util.write_tree(best_T_edges, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.tree"))
-        vert_util.write_tree_vertex_labeling(best_labeling, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.vertex.labeling"))
-        vert_util.write_migration_graph(best_G_edges, os.path.join(out_dir, f"G_tree{tree_num}_seed{seed}.predicted.tree"))
+        vert_util.write_tree(best_T_edges, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.tree"), add_germline_node=True)
+        vert_util.write_tree_vertex_labeling(best_labeling, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.vertex.labeling"), add_germline_node=True)
+        vert_util.write_migration_graph(best_G_edges, os.path.join(out_dir, f"G_tree{tree_num}_seed{seed}.predicted.tree"), add_germline_node=True)
         tree_num += 1
         tree_info = {**{"site": site, "mig_type": mig_type, "seed":seed, "tree_num": tree_num, "time": time}, **best_loss_info}
         global results
