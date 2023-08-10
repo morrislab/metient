@@ -54,8 +54,8 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
                                                                                                  custom_colors=custom_colors, print_config=print_config, 
                                                                                                  weight_init_primary=weight_init_primary, lr_sched=lr_sched)
 
-        vert_util.write_tree(T_edges, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.tree"))
-        vert_util.write_tree_vertex_labeling(labeling, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.vertex.labeling"))
+        vert_util.write_tree(T_edges, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.tree"), add_germline_node=True)
+        vert_util.write_tree_vertex_labeling(labeling, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}.predicted.vertex.labeling"), add_germline_node=True)
         vert_util.write_migration_graph(G_edges, os.path.join(out_dir, f"G_tree{tree_num}_seed{seed}.predicted.tree"))
         tree_num += 1
         tree_info = {**{"site": site, "mig_type": mig_type, "seed":seed, "tree_num": tree_num, "time": time}, **loss_info}

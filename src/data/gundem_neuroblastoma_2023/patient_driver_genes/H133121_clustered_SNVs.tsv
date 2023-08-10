@@ -1,7 +1,7 @@
-	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad	sample_type	purity	ploidy	sampling_time_months_from_dx
-0	0	I-H-133121-T4-1-D1-2	0	right retroperitoneal - TR	0	ALK_p.R1275Q_non_synonymous_codon_2:29432664	80.0	0.0	primary_disease	retroperitoneal	t-resection	0.01	2.0	2.5
-1	1	I-H-133121-T5-1-D1-2	1	brain, parietal - R	0	ALK_p.R1275Q_non_synonymous_codon_2:29432664	113.0	38.0	distant_metastasis	CNS	relapse	0.78	2.32	7.5
-2	2	I-H-133121-T6-1-D1-2	2	brain, temporal - FR	0	ALK_p.R1275Q_non_synonymous_codon_2:29432664	82.0	47.0	distant_metastasis	CNS	frelapse	0.97	1.94	25.76666667
-3	0	I-H-133121-T4-1-D1-2	0	right retroperitoneal - TR	1	ALK_p.F1174L_non_synonymous_codon_2:29443695	538.0	15.0	primary_disease	retroperitoneal	t-resection	0.01	2.0	2.5
-4	1	I-H-133121-T5-1-D1-2	1	brain, parietal - R	1	ALK_p.F1174L_non_synonymous_codon_2:29443695	167.0	0.0	distant_metastasis	CNS	relapse	0.78	2.32	7.5
-5	2	I-H-133121-T6-1-D1-2	2	brain, temporal - FR	1	ALK_p.F1174L_non_synonymous_codon_2:29443695	158.0	1.0	distant_metastasis	CNS	frelapse	0.97	1.94	25.76666667
+	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	ploidy	purity	sampling_time_months_from_dx	sample_type	tumor_type	anatomical_site_broad
+0	0	I-H-133121-T4-1-D1-2	0	right retroperitoneal - TR	0	ALK_p.R1275Q_non_synonymous_codon_2:29432664	80.0	0.0	2.0	0.01	2.5	t-resection	primary_disease	retroperitoneal
+1	1	I-H-133121-T5-1-D1-2	1	brain, parietal - R	0	ALK_p.R1275Q_non_synonymous_codon_2:29432664	113.0	38.0	2.32	0.78	7.5	relapse	distant_metastasis	CNS
+2	2	I-H-133121-T6-1-D1-2	2	brain, temporal - FR	0	ALK_p.R1275Q_non_synonymous_codon_2:29432664	82.0	47.0	1.94	0.97	25.76666667	frelapse	distant_metastasis	CNS
+3	0	I-H-133121-T4-1-D1-2	0	right retroperitoneal - TR	1	ALK_p.F1174L_non_synonymous_codon_2:29443695	538.0	15.0	2.0	0.01	2.5	t-resection	primary_disease	retroperitoneal
+4	1	I-H-133121-T5-1-D1-2	1	brain, parietal - R	1	ALK_p.F1174L_non_synonymous_codon_2:29443695	167.0	0.0	2.32	0.78	7.5	relapse	distant_metastasis	CNS
+5	2	I-H-133121-T6-1-D1-2	2	brain, temporal - FR	1	ALK_p.F1174L_non_synonymous_codon_2:29443695	158.0	1.0	1.94	0.97	25.76666667	frelapse	distant_metastasis	CNS

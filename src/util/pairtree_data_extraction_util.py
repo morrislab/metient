@@ -96,8 +96,9 @@ def write_pooled_tsv_from_pairtree_clusters(tsv_fn, ssm_fn, clustered_params_jso
         (see: https://github.com/morrislab/pairtree#clustering-mutations)
 
         aggregation_rules: dictionary indicating how to aggregate any extra columns that are not in 
-        the required columns (specificied above). e.g. "first" aggregation rules can be used for columns shared by a sample, sicne we are 
-        aggregating within a sample. 
+        the required columns (specificied above). e.g. "first" aggregation rules can be used for columns 
+        shared by rows with the same anatomical_site_label, since we are aggregating within an
+        anatomical_site_label. 
 
         output_dir: where to save clustered tsv
 
@@ -124,7 +125,6 @@ def write_pooled_tsv_from_pairtree_clusters(tsv_fn, ssm_fn, clustered_params_jso
         raise ValueError(f"Input tsv needs required columns: {required_cols}")
 
     if not set(all_cols) == set(df.columns):
-        print(set(df.columns))
         missing_columns = set(df.columns) - set(all_cols)
         raise ValueError(f"Aggregation rules are required for all columns, missing rules for: {missing_columns}")
     
@@ -147,10 +147,10 @@ def write_pooled_tsv_from_pairtree_clusters(tsv_fn, ssm_fn, clustered_params_jso
     
     # 3. Pool reference and variant allele counts from all mutations within a cluster
     pooled_df = df.drop(['character_label', 'character_index', '#sample_index', 'anatomical_site_index'], axis=1)
-    
-    ref_var_rules = {'ref': np.sum, 'var': np.sum, 'anatomical_site_label':'first'}
 
-    pooled_df = pooled_df.groupby(['cluster', 'sample_label'], as_index=False).agg({**ref_var_rules, **aggregation_rules})
+    ref_var_rules = {'ref': np.sum, 'var': np.sum, 'sample_label': lambda x: ';'.join(set(x))}
+
+    pooled_df = pooled_df.groupby(['cluster', 'anatomical_site_label'], as_index=False).agg({**ref_var_rules, **aggregation_rules})
     # 4. Add new names for clustered mutations
     mut_id_to_name = {v:k for k,v in mut_name_to_id.items()}
     cluster_id_to_cluster_name = dict()

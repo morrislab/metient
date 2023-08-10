@@ -135,28 +135,28 @@ def get_seeding_pattern_from_migration_graph(G):
     return pattern
 
 
-def write_tree(tree_edge_list, output_filename):
+def write_tree(tree_edge_list, output_filename, add_germline_node=False):
     '''
     Writes the full tree to file like so:
-    GL 0
     0 1
     1 2;3
     '''
-    tree_edge_list.append(('GL', tree_edge_list[0][0]))
+    if add_germline_node:
+        tree_edge_list.append(('GL', tree_edge_list[0][0]))
     with open(output_filename, 'w') as f:
         for edge in tree_edge_list:
             f.write(f"{edge[0]} {edge[1]}")
             f.write("\n")
 
-def write_tree_vertex_labeling(vertex_name_to_site_map, output_filename):
+def write_tree_vertex_labeling(vertex_name_to_site_map, output_filename, add_germline_node=False):
     '''
     Writes the full tree's vertex labeling to file like so:
-    GL P
     1 P
     1_P P
     25;32_M1 M1
     '''
-    vertex_name_to_site_map['GL'] = "P"
+    if add_germline_node:
+        vertex_name_to_site_map['GL'] = "P"
     with open(output_filename, 'w') as f:
         for vert_label in vertex_name_to_site_map:
             f.write(f"{vert_label} {vertex_name_to_site_map[vert_label]}")
@@ -650,7 +650,10 @@ def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_m
             _visualize_intermediate_trees(best_tree_idx)
 
     ret = None
-    outputs = []
+    figure_outputs = []
+    npz_outputs = {'ancestral_labelings':[], 'subclonal_presence_matrices':[], 
+                   'full_adjacency_matrices':[], 'ordered_anatomical_sites':ordered_sites,
+                   'node_idx_to_label':node_idx_to_label}
     for i, tup in enumerate(k_trees_and_losses):
         tree = tup[0]
 
@@ -659,11 +662,15 @@ def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_m
         mig_graph_dot, mig_graph_edges = plot_migration_graph(tree.labeling, tree.tree, ordered_sites, custom_colors, primary, show=False)
 
         seeding_pattern = get_seeding_pattern_from_migration_graph(get_migration_graph(tree.labeling, tree.tree))
-        outputs.append((tree_dot, mig_graph_dot, loss_info, seeding_pattern))
+        figure_outputs.append((tree_dot, mig_graph_dot, loss_info, seeding_pattern))
+        npz_outputs['ancestral_labelings'].append(tree.labeling)
+        npz_outputs['subclonal_presence_matrices'].append(tree.U)
+        npz_outputs['full_adjacency_matrices'].append(tree.tree)
+
         if i == 0: # Best tree
             ret = (edges, vertices_to_sites_map, mig_graph_edges, loss_info)
 
-    format_visualization(outputs, print_config, output_dir, run_name)
+    save_outputs(figure_outputs, print_config, output_dir, run_name, npz_outputs)
 
     return ret
 
@@ -683,7 +690,7 @@ def formatted_loss_string(loss_dict):
     return s
 
 
-def format_visualization(outputs, print_config, output_dir, run_name):
+def save_outputs(figure_outputs, print_config, output_dir, run_name, npz_outputs):
 
     k = print_config.k_best_trees
     sys_fonts = matplotlib.font_manager.findSystemFonts(fontpaths=None, fontext='ttf')
@@ -692,7 +699,7 @@ def format_visualization(outputs, print_config, output_dir, run_name):
             matplotlib.font_manager.fontManager.addfont(font)
             rcParams['font.family'] = 'Lato'
 
-    n = len(outputs)
+    n = len(figure_outputs)
 
     if k < n:
         print("{k} unique best trees were not found ({n} were found). Retry with higher batch size if you want to try and get more trees.")
@@ -703,11 +710,14 @@ def format_visualization(outputs, print_config, output_dir, run_name):
     plt.suptitle(run_name)
 
     z = 2 # number of trees displayed per row
-    fig = plt.figure(figsize=(10,15))
+
     nrows = math.ceil(k/z)
+    h = nrows*5
+    fig = plt.figure(figsize=(10,h))
+    
     vspace = 1/nrows
 
-    for i, (tree_dot, mig_graph_dot, loss_info, seeding_pattern) in enumerate(outputs):
+    for i, (tree_dot, mig_graph_dot, loss_info, seeding_pattern) in enumerate(figure_outputs):
         # Create graphviz objects from the DOT code
         tree = PILImage.open(tree_dot.render(os.path.join(output_dir,f"T_{run_name}"),format="png", view=False))
         mig_graph = PILImage.open(mig_graph_dot.render(os.path.join(output_dir, f"G_{run_name}"),format="png", view=False))
@@ -741,6 +751,7 @@ def format_visualization(outputs, print_config, output_dir, run_name):
     fig1 = plt.gcf()
     fig1.savefig(os.path.join(output_dir, f'{run_name}.png'), dpi=300)
     print(f"Saving {run_name} to {output_dir}")
+
     if print_config.visualize:
         plt.show()
 
@@ -749,6 +760,14 @@ def format_visualization(outputs, print_config, output_dir, run_name):
     os.remove(os.path.join(output_dir, f"T_{run_name}.png"))
     os.remove(os.path.join(output_dir, f"G_{run_name}"))
     os.remove(os.path.join(output_dir, f"G_{run_name}.png"))
+
+    # Save results to npz file
+    np.savez(os.path.join(output_dir, f"{run_name}.results.npz"), 
+             ancestral_labelings=npz_outputs['ancestral_labelings'],
+             subclonal_presence_matrices=npz_outputs['subclonal_presence_matrices'],
+             full_adjacency_matrices=npz_outputs['full_adjacency_matrices'],
+             ordered_anatomical_sites=npz_outputs['ordered_anatomical_sites'],
+             node_idx_to_label=npz_outputs['node_idx_to_label'])
 
 
 

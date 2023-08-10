@@ -507,8 +507,8 @@ def get_migration_history(T, ref_matrix, var_matrix, ordered_sites, p, node_idx_
                                                                                     custom_colors, primary_site_label, 
                                                                                     max_iter, output_dir, run_name)
 
-        avg_tree = plot_util.print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_colors,
-                                            ordered_sites, print_config)
+        # avg_tree = plot_util.print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_colors,
+        #                                     ordered_sites, print_config)
 
        
 

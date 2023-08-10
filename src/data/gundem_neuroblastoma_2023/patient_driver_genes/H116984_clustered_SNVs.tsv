@@ -1,5 +1,5 @@
-	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	tumor_type	anatomical_site_broad	sample_type	purity	ploidy	sampling_time_months_from_dx
-0	0	I-H-116984-T1-1-D1-1	0	right inguinal lymph node - R	0	PIK3CA_p.V448L_non_synonymous_codon_3:178928064	67.0	8.0	distant_metastasis	other	relapse	0.33	2.13	26.4
-1	1	I-H-116984-T2-1-D1-1	1	left adrenal - D	0	PIK3CA_p.V448L_non_synonymous_codon_3:178928064	69.0	43.0	primary_disease	adrenal	diagnosis	0.94	2.3	0.0
-2	0	I-H-116984-T1-1-D1-1	0	right inguinal lymph node - R	1	ALK_p.F1174L_non_synonymous_codon_2:29443695	61.0	16.0	distant_metastasis	other	relapse	0.33	2.13	26.4
-3	1	I-H-116984-T2-1-D1-1	1	left adrenal - D	1	ALK_p.F1174L_non_synonymous_codon_2:29443695	98.0	0.0	primary_disease	adrenal	diagnosis	0.94	2.3	0.0
+	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	ploidy	purity	sampling_time_months_from_dx	sample_type	tumor_type	anatomical_site_broad
+0	0	I-H-116984-T1-1-D1-1	0	right inguinal lymph node - R	0	PIK3CA_p.V448L_non_synonymous_codon_3:178928064	67.0	8.0	2.13	0.33	26.4	relapse	distant_metastasis	other
+1	1	I-H-116984-T2-1-D1-1	1	left adrenal - D	0	PIK3CA_p.V448L_non_synonymous_codon_3:178928064	69.0	43.0	2.3	0.94	0.0	diagnosis	primary_disease	adrenal
+2	0	I-H-116984-T1-1-D1-1	0	right inguinal lymph node - R	1	ALK_p.F1174L_non_synonymous_codon_2:29443695	61.0	16.0	2.13	0.33	26.4	relapse	distant_metastasis	other
+3	1	I-H-116984-T2-1-D1-1	1	left adrenal - D	1	ALK_p.F1174L_non_synonymous_codon_2:29443695	98.0	0.0	2.3	0.94	0.0	diagnosis	primary_disease	adrenal
