@@ -17,6 +17,7 @@ import math
 import matplotlib.font_manager
 from matplotlib import rcParams
 import os
+import pickle
 
 import string
 
@@ -651,9 +652,9 @@ def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_m
 
     ret = None
     figure_outputs = []
-    npz_outputs = {'ancestral_labelings':[], 'subclonal_presence_matrices':[], 
-                   'full_adjacency_matrices':[], 'ordered_anatomical_sites':ordered_sites,
-                   'node_idx_to_label':node_idx_to_label}
+    pickle_outputs = {'ancestral_labelings':[], 'subclonal_presence_matrices':[], 
+                      'full_adjacency_matrices':[], 'ordered_anatomical_sites':ordered_sites,
+                      'node_idx_to_label':node_idx_to_label}
     for i, tup in enumerate(k_trees_and_losses):
         tree = tup[0]
 
@@ -663,14 +664,14 @@ def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_m
 
         seeding_pattern = get_seeding_pattern_from_migration_graph(get_migration_graph(tree.labeling, tree.tree))
         figure_outputs.append((tree_dot, mig_graph_dot, loss_info, seeding_pattern))
-        npz_outputs['ancestral_labelings'].append(tree.labeling)
-        npz_outputs['subclonal_presence_matrices'].append(tree.U)
-        npz_outputs['full_adjacency_matrices'].append(tree.tree)
+        pickle_outputs['ancestral_labelings'].append(tree.labeling)
+        pickle_outputs['subclonal_presence_matrices'].append(tree.U)
+        pickle_outputs['full_adjacency_matrices'].append(tree.tree)
 
         if i == 0: # Best tree
             ret = (edges, vertices_to_sites_map, mig_graph_edges, loss_info)
 
-    save_outputs(figure_outputs, print_config, output_dir, run_name, npz_outputs)
+    save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outputs)
 
     return ret
 
@@ -690,7 +691,7 @@ def formatted_loss_string(loss_dict):
     return s
 
 
-def save_outputs(figure_outputs, print_config, output_dir, run_name, npz_outputs):
+def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outputs):
 
     k = print_config.k_best_trees
     sys_fonts = matplotlib.font_manager.findSystemFonts(fontpaths=None, fontext='ttf')
@@ -761,13 +762,8 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, npz_outputs
     os.remove(os.path.join(output_dir, f"G_{run_name}"))
     os.remove(os.path.join(output_dir, f"G_{run_name}.png"))
 
-    # Save results to npz file
-    np.savez(os.path.join(output_dir, f"{run_name}.results.npz"), 
-             ancestral_labelings=npz_outputs['ancestral_labelings'],
-             subclonal_presence_matrices=npz_outputs['subclonal_presence_matrices'],
-             full_adjacency_matrices=npz_outputs['full_adjacency_matrices'],
-             ordered_anatomical_sites=npz_outputs['ordered_anatomical_sites'],
-             node_idx_to_label=npz_outputs['node_idx_to_label'])
-
+    # Save results to pickle file
+    with open(os.path.join(output_dir, f"{run_name}.pickle"), 'wb') as handle:
+        pickle.dump(pickle_outputs, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
