@@ -413,10 +413,10 @@ def plot_averaged_tree(avg_edges, avg_node_colors, ordered_sites, custom_colors=
         
         node_i_color = ""
         for site_idx in avg_node_colors[label_i]:
-            node_i_color += f"{idx_to_color(custom_colors, site_idx, alpha=alpha)};{avg_node_colors[label_i][site_idx]}:"
+            node_i_color += f'"{idx_to_color(custom_colors, site_idx, alpha=alpha)};{avg_node_colors[label_i][site_idx]}:"'
         node_j_color = ""
         for site_idx in avg_node_colors[label_j]:
-            node_j_color += f"{idx_to_color(custom_colors, site_idx, alpha=alpha)};{avg_node_colors[label_j][site_idx]}:"
+            node_j_color += f'"{idx_to_color(custom_colors, site_idx, alpha=alpha)};{avg_node_colors[label_j][site_idx]}:"'
         is_leaf = False
 
         G.add_node(label_i, xlabel=label_i, label="", shape="circle", fillcolor=node_i_color, 
