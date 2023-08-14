@@ -400,11 +400,13 @@ def get_migration_history(T, ref_matrix, var_matrix, ordered_sites, p, node_idx_
         raise ValueError("Adjacency matrix T is empty or not a tree.")
     if not os.path.isdir(output_dir):
         raise ValueError(f"{output_dir} does not exist.")
+    # TODO: should we enforce this? would people want no labels?
+    if not len(node_idx_to_label.values()) == len(set(list(node_idx_to_label.values()))):
+        raise ValueError(f"Labels in node_idx_to_label should be unique, got: {list(node_idx_to_label.values())}")
 
     B = vert_util.get_mutation_matrix_tensor(T)
     num_sites = ref_matrix.shape[0]
     num_internal_nodes = T.shape[0]
-    # TODO: BUG: can't assume that index 0 represents the root!
     # We're learning psi, which is the mixture matrix U (U = softmax(psi)), and tells us the existence
     # and antomical locations of the extant clones (U > U_CUTOFF)
     psi = -1 * torch.rand(batch_size, num_sites, num_internal_nodes + 1) # an extra column for normal cells
