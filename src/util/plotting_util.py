@@ -501,9 +501,9 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx
         label_i, _ = display_node_idx_to_label_map[i]
         label_j, is_leaf = display_node_idx_to_label_map[j]
         
-        G.add_node(label_i, xlabel=label_i, fillcolor=color_map[label_i], 
+        G.add_node(i, xlabel=label_i, fillcolor=color_map[label_i], 
                     color=color_map[label_i], style="filled", **node_options)
-        G.add_node(label_j, xlabel="" if is_leaf else label_j, fillcolor=color_map[label_j], 
+        G.add_node(j, xlabel="" if is_leaf else label_j, fillcolor=color_map[label_j], 
                     color=color_map[label_j], style="solid" if is_leaf else "filled", **node_options)
 
         style = "dashed" if is_leaf else "solid"
@@ -514,9 +514,8 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx
         # while G only has genetic distances between internal nodes
         minlen = gen_dist[i, j].item() if (gen_dist != None and i < len(gen_dist) and j < len(gen_dist)) else 1.0
         #print(i, j, minlen)
-        G.add_edge(label_i, label_j,
-                    color=f'"{color_map[label_i]};0.5:{color_map[label_j]}"', 
-                    penwidth=penwidth, arrowsize=0, style=style, minlen=minlen)
+        G.add_edge(i, j,color=f'"{color_map[label_i]};0.5:{color_map[label_j]}"', 
+                   penwidth=penwidth, arrowsize=0, style=style, minlen=minlen)
 
         edges.append((full_node_idx_to_label_map[i][0], full_node_idx_to_label_map[j][0]))
 
@@ -524,7 +523,7 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx
     root_idx = get_root_index(T)
     root_label = display_node_idx_to_label_map[root_idx][0]
     G.add_node("normal", label="", xlabel=root_label, penwidth=3, style="invis")
-    G.add_edge("normal", root_label, label="", 
+    G.add_edge("normal", root_idx, label="", 
                 color=f'"{color_map[root_label]}"', 
                 penwidth=4, arrowsize=0, style="solid")
 
@@ -546,8 +545,6 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx
         view_pydot(dot)
 
     dot = Source(dot)
-
-    #dot.write_png('labeled_tree.png')
 
     vertex_name_to_site_map = { full_node_idx_to_label_map[i][0]:ordered_sites[(V[:,i] == 1).nonzero()[0][0].item()] for i in range(V.shape[1])}
     return dot, edges, vertex_name_to_site_map

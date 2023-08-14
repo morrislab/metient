@@ -288,6 +288,7 @@ class TestTRACERxPreprocessing(unittest.TestCase):
 			self._test_mig_hist_pt_orchard_tsv(patient, patient_tsv_dir, true_patient_data)
 			self._test_conipher_tsv(patient, conipher_tsv_dir, true_patient_data, true_sample_info_df, true_purity_ploidy_df)
 
-	# TODO: test conipher input
+	# TODO: test write_pooled_tsv_from_pairtree_clusters
+
 
 unittest.main()

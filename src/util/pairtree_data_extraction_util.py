@@ -2,6 +2,7 @@
 import numpy as np
 import torch
 from src.util import plotting_util as plt_util
+from src.util import data_extraction_util as dutil
 import os
 import pandas as pd
 
@@ -114,62 +115,37 @@ def write_pooled_tsv_from_pairtree_clusters(tsv_fn, ssm_fn, clustered_params_jso
 
     '''
 
-    required_cols = ["#sample_index", "sample_label", "anatomical_site_index", "anatomical_site_label", 
-                     "character_index", "character_label", "ref","var"]
-
-
     df = pd.read_csv(tsv_fn, delimiter="\t", index_col=0)
-    all_cols = required_cols + list(aggregation_rules.keys())
-
-    if not (set(required_cols).issubset(df.columns)):
-        raise ValueError(f"Input tsv needs required columns: {required_cols}")
-
-    if not set(all_cols) == set(df.columns):
-        missing_columns = set(df.columns) - set(all_cols)
-        raise ValueError(f"Aggregation rules are required for all columns, missing rules for: {missing_columns}")
     
     # 1. Get mapping between mutation names and pairtree mutation_ids
-    mut_name_to_id = dict()
+    mut_name_to_mut_id = dict()
     with open(ssm_fn) as f:
         for i, line in enumerate(f):
             if i == 0: continue
             items = line.split("\t")
-            if items[1] not in mut_name_to_id:
-                mut_name_to_id[items[1]] = items[0]
+            if items[1] not in mut_name_to_mut_id:
+                mut_name_to_mut_id[items[1]] = items[0]
                 
     # 2. Get pairtree cluster assignments
     with open(clustered_params_json_fn) as f:
         cluster_json = json.loads(f.read())
-    cluster_assignments = []
+    mut_name_to_cluster_id = dict()
     for mut_name in df['character_label']:
-        cluster_assignments.append(_get_cluster_id(mut_name_to_id[mut_name], cluster_json['clusters']))
-    df['cluster'] = cluster_assignments
-    
-    # 3. Pool reference and variant allele counts from all mutations within a cluster
-    pooled_df = df.drop(['character_label', 'character_index', '#sample_index', 'anatomical_site_index'], axis=1)
+        cluster_id = _get_cluster_id(mut_name_to_mut_id[mut_name], cluster_json['clusters'])
+        mut_name_to_cluster_id[mut_name] = cluster_id
 
-    ref_var_rules = {'ref': np.sum, 'var': np.sum, 'sample_label': lambda x: ';'.join(set(x))}
-
-    pooled_df = pooled_df.groupby(['cluster', 'anatomical_site_label'], as_index=False).agg({**ref_var_rules, **aggregation_rules})
-    # 4. Add new names for clustered mutations
-    mut_id_to_name = {v:k for k,v in mut_name_to_id.items()}
+    # 3. Get new names for clustered mutations
+    mut_id_to_name = {v:k for k,v in mut_name_to_mut_id.items()}
     cluster_id_to_cluster_name = dict()
     for i, cluster in enumerate(cluster_json['clusters']):
         cluster_comps = []
         for mut in cluster:
             cluster_comps.append(mut_id_to_name[mut])
         cluster_id_to_cluster_name[i] = cluster_sep.join(cluster_comps)
-    
-    pooled_df['character_label'] = pooled_df.apply(lambda row: cluster_id_to_cluster_name[row['cluster']], axis=1)
-    
-    # Add indices for mutations, samples and anatomical sites as needed for input format
-    pooled_df['character_index'] = pooled_df.apply(lambda row: list(pooled_df['character_label'].unique()).index(row["character_label"]), axis=1)
-    pooled_df['anatomical_site_index'] = pooled_df.apply(lambda row: list(pooled_df['anatomical_site_label'].unique()).index(row["anatomical_site_label"]), axis=1)
-    pooled_df['#sample_index'] = pooled_df.apply(lambda row: list(pooled_df['sample_label'].unique()).index(row["sample_label"]), axis=1)    
-    
-    pooled_df = pooled_df[all_cols]
-    output_fn = os.path.join(output_dir, f"{patient_id}_clustered_SNVs.tsv")
-    pooled_df.to_csv(output_fn, sep="\t")
+
+    # 4. Pool mutations and write to file
+    dutil.write_pooled_tsv_from_clusters(df, mut_name_to_cluster_id, cluster_id_to_cluster_name,
+                                         aggregation_rules, output_dir, patient_id,)
 
 # Adapted from pairtree 
 def get_adj_matrix_from_parents(parents):

@@ -86,7 +86,6 @@ def get_mutation_matrix_tensor(A):
 
 def get_adj_matrix_from_edge_list(edge_list):
     T = []
-    G = nx.DiGraph()
     nodes = set([node for edge in edge_list for node in edge])
     T = [[0 for _ in range(len(nodes))] for _ in range(len(nodes))]
     for edge in edge_list:

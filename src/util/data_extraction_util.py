@@ -13,6 +13,150 @@ if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
 
 
+def write_pooled_tsv_from_clusters(df, mut_name_to_cluster_id, cluster_id_to_cluster_name,
+                                   aggregation_rules, output_dir, patient_id):
+    '''
+    After clustering with any clustering algorithm, prepares tsvs by pooling mutations belonging 
+    to the same cluster
+
+    Args:
+        df: pandas DataFrame with reqiured columns: [#sample_index, sample_label, 
+        character_index, character_label, anatomical_site_index, anatomical_site_label, 
+        ref, var]
+
+        mut_name_to_cluster_id: dictionary mapping mutation name ('character_label' in input df)
+        to a cluster id
+
+        cluster_id_to_cluster_name: dictionary mapping a cluster id to the name in the output tsv
+
+        aggregation_rules: dictionary indicating how to aggregate any extra columns that are not in 
+        the required columns (specificied above). e.g. "first" aggregation rules can be used for columns 
+        shared by rows with the same anatomical_site_label, since we are aggregating within an
+        anatomical_site_label. 
+
+        output_dir: where to save clustered tsv
+
+        patient_id: name of patient used in tsv filename
+    
+    Outputs:
+
+        Saves pooled tsv at {output_dir}/{patient_id}_clustered_SNVs.tsv
+
+    '''
+
+    required_cols = ["#sample_index", "sample_label", "anatomical_site_index", "anatomical_site_label", 
+                     "character_index", "character_label", "ref","var"]
+    
+    all_cols = required_cols + list(aggregation_rules.keys())
+
+    if not (set(required_cols).issubset(df.columns)):
+        raise ValueError(f"Input tsv needs required columns: {required_cols}")
+
+    if not set(all_cols) == set(df.columns):
+        missing_columns = set(df.columns) - set(all_cols)
+        raise ValueError(f"Aggregation rules are required for all columns, missing rules for: {missing_columns}")
+
+    df['cluster'] = df.apply(lambda row: mut_name_to_cluster_id[row['character_label']] if row['character_label'] in mut_name_to_cluster_id else np.nan, axis=1)
+    df.dropna(subset=['cluster'])
+
+    # Pool reference and variant allele counts from all mutations within a cluster
+    pooled_df = df.drop(['character_label', 'character_index', '#sample_index', 'anatomical_site_index'], axis=1)
+
+    ref_var_rules = {'ref': np.sum, 'var': np.sum, 'sample_label': lambda x: ';'.join(set(x))}
+
+    pooled_df = pooled_df.groupby(['cluster', 'anatomical_site_label'], as_index=False).agg({**ref_var_rules, **aggregation_rules})
+    
+    pooled_df['character_label'] = pooled_df.apply(lambda row: cluster_id_to_cluster_name[row['cluster']], axis=1)
+    
+    # Add indices for mutations, samples and anatomical sites as needed for input format
+    pooled_df['character_index'] = pooled_df.apply(lambda row: list(pooled_df['character_label'].unique()).index(row["character_label"]), axis=1)
+    pooled_df['anatomical_site_index'] = pooled_df.apply(lambda row: list(pooled_df['anatomical_site_label'].unique()).index(row["anatomical_site_label"]), axis=1)
+    pooled_df['#sample_index'] = pooled_df.apply(lambda row: list(pooled_df['sample_label'].unique()).index(row["sample_label"]), axis=1)    
+    
+    pooled_df = pooled_df[all_cols]
+    output_fn = os.path.join(output_dir, f"{patient_id}_clustered_SNVs.tsv")
+    pooled_df.to_csv(output_fn, sep="\t")
+
+def write_pooled_tsv_from_pyclone_clusters(input_data_tsv_fn, clusters_tsv_fn, 
+                                           aggregation_rules, output_dir, patient_id,
+                                           cluster_sep=";", trees_fn=None):
+
+    '''
+    After clustering with PairTree (see: https://github.com/morrislab/pairtree#clustering-mutations),
+    prepares tsvs by pooling mutations belonging to the same cluster
+
+    Args:
+        tsv_fn: path to tsv with reqiured columns: [#sample_index, sample_label, 
+        character_index, character_label, anatomical_site_index, anatomical_site_label, 
+        ref, var]
+
+        clusters_tsv_fn: PyClone results tsv that maps each mutation to a cluster id
+        
+        aggregation_rules: dictionary indicating how to aggregate any extra columns that are not in 
+        the required columns (specificied above). e.g. "first" aggregation rules can be used for columns 
+        shared by rows with the same anatomical_site_label, since we are aggregating within an
+        anatomical_site_label. 
+
+        output_dir: where to save clustered tsv
+
+        patient_id: name of patient used in tsv filename
+
+        cluster_sep: string that separates names of mutations when creating a cluster name.
+        e.g. cluster name for mutations ABC:4:3 and DEF:1:2 with cluster_sep=";" will be 
+        "ABC:4:3;DEF:1:2"
+
+        trees_fn: CONIPHER tree filename to handle the fact that some tree clusters aren't included
+        in the final tree, so we remove those
+
+
+    Outputs:
+
+        Saves pooled tsv at {output_dir}/{patient_id}_clustered_SNVs.tsv
+
+    '''
+    tree_clusters = None
+    if trees_fn != None:
+        tree_clusters = set()
+        with open(trees_fn, 'r') as f:
+            for i, line in enumerate(f):
+                if i < 2: continue
+                # This marks the beginning of a tree, we only need to check 
+                # the first tree in the file
+                if "# tree" in line:
+                    break
+                else:
+                    items = line.strip().split()
+                    tree_clusters.add(int(items[0]))
+                    tree_clusters.add(int(items[1]))
+        print(tree_clusters)    
+
+    df = pd.read_csv(input_data_tsv_fn, delimiter="\t", index_col=0)
+    pyclone_df = pd.read_csv(clusters_tsv_fn, delimiter="\t")
+    mut_name_to_cluster_id = dict()
+    cluster_id_to_mut_names = dict()
+    # 1. Get mapping between mutation names and PyClone cluster ids
+    for _, row in df.iterrows():
+        mut_items = row['character_label'].split(":")
+        cluster_id = pyclone_df[(pyclone_df['CHR']==int(mut_items[1]))&(pyclone_df['POS']==int(mut_items[2]))&(pyclone_df['REF']==mut_items[3])]['treeCLUSTER'].unique()
+        assert(len(cluster_id) <= 1)
+        if len(cluster_id) == 1:
+            cluster_id = cluster_id.item() - 1 # make this zero indexed
+            # Don't use this cluster id if it's not in the final tree
+            print(cluster_id)
+            if tree_clusters != None and cluster_id not in tree_clusters:
+                continue
+            mut_name_to_cluster_id[row['character_label']] = cluster_id
+            if cluster_id not in cluster_id_to_mut_names:
+                cluster_id_to_mut_names[cluster_id] = []
+            else:
+                cluster_id_to_mut_names[cluster_id].append(row['character_label'])
+    # 2. Set new names for clustered mutations
+    cluster_id_to_cluster_name = {k:"_".join(v) for k,v in cluster_id_to_mut_names.items()}
+
+    # 3. Pool mutations and write to file
+    write_pooled_tsv_from_clusters(df, mut_name_to_cluster_id, cluster_id_to_cluster_name,
+                                   aggregation_rules, output_dir, patient_id)
+
 def is_resolved_polytomy_cluster(cluster_label):
     '''
     In MACHINA simulated data, cluster labels with non-numeric components (e.g. M2_1
@@ -302,6 +446,42 @@ def get_adj_matrices_from_all_mutation_trees(mut_trees_filename, character_label
         adj_matrix, pruned_char_label_to_idx = _get_adj_matrix_from_machina_tree(tree_data, character_label_to_idx)
         out.append((adj_matrix, pruned_char_label_to_idx))
     return out
+
+def get_adj_matrices_from_all_conipher_trees(mut_trees_filename):
+    '''
+    Extracts trees after running CONIPHER (https://github.com/McGranahanLab/CONIPHER-wrapper)
+
+    Returns a list of adjacency matrices, where Tij = 1 if there is a path from i to j
+    '''
+
+    def _get_adj_matrix_from_edges(edges):
+        print(edges)
+        nodes = set([node for edge in edges for node in edge])
+        print(len(nodes), nodes)
+        T = np.zeros((len(nodes), len(nodes)))
+        for edge in edges:
+            T[edge[0], edge[1]] = 1
+        return torch.tensor(T, dtype = torch.float32)
+
+    out = []
+    with open(mut_trees_filename, 'r') as f:
+        tree_edges = []
+        for i, line in enumerate(f):
+            if i < 2: continue
+            # This marks the beginning of a tree
+            if "# tree" in line:
+                adj_matrix = _get_adj_matrix_from_edges(tree_edges)
+                out.append(adj_matrix)
+                tree_edges = []
+            else:
+                nodes = line.strip().split()
+                # -1 for 0-indexing
+                tree_edges.append((int(nodes[0])-1, int(nodes[1])-1))
+
+        adj_matrix = _get_adj_matrix_from_edges(tree_edges)
+        out.append(adj_matrix)
+    return out
+
 
 def test():
     print("passed")
