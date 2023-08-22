@@ -21,10 +21,6 @@ import pickle
 
 import string
 
-import pygraphviz as pgv
-
-import hashlib
-
 # TODO: this cyclical import is not great
 import src.lib.vertex_labeling as vert_label
 from src.util.vertex_labeling_util import LabeledTree
@@ -538,10 +534,9 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx
     dot.insert(1, 'graph[splines=false]; nodesep=0.7; ranksep=0.6; forcelabels=true; dpi=600; size=2.5;')
     #dot.insert(2, legend_dot)
     dot = ("\n").join(dot)
-    #dot = pydot.graph_from_dot_data(dot)[0]
-    
+
     if show:
-        dot = pydot.graph_from_dot_data(dot)[0]
+        dot = nx.nx_pydot.to_pydot(dot)
         view_pydot(dot)
 
     dot = Source(dot)
@@ -587,7 +582,7 @@ def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights,
                     node_idx_to_label, ordered_sites, max_iter, show):
     
     # Debugging information
-    U_clipped = labeled_tree.U.cpu().detach().numpy()
+    U_clipped = labeled_tree.U.cpu().clone().detach().numpy()
     U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
     logger.debug(f"\nU > {U_CUTOFF}\n")
     col_labels = ["norm"] + [truncated_cluster_name(node_idx_to_label[k]) if k in node_idx_to_label else "0" for k in range(U_clipped.shape[1] - 1)]
@@ -636,26 +631,26 @@ def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_m
     k_trees_and_losses = []
     tree_set = set()
     # Iterate from best to worst tree, and only get trees with unique U or V matrices
-    for i in min_loss_indices:
-        labeled_tree = LabeledTree(full_trees[i], V[i], U[i], full_branch_lengths[i])
+    for i, loss_ix in enumerate(min_loss_indices):
+        labeled_tree = LabeledTree(full_trees[loss_ix], V[loss_ix], U[loss_ix], full_branch_lengths[loss_ix])
         if labeled_tree not in tree_set:
             tree_set.add(labeled_tree)
             if len(k_trees_and_losses) < print_config.k_best_trees:
-                k_trees_and_losses.append((labeled_tree, losses_tensor[i]))
+                k_trees_and_losses.append((labeled_tree, losses_tensor[loss_ix]))
 
         if i == 0 and print_config.viz_intermeds:
-            best_tree_idx = min_loss_indices[0]
+            best_tree_idx = min_loss_indices[loss_ix]
             _visualize_intermediate_trees(best_tree_idx)
 
     ret = None
     figure_outputs = []
     pickle_outputs = {'ancestral_labelings':[], 'subclonal_presence_matrices':[], 
                       'full_adjacency_matrices':[], 'ordered_anatomical_sites':ordered_sites,
-                      'node_idx_to_label':node_idx_to_label}
+                      'full_node_idx_to_label':[]}
     for i, tup in enumerate(k_trees_and_losses):
         tree = tup[0]
-
         loss_info = print_tree_info(tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, max_iter, show=False)
+
         tree_dot, edges, vertices_to_sites_map = plot_tree(tree.labeling, tree.tree, G, ordered_sites, custom_colors, node_idx_to_label, show=False)
         mig_graph_dot, mig_graph_edges = plot_migration_graph(tree.labeling, tree.tree, ordered_sites, custom_colors, primary, show=False)
 
@@ -664,6 +659,9 @@ def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_m
         pickle_outputs['ancestral_labelings'].append(tree.labeling)
         pickle_outputs['subclonal_presence_matrices'].append(tree.U)
         pickle_outputs['full_adjacency_matrices'].append(tree.tree)
+        full_tree_idx_to_label = get_full_tree_node_idx_to_label(tree.labeling, tree.tree, node_idx_to_label, ordered_sites,
+                                                                 shorten_label=False, pad=False)
+        pickle_outputs['full_node_idx_to_label'].append(full_tree_idx_to_label)
 
         if i == 0: # Best tree
             ret = (edges, vertices_to_sites_map, mig_graph_edges, loss_info)
@@ -683,8 +681,8 @@ def formatted_loss_string(loss_dict):
 
     if (loss_dict['gen'] != 0):
         s += f"Genetic distance loss: {loss_dict['gen']}\n"
-    if (loss_dict['gen'] != 0):
-        s += f"Organotropism loss: {loss_dict['gen']}\n"
+    if (loss_dict['organo'] != 0):
+        s += f"Organotropism loss: {loss_dict['organo']}\n"
     return s
 
 
