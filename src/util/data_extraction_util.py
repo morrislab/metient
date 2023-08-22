@@ -5,6 +5,7 @@ import torch
 import copy
 from collections import OrderedDict
 import pandas as pd
+import sys
 
 # TODO: make more assertions on uniqueness and completeness of input csvs
 
@@ -79,7 +80,7 @@ def write_pooled_tsv_from_clusters(df, mut_name_to_cluster_id, cluster_id_to_clu
 
 def write_pooled_tsv_from_pyclone_clusters(input_data_tsv_fn, clusters_tsv_fn, 
                                            aggregation_rules, output_dir, patient_id,
-                                           cluster_sep=";", trees_fn=None):
+                                           cluster_sep=";"):
 
     '''
     After clustering with PairTree (see: https://github.com/morrislab/pairtree#clustering-mutations),
@@ -105,30 +106,12 @@ def write_pooled_tsv_from_pyclone_clusters(input_data_tsv_fn, clusters_tsv_fn,
         e.g. cluster name for mutations ABC:4:3 and DEF:1:2 with cluster_sep=";" will be 
         "ABC:4:3;DEF:1:2"
 
-        trees_fn: CONIPHER tree filename to handle the fact that some tree clusters aren't included
-        in the final tree, so we remove those
-
 
     Outputs:
 
         Saves pooled tsv at {output_dir}/{patient_id}_clustered_SNVs.tsv
 
     '''
-    tree_clusters = None
-    if trees_fn != None:
-        tree_clusters = set()
-        with open(trees_fn, 'r') as f:
-            for i, line in enumerate(f):
-                if i < 2: continue
-                # This marks the beginning of a tree, we only need to check 
-                # the first tree in the file
-                if "# tree" in line:
-                    break
-                else:
-                    items = line.strip().split()
-                    tree_clusters.add(int(items[0]))
-                    tree_clusters.add(int(items[1]))
-        print(tree_clusters)    
 
     df = pd.read_csv(input_data_tsv_fn, delimiter="\t", index_col=0)
     pyclone_df = pd.read_csv(clusters_tsv_fn, delimiter="\t")
@@ -140,18 +123,14 @@ def write_pooled_tsv_from_pyclone_clusters(input_data_tsv_fn, clusters_tsv_fn,
         cluster_id = pyclone_df[(pyclone_df['CHR']==int(mut_items[1]))&(pyclone_df['POS']==int(mut_items[2]))&(pyclone_df['REF']==mut_items[3])]['treeCLUSTER'].unique()
         assert(len(cluster_id) <= 1)
         if len(cluster_id) == 1:
-            cluster_id = cluster_id.item() - 1 # make this zero indexed
-            # Don't use this cluster id if it's not in the final tree
-            print(cluster_id)
-            if tree_clusters != None and cluster_id not in tree_clusters:
-                continue
+            cluster_id = cluster_id.item()
             mut_name_to_cluster_id[row['character_label']] = cluster_id
             if cluster_id not in cluster_id_to_mut_names:
-                cluster_id_to_mut_names[cluster_id] = []
+                cluster_id_to_mut_names[cluster_id] = set()
             else:
-                cluster_id_to_mut_names[cluster_id].append(row['character_label'])
+                cluster_id_to_mut_names[cluster_id].add(row['character_label'])
     # 2. Set new names for clustered mutations
-    cluster_id_to_cluster_name = {k:"_".join(v) for k,v in cluster_id_to_mut_names.items()}
+    cluster_id_to_cluster_name = {k:cluster_sep.join(list(v)) for k,v in cluster_id_to_mut_names.items()}
 
     # 3. Pool mutations and write to file
     write_pooled_tsv_from_clusters(df, mut_name_to_cluster_id, cluster_id_to_cluster_name,
@@ -295,8 +274,8 @@ def get_ref_var_matrices_from_real_data(tsv_filepath):
     (4) dictionary mapping index to character_label (based on input tsv, gives the index for each mutation name,
     where these indices are used in R matrix, V matrix
     '''
-
-
+    # For tsvs with very large fields
+    csv.field_size_limit(sys.maxsize)
     # Get metadata
     header_row_idx = -1
     with open(tsv_filepath) as f:
@@ -455,9 +434,7 @@ def get_adj_matrices_from_all_conipher_trees(mut_trees_filename):
     '''
 
     def _get_adj_matrix_from_edges(edges):
-        print(edges)
         nodes = set([node for edge in edges for node in edge])
-        print(len(nodes), nodes)
         T = np.zeros((len(nodes), len(nodes)))
         for edge in edges:
             T[edge[0], edge[1]] = 1
@@ -475,16 +452,11 @@ def get_adj_matrices_from_all_conipher_trees(mut_trees_filename):
                 tree_edges = []
             else:
                 nodes = line.strip().split()
-                # -1 for 0-indexing
-                tree_edges.append((int(nodes[0])-1, int(nodes[1])-1))
+                tree_edges.append((int(nodes[0]), int(nodes[1])))
 
         adj_matrix = _get_adj_matrix_from_edges(tree_edges)
         out.append(adj_matrix)
     return out
-
-
-def test():
-    print("passed")
 
 # TODO: take out skip polytomies functionality?
 def get_adj_matrix_from_machina_tree(character_label_to_idx, tree_filename, remove_unseen_nodes=True, skip_polytomies=False):
@@ -512,21 +484,20 @@ def get_adj_matrix_from_machina_tree(character_label_to_idx, tree_filename, remo
             edges.append((node_i, node_j))
     return _get_adj_matrix_from_machina_tree(edges, character_label_to_idx, remove_unseen_nodes, skip_polytomies)
 
-def get_genetic_distance_tensor_from_adj_matrix(adj_matrix, character_label_to_idx, split_char, normalize=True):
+def get_genetic_distance_tensor_from_adj_matrix(adj_matrix, idx_to_character_label, split_char, normalize=True):
     '''
     Get the genetic distances between nodes by counting the number of mutations between
-    parent and child. character_label_to_idx's keys are expected to be cluster names with
-    the mutations in that cluster (e.g. 'ENAM:4:71507837_DLG1:3:196793590'). split_char
-    indicates what the mutations in the cluster name are split by.
+    parent and child. idx_to_character_label's keys are expected to be mutation/cluster indices with
+    the mutation or mutations in that cluster (e.g. 'ENAM:4:71507837_DLG1:3:196793590'). split_char
+    indicates what the mutations in the cluster name are split by (if it's a cluster).
     '''
     G = np.zeros(adj_matrix.shape)
-    idx_to_char_label = { v:k for k,v in character_label_to_idx.items() }
 
     for i, adj_row in enumerate(adj_matrix):
         for j, val in enumerate(adj_row):
             if val == 1:
                 # This is the number of mutations the child node has accumulated compared to its parent
-                num_mutations = idx_to_char_label[j].count(split_char) + 1
+                num_mutations = idx_to_character_label[j].count(split_char) + 1
                 G[i][j] = num_mutations
 
     if normalize:
