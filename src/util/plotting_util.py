@@ -715,8 +715,8 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
 
     for i, (tree_dot, mig_graph_dot, loss_info, seeding_pattern) in enumerate(figure_outputs):
         # Create graphviz objects from the DOT code
-        tree = PILImage.open(tree_dot.render(os.path.join(output_dir,f"T_{run_name}{i}"),format="png", view=False))
-        mig_graph = PILImage.open(mig_graph_dot.render(os.path.join(output_dir, f"G_{run_name}{i}"),format="png", view=False))
+        tree = PILImage.open(tree_dot.render(os.path.join(output_dir,f"T_{run_name}"),format="png", view=False))
+        mig_graph = PILImage.open(mig_graph_dot.render(os.path.join(output_dir, f"G_{run_name}"),format="png", view=False))
 
         gs1 = gridspec.GridSpec(3, 3)
 
@@ -743,10 +743,10 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
         ax3.axis('off')
 
         # Cleanup temp files
-        os.remove(os.path.join(output_dir, f"T_{run_name}{i}"))
-        os.remove(os.path.join(output_dir, f"T_{run_name}{i}.png"))
-        os.remove(os.path.join(output_dir, f"G_{run_name}{i}"))
-        os.remove(os.path.join(output_dir, f"G_{run_name}{i}.png"))
+        os.remove(os.path.join(output_dir, f"T_{run_name}"))
+        os.remove(os.path.join(output_dir, f"T_{run_name}.png"))
+        os.remove(os.path.join(output_dir, f"G_{run_name}"))
+        os.remove(os.path.join(output_dir, f"G_{run_name}.png"))
 
     # Display and save the plot
     plt.tight_layout()

@@ -39,9 +39,9 @@ def find_labeling(ref_var_fn, tree, custom_colors, primary_site, patient_name, o
                                           batch_size=32, max_iter=100, lr_sched='step')
 
     
-def run_orchard_patient(patient, weights, input_dir, output_dir):
+def run_orchard_patient(patient, weights, tsv_dir, tree_dir, output_dir):
     space = "x"*44
-    tsv_fn = os.path.join(input_dir, f"{patient}_SNVs.tsv")
+    tsv_fn = os.path.join(tsv_dir, f"{patient}_SNVs.tsv")
     print(f"{space} PATIENT {patient} {space}")
     df = pd.read_csv(tsv_fn, delimiter="\t")
     primary_sites = list(df[df['sample_type']=='primary']['anatomical_site_label'].unique())
@@ -51,7 +51,7 @@ def run_orchard_patient(patient, weights, input_dir, output_dir):
     for primary_site in primary_sites:
         print(f"Primary site: {primary_site}")
         run_name = f"{patient}_{primary_site}"
-        tree_fn = os.path.join(ORCHARD_TREES_DIR, f"{patient}.results.npz")
+        tree_fn = os.path.join(tree_dir, f"{patient}.results.npz")
         data = pt_util.get_adj_matrices_from_pairtree_results(tree_fn)
         tree, _ = data[0] # Use best tree
         find_labeling(tsv_fn, tree, custom_colors, primary_site, run_name, output_dir, weights, weight_init_primary)
@@ -59,34 +59,36 @@ def run_orchard_patient(patient, weights, input_dir, output_dir):
 
 
 if __name__=="__main__":
-	
-	parser = argparse.ArgumentParser(description='run metient on orchard generated trees (with and without genetic distance).')
-	parser.add_argument('patient', type=str,
-                    	help='an integer for the accumulator')
-    parser.add_argument('input_dir', type=str,
+    
+    parser = argparse.ArgumentParser(description='run metient on conipher generated trees (with and without genetic distance).')
+    parser.add_argument('patient', type=str,
+                        help='an integer for the accumulator')
+    parser.add_argument('tsv_dir', type=str,
+                        help='directory with clustered tsvs')
+    parser.add_argument('tree_dir', type=str,
+                        help='directory with conipher trees')
+    parser.add_argument('output_dir', type=str,
                         help='parent output directory, where subdirectories for each configuration will get created')
-	parser.add_argument('output_dir', type=str,
-                    	help='parent output directory, where subdirectories for each configuration will get created')
+    args = parser.parse_args()
+    patient = args.patient
 
-	args = parser.parse_args()
-	patient = args.patient
+    # (1) Maximum parsimony
+    weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=0.0)
+    output_dir = os.path.join(args.output_dir, "max_pars")
+    run_orchard_patient(patient, weights, False, args.tsv_dir, args.tree_dir, output_dir)
 
-	# (1) Maximum parsimony
-	weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=0.0)
-	output_dir = os.path.join(args.output_dir, "max_pars")
-	run_orchard_patient(patient, weights, False, output_dir)
+    # (2) Maximum parsimony + weight init primary
+    weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=0.0)
+    output_dir = os.path.join(args.output_dir, "max_pars_wip")
+    run_orchard_patient(patient, weights, True, args.tsv_dir, args.tree_dir, output_dir)
 
-	# (2) Maximum parsimony + weight init primary
-	weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=0.0)
-	run_orchard_patient(patient, weights, True, output_dir)
+    # (3) Maximum parsimony + genetic distance
+    weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=1.0)
+    output_dir = os.path.join(args.output_dir, "max_pars_genetic_distance")
+    run_orchard_patient(patient, weights, False, args.tsv_dir, args.tree_dir, output_dir)
 
-	# (3) Maximum parsimony + genetic distance
-	weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=1.0)
-	output_dir = os.path.join(args.output_dir, "max_pars_genetic_distance")
-	run_orchard_patient(patient, weights, False, output_dir)
-
-	# (4) Maximum parsimony + genetic distance + weight init primary
-	weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=1.0)
-	output_dir = os.path.join(args.output_dir, "max_pars_genetic_distance_wip")
-	run_orchard_patient(patient, weights, True, output_dir)
-
+    # (4) Maximum parsimony + genetic distance + weight init primary
+    weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=1.0)
+    output_dir = os.path.join(args.output_dir, "max_pars_genetic_distance_wip")
+    run_orchard_patient(patient, weights, True, args.tsv_dir, args.tree_dir, output_dir)
+    
