@@ -1,0 +1,39 @@
+treeID	sum_condition_error	SCE_ranking	lowest_SCE	edge_probability_score	edge_probability_ranking	highest_edge_probability
+1	1.73015873015873	14	Alternative tree	-58.1647237928932	4	Alternative tree
+2	1.66666666666667	12	Alternative tree	-60.693376168681	7	Alternative tree
+3	2.39285714285714	26	Alternative tree	-61.7101894289201	8	Alternative tree
+4	1.94642857142857	20	Alternative tree	-61.7101894289201	8	Alternative tree
+5	1.65079365079365	11	Alternative tree	-52.2793855862332	1	Highest edge probability tree
+6	1.6984126984127	13	Alternative tree	-77.9397449889191	14	Alternative tree
+7	2.28571428571429	24	Alternative tree	-58.1647237928932	4	Alternative tree
+8	1.82142857142857	16	Alternative tree	-72.0544067822592	13	Alternative tree
+9	2.48214285714286	28	Alternative tree	-52.2793855862332	1	Highest edge probability tree
+10	1.03174603174603	2	Alternative tree	-59.2380945803345	6	Alternative tree
+11	1.58730158730159	9	Alternative tree	-54.808037962021	2	Alternative tree
+12	2.30357142857143	25	Alternative tree	-55.8248512222601	3	Alternative tree
+13	1.85714285714286	18	Alternative tree	-55.8248512222601	3	Alternative tree
+14	2.22222222222222	23	Alternative tree	-60.693376168681	7	Alternative tree
+15	3.01785714285714	34	Alternative tree	-61.7101894289201	8	Alternative tree
+16	2.57142857142857	30	Alternative tree	-61.7101894289201	8	Alternative tree
+17	1.875	19	Alternative tree	-64.2388418047079	11	Alternative tree
+18	2.14285714285714	22	Alternative tree	-64.2388418047079	11	Alternative tree
+19	1.16071428571429	4	Alternative tree	-59.2380945803345	6	Alternative tree
+20	2.41071428571429	27	Alternative tree	-54.808037962021	2	Alternative tree
+21	3.3469387755102	36	Alternative tree	-55.8248512222601	3	Alternative tree
+22	2.83673469387755	33	Alternative tree	-55.8248512222601	3	Alternative tree
+23	0.968253968253968	1	Lowest SCE tree	-61.7667469561224	9	Alternative tree
+24	1.60714285714286	10	Alternative tree	-62.7835602163615	10	Alternative tree
+25	1.16071428571429	4	Alternative tree	-62.7835602163615	10	Alternative tree
+26	1.78571428571429	15	Alternative tree	-58.353503598048	5	Alternative tree
+27	2.05357142857143	21	Alternative tree	-58.353503598048	5	Alternative tree
+28	2.5	29	Alternative tree	-64.2388418047079	11	Alternative tree
+29	2.76785714285714	32	Alternative tree	-64.2388418047079	11	Alternative tree
+30	1.08928571428571	3	Alternative tree	-61.7667469561224	9	Alternative tree
+31	1.83673469387755	17	Alternative tree	-62.7835602163615	10	Alternative tree
+32	1.3265306122449	6	Alternative tree	-62.7835602163615	10	Alternative tree
+33	2.75510204081633	31	Alternative tree	-58.353503598048	5	Alternative tree
+34	3.06122448979592	35	Alternative tree	-58.353503598048	5	Alternative tree
+35	1.08928571428571	3	Alternative tree	-65.3122125921493	12	Alternative tree
+36	1.35714285714286	7	Alternative tree	-65.3122125921493	12	Alternative tree
+37	1.24489795918367	5	Alternative tree	-65.3122125921493	12	Alternative tree
+38	1.55102040816327	8	Alternative tree	-65.3122125921493	12	Alternative tree

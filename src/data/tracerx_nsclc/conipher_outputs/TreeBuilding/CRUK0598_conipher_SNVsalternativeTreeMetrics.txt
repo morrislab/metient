@@ -1,0 +1,16 @@
+treeID	sum_condition_error	SCE_ranking	lowest_SCE	edge_probability_score	edge_probability_ranking	highest_edge_probability
+1	2.58333333333333	1	Lowest SCE tree	-62.337468329141	1	Highest edge probability tree
+2	3.75757575757576	9	Alternative tree	-172.601967702095	8	Alternative tree
+3	2.81818181818182	2	Alternative tree	-120.396729580677	7	Alternative tree
+4	2.81818181818182	2	Alternative tree	-65.2751589668805	3	Alternative tree
+5	3.21212121212121	4	Alternative tree	-73.3329571116309	5	Alternative tree
+6	2.81818181818182	2	Alternative tree	-73.3329571116309	5	Alternative tree
+7	3.24242424242424	5	Alternative tree	-73.3329571116309	5	Alternative tree
+8	3.45454545454545	6	Alternative tree	-65.0151909449115	2	Alternative tree
+9	3.53333333333333	7	Alternative tree	-76.2706477493704	6	Alternative tree
+10	3.1	3	Alternative tree	-76.2706477493704	6	Alternative tree
+11	3.56666666666667	8	Alternative tree	-76.2706477493704	6	Alternative tree
+12	3.8	10	Alternative tree	-67.952881582651	4	Alternative tree
+13	4.13333333333333	11	Alternative tree	-175.539658339835	10	Alternative tree
+14	4.83333333333333	12	Alternative tree	-175.279690317866	9	Alternative tree
+15	5.37037037037037	13	Alternative tree	-178.217380955605	11	Alternative tree
