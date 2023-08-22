@@ -15,4 +15,7 @@ dependencies:
   - certifi
   - pytorch
   - pydot
+  - pip
+  - pip:
+    - torchopt
 prefix: /Users/divyakoyyalagunta/mambaforge/envs/met

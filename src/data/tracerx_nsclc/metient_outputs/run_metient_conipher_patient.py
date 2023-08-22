@@ -72,20 +72,24 @@ if __name__=="__main__":
 	# (1) Maximum parsimony
 	weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=0.0)
 	output_dir = os.path.join(args.output_dir, "max_pars")
+    print(output_dir)
 	run_conipher_patient(patient, weights, False, args.tsv_dir, args.tree_dir, output_dir)
 
 	# (2) Maximum parsimony + weight init primary
 	weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=0.0)
 	output_dir = os.path.join(args.output_dir, "max_pars_wip")
+    print(output_dir)
 	run_conipher_patient(patient, weights, True, args.tsv_dir, args.tree_dir, output_dir)
 
 	# (3) Maximum parsimony + genetic distance
 	weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=1.0)
 	output_dir = os.path.join(args.output_dir, "max_pars_genetic_distance")
+    print(output_dir)
 	run_conipher_patient(patient, weights, False, args.tsv_dir, args.tree_dir, output_dir)
 
 	# (4) Maximum parsimony + genetic distance + weight init primary
 	weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=1.0)
+    print(output_dir)
 	output_dir = os.path.join(args.output_dir, "max_pars_genetic_distance_wip")
 	run_conipher_patient(patient, weights, True, args.tsv_dir, args.tree_dir, output_dir)
 
