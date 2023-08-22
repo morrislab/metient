@@ -742,6 +742,12 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
         ax3.text(0.5, 0.5, formatted_loss_string(loss_info), ha='center', va='center', fontsize=10)
         ax3.axis('off')
 
+        # Cleanup temp files
+        os.remove(os.path.join(output_dir, f"T_{run_name}"))
+        os.remove(os.path.join(output_dir, f"T_{run_name}.png"))
+        os.remove(os.path.join(output_dir, f"G_{run_name}"))
+        os.remove(os.path.join(output_dir, f"G_{run_name}.png"))
+
     # Display and save the plot
     plt.tight_layout()
     fig1 = plt.gcf()
@@ -751,11 +757,7 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
     if print_config.visualize:
         plt.show()
 
-    # Cleanup temp files
-    os.remove(os.path.join(output_dir, f"T_{run_name}"))
-    os.remove(os.path.join(output_dir, f"T_{run_name}.png"))
-    os.remove(os.path.join(output_dir, f"G_{run_name}"))
-    os.remove(os.path.join(output_dir, f"G_{run_name}.png"))
+
 
     # Save results to pickle file
     with open(os.path.join(output_dir, f"{run_name}.pickle"), 'wb') as handle:
