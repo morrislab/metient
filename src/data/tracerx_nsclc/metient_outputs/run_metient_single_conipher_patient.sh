@@ -18,4 +18,4 @@ mkdir -p ${4}"/max_pars_wip/"
 mkdir -p ${4}"/max_pars_genetic_distance/"
 mkdir -p ${4}"/max_pars_genetic_distance_wip/"
 
-python run_conipher_patient.py ${1} ${2} ${3} ${4}
+python run_metient_conipher_patient.py ${1} ${2} ${3} ${4}

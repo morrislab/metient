@@ -60,13 +60,12 @@ if __name__=="__main__":
 	parser = argparse.ArgumentParser(description='run metient on conipher generated trees (with and without genetic distance).')
 	parser.add_argument('patient', type=str,
                     	help='an integer for the accumulator')
-	parser.add_argument('output_dir', type=str,
-                    	help='parent output directory, where subdirectories for each configuration will get created')
 	parser.add_argument('tsv_dir', type=str,
                     	help='directory with clustered tsvs')
 	parser.add_argument('tree_dir', type=str,
                     	help='directory with conipher trees')
-
+	parser.add_argument('output_dir', type=str,
+                        help='parent output directory, where subdirectories for each configuration will get created')
 	args = parser.parse_args()
 	patient = args.patient
 
