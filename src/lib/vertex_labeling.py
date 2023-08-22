@@ -4,6 +4,8 @@ import sys
 import numpy as np
 import datetime
 
+import torchopt
+
 from src.util import vertex_labeling_util as vert_util
 from src.util import plotting_util as plot_util
 
@@ -17,7 +19,7 @@ if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
 
 class Weights:
-    def __init__(self, data_fit=1.0, mig=1.0, comig=1.0, seed_site=1.0, reg=1.0, gen_dist=1.0, organotrop=1.0):
+    def __init__(self, data_fit=1.0, mig=1.0, comig=1.0, seed_site=1.0, reg=1.0, gen_dist=0.0, organotrop=0.0):
         self.data_fit = data_fit
         self.mig = mig
         self.comig = comig
@@ -135,11 +137,11 @@ def _calc_llh(F_hat, R, V, omega_v, epsilon=1e-5):
     nlglh = torch.sum(llh_per_sample) / S
     return (F_llh, llh_per_sample, nlglh)
 
-def _subclonal_presence_objective(ref_matrix, var_matrix, omega_v, U, B, weights):
+def _subclonal_presence_objective(ref, var, omega_v, U, B, weights):
     '''
     Args:
-        ref_matrix: Reference matrix (num_anatomical_sites x num_mutation_clusters). Num. reads that map to reference allele
-        var_matrix: Variant matrix (num_anatomical_sites x num_mutation_clusters). Num. reads that map to variant allele
+        ref: Reference matrix (num_anatomical_sites x num_mutation_clusters). Num. reads that map to reference allele
+        var: Variant matrix (num_anatomical_sites x num_mutation_clusters). Num. reads that map to variant allele
         U: Mixture matrix (num_sites x num_internal_nodes)
         B: Mutation matrix (shape: num_internal_nodes x num_mutation_clusters)
         weights: Weights object
@@ -150,7 +152,7 @@ def _subclonal_presence_objective(ref_matrix, var_matrix, omega_v, U, B, weights
     '''
     # 1. Data fit
     F_hat = (U @ B)
-    F_llh, llh_per_sample, nlglh = _calc_llh(F_hat, ref_matrix, var_matrix, omega_v)
+    F_llh, llh_per_sample, nlglh = _calc_llh(F_hat, ref, var, omega_v)
 
     # 2. Regularization to make some values of U -> 0
     # TODO: this is not a normal matrix norm, but works very well here...
@@ -160,13 +162,21 @@ def _subclonal_presence_objective(ref_matrix, var_matrix, omega_v, U, B, weights
     loss_components = {"nll": round(nlglh.item(), 3), "reg": reg.item()}
     return subclonal_presence_loss, loss_components
 
-def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter, lr_sched):
+def no_cna_omega(shape):
+    '''
+    Returns omega values assuming no copy number alterations (0.5)
+    Shape is (num_anatomical_sites x num_mutation_clusters)
+    '''
+    # TODO: don't hardcode omega here (omegas are all 1/2 since we're assuming there are no CNAs)
+    return torch.ones(shape) * 0.5
+
+def objective(V, A, ref, var, U, B, G, O, weights, epoch, max_iter, lr_sched):
     '''
     Args:
         V: Vertex labeling of the full tree (num_sites x num_nodes)
         A: Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
-        ref_matrix: Reference matrix (num_anatomical_sites x num_mutation_clusters). Num. reads that map to reference allele
-        var_matrix: Variant matrix (num_anatomical_sites x num_mutation_clusters). Num. reads that map to variant allele
+        ref: Reference matrix (num_anatomical_sites x num_mutation_clusters). Num. reads that map to reference allele
+        var: Variant matrix (num_anatomical_sites x num_mutation_clusters). Num. reads that map to variant allele
         U: Mixture matrix (num_sites x num_internal_nodes)
         B: Mutation matrix (shape: num_internal_nodes x num_mutation_clusters)
         G: Matrix of genetic distances between internal nodes (shape: num_internal_nodes x num_internal_nodes).
@@ -183,9 +193,8 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter
 
     ancestral_labeling_loss, loss_dict_a = _ancestral_labeling_objective(V, A, G, O, weights)
 
-    # TODO: don't hardcode omega_v here (omegas are all 1/2 since we're assuming there are no CNAs)
-    omega_v = torch.ones(ref_matrix.shape) * 0.5
-    subclonal_presence_loss, loss_dict_b = _subclonal_presence_objective(ref_matrix, var_matrix, omega_v, U, B, weights)
+    omega_v = no_cna_omega(ref.shape)
+    subclonal_presence_loss, loss_dict_b = _subclonal_presence_objective(ref, var, omega_v, U, B, weights)
 
     lam1, lam2 = 1.0, 1.0
     if epoch != -1: # to evaluate loss values after training is done
@@ -205,7 +214,6 @@ def objective(V, A, ref_matrix, var_matrix, U, B, G, O, weights, epoch, max_iter
             lam2 = l
 
     loss = (lam1*subclonal_presence_loss) + (lam2*ancestral_labeling_loss)
-
 
     loss_components = {**loss_dict_a, **loss_dict_b, **{"loss": round(loss.item(), 3)}}
 
@@ -251,11 +259,14 @@ def gumbel_softmax(logits, temperature, hard=False):
     return y, y_soft
 
 
-def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, epoch, max_iter, lr_sched):
+def compute_losses(psi, X, T, ref, var, B, p, G, O, temp, hard, weights, epoch, max_iter, lr_sched):
     '''
     Takes latent variables U and X (both of size batch_size x num_internal_nodes x num_sites)
     and computes loss for each gumbel-softmax estimated training example.
     '''
+    # Using the softmax enforces that the row sums are 1, since the proprtions of
+    # subclones in a given site should sum to 1
+    U = torch.softmax(psi, dim=2)
 
     assert(U.shape[0] == X.shape[0])
 
@@ -326,7 +337,7 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weig
     for idx in range(batch_size):
         V = vertex_labeling(idx, U, softmax_X, p, T)
         full_T, full_G = full_adj_matrix(idx, T, U, G)
-        loss, loss_components = objective(V, full_T, ref_matrix, var_matrix, U[idx,:,:], B, full_G, O, weights, epoch, max_iter, lr_sched)
+        loss, loss_components = objective(V, full_T, ref, var, U[idx,:,:], B, full_G, O, weights, epoch, max_iter, lr_sched)
         losses_list.append(loss)
         loss_components_list.append(loss_components)
         V_list.append(V)
@@ -335,7 +346,33 @@ def compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weig
 
     return torch.stack(losses_list), V_list, full_trees_list, full_branch_lengths_list, softmax_X_soft, loss_components_list
     
-def get_migration_history(T, ref_matrix, var_matrix, ordered_sites, p, node_idx_to_label,
+class UNet(torch.nn.Module):
+    def __init__(self, psi):
+        super().__init__()
+        self.psi = torch.nn.Parameter(psi, requires_grad=True)
+
+    def forward(self, X, T, ref, var, B, p, G, O, temp, hard, weights, i, max_iter, lr_sched):
+        omega_v = no_cna_omega(ref.shape)
+        losses, V, trees, branch_lengths, softmax_Xs, loss_comps = compute_losses(self.psi, X, T, ref, var, 
+                                                                                  B, p, G, O, temp, hard, weights, i, 
+                                                                                  max_iter, lr_sched)
+        return losses, V, trees, branch_lengths, softmax_Xs, loss_comps
+
+def get_avg_loss_components(loss_components):
+    '''
+    Calculate the averages of each loss component (e.g. "nll" 
+    (negative log likelihood), "mig" (migration number), etc.)
+    '''
+    d = {}
+    for key in loss_components[0]:
+        if key not in d:
+            d[key] = 0
+        for e in loss_components:
+            d[key] += e[key]
+    d = {key:d[key]/len(loss_components) for key in d} # calc averages across batch
+    return d
+
+def get_migration_history(T, ref, var, ordered_sites, p, node_idx_to_label,
                           weights, print_config, output_dir, run_name, 
                           G=None, O=None, max_iter=200, lr=0.1, init_temp=40, final_temp=0.01,
                           batch_size=64, custom_colors=None, weight_init_primary=True, lr_sched="step"):
@@ -343,12 +380,12 @@ def get_migration_history(T, ref_matrix, var_matrix, ordered_sites, p, node_idx_
     Args:
         T: Adjacency matrix (directed) of the internal nodes (shape: num_internal_nodes x num_internal_nodes)
         
-        ref_matrix: Reference matrix (num_anatomical_sites x num_mutation_clusters), i.e., num. reads that map to reference allele
+        ref: Reference matrix (num_anatomical_sites x num_mutation_clusters), i.e., num. reads that map to reference allele
         
-        var_matrix: Variant matrix (num_anatomical_sites x num_mutation_clusters), i.e., num. reads that map to variant allele
+        var: Variant matrix (num_anatomical_sites x num_mutation_clusters), i.e., num. reads that map to variant allele
         
         ordered_sites: array of the anatomical site names (e.g. ["breast", "lung_met"]) with length =  num_anatomical_sites) and 
-        the order matches the order of sites in the ref_matrix and var_matrix
+        the order matches the order of sites in the ref and var
         
         weights: Weight object for how much to penalize each component of the loss
         
@@ -373,6 +410,7 @@ def get_migration_history(T, ref_matrix, var_matrix, ordered_sites, p, node_idx_
         weight_init_primary: whether to initialize weights higher to favor vertex labeling of primary for all internal nodes
         
         lr_sched: how to weight the tasks of (1) leaf node inference and (2) internal vertex labeling. options:
+            "bi-level": outer objective is to learn vertex labeling, inner objective is to learn leaf nodes (subclonal presence)
             "constant": default, (1) and (2) weighted equally at each epoch
             "step": (1) has weight=1 for first half of epochs and (2) has weight=0, and then we flip the weights for the last half of training
             "em": (1) has weight=1 and (2) has weight=0 for 20 epochs, and we flip every 20 epochs (kind of like E-M)
@@ -390,41 +428,35 @@ def get_migration_history(T, ref_matrix, var_matrix, ordered_sites, p, node_idx_
     # TODO: test these assertions
     if not (T.shape[0] == T.shape[1]):
         raise ValueError(f"Number of tree nodes should be consistent (T.shape[0] == T.shape[1])")
-    if ref_matrix.shape != var_matrix.shape:
-        raise ValueError(f"ref_matrix and var_matrix must have identical shape, got {ref_matrix.shape} and {var_matrix.shape}")
-    if not (ref_matrix.shape[1] == var_matrix.shape[1] == T.shape[0]):
-        raise ValueError(f"Number of mutations/mutation clusters should be consistent (ref_matrix.shape[1] == var_matrix.shape[1] == T.shape[0])")
-    if not (ref_matrix.shape[0] == var_matrix.shape[0] == len(ordered_sites)):   
-        raise ValueError(f"Length of ordered_sites should be equal to ref_matrix and var_matrix dim 0")
+    if ref.shape != var.shape:
+        raise ValueError(f"ref and var must have identical shape, got {ref.shape} and {var.shape}")
+    if not (ref.shape[1] == var.shape[1] == T.shape[0]):
+        raise ValueError(f"Number of mutations/mutation clusters should be consistent (ref.shape[1] == var.shape[1] == T.shape[0])")
+    if not (ref.shape[0] == var.shape[0] == len(ordered_sites)):   
+        raise ValueError(f"Length of ordered_sites should be equal to ref and var dim 0")
     if not vert_util.is_tree(T):
         raise ValueError("Adjacency matrix T is empty or not a tree.")
     if not os.path.isdir(output_dir):
         raise ValueError(f"{output_dir} does not exist.")
-    # TODO: should we enforce this? would people want no labels?
-    if not len(node_idx_to_label.values()) == len(set(list(node_idx_to_label.values()))):
-        raise ValueError(f"Labels in node_idx_to_label should be unique, got: {list(node_idx_to_label.values())}")
 
     B = vert_util.get_mutation_matrix_tensor(T)
-    num_sites = ref_matrix.shape[0]
+    num_sites = ref.shape[0]
     num_internal_nodes = T.shape[0]
-    # We're learning psi, which is the mixture matrix U (U = softmax(psi)), and tells us the existence
-    # and antomical locations of the extant clones (U > U_CUTOFF)
-    psi = -1 * torch.rand(batch_size, num_sites, num_internal_nodes + 1) # an extra column for normal cells
-    psi.requires_grad = True # we're learning psi
+
     # If we don't know the anatomical site of the primary tumor, we need to learn it
     num_nodes_to_label = -1
     if p is None:
         num_nodes_to_label = num_internal_nodes
     else:
         assert(p.shape[1] == 1)
-        assert(p.shape[0] == ref_matrix.shape[0]) # num_anatomical_sites
+        assert(p.shape[0] == ref.shape[0]) # num_anatomical_sites
         num_nodes_to_label = num_internal_nodes - 1 # we don't need to learn the root labeling
         prim_site_idx = torch.nonzero(p)[0][0]
         primary_site_label = ordered_sites[prim_site_idx]
 
     # We're learning X, which is the vertex labeling of the internal nodes
     X = torch.rand(batch_size, num_sites, num_nodes_to_label)
-    
+
     if weight_init_primary:
         if p is None: raise ValueError(f"Cannot use weight_init_primary flag without inputting p vector ")
         prim_site_idx = torch.nonzero(p)[0][0]
@@ -432,8 +464,18 @@ def get_migration_history(T, ref_matrix, var_matrix, ordered_sites, p, node_idx_
         # TODO: applying softmax on iterations where we're not learning vertex labeling
         # lessens the effect of this weight initialization
 
-    X.requires_grad = True
-
+    # We're learning psi, which is the mixture matrix U (U = softmax(psi)), and tells us the existence
+    # and antomical locations of the extant clones (U > U_CUTOFF)
+    psi = -1 * torch.rand(batch_size, num_sites, num_internal_nodes + 1) # an extra column for normal cells
+    if lr_sched == 'bi-level':
+        unet = UNet(psi)
+        meta_optim = torchopt.MetaAdam(unet, lr=lr)
+        X = torch.nn.Parameter(X, requires_grad=True)
+    else:
+        optimizer = torch.optim.Adam([psi, X], lr=lr)
+        psi.requires_grad = True 
+        X.requires_grad = True
+    
     # add a row of zeros to account for the non-cancerous root node
     B = torch.vstack([torch.zeros(B.shape[1]), B])
     # add a column of ones to indicate that every subclone has the non-cancerous mutations
@@ -443,43 +485,50 @@ def get_migration_history(T, ref_matrix, var_matrix, ordered_sites, p, node_idx_
     temp = init_temp
     decay = (init_temp - final_temp) / max_iter
     hard = True
-    min_loss = torch.tensor(float("Inf"))
-    optimizer = torch.optim.Adam([psi, X], lr=lr)
-    losses = []
+
     max_patience_epochs = 20
     early_stopping_ctr = 0
     eps = 1e-2
     anneal_rate = 0.002
-    last_loss = None
-
     intermediate_data = []
-    # Optimize
     temps = []
-
     start_time = datetime.datetime.now()
-
     all_loss_components = []
+
     for i in range(max_iter):
-        optimizer.zero_grad()
-        # Using the softmax enforces that the row sums are 1, since the proprtions of
-        # subclones in a given site should sum to 1
-        U = torch.softmax(psi, dim=2)
-        losses_tensor, V, full_trees, full_branch_lengths, softmax_Xs, loss_components = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, i, max_iter, lr_sched)
-        # TODO: better way to calc loss across trees?
-        loss = torch.mean(losses_tensor)
-        loss.backward()
-        losses.append(loss.item())
 
-        d = {}
-        for key in loss_components[0]:
-            if key not in d:
-                d[key] = 0
-            for e in loss_components:
-                d[key] += e[key]
-        d = {key:d[key]/len(loss_components) for key in d} # calc averages across batch
-        all_loss_components.append(d)
+        if lr_sched == 'bi-level':
+            inner_losses, V, trees, branch_lengths, Xs, loss_comps = unet(X, T, ref, var, B, p, G, O, 
+                                                                          temp, hard, weights, i, max_iter, lr_sched)
+            inner_loss = torch.mean(inner_losses)
+            
+            meta_optim.step(inner_loss)
+            print(inner_loss)
 
-        optimizer.step()
+            with torch.no_grad():
+                if i % 20 == 0:
+                    intermediate_data.append([inner_losses, trees, V, torch.softmax(psi, dim=2), branch_lengths, Xs])
+
+        else:
+
+            optimizer.zero_grad()
+            losses_tensor, V, trees, branch_lengths, Xs, loss_comps = compute_losses(psi, X, T, ref, var, 
+                                                                                     B, p, G, O, temp, hard, weights, i, 
+                                                                                     max_iter, lr_sched)
+            
+
+            # TODO: better way to calc loss across trees?
+            loss = torch.mean(losses_tensor)
+            loss.backward()
+            optimizer.step()
+
+            with torch.no_grad():
+                if i % 20 == 0:
+                    intermediate_data.append([losses_tensor, trees, V, torch.softmax(psi, dim=2), branch_lengths, Xs])
+
+        all_loss_components.append(get_avg_loss_components(loss_comps))
+
+        
         #temp -= decay # drop temperature
 
         if i % 10 == 0:
@@ -487,9 +536,17 @@ def get_migration_history(T, ref_matrix, var_matrix, ordered_sites, p, node_idx_
                 temp = np.maximum(temp * np.exp(-anneal_rate * i), final_temp)
         temps.append(temp)
 
-        with torch.no_grad():
-            if i % 20 == 0:
-                intermediate_data.append([losses_tensor, full_trees, V, U, full_branch_lengths, softmax_Xs])
+    if lr_sched == 'bi-level':
+        outer_losses, V, trees, branch_lengths, Xs, loss_comps = unet(X, T, ref, var, B, p, G, O, 
+                                                                      temp, hard, weights, i, max_iter, lr_sched)
+        outer_loss = torch.mean(outer_losses)
+        print(V[0])
+        print(X[0])
+        outer_loss.backward()
+        print("after backwards pass")
+        print(V[0])
+        print(torch.mean(X.grad))
+
 
     if print_config.visualize:
         plot_util.plot_loss_components(all_loss_components, weights)
@@ -500,14 +557,15 @@ def get_migration_history(T, ref_matrix, var_matrix, ordered_sites, p, node_idx_
         print(f"Time elapsed: {time_elapsed}")
 
     with torch.no_grad():
-
-        losses_tensor, V, full_trees, full_branch_lengths, _, _ = compute_losses(U, X, T, ref_matrix, var_matrix, B, p, G, O, temp, hard, weights, -1, max_iter, lr_sched)
-        _, best_tree_idx = torch.topk(losses_tensor, 1, largest=False, sorted=True)
-        edges, vert_to_site_map, mig_graph_edges, loss_info = plot_util.print_best_trees(losses_tensor, V, U, full_trees,                                                                        full_branch_lengths, ref_matrix,                                                                        var_matrix, B, O, G, weights, 
-                                                                                    node_idx_to_label, ordered_sites,
-                                                                                    print_config, intermediate_data, 
-                                                                                    custom_colors, primary_site_label, 
-                                                                                    max_iter, output_dir, run_name)
+        if lr_sched == 'bi-level': psi = unet.psi
+        losses, V, trees, branch_lengths, _, _ = compute_losses(psi, X, T, ref, var, B, p, G, O, temp, hard, weights, -1, max_iter, lr_sched)
+        _, best_tree_idx = torch.topk(losses, 1, largest=False, sorted=True)
+        edges, vert_to_site_map, mig_graph_edges, loss_info = plot_util.print_best_trees(losses, V, torch.softmax(psi, dim=2), trees, 
+                                                                                         branch_lengths, ref, var, B, O, G, weights, 
+                                                                                         node_idx_to_label, ordered_sites,
+                                                                                         print_config, intermediate_data, 
+                                                                                         custom_colors, primary_site_label, 
+                                                                                         max_iter, output_dir, run_name)
 
         # avg_tree = plot_util.print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_colors,
         #                                     ordered_sites, print_config)
