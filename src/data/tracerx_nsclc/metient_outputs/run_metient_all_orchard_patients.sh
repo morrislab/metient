@@ -5,9 +5,15 @@ then
     exit 1
 fi
 
+rm -rf ${3}; 
+mkdir -p ${3}"/max_pars/"
+mkdir -p ${3}"/max_pars_wip/"
+mkdir -p ${3}"/max_pars_genetic_distance/"
+mkdir -p ${3}"/max_pars_genetic_distance_wip/"
+
 for f in ${2}/*.results.npz
 do
     p=$(basename $f .tsv | sed -e "s/.results.npz//")
     echo "Submitting metient_orchard_job_$p"
-    #bsub -J "metient_orchard_job_$p" -n 8 -W 20:00 -o output_metient_orchard.log -e error_metient_orchard.log ./run_metient_single_orchard_patient.sh ${p} ${1} ${2} ${3}
+    bsub -J "metient_orchard_job_$p" -n 8 -W 20:00 -o output_metient_orchard.log -e error_metient_orchard.log ./run_metient_single_orchard_patient.sh ${p} ${1} ${2} ${3}
 done

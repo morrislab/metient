@@ -39,7 +39,7 @@ def find_labeling(ref_var_fn, tree, custom_colors, primary_site, patient_name, o
                                           batch_size=32, max_iter=100, lr_sched='step')
 
     
-def run_orchard_patient(patient, weights, tsv_dir, tree_dir, output_dir):
+def run_orchard_patient(patient, weights,weight_init_primary, tsv_dir, tree_dir, output_dir):
     space = "x"*44
     tsv_fn = os.path.join(tsv_dir, f"{patient}_SNVs.tsv")
     print(f"{space} PATIENT {patient} {space}")
