@@ -395,7 +395,7 @@ def get_avg_loss_components(loss_components):
 def get_migration_history(T, ref, var, ordered_sites, p, node_idx_to_label,
                           weights, print_config, output_dir, run_name, 
                           G=None, O=None, max_iter=200, lr=0.1, init_temp=40, final_temp=0.01,
-                          batch_size=64, custom_colors=None, weight_init_primary=True, lr_sched="step"):
+                          batch_size=64, custom_colors=None, weight_init_primary=False, lr_sched="step"):
     '''
     Args:
         T: Adjacency matrix (directed) of the internal nodes (shape: num_internal_nodes x num_internal_nodes)
@@ -480,7 +480,7 @@ def get_migration_history(T, ref, var, ordered_sites, p, node_idx_to_label,
     if weight_init_primary:
         if p is None: raise ValueError(f"Cannot use weight_init_primary flag without inputting p vector ")
         prim_site_idx = torch.nonzero(p)[0][0]
-        X[:,prim_site_idx,:] = 5
+        X[:batch_size//2,prim_site_idx,:] = 5
         # TODO: applying softmax on iterations where we're not learning vertex labeling
         # lessens the effect of this weight initialization
 
@@ -488,14 +488,14 @@ def get_migration_history(T, ref, var, ordered_sites, p, node_idx_to_label,
     # and antomical locations of the extant clones (U > U_CUTOFF)
     psi = -1 * torch.rand(batch_size, num_sites, num_internal_nodes + 1) # an extra column for normal cells
     if lr_sched == 'bi-level':
+        X = torch.nn.Parameter(X, requires_grad=True)
         unet = UNet(psi)
         meta_optim = torchopt.MetaAdam(unet, lr=lr)
-        X = torch.nn.Parameter(X, requires_grad=True)
     else:
-        optimizer = torch.optim.Adam([psi, X], lr=lr)
         psi.requires_grad = True 
         X.requires_grad = True
-    
+        optimizer = torch.optim.Adam([psi, X], lr=lr)
+
     # add a row of zeros to account for the non-cancerous root node
     B = torch.vstack([torch.zeros(B.shape[1]), B])
     # add a column of ones to indicate that every subclone has the non-cancerous mutations
