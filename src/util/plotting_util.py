@@ -7,10 +7,11 @@ import itertools
 import pydot
 from networkx.drawing.nx_pydot import graphviz_layout
 import torch
-from IPython.display import Image, display
 from networkx.drawing.nx_pydot import to_pydot
 from graphviz import Source
 from PIL import Image as PILImage
+from IPython.display import Image, display
+import matplotlib.image as mpimg
 import io
 import matplotlib.gridspec as gridspec
 import math
@@ -18,6 +19,7 @@ import matplotlib.font_manager
 from matplotlib import rcParams
 import os
 import pickle
+import pygraphviz as pgv
 
 import string
 
@@ -28,6 +30,7 @@ from src.util.globals import *
 
 import pandas as pd
 pd.options.display.float_format = '{:,.3f}'.format
+import scipy.sparse as sp
 
 import seaborn as sns
 
@@ -234,10 +237,11 @@ def tree_iterator(T):
     '''
     iterate an adjacency matrix, returning i and j for all values = 1
     '''
-    for i, adj_row in enumerate(T):
-        for j, val in enumerate(adj_row):
-            if val == 1:
-                yield i, j
+    # enumerating through a torch tensor is pretty computationally expensive,
+    # so convert to a sparse matrix to efficiently access non-zero values
+    T = sp.coo_matrix(T.numpy())
+    for i, j, val in zip(T.row, T.col, T.data):
+        yield i,j
 
 def truncated_cluster_name(cluster_name):
     '''
@@ -320,13 +324,9 @@ def plot_migration_graph(V, A, ordered_sites, custom_colors, primary, show=True)
     # TODO pass in printconfig save option 
     dot_lines = dot.to_string().split("\n")
     dot_lines.insert(1, 'dpi=600;size=3.5;')
-    dot = ("\n").join(dot_lines)
-    
-    #dot = pydot.graph_from_dot_data(dot)[0]
-    dot = Source(dot)
-    #dot.write_png('mig_graph.png')
+    dot_str = ("\n").join(dot_lines)
 
-    return dot, edges
+    return dot_str, edges
 
 def print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_colors, ordered_sites, print_config):
     '''
@@ -533,16 +533,15 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx
     # hack since there doesn't seem to be API to modify graph attributes...
     dot.insert(1, 'graph[splines=false]; nodesep=0.7; ranksep=0.6; forcelabels=true; dpi=600; size=2.5;')
     #dot.insert(2, legend_dot)
-    dot = ("\n").join(dot)
+    dot_str = ("\n").join(dot)
 
     if show:
-        dot = nx.nx_pydot.to_pydot(dot)
+        dot = nx.nx_pydot.to_pydot(dot_str)
         view_pydot(dot)
 
-    dot = Source(dot)
 
     vertex_name_to_site_map = { full_node_idx_to_label_map[i][0]:ordered_sites[(V[:,i] == 1).nonzero()[0][0].item()] for i in range(V.shape[1])}
-    return dot, edges, vertex_name_to_site_map
+    return dot_str, edges, vertex_name_to_site_map
 
 # TODO: make this a diff option to display
 def plot_tree_deprecated(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=None, show=True):
@@ -715,8 +714,13 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
 
     for i, (tree_dot, mig_graph_dot, loss_info, seeding_pattern) in enumerate(figure_outputs):
         # Create graphviz objects from the DOT code
-        tree = PILImage.open(tree_dot.render(os.path.join(output_dir,f"T_{run_name}{i}"),format="png", view=False))
-        mig_graph = PILImage.open(mig_graph_dot.render(os.path.join(output_dir, f"G_{run_name}{i}"),format="png", view=False))
+        #tree = PILImage.open(tree_dot.render(os.path.join(output_dir,f"T_{run_name}{i}"),format="png", view=False))
+        #mig_graph = PILImage.open(mig_graph_dot.render(os.path.join(output_dir, f"G_{run_name}{i}"),format="png", view=False))
+
+        tree = pgv.AGraph(string=tree_dot).draw(format="png", prog="dot")
+        tree = PILImage.open(io.BytesIO(tree))
+        mig_graph = pgv.AGraph(string=mig_graph_dot).draw(format="png", prog="dot")
+        mig_graph = PILImage.open(io.BytesIO(mig_graph))
 
         gs1 = gridspec.GridSpec(3, 3)
 
@@ -743,13 +747,12 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
         ax3.axis('off')
 
         # Cleanup temp files
-        os.remove(os.path.join(output_dir, f"T_{run_name}{i}"))
-        os.remove(os.path.join(output_dir, f"T_{run_name}{i}.png"))
-        os.remove(os.path.join(output_dir, f"G_{run_name}{i}"))
-        os.remove(os.path.join(output_dir, f"G_{run_name}{i}.png"))
+        # os.remove(os.path.join(output_dir, f"T_{run_name}{i}"))
+        # os.remove(os.path.join(output_dir, f"T_{run_name}{i}.png"))
+        # os.remove(os.path.join(output_dir, f"G_{run_name}{i}"))
+        # os.remove(os.path.join(output_dir, f"G_{run_name}{i}.png"))
 
     # Display and save the plot
-    plt.tight_layout()
     fig1 = plt.gcf()
     fig1.savefig(os.path.join(output_dir, f'{run_name}.png'), dpi=300)
     print(f"Saving {run_name} to {output_dir}")

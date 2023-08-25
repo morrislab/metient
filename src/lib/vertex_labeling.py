@@ -3,6 +3,7 @@ import torch
 import sys
 import numpy as np
 import datetime
+from tqdm import tqdm
 
 import torchopt
 
@@ -118,7 +119,6 @@ def _calc_llh(F_hat, R, V, omega_v, epsilon=1e-5):
     # TODO: how do we make sure the non-cancerous root clone subclonal frequencies here are 1
     #assert(np.allclose(1, phi[0]))
     P = torch.mul(omega_v, F_hat[:,1:])
-    #print("P", P.shape, "\n", P)
 
     # TODO: why these cutoffs?
     #P = torch.maximum(P, epsilon)
@@ -126,7 +126,6 @@ def _calc_llh(F_hat, R, V, omega_v, epsilon=1e-5):
 
     bin_dist = Binomial(N, P)
     F_llh = bin_dist.log_prob(V)
-    #print("F_llh", F_llh.shape, "\n", F_llh)
     # TODO: why divide by np.log(2)
     #phi_llh = stats.binom.logpmf(V, N, P) / np.log(2)
     assert(not torch.any(F_llh.isnan()))
@@ -170,6 +169,36 @@ def no_cna_omega(shape):
     # TODO: don't hardcode omega here (omegas are all 1/2 since we're assuming there are no CNAs)
     return torch.ones(shape) * 0.5
 
+def get_lambdas(epoch, max_iter, lr_sched):
+    '''
+    Returns weights for subclonal presence loss and ancestral labeling loss,
+    and bools indicating if we need to calculate that loss at this iteration
+    (for perf optimization)
+    '''
+    calc_subclonal, calc_ancestral = True, True
+    lam1, lam2 = 1.0, 1.0
+    if epoch != -1: # to evaluate loss values after training is done
+        if lr_sched == "step":   
+            if epoch < max_iter/2:
+                lam1, lam2 = 1.0, 0.0
+                calc_ancestral = False
+            else:
+                lam1, lam2 = 0.0, 1.0
+                calc_subclonal = False
+        elif lr_sched == "em": 
+            if ((epoch//20) % 2 == 0):
+                lam1, lam2 = 1.0, 0.0
+                calc_ancestral = False
+            else:
+                lam1, lam2 = 0.0, 1.0
+                calc_subclonal = False
+        elif lr_sched == "linear":
+            l = (epoch+1)*(1.0/max_iter)
+            lam1 = 1.0 - l
+            lam2 = l
+
+    return lam1, lam2, calc_subclonal, calc_ancestral
+
 def objective(V, A, ref, var, U, B, G, O, weights, epoch, max_iter, lr_sched):
     '''
     Args:
@@ -191,27 +220,18 @@ def objective(V, A, ref, var, U, B, G, O, weights, epoch, max_iter, lr_sched):
         Loss to score this tree and labeling combo.
     '''
 
-    ancestral_labeling_loss, loss_dict_a = _ancestral_labeling_objective(V, A, G, O, weights)
+    lam1, lam2, calc_subclonal, calc_ancestral = get_lambdas(epoch, max_iter, lr_sched)
 
-    omega_v = no_cna_omega(ref.shape)
-    subclonal_presence_loss, loss_dict_b = _subclonal_presence_objective(ref, var, omega_v, U, B, weights)
-
-    lam1, lam2 = 1.0, 1.0
-    if epoch != -1: # to evaluate loss values after training is done
-        if lr_sched == "step":   
-            if epoch < max_iter/2:
-                lam1, lam2 = 1.0, 0.0
-            else:
-                lam1, lam2 = 0.0, 1.0
-        elif lr_sched == "em": 
-            if ((epoch//20) % 2 == 0):
-                lam1, lam2 = 1.0, 0.0
-            else:
-                lam1, lam2 = 0.0, 1.0
-        elif lr_sched == "linear":
-            l = (epoch+1)*(1.0/max_iter)
-            lam1 = 1.0 - l
-            lam2 = l
+    if calc_ancestral:
+        ancestral_labeling_loss, loss_dict_a = _ancestral_labeling_objective(V, A, G, O, weights)
+    else:
+        ancestral_labeling_loss, loss_dict_a = 0.0, {}
+   
+    if calc_subclonal:
+        omega_v = no_cna_omega(ref.shape)
+        subclonal_presence_loss, loss_dict_b = _subclonal_presence_objective(ref, var, omega_v, U, B, weights)
+    else:
+        subclonal_presence_loss, loss_dict_b = 0.0, {}
 
     loss = (lam1*subclonal_presence_loss) + (lam2*ancestral_labeling_loss)
 
@@ -495,7 +515,7 @@ def get_migration_history(T, ref, var, ordered_sites, p, node_idx_to_label,
     start_time = datetime.datetime.now()
     all_loss_components = []
 
-    for i in range(max_iter):
+    for i in tqdm(range(max_iter)):
 
         if lr_sched == 'bi-level':
             inner_losses, V, trees, branch_lengths, Xs, loss_comps = unet(X, T, ref, var, B, p, G, O, 
@@ -503,8 +523,6 @@ def get_migration_history(T, ref, var, ordered_sites, p, node_idx_to_label,
             inner_loss = torch.mean(inner_losses)
             
             meta_optim.step(inner_loss)
-            print(inner_loss)
-
             with torch.no_grad():
                 if i % 20 == 0:
                     intermediate_data.append([inner_losses, trees, V, torch.softmax(psi, dim=2), branch_lengths, Xs])
@@ -515,9 +533,6 @@ def get_migration_history(T, ref, var, ordered_sites, p, node_idx_to_label,
             losses_tensor, V, trees, branch_lengths, Xs, loss_comps = compute_losses(psi, X, T, ref, var, 
                                                                                      B, p, G, O, temp, hard, weights, i, 
                                                                                      max_iter, lr_sched)
-            
-
-            # TODO: better way to calc loss across trees?
             loss = torch.mean(losses_tensor)
             loss.backward()
             optimizer.step()
@@ -528,9 +543,6 @@ def get_migration_history(T, ref, var, ordered_sites, p, node_idx_to_label,
 
         all_loss_components.append(get_avg_loss_components(loss_comps))
 
-        
-        #temp -= decay # drop temperature
-
         if i % 10 == 0:
             if lr_sched != "step" or (lr_sched == "step" and i > max_iter/2):
                 temp = np.maximum(temp * np.exp(-anneal_rate * i), final_temp)
@@ -540,12 +552,7 @@ def get_migration_history(T, ref, var, ordered_sites, p, node_idx_to_label,
         outer_losses, V, trees, branch_lengths, Xs, loss_comps = unet(X, T, ref, var, B, p, G, O, 
                                                                       temp, hard, weights, i, max_iter, lr_sched)
         outer_loss = torch.mean(outer_losses)
-        print(V[0])
-        print(X[0])
         outer_loss.backward()
-        print("after backwards pass")
-        print(V[0])
-        print(torch.mean(X.grad))
 
 
     if print_config.visualize:

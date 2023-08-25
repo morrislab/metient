@@ -18,4 +18,6 @@ dependencies:
   - pip
   - pip:
     - torchopt
+    - pygraphviz
+    - tqdm
 prefix: /Users/divyakoyyalagunta/mambaforge/envs/met
