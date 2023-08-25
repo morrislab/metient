@@ -1,6 +1,5 @@
 U_CUTOFF = 0.05
-# TODO: better way to handle this?
-G_IDENTICAL_CLONE_VALUE = -10.0
+G_IDENTICAL_CLONE_VALUE = 0.0
 
 import logging
 logger = logging.getLogger('SGD')
