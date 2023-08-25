@@ -13,7 +13,7 @@ from src.util import plotting_util as plot_util
 
 custom_colors = ["#6aa84fff","#c27ba0ff", "#e69138ff", "#be5742e1", "#2496c8ff", "#674ea7ff"] + sns.color_palette("Paired").as_hex()
 
-def find_labeling(ref_var_fn, tree, custom_colors, primary_site, patient_name, output_dir, weights, weight_init_primary):    
+def find_labeling(ref_var_fn, tree, custom_colors, primary_site, patient_name, output_dir, weights):    
     ref_matrix, var_matrix, unique_sites, idx_to_full_cluster_label = data_util.get_ref_var_matrices_from_real_data(ref_var_fn)
 
     idx_to_cluster_label = dict()
@@ -35,11 +35,11 @@ def find_labeling(ref_var_fn, tree, custom_colors, primary_site, patient_name, o
     print_config = plot_util.PrintConfig(visualize=False, verbose=False, viz_intermeds=False, k_best_trees=4)
     vertex_labeling.get_migration_history(tree, ref_matrix, var_matrix, unique_sites, p, idx_to_cluster_label,
                                           weights, print_config, output_dir, patient_name, G=G, 
-                                          weight_init_primary=weight_init_primary, custom_colors=custom_colors, 
-                                          batch_size=32, max_iter=100, lr_sched='bi-level')
+                                          weight_init_primary=True, custom_colors=custom_colors, 
+                                          batch_size=32, max_iter=100, lr_sched='step')
 
     
-def run_conipher_patient(patient, weights, weight_init_primary, tsv_dir, tree_dir, output_dir):
+def run_conipher_patient(patient, weights, tsv_dir, tree_dir, output_dir):
     space = "x"*44
     tsv_fn = os.path.join(tsv_dir, f"{patient}_clustered_SNVs.tsv")
     print(f"{space} PATIENT {patient} {space}")
@@ -52,7 +52,7 @@ def run_conipher_patient(patient, weights, weight_init_primary, tsv_dir, tree_di
         run_name = f"{patient}_{primary_site}"
         tree_fn = os.path.join(tree_dir, f"{patient}_conipher_SNVsallTrees_cleaned.txt")
         trees = data_util.get_adj_matrices_from_all_conipher_trees(tree_fn)
-        find_labeling(tsv_fn, trees[0], custom_colors, primary_site, run_name, output_dir, weights, weight_init_primary)
+        find_labeling(tsv_fn, trees[0], custom_colors, primary_site, run_name, output_dir, weights)
 
 
 if __name__=="__main__":
@@ -70,22 +70,13 @@ if __name__=="__main__":
 	patient = args.patient
 
 	# (1) Maximum parsimony
-	weights = vertex_labeling.Weights(data_fit=1.0, mig=5.0, comig=4.0, seed_site=3.0, reg=2.0, gen_dist=0.0)
+	weights = vertex_labeling.Weights(data_fit=0.5, mig=10.0, comig=7.0, seed_site=5.0, reg=2.0, gen_dist=0.0)
 	output_dir = os.path.join(args.output_dir, "max_pars")
-	run_conipher_patient(patient, weights, False, args.tsv_dir, args.tree_dir, output_dir)
+	run_conipher_patient(patient, weights, args.tsv_dir, args.tree_dir, output_dir)
 
-	# (2) Maximum parsimony + weight init primary
-	weights = vertex_labeling.Weights(data_fit=1.0, mig=5.0, comig=4.0, seed_site=3.0, reg=2.0, gen_dist=0.0)
-	output_dir = os.path.join(args.output_dir, "max_pars_wip")
-	run_conipher_patient(patient, weights, True, args.tsv_dir, args.tree_dir, output_dir)
-
-	# (3) Maximum parsimony + genetic distance
-	weights = vertex_labeling.Weights(data_fit=1.0, mig=5.0, comig=4.0, seed_site=3.0, reg=2.0, gen_dist=1.0)
+	# (2) Maximum parsimony + genetic distance
+	weights = vertex_labeling.Weights(data_fit=0.5, mig=10.0, comig=7.0, seed_site=5.0, reg=2.0, gen_dist=1.0)
 	output_dir = os.path.join(args.output_dir, "max_pars_genetic_distance")
-	run_conipher_patient(patient, weights, False, args.tsv_dir, args.tree_dir, output_dir)
+	run_conipher_patient(patient, weights, args.tsv_dir, args.tree_dir, output_dir)
 
-	# (4) Maximum parsimony + genetic distance + weight init primary
-	weights = vertex_labeling.Weights(data_fit=1.0, mig=5.0, comig=4.0, seed_site=3.0, reg=2.0, gen_dist=1.0)
-	output_dir = os.path.join(args.output_dir, "max_pars_genetic_distance_wip")
-	run_conipher_patient(patient, weights, True, args.tsv_dir, args.tree_dir, output_dir)
 
