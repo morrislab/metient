@@ -36,7 +36,7 @@ def find_labeling(ref_var_fn, tree, custom_colors, primary_site, patient_name, o
     vertex_labeling.get_migration_history(tree, ref_matrix, var_matrix, unique_sites, p, idx_to_cluster_label,
                                           weights, print_config, output_dir, patient_name, G=G, 
                                           weight_init_primary=weight_init_primary, custom_colors=custom_colors, 
-                                          batch_size=32, max_iter=100, lr_sched='step')
+                                          batch_size=32, max_iter=100, lr_sched='bi-level')
 
     
 def run_conipher_patient(patient, weights, weight_init_primary, tsv_dir, tree_dir, output_dir):
@@ -70,22 +70,22 @@ if __name__=="__main__":
 	patient = args.patient
 
 	# (1) Maximum parsimony
-	weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=0.0)
+	weights = vertex_labeling.Weights(data_fit=1.0, mig=5.0, comig=4.0, seed_site=3.0, reg=2.0, gen_dist=0.0)
 	output_dir = os.path.join(args.output_dir, "max_pars")
 	run_conipher_patient(patient, weights, False, args.tsv_dir, args.tree_dir, output_dir)
 
 	# (2) Maximum parsimony + weight init primary
-	weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=0.0)
+	weights = vertex_labeling.Weights(data_fit=1.0, mig=5.0, comig=4.0, seed_site=3.0, reg=2.0, gen_dist=0.0)
 	output_dir = os.path.join(args.output_dir, "max_pars_wip")
 	run_conipher_patient(patient, weights, True, args.tsv_dir, args.tree_dir, output_dir)
 
 	# (3) Maximum parsimony + genetic distance
-	weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=1.0)
+	weights = vertex_labeling.Weights(data_fit=1.0, mig=5.0, comig=4.0, seed_site=3.0, reg=2.0, gen_dist=1.0)
 	output_dir = os.path.join(args.output_dir, "max_pars_genetic_distance")
 	run_conipher_patient(patient, weights, False, args.tsv_dir, args.tree_dir, output_dir)
 
 	# (4) Maximum parsimony + genetic distance + weight init primary
-	weights = vertex_labeling.Weights(data_fit=1.0, mig=3.0, comig=2.0, seed_site=1.0, reg=2.0, gen_dist=1.0)
+	weights = vertex_labeling.Weights(data_fit=1.0, mig=5.0, comig=4.0, seed_site=3.0, reg=2.0, gen_dist=1.0)
 	output_dir = os.path.join(args.output_dir, "max_pars_genetic_distance_wip")
 	run_conipher_patient(patient, weights, True, args.tsv_dir, args.tree_dir, output_dir)
 
