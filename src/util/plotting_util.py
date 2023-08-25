@@ -239,7 +239,8 @@ def tree_iterator(T):
     '''
     # enumerating through a torch tensor is pretty computationally expensive,
     # so convert to a sparse matrix to efficiently access non-zero values
-    T = sp.coo_matrix(T.numpy())
+    T = T if isinstance(T, np.ndarray) else T.numpy()
+    T = sp.coo_matrix(T)
     for i, j, val in zip(T.row, T.col, T.data):
         yield i,j
 
