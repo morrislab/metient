@@ -126,7 +126,6 @@ def _calc_llh(F_hat, R, V, omega_v, epsilon=1e-5):
 
     bin_dist = Binomial(N, P)
     F_llh = bin_dist.log_prob(V)
-    # TODO: why divide by np.log(2)
     #phi_llh = stats.binom.logpmf(V, N, P) / np.log(2)
     assert(not torch.any(F_llh.isnan()))
     assert(not torch.any(F_llh.isinf()))
@@ -304,7 +303,6 @@ def compute_losses(psi, X, T, ref, var, B, p, G, O, temp, hard, weights, epoch, 
         U_i = U[i,:,:][:,1:] # don't include column for normal cells
         num_sites = U.shape[1]
         L = torch.nn.functional.one_hot((U_i > U_CUTOFF).nonzero()[:,0], num_classes=num_sites).T
-        # TODO: is this indexing the way to handle two latent vars?? probs not
         X_i = X[i,:,:] # internal labeling
         if p is None:
             return torch.hstack((X_i, L))

@@ -738,7 +738,7 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
         # Render and display each graph
         ax1.imshow(tree)
         ax1.axis('off')
-        ax1.set_title(f'Tree {i+1}\n{seeding_pattern}', fontsize=12, ha="left", va="top", x=0, y=1.0)
+        ax1.set_title(f'Tree {i+1}\n{seeding_pattern}', fontsize=12, loc="left", va="top", x=-0.1, y=1.0)
         #ax1.text(0.1, 0.65, seeding_pattern, fontname=fontname)
 
         ax2.imshow(mig_graph)
@@ -755,7 +755,7 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
 
     # Display and save the plot
     fig1 = plt.gcf()
-    fig1.savefig(os.path.join(output_dir, f'{run_name}.png'), dpi=300)
+    fig1.savefig(os.path.join(output_dir, f'{run_name}.png'), dpi=300, bbox_inches='tight')
     print(f"Saving {run_name} to {output_dir}")
 
     if print_config.visualize:
