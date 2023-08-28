@@ -1,3 +1,4 @@
+import random
 import sys
 import os
 import subprocess
@@ -6,7 +7,6 @@ import argparse
 import datetime
 import concurrent.futures
 import multiprocessing
-import pandas as pd
 from src.lib import vertex_labeling
 
 parser = argparse.ArgumentParser()
@@ -32,11 +32,10 @@ run_name = args.run_name
 
 predictions_dir = f"predictions_{run_name}"
 os.mkdir(predictions_dir)
+sys.stdout = open(os.path.join(predictions_dir, f"output_{run_name}.txt"), 'w')
 
 sites = ["m8", "m5"]
 mig_types = ["M", "mS", "R", "S"]
-sites = ["m8"]
-mig_types = ["M"]
 
 print("Weights:")
 weights = vertex_labeling.Weights(data_fit=args.data_fit, mig=args.mig, comig=args.comig, seed_site=args.seed, reg=args.reg, gen_dist=args.gen)
@@ -61,10 +60,9 @@ for site in sites:
         site_mig_data_dir = os.path.join(machina_sims_data_dir, site, mig_type)
         seeds = fnmatch.filter(os.listdir(site_mig_data_dir), 'reads_seed*.tsv')
         seeds = [s.replace(".tsv", "").replace("reads_seed", "") for s in seeds]
-        seeds = ['7']
         print(seeds)
         for seed in seeds:
-            python_cmd = [f"bsub -J metient_sim_{site}_{mig_type}_{seed} -n 8 -W 20:00 -o output_metient_sims.log -e error_metient_sims.log"
+            python_cmd = [f"bsub -J metient_sim_{site}_{mig_type}_{seed} -n 8 -W 30:00 -o output_metient_sims.log -e error_metient_sims.log ./predict_single_simulated_tree.sh",
                           machina_sims_data_dir, site, mig_type, seed, str(args.data_fit), str(args.mig),
                           str(args.comig), str(args.seed), str(args.reg), str(args.gen),
                           'True' if args.wip else 'False', str(args.bs), args.lr_sched, out_dir]
