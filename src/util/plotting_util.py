@@ -646,7 +646,7 @@ def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_m
     figure_outputs = []
     pickle_outputs = {'ancestral_labelings':[], 'subclonal_presence_matrices':[], 
                       'full_adjacency_matrices':[], 'ordered_anatomical_sites':ordered_sites,
-                      'full_node_idx_to_label':[]}
+                      'full_node_idx_to_label':[], 'losses':[]}
     for i, tup in enumerate(k_trees_and_losses):
         tree = tup[0]
         loss_info = print_tree_info(tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, max_iter, show=False)
@@ -659,6 +659,7 @@ def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_m
         pickle_outputs['ancestral_labelings'].append(tree.labeling)
         pickle_outputs['subclonal_presence_matrices'].append(tree.U)
         pickle_outputs['full_adjacency_matrices'].append(tree.tree)
+        pickle_outputs['losses'].append(loss_info['loss'])
         full_tree_idx_to_label = get_full_tree_node_idx_to_label(tree.labeling, tree.tree, node_idx_to_label, ordered_sites,
                                                                  shorten_label=False, pad=False)
         pickle_outputs['full_node_idx_to_label'].append(full_tree_idx_to_label)
