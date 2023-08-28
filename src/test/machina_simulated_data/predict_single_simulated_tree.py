@@ -32,7 +32,7 @@ def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir
         primary_idx = unique_sites.index('P')
         r = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(unique_sites)).T
         G = data_util.get_genetic_distance_tensor_from_adj_matrix(T, idx_to_label, ";")
-        print_config = plot_util.PrintConfig(visualize=False, verbose=False, viz_intermeds=False)
+        print_config = plot_util.PrintConfig(visualize=False, verbose=False, viz_intermeds=False, k_best_trees=5)
         T_edges, labeling, G_edges, loss_info, time = vertex_labeling.get_migration_history(T, ref_matrix, var_matrix, unique_sites, r, idx_to_label,
                                                                                             weights, print_config, out_dir, f"tree{tree_num}_seed{seed}", 
                                                                                             G=G, max_iter=100, batch_size=batch_size, custom_colors=custom_colors, 
