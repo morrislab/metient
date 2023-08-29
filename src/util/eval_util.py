@@ -124,7 +124,6 @@ def metient_parse_mig_graph(pickle_fn, met_tree_num):
     A = pckl['full_adjacency_matrices'][met_tree_num]
     sites = pckl['ordered_anatomical_sites']
     G = plot_util.get_migration_graph(V, A)
-    
     migration_edges = []
     for i, row in enumerate(G):
         for j, val in enumerate(row):
@@ -133,11 +132,11 @@ def metient_parse_mig_graph(pickle_fn, met_tree_num):
                     migration_edges.append((sites[i], sites[j]))
     return migration_edges
     
-def get_metient_min_loss_trees(site_mig_type_dir, seed, k):
+def get_metient_min_loss_trees(site_mig_type_dir, seed, k, loss_thres=1.0):
     # Get all clone trees for the seed
     tree_pickles = glob.glob(os.path.join(site_mig_type_dir, f"*_seed{seed}.pickle"))
     
-    # Keep treack of the best trees and losses
+    # Keep track of the best trees and losses
     min_heap = [] 
     for tree_pickle in tree_pickles:
         clone_tree_num = os.path.basename(tree_pickle).replace("tree", "").replace(f"_seed{seed}.pickle", "")
@@ -146,9 +145,12 @@ def get_metient_min_loss_trees(site_mig_type_dir, seed, k):
         for met_tree_num, loss in enumerate(pckl['losses']):
             heapq.heappush(min_heap, (loss, clone_tree_num, met_tree_num))
     out = []
-    while len(out) < k:
+    min_loss = min_heap[0][0]
+    while len(out) < k and len(min_heap) > 0:
         item = heapq.heappop(min_heap)
-        out.append((item[1], item[2]))
+        # only add tree if it's ~= to the min loss
+        if abs(min_loss-item[0]) <= loss_thres:
+            out.append((item[0], item[1], item[2]))
         
     return out
 
