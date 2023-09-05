@@ -59,7 +59,7 @@ if __name__=="__main__":
     
     args = parser.parse_args()
     
-    weights = vertex_labeling.Weights(data_fit=args.wdata_fit, mig=args.wmig, comig=args.wcomig, seed_site=args.wseed, reg=args.wreg, gen_dist=args.wgen)
+    weights = Weights(data_fit=args.wdata_fit, mig=args.wmig, comig=args.wcomig, seed_site=args.wseed, reg=args.wreg, gen_dist=args.wgen)
 
     predict_vertex_labeling(args.sim_data_dir, args.num_sites, args.mig_type, args.seed, args.tree_num, args.out_dir, weights, args.bs, args.wip, args.lr_sched)
                 
