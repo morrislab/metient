@@ -67,6 +67,7 @@ def write_pairtree_inputs(patient_data, patient_id, output_dir):
     with open(os.path.join(output_dir, f"{patient_id}.params.json"), 'w', encoding='utf-8') as f:
         json.dump(json_data, f, ensure_ascii=False)
 
+
 def _get_cluster_id(mut_id, clusters):
     '''
     Given mut_id = 'm1' and clusters= [['m1'], ['m0', 'm2']], returns 1 
@@ -77,6 +78,54 @@ def _get_cluster_id(mut_id, clusters):
     
     print(f"mut id {mut_id} not found")
     return None
+
+def write_clustered_params_json_from_pyclone_clusters(clusters_tsv_fn, pairtree_ssm_fn, pairtree_params_fn, 
+                                                      output_dir, patient_id):
+    '''
+    After clustering with PyClone (see: https://github.com/Roth-Lab/pyclone),
+    prepares clustered params.json files needed for PairTree/Orchard tree building
+
+    Args:
+
+        clusters_tsv_fn: PyClone results tsv that maps each mutation to a cluster id
+
+        pairtree_ssm_fn: PairTree .ssm file which maps mutation ids (e.g. m0) to mutation
+        names (e.g. SETD2:3:47103798:G)
+
+        output_dir: where to save clustered params.json
+
+        patient_id: name of patient used for saving
+
+    Outputs:
+
+        Saves clustered params.json at {output_dir}/{patient_id}_pyclone_clustered.params.json
+
+    '''
+
+    pyclone_df = pd.read_csv(clusters_tsv_fn, delimiter="\t")
+    pt_ssm_df = pd.read_csv(pairtree_ssm_fn, delimiter="\t")
+    cluster_id_to_mut_ids = dict() # 3 -> [m0, m5 ...]
+
+    with open(pairtree_params_fn) as f:
+        params = json.load(f)
+        
+    # 1. Get mapping between mutation ids (from .ssm file) and PyClone cluster ids
+    for _, row in pt_ssm_df.iterrows():
+        mut_id = row['id']
+        mut_items = row['name'].split(":")
+        cluster_id = pyclone_df[(pyclone_df['CHR']==int(mut_items[1]))&(pyclone_df['POS']==int(mut_items[2]))&(pyclone_df['REF']==mut_items[3])]['treeCLUSTER'].unique()
+        assert(len(cluster_id) <= 1)
+        if len(cluster_id) == 1:
+            cluster_id = cluster_id.item()
+            if cluster_id not in cluster_id_to_mut_ids:
+                cluster_id_to_mut_ids[cluster_id] = []
+            cluster_id_to_mut_ids[cluster_id].append(mut_id)
+            
+    # 2. Update params.json with clusters
+    clusters = [cluster_id_to_mut_ids[x] for x in range(0, len(cluster_id_to_mut_ids))]
+    params['clusters'] = clusters
+    with open(os.path.join(output_dir, f"{patient_id}_pyclone_clustered.params.json"), 'w', encoding='utf-8') as f:
+        json.dump(params, f, ensure_ascii=False)
 
 def write_pooled_tsv_from_pairtree_clusters(tsv_fn, ssm_fn, clustered_params_json_fn, 
                                             aggregation_rules, output_dir, patient_id,

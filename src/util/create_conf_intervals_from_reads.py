@@ -118,9 +118,11 @@ def write(reads_filename, cluster_filename, out_directory, output_fn=None, clust
 
     # find header row
     with open(reads_filename, 'r') as f:
-        reader = csv.reader(f)
-        header_row_idx = next(idx for idx, row in enumerate(reader) if len(row) > 1)
-
+        reader = csv.reader(f, delimiter="\t")
+        for idx, row in enumerate(reader):
+            if len(row) > 1:
+                header_row_idx = idx
+                break
     # this is fragile but eh
     if ".tsv" in reads_filename:
         read_data = pd.read_table(reads_filename, skiprows=header_row_idx)
@@ -146,14 +148,20 @@ def write(reads_filename, cluster_filename, out_directory, output_fn=None, clust
             cluster_index_to_variant_indices[i] = line.strip()
 
     # TODO: should this be per sample or per anatomical site
-    sample_labels = read_data['anatomical_site_label'].unique()
-
+    sample_labels = read_data['sample_label'].unique()
+    ordered_sites = []
+    for sample in sample_labels:
+        site = read_data[read_data['sample_label']==sample]['anatomical_site_label'].unique().item()
+        if site not in ordered_sites:
+            ordered_sites.append(site)
+   
     print("num variants:", len(variants))
-    print("anatomical site labels:", sample_labels)
+    print("sample labels:", sample_labels)
+    print("anatomical site labels:", ordered_sites)
 
     # Reformat the read data into a dataframe with the reference and variant reads for each variant ID
     # with clusters annotated so that we can pool the read data by cluster
-    cols = ["cluster"] + ['ref-'+c for c in sample_labels] + ['var-'+c for c in sample_labels]
+    cols = ["cluster"] + ['ref-'+c for c in ordered_sites] + ['var-'+c for c in ordered_sites]
     pooled_data = []
     indices = []
     for v in variants:
@@ -162,39 +170,39 @@ def write(reads_filename, cluster_filename, out_directory, output_fn=None, clust
             row = [cluster_idx]
             variant_subset = read_data[read_data['character_label']==v]
             for col in ["ref", "var"]:
-                for sample_label in sample_labels:
-                    # TODO: if we are using both primary samples, we need to somehow incorporate both
-                    # but right now we're just taking the first primary sample... (.iloc[0])
-                    var_sample_sub = variant_subset[variant_subset['anatomical_site_label'] == sample_label].iloc[0]
+                for site in ordered_sites:
+                    # If there are multiple samples from the same anatomical site, sum
+                    # them together (sum of two binomials is a binomial)
+                    var_sample_sub = variant_subset[variant_subset['anatomical_site_label'] == site].sum()
                     row.append(int(var_sample_sub[col]))
+                    
             pooled_data.append(row)
             indices.append(v)
-
     pooled_df = pd.DataFrame(pooled_data, index=indices, columns=cols)
 
     ctable = pooled_df.groupby('cluster').sum()
 
-    nsamples = len([c for c in ctable.columns if c.startswith('ref')])
+    nsites = len([c for c in ctable.columns if c.startswith('ref')])
     nclusters = len(ctable)
-    corrected_confidence = 1-((1.-CONFIDENCE)/(nsamples*nclusters))
+    corrected_confidence = 1-((1.-CONFIDENCE)/(nsites*nclusters))
 
     assert(corrected_confidence > CONFIDENCE)
     assert(corrected_confidence < 1.0)
 
     ctable = pooled_df.groupby('cluster').sum()
-    for sample in sample_labels:
-        ctable['ub-'+sample]= ctable.apply(get_ub, args=[sample, corrected_confidence], axis=1)
-        ctable['lb-'+sample]= ctable.apply(get_lb, args=[sample, corrected_confidence, False], axis=1)
-        ctable[sample]= ctable.apply(get_mean, args=[sample, corrected_confidence], axis=1)
+    for site in ordered_sites:
+        ctable['ub-'+site]= ctable.apply(get_ub, args=[site, corrected_confidence], axis=1)
+        ctable['lb-'+site]= ctable.apply(get_lb, args=[site, corrected_confidence, False], axis=1)
+        ctable[site]= ctable.apply(get_mean, args=[site, corrected_confidence], axis=1)
 
     ctable_cutoff = pooled_df.groupby('cluster').sum()
-    for sample in sample_labels:
-        ctable_cutoff['ub-'+sample]= ctable.apply(get_ub, args=[sample, corrected_confidence], axis=1)
-        ctable_cutoff['lb-'+sample]= ctable.apply(get_lb, args=[sample, corrected_confidence, True], axis=1)
-        ctable_cutoff[sample]= ctable.apply(get_mean, args=[sample, corrected_confidence], axis=1)
+    for site in ordered_sites:
+        ctable_cutoff['ub-'+site]= ctable.apply(get_ub, args=[site, corrected_confidence], axis=1)
+        ctable_cutoff['lb-'+site]= ctable.apply(get_lb, args=[site, corrected_confidence, True], axis=1)
+        ctable_cutoff[site]= ctable.apply(get_mean, args=[site, corrected_confidence], axis=1)
 
-    rows = [f"{len(sample_labels)} #anatomical sites\n{len(sample_labels)} #samples\n{len(cluster_index_to_variant_indices)} #mutations\n#sample_index\tsample_label\tanatomical_site_index\tanatomical_site_label\tcharacter_index\tcharacter_label\tf_lb\tf_ub\tref\tvar\n",]
-    for i, sam in enumerate(sample_labels):
+    rows = [f"{len(ordered_sites)} #anatomical sites\n{len(ordered_sites)} #samples\n{len(cluster_index_to_variant_indices)} #mutations\n#sample_index\tsample_label\tanatomical_site_index\tanatomical_site_label\tcharacter_index\tcharacter_label\tf_lb\tf_ub\tref\tvar\n",]
+    for i, sam in enumerate(ordered_sites):
         rows += list(ctable_cutoff.apply(print_char, args=[i, sam, cluster_index_to_variant_indices, use_char_idx_as_char_label], axis=1))
 
     if output_fn == None:

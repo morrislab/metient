@@ -40,20 +40,6 @@ COLORS = ["#6aa84fff","#c27ba0ff", "#e69138ff", "#be5742e1", "#2496c8ff", "#674e
 if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
 
-class PrintConfig:
-    def __init__(self, visualize=True, verbose=False, viz_intermeds=False, k_best_trees=1, save_imgs=False):
-        '''
-        visualize: bool, whether to visualize loss, best tree, and migration graph
-        verbose: bool, whether to print debug info
-        viz_intermeds: bool, whether to visualize intermediate solutions to best tree
-        k_best_trees: int, number of best tree solutions to visualize (if 1, only show best tree)
-        '''
-        self.visualize = visualize
-        self.verbose = verbose 
-        self.viz_intermeds = viz_intermeds
-        self.k_best_trees = k_best_trees
-        self.save_imgs = save_imgs
-
 def get_root_index(T):
     '''
     returns the root idx (node with no inbound edges) from adjacency matrix T
@@ -126,7 +112,9 @@ def get_seeding_pattern_from_migration_graph(G):
 
     unique_source_sites = torch.unique(source_sites)
 
-    if len(unique_source_sites) == 1:
+    if len(unique_source_sites) == 0:
+        return "no seeding"
+    elif len(unique_source_sites) == 1:
         pattern += "single-source seeding"
     elif is_cyclic(G):
         pattern += "reseeding"
@@ -188,12 +176,14 @@ def plot_temps(temps):
     plt.show()
 
 def plot_loss_components(loss_dicts, weights):
-    mig_losses = [weights.mig*e["mig"] for e in loss_dicts]
-    comig_losses = [weights.comig*e["comig"] for e in loss_dicts]
-    seed_losses = [weights.seed_site*e["seeding"] for e in loss_dicts]
-    data_fit_losses = [weights.data_fit*e["nll"] for e in loss_dicts]
-    reg_losses = [weights.reg*e["reg"] for e in loss_dicts]
-    total_losses = [e["loss"] for e in loss_dicts]
+    # if else statements to handle lr schedules where we do not calculate
+    # all loss components at every epoch
+    mig_losses = [weights.mig*e[MIG_KEY] if MIG_KEY in e else 0.0 for e in loss_dicts]
+    comig_losses = [weights.comig*e[COMIG_KEY] if COMIG_KEY in e else 0.0  for e in loss_dicts]
+    seed_losses = [weights.seed_site*e[SEEDING_KEY] if SEEDING_KEY in e else 0.0  for e in loss_dicts]
+    data_fit_losses = [weights.data_fit*e[DATA_FIT_KEY] if DATA_FIT_KEY in e else 0.0  for e in loss_dicts]
+    reg_losses = [weights.reg*e[REG_KEY] if REG_KEY in e else 0.0  for e in loss_dicts]
+    total_losses = [e[FULL_LOSS_KEY] for e in loss_dicts]
 
     plt.plot([x for x in range(len(loss_dicts))],mig_losses, label="m")
     plt.plot([x for x in range(len(loss_dicts))],comig_losses, label="c")
@@ -597,7 +587,7 @@ def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights,
                                            labeled_tree.U, B, labeled_tree.branch_lengths, O, weights, -1, 
                                            max_iter, "constant")
     if show:
-        print(formatted_loss_string(loss_dict))
+        print(formatted_loss_string(loss_dict, weights))
 
     return loss_dict
 
@@ -667,27 +657,27 @@ def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_m
         if i == 0: # Best tree
             ret = (edges, vertices_to_sites_map, mig_graph_edges, loss_info)
 
-    save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outputs)
+    save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outputs, weights)
 
     return ret
 
-def formatted_loss_string(loss_dict):
-    s = f"Loss: {loss_dict['loss']}\n\n"
+def formatted_loss_string(loss_dict, weights):
+    s = f"Loss: {loss_dict[FULL_LOSS_KEY]}\n\n"
 
-    s += f"Migration num.: {int(loss_dict['mig'])}\n"
-    s += f"Comigration num.: {int(loss_dict['comig'])}\n"
-    s += f"Seeding site num.: {int(loss_dict['seeding'])}\n"
+    s += f"Migration num.: {int(loss_dict[MIG_KEY])}\n"
+    s += f"Comigration num.: {int(loss_dict[COMIG_KEY])}\n"
+    s += f"Seeding site num.: {int(loss_dict[SEEDING_KEY])}\n"
 
-    s += f"Data fit nll: {loss_dict['nll']}\n"
+    s += f"Data fit nll: {loss_dict[DATA_FIT_KEY]}\n"
 
-    if (loss_dict['gen'] != 0):
-        s += f"Genetic distance loss: {loss_dict['gen']}\n"
-    if (loss_dict['organo'] != 0):
-        s += f"Organotropism loss: {loss_dict['organo']}\n"
+    if weights.gen_dist != 0:
+        s += f"Genetic distance loss: {loss_dict[GEN_DIST_KEY]}\n"
+    if weights.organotrop != 0:
+        s += f"Organotropism loss: {loss_dict[ORGANOTROP_KEY]}\n"
     return s
 
 
-def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outputs):
+def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outputs, weights):
 
     k = print_config.k_best_trees
     sys_fonts = matplotlib.font_manager.findSystemFonts(fontpaths=None, fontext='ttf')
@@ -715,11 +705,7 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
     vspace = 1/nrows
 
     for i, (tree_dot, mig_graph_dot, loss_info, seeding_pattern) in enumerate(figure_outputs):
-        # Create graphviz objects from the DOT code
-        #tree = PILImage.open(tree_dot.render(os.path.join(output_dir,f"T_{run_name}{i}"),format="png", view=False))
-        #mig_graph = PILImage.open(mig_graph_dot.render(os.path.join(output_dir, f"G_{run_name}{i}"),format="png", view=False))
-
-        tree = pgv.AGraph(string=tree_dot).draw(format="png", prog="dot")
+        tree = pgv.AGraph(string=tree_dot).draw(format="png", prog="dot", args="-Glabel=\"\"")
         tree = PILImage.open(io.BytesIO(tree))
         mig_graph = pgv.AGraph(string=mig_graph_dot).draw(format="png", prog="dot")
         mig_graph = PILImage.open(io.BytesIO(mig_graph))
@@ -745,14 +731,8 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
         ax2.imshow(mig_graph)
         ax2.axis('off')
 
-        ax3.text(0.5, 0.5, formatted_loss_string(loss_info), ha='center', va='center', fontsize=10)
+        ax3.text(0.5, 0.5, formatted_loss_string(loss_info, weights), ha='center', va='center', fontsize=10)
         ax3.axis('off')
-
-        # Cleanup temp files
-        # os.remove(os.path.join(output_dir, f"T_{run_name}{i}"))
-        # os.remove(os.path.join(output_dir, f"T_{run_name}{i}.png"))
-        # os.remove(os.path.join(output_dir, f"G_{run_name}{i}"))
-        # os.remove(os.path.join(output_dir, f"G_{run_name}{i}.png"))
 
     # Display and save the plot
     fig1 = plt.gcf()

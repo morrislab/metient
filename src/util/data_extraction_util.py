@@ -83,7 +83,7 @@ def write_pooled_tsv_from_pyclone_clusters(input_data_tsv_fn, clusters_tsv_fn,
                                            cluster_sep=";"):
 
     '''
-    After clustering with PairTree (see: https://github.com/morrislab/pairtree#clustering-mutations),
+    After clustering with PyClone (see: https://github.com/Roth-Lab/pyclone),
     prepares tsvs by pooling mutations belonging to the same cluster
 
     Args:
@@ -260,11 +260,11 @@ def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_cluster_labe
 
     return torch.tensor(R, dtype=torch.float32), torch.tensor(V, dtype=torch.float32), list(unique_sites)
 
-def get_ref_var_matrices_from_real_data(tsv_filepath):
+def get_ref_var_matrices(tsv_filepath):
     '''
-    tsv_filepath: path to tsv for hoadley tsv data
+    tsv_filepath: path to tsv with columns:
 
-    tsv is expected to have columns: ['#sample_index', 'sample_label', '#anatomical_site_index',
+    ['#sample_index', 'sample_label', '#anatomical_site_index',
     'anatomical_site_label', 'character_index', 'character_label', 'ref', 'var']
 
     returns
@@ -391,18 +391,18 @@ def _get_adj_matrix_from_machina_tree(tree_edges, character_label_to_idx, remove
 
     return T, pruned_character_label_to_idx if remove_unseen_nodes else character_label_to_idx
 
-def get_adj_matrices_from_all_mutation_trees(mut_trees_filename, character_label_to_idx, is_sim_data=False):
+def get_adj_matrices_from_spruce_mutation_trees(mut_trees_filename, idx_to_character_label, is_sim_data=False):
     '''
-    When running MACHINA's generatemutationtrees executable, it provides a txt file with
+    When running MACHINA's generatemutationtrees executable (SPRUCE), it provides a txt file with
     all possible mutation trees. See data/machina_simulated_data/mut_trees_m5/ for examples
 
-    Returns a list of tuples, each containing (T, character_label_to_idx) for each
+    Returns a list of tuples, each containing (T, pruned_idx_to_character_label) for each
     tree in mut_trees_filename.
         - T: adjacency matrix where Tij = 1 if there is a path from i to j
-        - character_label_to_idx: a pruned character_label_to_idx where nodes that
-        appear in the machina tsv file but do not appear in the reported tree are removed
+        - idx_to_character_label: a dict mapping indices of the adj matrix T to character
+        labels 
     '''
-
+    character_label_to_idx = {v:k for k,v in idx_to_character_label.items()}
     out = []
     with open(mut_trees_filename, 'r') as f:
         tree_data = []
@@ -484,7 +484,7 @@ def get_adj_matrix_from_machina_tree(character_label_to_idx, tree_filename, remo
             edges.append((node_i, node_j))
     return _get_adj_matrix_from_machina_tree(edges, character_label_to_idx, remove_unseen_nodes, skip_polytomies)
 
-def get_genetic_distance_tensor_from_adj_matrix(adj_matrix, idx_to_character_label, split_char, normalize=True):
+def get_genetic_distance_matrix_from_adj_matrix(adj_matrix, idx_to_character_label, split_char, normalize=True):
     '''
     Get the genetic distances between nodes by counting the number of mutations between
     parent and child. idx_to_character_label's keys are expected to be mutation/cluster indices with
