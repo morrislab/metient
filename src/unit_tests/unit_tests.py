@@ -237,14 +237,16 @@ class TestTRACERxPreprocessing(unittest.TestCase):
 		self.assertEqual(case_id, patient_id)
 
 		true_patient_data = true_patient_data[true_patient_data['patient_id']==patient_id]
-		
+		true_sample_data = true_sample_data[true_sample_data['patient_id']==patient_id]
+
 		num_expected_rows = 0
 		for _, row in true_patient_data.iterrows():
 			samples_w_cn = set(self._get_sample_to_cn_count(row['MajorCPN_SC']).keys()).intersection(self._get_sample_to_cn_count(row['MinorCPN_SC']).keys())
-			samples_w_full_info = samples_w_cn.intersection(set(self._get_sample_to_ref_var_count(row['RegionSum']).keys()))
+			samples_w_cn_and_mut_data = samples_w_cn.intersection(set(self._get_sample_to_ref_var_count(row['RegionSum']).keys()))
+			samples_w_sample_info = set([region.replace(f"{patient_id}_", "") for region in true_sample_data['region']])
+			samples_w_full_info = samples_w_cn_and_mut_data.intersection(samples_w_sample_info)
 			num_expected_rows += len(samples_w_full_info)
 
-		true_sample_data = true_sample_data[true_sample_data['patient_id']==patient_id]
 		
 		self.assertEqual(len(patient_df), num_expected_rows)
 
@@ -284,7 +286,6 @@ class TestTRACERxPreprocessing(unittest.TestCase):
 		print(len(patients), "patients")
 		
 		for patient in patients:
-			print(patient)
 			self._test_mig_hist_pt_orchard_tsv(patient, patient_tsv_dir, true_patient_data)
 			self._test_conipher_tsv(patient, conipher_tsv_dir, true_patient_data, true_sample_info_df, true_purity_ploidy_df)
 
