@@ -168,7 +168,7 @@ def get_cluster_label_to_idx(cluster_filepath, ignore_polytomies):
 	    for e.g. for the file above, this would return:
 	        {'0': 0, '1': 1, '3;15;17;22;24;29;32;34;53;56': 2, '69;78;80;81': 3}
     '''
-    dutil.get_cluster_label_to_idx(cluster_filepath, ignore_polytomies)
+    return dutil.get_cluster_label_to_idx(cluster_filepath, ignore_polytomies)
 
 def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_cluster_label_to_idx, T):
     '''
@@ -190,4 +190,4 @@ def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_cluster_labe
 	    (2) V matrix (num_samples x num_clusters) with the # of variant reads for each sample+cluster,
 	    (3) unique anatomical sites from the patient's data
     '''
-    dutil.get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_cluster_label_to_idx, T)
+    return dutil.get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_cluster_label_to_idx, T)
