@@ -19,16 +19,6 @@ import os
 if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
 
-class Weights:
-    def __init__(self, data_fit=1.0, mig=1.0, comig=1.0, seed_site=1.0, reg=1.0, gen_dist=0.0, organotrop=0.0):
-        self.data_fit = data_fit
-        self.mig = mig
-        self.comig = comig
-        self.seed_site = seed_site
-        self.reg = reg
-        self.gen_dist = gen_dist
-        self.organotrop = organotrop
-
 def _ancestral_labeling_objective(V, A, G, O, weights):
     '''
     Args:
@@ -93,8 +83,8 @@ def _ancestral_labeling_objective(V, A, G, O, weights):
 
     # Combine all 5 components with their weights
     vertex_labeling_loss = (weights.mig*m + weights.seed_site*s + weights.comig*c + weights.gen_dist*g + weights.organotrop*o)
-    loss_components = {"mig": m.item(), "comig": c.item(), "seeding": s.item(), 
-                       "organo": 0 if o == 0 else round(o.item(), 3), "gen": 0 if g == 0 else round(g.item(), 3)}
+    loss_components = {MIG_KEY: m.item(), COMIG_KEY: c.item(), SEEDING_KEY: s.item(), 
+                       ORGANOTROP_KEY: 0 if o == 0 else round(o.item(), 3), GEN_DIST_KEY: 0 if g == 0 else round(g.item(), 3)}
 
     return vertex_labeling_loss, loss_components
 
@@ -157,7 +147,7 @@ def _subclonal_presence_objective(ref, var, omega_v, U, B, weights):
     reg = torch.sum(U)
 
     subclonal_presence_loss = (weights.data_fit*nlglh + weights.reg*reg)
-    loss_components = {"nll": round(nlglh.item(), 3), "reg": reg.item()}
+    loss_components = {DATA_FIT_KEY: round(nlglh.item(), 3), REG_KEY: reg.item()}
     return subclonal_presence_loss, loss_components
 
 def no_cna_omega(shape):
@@ -234,7 +224,7 @@ def objective(V, A, ref, var, U, B, G, O, weights, epoch, max_iter, lr_sched):
 
     loss = (lam1*subclonal_presence_loss) + (lam2*ancestral_labeling_loss)
 
-    loss_components = {**loss_dict_a, **loss_dict_b, **{"loss": round(loss.item(), 3)}}
+    loss_components = {**loss_dict_a, **loss_dict_b, **{FULL_LOSS_KEY: round(loss.item(), 3)}}
 
     return loss, loss_components
 
@@ -390,40 +380,41 @@ def get_avg_loss_components(loss_components):
     d = {key:d[key]/len(loss_components) for key in d} # calc averages across batch
     return d
 
-def get_migration_history(T, ref, var, ordered_sites, p, node_idx_to_label,
+def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_label,
                           weights, print_config, output_dir, run_name, 
                           G=None, O=None, max_iter=200, lr=0.1, init_temp=40, final_temp=0.01,
                           batch_size=64, custom_colors=None, weight_init_primary=False, lr_sched="step"):
     '''
     Args:
-        T: Adjacency matrix (directed) of the internal nodes (shape: num_internal_nodes x num_internal_nodes)
+        T: numpy ndarray or torch tensor (shape: num_internal_nodes x num_internal_nodes). Adjacency matrix (directed) of the internal nodes.
         
-        ref: Reference matrix (num_anatomical_sites x num_mutation_clusters), i.e., num. reads that map to reference allele
+        ref: numpy ndarray or torch tensor (shape: num_anatomical_sites x num_mutation_clusters). Reference matrix, i.e., num. reads that map to reference allele
         
-        var: Variant matrix (num_anatomical_sites x num_mutation_clusters), i.e., num. reads that map to variant allele
+        var: numpy ndarray or torch tensor (shape:  num_anatomical_sites x num_mutation_clusters). Variant matrix, i.e., num. reads that map to variant allele
         
-        ordered_sites: array of the anatomical site names (e.g. ["breast", "lung_met"]) with length =  num_anatomical_sites) and 
+        ordered_sites: list of the anatomical site names (e.g. ["breast", "lung_met"]) with length =  num_anatomical_sites) and 
         the order matches the order of sites in the ref and var
         
+        primary_site: name of the primary site (must be an element of ordered_sites)
+
         weights: Weight object for how much to penalize each component of the loss
         
         print_config: PrintConfig object with options on how to visualize output
         
         node_idx_to_label: dictionary mapping vertex indices (corresponding to their index in T) to custom labels
         for plotting
-
-        p: one-hot vector (shape: num_anatomical_sites x 1) indicating the location
-        of the primary tumor (root vertex must be labeled with the primary)
         
         output_dir: path for where to save output trees to
 
-        run_name: e.g. patient name
+        run_name: e.g. patient name, used for naming output files.
 
     Optional:
-        G: Matrix of genetic distances between internal nodes (shape: num_internal_nodes x num_internal_nodes).
+        G: numpy ndarray or torch tensor (shape: num_internal_nodes x num_internal_nodes).
+        Matrix of genetic distances between internal nodes.
         Lower values indicate lower branch lengths, i.e. more genetically similar.
         
-        O: Matrix of organotropism values between sites (shape: num_anatomical_sites x  num_anatomical_sites).
+        O: numpy ndarray or torch tensor (shape: num_anatomical_sites x  num_anatomical_sites).
+        Matrix of organotropism values between sites.
 
         weight_init_primary: whether to initialize weights higher to favor vertex labeling of primary for all internal nodes
         
@@ -456,6 +447,11 @@ def get_migration_history(T, ref, var, ordered_sites, p, node_idx_to_label,
         raise ValueError("Adjacency matrix T is empty or not a tree.")
     if not os.path.isdir(output_dir):
         raise ValueError(f"{output_dir} does not exist.")
+    if not primary_site in ordered_sites:
+        raise ValueError(f"{primary_site} not in ordered_sites: {ordered_sites}")
+
+    primary_idx = ordered_sites.index(primary_site)
+    p = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(ordered_sites)).T
 
     B = vert_util.get_mutation_matrix_tensor(T)
     num_sites = ref.shape[0]
