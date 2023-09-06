@@ -118,19 +118,6 @@ def get_genetic_distance_matrix_from_adj_matrix(adj_matrix, idx_to_character_lab
     '''
     return dutil.get_genetic_distance_matrix_from_adj_matrix(adj_matrix, idx_to_character_label, split_char, normalize=normalize)
 
-def get_adj_matrices_from_spruce_mutation_trees(mut_trees_filename, idx_to_character_label, is_sim_data=False):
-    '''
-    When running MACHINA's generatemutationtrees executable, it provides a txt file with
-    all possible mutation trees. See data/machina_simulated_data/mut_trees_m5/ for examples
-
-    Returns a list of tuples, each containing (T, pruned_idx_to_character_label) for each
-    tree in mut_trees_filename.
-        - T: adjacency matrix where Tij = 1 if there is a path from i to j
-        - idx_to_character_label: a dict mapping indices of the adj matrix T to character
-        labels 
-    '''
-    return dutil.get_adj_matrices_from_spruce_mutation_trees(mut_trees_filename, idx_to_character_label, is_sim_data=is_sim_data)
-
 def get_organotropism_matrix_from_msk_met(ordered_sites, cancer_type, frequency_csv, site_to_msk_met_map=None):
     '''
     Args:
@@ -148,7 +135,20 @@ def get_organotropism_matrix_from_msk_met(ordered_sites, cancer_type, frequency_
     '''
     return dutil.get_organotropism_matrix_from_msk_met(ordered_sites, cancer_type, frequency_csv, site_to_msk_met_map=site_to_msk_met_map)
 
-def get_cluster_label_to_idx(cluster_filepath, ignore_polytomies):
+def get_adj_matrices_from_spruce_mutation_trees(mut_trees_filename, idx_to_character_label, is_sim_data=False):
+    '''
+    When running MACHINA's generatemutationtrees executable, it provides a txt file with
+    all possible mutation trees. See data/machina_simulated_data/mut_trees_m5/ for examples
+
+    Returns a list of tuples, each containing (T, pruned_idx_to_character_label) for each
+    tree in mut_trees_filename.
+        - T: adjacency matrix where Tij = 1 if there is a path from i to j
+        - idx_to_character_label: a dict mapping indices of the adj matrix T to character
+        labels 
+    '''
+    return dutil.get_adj_matrices_from_spruce_mutation_trees(mut_trees_filename, idx_to_character_label, is_sim_data=is_sim_data)
+
+def get_idx_to_cluster_label(cluster_filepath, ignore_polytomies):
     '''
     Args:
 	    cluster_filepath: path to cluster file for MACHINA simulated data in the format:
@@ -164,30 +164,30 @@ def get_cluster_label_to_idx(cluster_filepath, ignore_polytomies):
 	    running PMH-TR) in the returned dictionary
 
     Returns:
-	    (1) a dictionary mapping cluster name to cluster number
-	    for e.g. for the file above, this would return:
-	        {'0': 0, '1': 1, '3;15;17;22;24;29;32;34;53;56': 2, '69;78;80;81': 3}
+        (1) a dictionary mapping cluster number to cluster name
+        for e.g. for the file above, this would return:
+            {0: '0', 1: '69;78;80;81'}
     '''
-    return dutil.get_cluster_label_to_idx(cluster_filepath, ignore_polytomies)
+    return dutil.get_idx_to_cluster_label(cluster_filepath, ignore_polytomies)
 
-def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_cluster_label_to_idx, T):
+def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_idx_to_cluster_label, T):
     '''
     tsv_filepath: path to tsv for machina simulated data (generated from create_conf_intervals_from_reads.py)
 
     tsv is expected to have columns: ['#sample_index', 'sample_label', 'anatomical_site_index',
     'anatomical_site_label', 'character_index', 'character_label', 'f_lb', 'f_ub', 'ref', 'var']
 
-    pruned_cluster_label_to_idx:  dictionary mapping the cluster label to index which corresponds to
-    col index in the R matrix and V matrix returned. This isn't 1:1 with the
-    'character_label' to 'character_index' mapping in the tsv because we only keep the
+    pruned_idx_to_cluster_label:  dictionary mapping the cluster index to label, where 
+    index corresponds to col index in the R matrix and V matrix returned. This isn't 1:1 
+    with the 'character_label' to 'character_index' mapping in the tsv because we only keep the
     nodes which appear in the mutation tree, and re-index after removing unseen nodes
     (see _get_adj_matrix_from_machina_tree)
 
     T: adjacency matrix of the internal nodes.
 
-    Returns:
-	    (1) R matrix (num_samples x num_clusters) with the # of reference reads for each sample+cluster,
-	    (2) V matrix (num_samples x num_clusters) with the # of variant reads for each sample+cluster,
-	    (3) unique anatomical sites from the patient's data
+    returns
+    (1) R matrix (num_samples x num_clusters) with the # of reference reads for each sample+cluster,
+    (2) V matrix (num_samples x num_clusters) with the # of variant reads for each sample+cluster,
+    (3) unique anatomical sites from the patient's data
     '''
-    return dutil.get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_cluster_label_to_idx, T)
+    return dutil.get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_idx_to_cluster_label, T)

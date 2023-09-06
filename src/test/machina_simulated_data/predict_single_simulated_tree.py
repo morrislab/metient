@@ -12,22 +12,18 @@ def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, tree_nu
     all_mut_trees_fn = os.path.join(machina_sims_data_dir, f"{site}_mut_trees", f"mut_trees_{mig_type}_seed{seed}.txt")
     ref_var_fn = os.path.join(machina_sims_data_dir, f"{site}_clustered_input", f"cluster_{mig_type}_seed{seed}.tsv")
 
-    cluster_label_to_idx = get_cluster_label_to_idx(cluster_fn, ignore_polytomies=True)
-    
-    adj_matrix, pruned_cluster_label_to_idx = get_adj_matrices_from_spruce_mutation_trees(all_mut_trees_fn, cluster_label_to_idx, is_sim_data=True)[tree_num]
+    idx_to_cluster_label = get_idx_to_cluster_label(cluster_fn, ignore_polytomies=True)
+    adj_matrix, pruned_idx_to_label = get_adj_matrices_from_spruce_mutation_trees(all_mut_trees_fn, idx_to_cluster_label, is_sim_data=True)[tree_num]
     custom_colors = [matplotlib.colors.to_hex(c) for c in ['limegreen', 'royalblue', 'hotpink', 'grey', 'saddlebrown', 'darkorange', 'purple', 'red', 'black', 'black', 'black', 'black']]
 
     print(f"Tree {tree_num}")
     T = torch.tensor(adj_matrix, dtype = torch.float32)
-    idx_to_label = {v:k for k,v in pruned_cluster_label_to_idx.items()}
 
-    ref_matrix, var_matrix, unique_sites= get_ref_var_matrices_from_machina_sim_data(ref_var_fn, pruned_cluster_label_to_idx, T)
+    ref_matrix, var_matrix, unique_sites= get_ref_var_matrices_from_machina_sim_data(ref_var_fn, pruned_idx_to_label, T)
 
-    primary_idx = unique_sites.index('P')
-    r = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(unique_sites)).T
-    G = get_genetic_distance_matrix_from_adj_matrix(T, idx_to_label, ";")
-    print_config = plot_util.PrintConfig(visualize=False, verbose=False, viz_intermeds=False, k_best_trees=5)
-    T_edges, labeling, G_edges, loss_info, time = get_migration_history(T, ref_matrix, var_matrix, unique_sites, r, idx_to_label,
+    G = get_genetic_distance_matrix_from_adj_matrix(T, pruned_idx_to_label, ";")
+    print_config = PrintConfig(visualize=False, verbose=False, viz_intermeds=False, k_best_trees=5)
+    T_edges, labeling, G_edges, loss_info, time = get_migration_history(T, ref_matrix, var_matrix, unique_sites, 'P', pruned_idx_to_label,
                                                                         weights, print_config, out_dir, f"tree{tree_num}_seed{seed}", 
                                                                         G=G, max_iter=100, batch_size=batch_size, custom_colors=custom_colors, 
                                                                         weight_init_primary=weight_init_primary, lr_sched=lr_sched)
