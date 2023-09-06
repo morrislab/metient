@@ -154,47 +154,48 @@ def is_leaf(cluster_label):
     '''
     return "_" in cluster_label and not is_resolved_polytomy_cluster(cluster_label)
 
-def get_cluster_label_to_idx(cluster_filepath, ignore_polytomies):
+def get_idx_to_cluster_label(cluster_filepath, ignore_polytomies):
     '''
-    cluster_filepath: path to cluster file for MACHINA simulated data in the format:
-    0
-    1
-    3;15;17;22;24;29;32;34;53;56
-    69;78;80;81
+    Args:
+        cluster_filepath: path to cluster file for MACHINA simulated data in the format:
+        0
+        1
+        3;15;17;22;24;29;32;34;53;56
+        69;78;80;81
 
-    where each semi-colon separated number represents a mutation that belongs
-    to cluster i where i is the file line number.
+        where each semi-colon separated number represents a mutation that belongs
+        to cluster i where i is the file line number.
 
-    ignore_polytomies: whether to include resolved polytomies (which were found by
-    running PMH-TR) in the returned dictionary
+        ignore_polytomies: whether to include resolved polytomies (which were found by
+        running PMH-TR) in the returned dictionary
 
-    returns
-    (1) a dictionary mapping cluster name to cluster number
-    for e.g. for the file above, this would return:
-        {'0': 0, '1': 1, '3;15;17;22;24;29;32;34;53;56': 2, '69;78;80;81': 3}
+    Returns:
+        (1) a dictionary mapping cluster number to cluster name
+        for e.g. for the file above, this would return:
+            {0: '0', 1: '69;78;80;81'}
     '''
-    cluster_label_to_idx = OrderedDict()
+    idx_to_cluster_label = OrderedDict()
     with open(cluster_filepath) as f:
         i = 0
         for line in f:
             label = line.strip()
             if is_resolved_polytomy_cluster(label) and ignore_polytomies:
                 continue
-            cluster_label_to_idx[label] = i
+            idx_to_cluster_label[i] = label
             i += 1
-    return cluster_label_to_idx
+    return idx_to_cluster_label
 
 # TODO: remove polytomy stuff?
-def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_cluster_label_to_idx, T):
+def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_idx_to_cluster_label, T):
     '''
     tsv_filepath: path to tsv for machina simulated data (generated from create_conf_intervals_from_reads.py)
 
     tsv is expected to have columns: ['#sample_index', 'sample_label', 'anatomical_site_index',
     'anatomical_site_label', 'character_index', 'character_label', 'f_lb', 'f_ub', 'ref', 'var']
 
-    pruned_cluster_label_to_idx:  dictionary mapping the cluster label to index which corresponds to
-    col index in the R matrix and V matrix returned. This isn't 1:1 with the
-    'character_label' to 'character_index' mapping in the tsv because we only keep the
+    pruned_idx_to_cluster_label:  dictionary mapping the cluster index to label, where 
+    index corresponds to col index in the R matrix and V matrix returned. This isn't 1:1 
+    with the 'character_label' to 'character_index' mapping in the tsv because we only keep the
     nodes which appear in the mutation tree, and re-index after removing unseen nodes
     (see _get_adj_matrix_from_machina_tree)
 
@@ -203,14 +204,13 @@ def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_cluster_labe
     returns
     (1) R matrix (num_samples x num_clusters) with the # of reference reads for each sample+cluster,
     (2) V matrix (num_samples x num_clusters) with the # of variant reads for each sample+cluster,
-    (3) unique anatomical sites from the patient's data,
-    # (4) dictionary mapping character_label to index (machina uses colors to represent
-    # subclones, so this would map 'pink' to n, if pink is the nth node in the adjacency matrix)
+    (3) unique anatomical sites from the patient's data
     '''
 
-    assert(pruned_cluster_label_to_idx != None)
+    assert(pruned_idx_to_cluster_label != None)
     assert(T != None)
 
+    pruned_cluster_label_to_idx = {v:k for k,v in pruned_idx_to_cluster_label.items()}
     with open(tsv_filepath) as f:
         tsv = csv.reader(f, delimiter="\t", quotechar='"')
         # Take a pass over the tsv to collect some metadata
@@ -328,12 +328,12 @@ def get_ref_var_matrices(tsv_filepath):
     idx_to_character_label = {v:k for k,v in character_label_to_idx.items()}
     return torch.tensor(R, dtype=torch.float32), torch.tensor(V, dtype=torch.float32), list(unique_sites), idx_to_character_label
 
-def _get_adj_matrix_from_machina_tree(tree_edges, character_label_to_idx, remove_unseen_nodes=True, skip_polytomies=False):
+def _get_adj_matrix_from_machina_tree(tree_edges, idx_to_character_label, remove_unseen_nodes=True, skip_polytomies=False):
     '''
     Args:
         tree_edges: list of tuples where each tuple is an edge in the tree
-        character_label_to_idx: dictionary mapping character_label to index (machina
-        uses colors to represent subclones, so this would map 'pink' to n, if pink
+        idx_to_character_label: dictionary mapping index to character_label (machina
+        uses colors to represent subclones, so this would map n to 'pink', if pink
         is the nth node in the adjacency matrix).
         remove_unseen_nodes: if True, removes nodes that
         appear in the machina tsv file but do not appear in the reported tree
@@ -343,9 +343,10 @@ def _get_adj_matrix_from_machina_tree(tree_edges, character_label_to_idx, remove
 
     Returns:
         T: adjacency matrix where Tij = 1 if there is a path from i to j
-        character_label_to_idx: a pruned character_label_to_idx where nodes that
+        idx_to_character_label: a pruned idx_to_character_label where nodes that
         appear in the machina tsv file but do not appear in the reported tree are removed
     '''
+    character_label_to_idx = {v:k for k,v in idx_to_character_label.items()}
     num_internal_nodes = len(character_label_to_idx)
     T = np.zeros((num_internal_nodes, num_internal_nodes))
     seen_nodes = set()
@@ -389,7 +390,9 @@ def _get_adj_matrix_from_machina_tree(tree_edges, character_label_to_idx, remove
             #print("Removing unseen nodes:", unseen_nodes, pruned_character_label_to_idx)
             pass
 
-    return T, pruned_character_label_to_idx if remove_unseen_nodes else character_label_to_idx
+    ret_dict = pruned_character_label_to_idx if remove_unseen_nodes else character_label_to_idx
+    ret_dict = {v:k for k,v in ret_dict.items()}
+    return T, ret_dict
 
 def get_adj_matrices_from_spruce_mutation_trees(mut_trees_filename, idx_to_character_label, is_sim_data=False):
     '''
@@ -402,7 +405,6 @@ def get_adj_matrices_from_spruce_mutation_trees(mut_trees_filename, idx_to_chara
         - idx_to_character_label: a dict mapping indices of the adj matrix T to character
         labels 
     '''
-    character_label_to_idx = {v:k for k,v in idx_to_character_label.items()}
     out = []
     with open(mut_trees_filename, 'r') as f:
         tree_data = []
@@ -410,8 +412,8 @@ def get_adj_matrices_from_spruce_mutation_trees(mut_trees_filename, idx_to_chara
             if i < 3: continue
             # This marks the beginning of a tree
             if "#edges, tree" in line:
-                adj_matrix, pruned_char_label_to_idx = _get_adj_matrix_from_machina_tree(tree_data, character_label_to_idx)
-                out.append((adj_matrix, pruned_char_label_to_idx))
+                adj_matrix, pruned_idx_to_label = _get_adj_matrix_from_machina_tree(tree_data, idx_to_character_label)
+                out.append((adj_matrix, pruned_idx_to_label))
                 tree_data = []
             else:
                 nodes = line.strip().split()
@@ -422,8 +424,8 @@ def get_adj_matrices_from_spruce_mutation_trees(mut_trees_filename, idx_to_chara
                 else:
                     tree_data.append((nodes[0], nodes[1]))
 
-        adj_matrix, pruned_char_label_to_idx = _get_adj_matrix_from_machina_tree(tree_data, character_label_to_idx)
-        out.append((adj_matrix, pruned_char_label_to_idx))
+        adj_matrix, pruned_idx_to_label = _get_adj_matrix_from_machina_tree(tree_data, idx_to_character_label)
+        out.append((adj_matrix, pruned_idx_to_label))
     return out
 
 def get_adj_matrices_from_all_conipher_trees(mut_trees_filename):
