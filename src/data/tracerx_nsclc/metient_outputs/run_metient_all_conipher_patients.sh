@@ -7,9 +7,7 @@ fi
 
 rm -rf ${3}; 
 mkdir -p ${3}"/max_pars/"
-mkdir -p ${3}"/max_pars_wip/"
 mkdir -p ${3}"/max_pars_genetic_distance/"
-mkdir -p ${3}"/max_pars_genetic_distance_wip/"
 
 for f in ${1}/*.tsv
 do

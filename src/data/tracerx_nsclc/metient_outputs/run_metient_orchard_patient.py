@@ -5,16 +5,13 @@ import seaborn as sns
 import pandas as pd
 import torch
 import matplotlib.pyplot as plt
-from src.lib import vertex_labeling
-from src.util import data_extraction_util as data_util
+from src.lib.metient import *
 from src.util import pairtree_data_extraction_util as pt_util
-from src.util import vertex_labeling_util as vert_util
-from src.util import plotting_util as plot_util
 
 custom_colors = ["#6aa84fff","#c27ba0ff", "#e69138ff", "#be5742e1", "#2496c8ff", "#674ea7ff"] + sns.color_palette("Paired").as_hex()
 
 def find_labeling(ref_var_fn, tree, custom_colors, primary_site, patient_name, output_dir, weights):    
-    ref_matrix, var_matrix, unique_sites, idx_to_full_cluster_label = data_util.get_ref_var_matrices_from_real_data(ref_var_fn)
+    ref_matrix, var_matrix, unique_sites, idx_to_full_cluster_label = get_ref_var_matrices(ref_var_fn)
 
     idx_to_cluster_label = dict()
     for ix in idx_to_full_cluster_label:
@@ -29,14 +26,12 @@ def find_labeling(ref_var_fn, tree, custom_colors, primary_site, patient_name, o
     print(tree.shape)
 
     print(f"Anatomical sites: {unique_sites}")   
-    primary_idx = unique_sites.index(primary_site)
-    p = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(unique_sites)).T
-    G = data_util.get_genetic_distance_tensor_from_adj_matrix(tree,idx_to_full_cluster_label, ";")
-    print_config = plot_util.PrintConfig(visualize=False, verbose=False, viz_intermeds=False, k_best_trees=4)
-    vertex_labeling.get_migration_history(tree, ref_matrix, var_matrix, unique_sites, p, idx_to_cluster_label,
-                                          weights, print_config, output_dir, patient_name, G=G, 
-                                          weight_init_primary=True, custom_colors=custom_colors, 
-                                          batch_size=32, max_iter=100, lr_sched='step')
+    G = get_genetic_distance_matrix_from_adj_matrix(tree,idx_to_full_cluster_label, ";")
+    print_config = PrintConfig(visualize=False, verbose=False, viz_intermeds=False, k_best_trees=5)
+    get_migration_history(tree, ref_matrix, var_matrix, unique_sites, primary_site, idx_to_cluster_label,
+                          weights, print_config, output_dir, patient_name, G=G, 
+                          weight_init_primary=True, custom_colors=custom_colors, 
+                          batch_size=2048, max_iter=100, lr_sched='step')
 
     
 def run_orchard_patient(patient, weights, tsv_dir, tree_dir, output_dir):
@@ -73,12 +68,12 @@ if __name__=="__main__":
     patient = args.patient
 
     # (1) Maximum parsimony
-    weights = vertex_labeling.Weights(data_fit=0.5, mig=10.0, comig=7.0, seed_site=5.0, reg=2.0, gen_dist=0.0)
+    weights = Weights(data_fit=0.2, mig=10.0, comig=7.0, seed_site=5.0, reg=2.0, gen_dist=0.0)
     output_dir = os.path.join(args.output_dir, "max_pars")
     run_orchard_patient(patient, weights, args.tsv_dir, args.tree_dir, output_dir)
 
     # (2) Maximum parsimony + genetic distance
-    weights = vertex_labeling.Weights(data_fit=0.5, mig=10.0, comig=7.0, seed_site=5.0, reg=2.0, gen_dist=1.0)
+    weights = Weights(data_fit=0.2, mig=10.0, comig=7.0, seed_site=5.0, reg=2.0, gen_dist=1.0)
     output_dir = os.path.join(args.output_dir, "max_pars_genetic_distance")
     run_orchard_patient(patient, weights, args.tsv_dir, args.tree_dir, output_dir)
 
