@@ -11,7 +11,7 @@ mkdir -p ${3}"/max_pars_genetic_distance/"
 
 for f in ${2}/*.results.npz
 do
-    p=$(basename $f .tsv | sed -e "s/.results.npz//")
+    p=$(basename $f .tsv | sed -e "s/_pyclone_clustered.results.npz//")
     echo "Submitting metient_orchard_job_$p"
     bsub -J "metient_orchard_job_$p" -n 8 -W 20:00 -o output_metient_orchard.log -e error_metient_orchard.log ./run_metient_single_orchard_patient.sh ${p} ${1} ${2} ${3}
 done
