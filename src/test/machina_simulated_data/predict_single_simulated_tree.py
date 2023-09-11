@@ -16,7 +16,7 @@ def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir
     data = get_adj_matrices_from_spruce_mutation_trees(all_mut_trees_fn, idx_to_cluster_label, is_sim_data=True)
     custom_colors = [matplotlib.colors.to_hex(c) for c in ['limegreen', 'royalblue', 'hotpink', 'grey', 'saddlebrown', 'darkorange', 'purple', 'red', 'black', 'black', 'black', 'black']]
 
-    for adj_matrix, pruned_idx_to_label in data:
+    for tree_num, (adj_matrix, pruned_idx_to_label) in enumerate(data):
         print(f"Tree {tree_num}")
         T = torch.tensor(adj_matrix, dtype = torch.float32)
 
