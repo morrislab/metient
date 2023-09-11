@@ -7,6 +7,7 @@ import argparse
 import datetime
 import concurrent.futures
 import multiprocessing
+import math
 from src.lib.metient import *
 
 def get_num_mut_trees(mut_tree_fn):
@@ -68,12 +69,12 @@ for site in sites:
         print(seeds)
         for seed in seeds:
             num_trees = get_num_mut_trees(os.path.join(machina_sims_data_dir, f"{site}_mut_trees", f"mut_trees_{mig_type}_seed{seed}.txt"))
-            for tree_num in range(0,num_trees):
-                python_cmd = [f"bsub -J metient_sim_{site}_{mig_type}_{seed} -n 8 -W 30:00  -R rusage[mem=8] -o output_metient_sims.log -e error_metient_sims.log ./predict_single_simulated_tree.sh",
-                              machina_sims_data_dir, site, mig_type, seed, str(tree_num), str(args.data_fit), str(args.mig),
-                              str(args.comig), str(args.seed), str(args.reg), str(args.gen),
-                              'True' if args.wip else 'False', str(args.bs), args.lr_sched, out_dir]
-                cmd = " ".join(python_cmd)
-                print(f"Submitting command: {cmd}")
-                subprocess.run(" ".join(python_cmd), shell=True)
+            time = math.ceil(num_trees/2)+2
+            python_cmd = [f"bsub -J metient_sim_{site}_{mig_type}_{seed} -n 8 -W {time}  -R rusage[mem=8] -o output_metient_sims.log -e error_metient_sims.log ./predict_single_simulated_tree.sh",
+                          machina_sims_data_dir, site, mig_type, seed, str(args.data_fit), str(args.mig),
+                          str(args.comig), str(args.seed), str(args.reg), str(args.gen),
+                          'True' if args.wip else 'False', str(args.bs), args.lr_sched, out_dir]
+            cmd = " ".join(python_cmd)
+            print(f"Submitting command: {cmd}")
+            subprocess.run(" ".join(python_cmd), shell=True)
 
