@@ -92,9 +92,8 @@ if __name__ == "__main__":
 
             for seed in seeds:
                 seed_filenames = [f for f in filenames if seed == f[f.find("seed")+4:f.find(".predicted")]]
-                #trees = [t[t.find("tree")+4:t.find("_seed")] for t in filenames if seed == t[t.find("seed")+4:t.find(".predicted")]]
-                tree_nums = eutil.get_metient_min_loss_trees(predicted_site_mig_type_data_dir, seed, k)
-                for clone_tree_num, met_tree_num in tree_nums:
+                tree_info = eutil.get_metient_min_loss_trees(predicted_site_mig_type_data_dir, seed, k)
+                for loss, clone_tree_num, met_tree_num in tree_info:
                     
                     metient_pickle_fn = os.path.join(predicted_site_mig_type_data_dir, f"tree{clone_tree_num}_seed{seed}.pickle")
 

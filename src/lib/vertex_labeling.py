@@ -80,7 +80,6 @@ def _ancestral_labeling_objective(V, A, G, O, weights):
         organ_penalty = -1.0*torch.mul(O, site_adj_no_diag[0,:])
         o = torch.sum(organ_penalty)
 
-
     # Combine all 5 components with their weights
     vertex_labeling_loss = (weights.mig*m + weights.seed_site*s + weights.comig*c + weights.gen_dist*g + weights.organotrop*o)
     loss_components = {MIG_KEY: m.item(), COMIG_KEY: c.item(), SEEDING_KEY: s.item(), 
@@ -449,6 +448,13 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
         raise ValueError(f"{output_dir} does not exist.")
     if not primary_site in ordered_sites:
         raise ValueError(f"{primary_site} not in ordered_sites: {ordered_sites}")
+
+    if not torch.is_tensor(T):
+        T = torch.tensor(T, dtype=torch.float32)
+    if not torch.is_tensor(ref):
+        ref = torch.tensor(ref, dtype=torch.float32)
+    if not torch.is_tensor(var):
+        var = torch.tensor(var, dtype=torch.float32)
 
     primary_idx = ordered_sites.index(primary_site)
     p = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(ordered_sites)).T
