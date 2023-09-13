@@ -6,10 +6,9 @@ src/data/rerun_machina_sims/
 src/test/output_plots/.DS_Store
 **/.DS_Store
 .DS_Store
-src/data/**
-src/data/**/*.params.json
-src/data/**/*.ssm
-src/data/**/*.tsv
-src/data/**/*.txt
-src/data/**/*.png
-src/data/**/*.pickle
+**/*.params.json
+**/*.ssm
+**/*.tsv
+**/*.txt
+**/*.png
+**/*.pickle
