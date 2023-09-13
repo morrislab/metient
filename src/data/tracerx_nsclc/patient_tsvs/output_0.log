@@ -1,0 +1,2394 @@
+Sender: LSF System <lsfadmin@lt03>
+Subject: Job 19016676: <batch_job_CRUK0742> in cluster <lila> Done
+
+Job <batch_job_CRUK0742> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:55 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:55 2023
+Terminated at Tue Aug  8 14:39:56 2023
+Results reported at Tue Aug  8 14:39:56 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0742
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   42.31 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.00 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   62 sec.
+    Turnaround time :                            63 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0742...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt11>
+Subject: Job 19016647: <batch_job_CRUK0572> in cluster <lila> Done
+
+Job <batch_job_CRUK0572> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt11>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 14:40:16 2023
+Results reported at Tue Aug  8 14:40:16 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0572
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   65.22 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.26 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   84 sec.
+    Turnaround time :                            84 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0572...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt03>
+Subject: Job 19016673: <batch_job_CRUK0733> in cluster <lila> Done
+
+Job <batch_job_CRUK0733> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:55 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:55 2023
+Terminated at Tue Aug  8 14:40:21 2023
+Results reported at Tue Aug  8 14:40:21 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0733
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   69.72 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.43 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   87 sec.
+    Turnaround time :                            88 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0733...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt03>
+Subject: Job 19016674: <batch_job_CRUK0736> in cluster <lila> Done
+
+Job <batch_job_CRUK0736> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:55 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:55 2023
+Terminated at Tue Aug  8 14:40:24 2023
+Results reported at Tue Aug  8 14:40:24 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0736
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   72.89 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.44 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   89 sec.
+    Turnaround time :                            91 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0736...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt03>
+Subject: Job 19016672: <batch_job_CRUK0730> in cluster <lila> Done
+
+Job <batch_job_CRUK0730> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:55 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:55 2023
+Terminated at Tue Aug  8 14:40:28 2023
+Results reported at Tue Aug  8 14:40:28 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0730
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   77.31 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.47 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   94 sec.
+    Turnaround time :                            95 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0730...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt11>
+Subject: Job 19016648: <batch_job_CRUK0584> in cluster <lila> Done
+
+Job <batch_job_CRUK0584> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt11>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 14:40:34 2023
+Results reported at Tue Aug  8 14:40:34 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0584
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   83.77 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.49 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   102 sec.
+    Turnaround time :                            102 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0584...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@ls03>
+Subject: Job 19016638: <batch_job_CRUK0524> in cluster <lila> Done
+
+Job <batch_job_CRUK0524> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:51 2023
+Job was executed on host(s) <2*ls03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 14:40:46 2023
+Results reported at Tue Aug  8 14:40:46 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0524
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   95.70 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.47 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   114 sec.
+    Turnaround time :                            115 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0524...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt03>
+Subject: Job 19016675: <batch_job_CRUK0737> in cluster <lila> Done
+
+Job <batch_job_CRUK0737> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:55 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:55 2023
+Terminated at Tue Aug  8 14:40:56 2023
+Results reported at Tue Aug  8 14:40:56 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0737
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   105.44 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.58 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   122 sec.
+    Turnaround time :                            123 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0737...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt03>
+Subject: Job 19016682: <batch_job_CRUK0794> in cluster <lila> Done
+
+Job <batch_job_CRUK0794> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:55 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:55 2023
+Terminated at Tue Aug  8 14:41:08 2023
+Results reported at Tue Aug  8 14:41:08 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0794
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   117.14 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.62 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   134 sec.
+    Turnaround time :                            135 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0794...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt08>
+Subject: Job 19016658: <batch_job_CRUK0636> in cluster <lila> Done
+
+Job <batch_job_CRUK0636> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt08>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 14:41:17 2023
+Results reported at Tue Aug  8 14:41:17 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0636
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   123.04 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.56 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   144 sec.
+    Turnaround time :                            145 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0636...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@ls11>
+Subject: Job 19016686: <batch_job_CRUK0872> in cluster <lila> Done
+
+Job <batch_job_CRUK0872> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+Job was executed on host(s) <2*ls11>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:55 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:55 2023
+Terminated at Tue Aug  8 14:41:17 2023
+Results reported at Tue Aug  8 14:41:17 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0872
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   122.94 sec.
+    Max Memory :                                 -
+    Average Memory :                             -
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                85
+    Run time :                                   144 sec.
+    Turnaround time :                            143 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0872...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@ls03>
+Subject: Job 19016641: <batch_job_CRUK0537> in cluster <lila> Done
+
+Job <batch_job_CRUK0537> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:51 2023
+Job was executed on host(s) <2*ls03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 14:41:25 2023
+Results reported at Tue Aug  8 14:41:25 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0537
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   134.35 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.59 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   153 sec.
+    Turnaround time :                            154 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0537...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt03>
+Subject: Job 19016679: <batch_job_CRUK0762> in cluster <lila> Done
+
+Job <batch_job_CRUK0762> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:55 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:55 2023
+Terminated at Tue Aug  8 14:42:32 2023
+Results reported at Tue Aug  8 14:42:32 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0762
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   202.06 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.77 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   218 sec.
+    Turnaround time :                            219 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0762...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@ls11>
+Subject: Job 19016684: <batch_job_CRUK0810> in cluster <lila> Done
+
+Job <batch_job_CRUK0810> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*ls11>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:55 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:55 2023
+Terminated at Tue Aug  8 14:42:45 2023
+Results reported at Tue Aug  8 14:42:45 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0810
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   214.21 sec.
+    Max Memory :                                 -
+    Average Memory :                             -
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   232 sec.
+    Turnaround time :                            232 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0810...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@ls11>
+Subject: Job 19016685: <batch_job_CRUK0817> in cluster <lila> Done
+
+Job <batch_job_CRUK0817> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*ls11>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:55 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:55 2023
+Terminated at Tue Aug  8 14:43:20 2023
+Results reported at Tue Aug  8 14:43:20 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0817
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   248.73 sec.
+    Max Memory :                                 -
+    Average Memory :                             -
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   267 sec.
+    Turnaround time :                            267 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0817...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt08>
+Subject: Job 19016660: <batch_job_CRUK0666> in cluster <lila> Done
+
+Job <batch_job_CRUK0666> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt08>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 14:43:26 2023
+Results reported at Tue Aug  8 14:43:26 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0666
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   254.65 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.70 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   273 sec.
+    Turnaround time :                            274 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0666...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt11>
+Subject: Job 19016643: <batch_job_CRUK0552> in cluster <lila> Done
+
+Job <batch_job_CRUK0552> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:51 2023
+Job was executed on host(s) <2*lt11>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 14:44:08 2023
+Results reported at Tue Aug  8 14:44:08 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0552
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   298.41 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.79 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   316 sec.
+    Turnaround time :                            317 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0552...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt08>
+Subject: Job 19016665: <batch_job_CRUK0702> in cluster <lila> Done
+
+Job <batch_job_CRUK0702> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt08>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 14:44:11 2023
+Results reported at Tue Aug  8 14:44:11 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0702
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   299.22 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.82 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   317 sec.
+    Turnaround time :                            319 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0702...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt08>
+Subject: Job 19016654: <batch_job_CRUK0609> in cluster <lila> Done
+
+Job <batch_job_CRUK0609> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt08>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 14:44:11 2023
+Results reported at Tue Aug  8 14:44:11 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0609
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   298.44 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.84 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   317 sec.
+    Turnaround time :                            319 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0609...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt11>
+Subject: Job 19016649: <batch_job_CRUK0587> in cluster <lila> Done
+
+Job <batch_job_CRUK0587> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt11>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 14:44:18 2023
+Results reported at Tue Aug  8 14:44:18 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0587
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   308.02 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.84 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   325 sec.
+    Turnaround time :                            326 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0587...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt08>
+Subject: Job 19016655: <batch_job_CRUK0617> in cluster <lila> Done
+
+Job <batch_job_CRUK0617> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt08>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 14:44:36 2023
+Results reported at Tue Aug  8 14:44:36 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0617
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   325.40 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.84 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   342 sec.
+    Turnaround time :                            344 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0617...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@ls03>
+Subject: Job 19016640: <batch_job_CRUK0530> in cluster <lila> Done
+
+Job <batch_job_CRUK0530> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:51 2023
+Job was executed on host(s) <2*ls03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 14:44:40 2023
+Results reported at Tue Aug  8 14:44:40 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0530
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   330.42 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.81 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   348 sec.
+    Turnaround time :                            349 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0530...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt03>
+Subject: Job 19016677: <batch_job_CRUK0745> in cluster <lila> Done
+
+Job <batch_job_CRUK0745> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:55 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:55 2023
+Terminated at Tue Aug  8 14:44:56 2023
+Results reported at Tue Aug  8 14:44:56 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0745
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   346.31 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.86 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   362 sec.
+    Turnaround time :                            363 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0745...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt08>
+Subject: Job 19016664: <batch_job_CRUK0698> in cluster <lila> Done
+
+Job <batch_job_CRUK0698> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt08>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 14:45:01 2023
+Results reported at Tue Aug  8 14:45:01 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0698
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   350.38 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.85 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   368 sec.
+    Turnaround time :                            369 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0698...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt19>
+Subject: Job 19016669: <batch_job_CRUK0719> in cluster <lila> Done
+
+Job <batch_job_CRUK0719> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt19>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 14:45:16 2023
+Results reported at Tue Aug  8 14:45:16 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0719
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   365.28 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.81 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   384 sec.
+    Turnaround time :                            383 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0719...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt03>
+Subject: Job 19016671: <batch_job_CRUK0722> in cluster <lila> Done
+
+Job <batch_job_CRUK0722> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:55 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:55 2023
+Terminated at Tue Aug  8 14:45:28 2023
+Results reported at Tue Aug  8 14:45:28 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0722
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   378.49 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.87 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   394 sec.
+    Turnaround time :                            395 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0722...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt08>
+Subject: Job 19016657: <batch_job_CRUK0625> in cluster <lila> Done
+
+Job <batch_job_CRUK0625> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt08>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 14:45:40 2023
+Results reported at Tue Aug  8 14:45:40 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0625
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   388.82 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.84 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   406 sec.
+    Turnaround time :                            408 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0625...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@ls03>
+Subject: Job 19016639: <batch_job_CRUK0528> in cluster <lila> Done
+
+Job <batch_job_CRUK0528> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:51 2023
+Job was executed on host(s) <2*ls03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 14:45:48 2023
+Results reported at Tue Aug  8 14:45:48 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0528
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   398.63 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.86 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   416 sec.
+    Turnaround time :                            417 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0528...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt11>
+Subject: Job 19016645: <batch_job_CRUK0559> in cluster <lila> Done
+
+Job <batch_job_CRUK0559> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:51 2023
+Job was executed on host(s) <2*lt11>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 14:45:55 2023
+Results reported at Tue Aug  8 14:45:55 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0559
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   405.27 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.88 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   423 sec.
+    Turnaround time :                            424 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0559...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt19>
+Subject: Job 19016666: <batch_job_CRUK0707> in cluster <lila> Done
+
+Job <batch_job_CRUK0707> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt19>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 14:46:00 2023
+Results reported at Tue Aug  8 14:46:00 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0707
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   409.80 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.88 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   427 sec.
+    Turnaround time :                            427 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0707...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt14>
+Subject: Job 19016632: <batch_job_CRUK0496> in cluster <lila> Done
+
+Job <batch_job_CRUK0496> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:51 2023
+Job was executed on host(s) <2*lt14>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:52 2023
+Terminated at Tue Aug  8 14:46:13 2023
+Results reported at Tue Aug  8 14:46:13 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0496
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   430.47 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.84 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   442 sec.
+    Turnaround time :                            442 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0496...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt13>
+Subject: Job 19016630: <batch_job_CRUK0487> in cluster <lila> Done
+
+Job <batch_job_CRUK0487> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:50 2023
+Job was executed on host(s) <2*lt13>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:52 2023
+Terminated at Tue Aug  8 14:47:00 2023
+Results reported at Tue Aug  8 14:47:00 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0487
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   470.49 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.88 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   488 sec.
+    Turnaround time :                            490 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0487...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt19>
+Subject: Job 19016668: <batch_job_CRUK0718> in cluster <lila> Done
+
+Job <batch_job_CRUK0718> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt19>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 14:47:26 2023
+Results reported at Tue Aug  8 14:47:26 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0718
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   496.06 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.88 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   514 sec.
+    Turnaround time :                            513 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0718...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt11>
+Subject: Job 19016652: <batch_job_CRUK0596> in cluster <lila> Done
+
+Job <batch_job_CRUK0596> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt11>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 14:47:37 2023
+Results reported at Tue Aug  8 14:47:37 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0596
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   507.57 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.88 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   525 sec.
+    Turnaround time :                            525 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0596...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt11>
+Subject: Job 19016644: <batch_job_CRUK0557> in cluster <lila> Done
+
+Job <batch_job_CRUK0557> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:51 2023
+Job was executed on host(s) <2*lt11>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 14:47:40 2023
+Results reported at Tue Aug  8 14:47:40 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0557
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   510.39 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.89 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   528 sec.
+    Turnaround time :                            529 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0557...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt08>
+Subject: Job 19016661: <batch_job_CRUK0667> in cluster <lila> Done
+
+Job <batch_job_CRUK0667> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt08>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 14:47:46 2023
+Results reported at Tue Aug  8 14:47:46 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0667
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   515.17 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.90 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   532 sec.
+    Turnaround time :                            534 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0667...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt11>
+Subject: Job 19016650: <batch_job_CRUK0589> in cluster <lila> Done
+
+Job <batch_job_CRUK0589> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt11>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 14:48:08 2023
+Results reported at Tue Aug  8 14:48:08 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0589
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   537.72 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.90 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   556 sec.
+    Turnaround time :                            556 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0589...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt19>
+Subject: Job 19016667: <batch_job_CRUK0714> in cluster <lila> Done
+
+Job <batch_job_CRUK0714> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt19>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 14:48:14 2023
+Results reported at Tue Aug  8 14:48:14 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0714
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   543.35 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.88 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   561 sec.
+    Turnaround time :                            561 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0714...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt11>
+Subject: Job 19016651: <batch_job_CRUK0590> in cluster <lila> Done
+
+Job <batch_job_CRUK0590> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt11>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 14:48:35 2023
+Results reported at Tue Aug  8 14:48:35 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0590
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   565.92 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.89 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   583 sec.
+    Turnaround time :                            583 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0590...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt03>
+Subject: Job 19016681: <batch_job_CRUK0769> in cluster <lila> Done
+
+Job <batch_job_CRUK0769> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:55 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:55 2023
+Terminated at Tue Aug  8 14:48:58 2023
+Results reported at Tue Aug  8 14:48:58 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0769
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   588.19 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.91 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   603 sec.
+    Turnaround time :                            605 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0769...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt03>
+Subject: Job 19016680: <batch_job_CRUK0766> in cluster <lila> Done
+
+Job <batch_job_CRUK0766> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:55 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:55 2023
+Terminated at Tue Aug  8 14:49:10 2023
+Results reported at Tue Aug  8 14:49:10 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0766
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   600.38 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.92 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   616 sec.
+    Turnaround time :                            617 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0766...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt08>
+Subject: Job 19016662: <batch_job_CRUK0691> in cluster <lila> Done
+
+Job <batch_job_CRUK0691> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt08>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 14:50:54 2023
+Results reported at Tue Aug  8 14:50:54 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0691
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   704.63 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.89 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   721 sec.
+    Turnaround time :                            722 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0691...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt03>
+Subject: Job 19016670: <batch_job_CRUK0721> in cluster <lila> Done
+
+Job <batch_job_CRUK0721> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 14:51:28 2023
+Results reported at Tue Aug  8 14:51:28 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0721
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   739.21 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.92 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   755 sec.
+    Turnaround time :                            755 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0721...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt11>
+Subject: Job 19016642: <batch_job_CRUK0543> in cluster <lila> Done
+
+Job <batch_job_CRUK0543> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:51 2023
+Job was executed on host(s) <2*lt11>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 14:51:54 2023
+Results reported at Tue Aug  8 14:51:54 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0543
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   764.01 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.93 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   781 sec.
+    Turnaround time :                            783 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0543...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt08>
+Subject: Job 19016659: <batch_job_CRUK0640> in cluster <lila> Done
+
+Job <batch_job_CRUK0640> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt08>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 14:53:27 2023
+Results reported at Tue Aug  8 14:53:27 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0640
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   856.51 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.93 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   874 sec.
+    Turnaround time :                            875 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0640...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt13>
+Subject: Job 19016631: <batch_job_CRUK0495> in cluster <lila> Done
+
+Job <batch_job_CRUK0495> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:50 2023
+Job was executed on host(s) <2*lt13>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:52 2023
+Terminated at Tue Aug  8 14:54:35 2023
+Results reported at Tue Aug  8 14:54:35 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0495
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   927.14 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.94 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   943 sec.
+    Turnaround time :                            945 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0495...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt03>
+Subject: Job 19016678: <batch_job_CRUK0748> in cluster <lila> Done
+
+Job <batch_job_CRUK0748> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*lt03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:55 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:55 2023
+Terminated at Tue Aug  8 14:54:52 2023
+Results reported at Tue Aug  8 14:54:52 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0748
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   943.72 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.95 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   958 sec.
+    Turnaround time :                            959 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0748...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt14>
+Subject: Job 19016633: <batch_job_CRUK0497> in cluster <lila> Done
+
+Job <batch_job_CRUK0497> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:51 2023
+Job was executed on host(s) <2*lt14>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 14:55:49 2023
+Results reported at Tue Aug  8 14:55:49 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0497
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1007.03 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.94 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   1017 sec.
+    Turnaround time :                            1018 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0497...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@ls11>
+Subject: Job 19016683: <batch_job_CRUK0799> in cluster <lila> Done
+
+Job <batch_job_CRUK0799> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+Job was executed on host(s) <2*ls11>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:55 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:55 2023
+Terminated at Tue Aug  8 14:59:29 2023
+Results reported at Tue Aug  8 14:59:29 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0799
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1221.20 sec.
+    Max Memory :                                 -
+    Average Memory :                             -
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   1236 sec.
+    Turnaround time :                            1236 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0799...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt11>
+Subject: Job 19016653: <batch_job_CRUK0598> in cluster <lila> Done
+
+Job <batch_job_CRUK0598> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt11>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 15:06:02 2023
+Results reported at Tue Aug  8 15:06:02 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0598
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1614.60 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.97 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   1630 sec.
+    Turnaround time :                            1630 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0598...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt11>
+Subject: Job 19016646: <batch_job_CRUK0567> in cluster <lila> Done
+
+Job <batch_job_CRUK0567> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt11>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 15:10:23 2023
+Results reported at Tue Aug  8 15:10:23 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0567
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   1877.72 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.97 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   1891 sec.
+    Turnaround time :                            1891 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0567...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt08>
+Subject: Job 19016656: <batch_job_CRUK0620> in cluster <lila> Done
+
+Job <batch_job_CRUK0620> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt08>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 15:14:59 2023
+Results reported at Tue Aug  8 15:14:59 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0620
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   2154.46 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.98 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   2166 sec.
+    Turnaround time :                            2167 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0620...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@ls03>
+Subject: Job 19016637: <batch_job_CRUK0519> in cluster <lila> Done
+
+Job <batch_job_CRUK0519> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:51 2023
+Job was executed on host(s) <2*ls03>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 15:15:02 2023
+Results reported at Tue Aug  8 15:15:02 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0519
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   2157.16 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.97 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   2170 sec.
+    Turnaround time :                            2171 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0519...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt12>
+Subject: Job 19016634: <batch_job_CRUK0510> in cluster <lila> Done
+
+Job <batch_job_CRUK0510> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:51 2023
+Job was executed on host(s) <2*lt12>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 15:15:25 2023
+Results reported at Tue Aug  8 15:15:25 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0510
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   2176.61 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.96 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   2192 sec.
+    Turnaround time :                            2194 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0510...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt12>
+Subject: Job 19016636: <batch_job_CRUK0516> in cluster <lila> Done
+
+Job <batch_job_CRUK0516> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:51 2023
+Job was executed on host(s) <2*lt12>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 15:17:18 2023
+Results reported at Tue Aug  8 15:17:18 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0516
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   2290.87 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.97 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   2305 sec.
+    Turnaround time :                            2307 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0516...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt08>
+Subject: Job 19016663: <batch_job_CRUK0693> in cluster <lila> Done
+
+Job <batch_job_CRUK0693> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:52 2023
+Job was executed on host(s) <2*lt08>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:54 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:54 2023
+Terminated at Tue Aug  8 15:24:13 2023
+Results reported at Tue Aug  8 15:24:13 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0693
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   2708.46 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.98 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   2720 sec.
+    Turnaround time :                            2721 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0693...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+
+Sender: LSF System <lsfadmin@lt12>
+Subject: Job 19016635: <batch_job_CRUK0514> in cluster <lila> Done
+
+Job <batch_job_CRUK0514> was submitted from host <lt18> by user <koyyald> in cluster <lila> at Tue Aug  8 14:38:51 2023
+Job was executed on host(s) <2*lt12>, in queue <cpuqueue>, as user <koyyald> in cluster <lila> at Tue Aug  8 14:38:53 2023
+</home/koyyald> was used as the home directory.
+</data/morrisq/divyak/projects/met_history_prediction/src/data/tracerx_nsclc/patient_tsvs> was used as the working directory.
+Started at Tue Aug  8 14:38:53 2023
+Terminated at Tue Aug  8 15:43:43 2023
+Results reported at Tue Aug  8 15:43:43 2023
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+./run_single_clustering.sh . /data/morrisq/divyak/projects/pairtree/bin/clustervars CRUK0514
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   3881.63 sec.
+    Max Memory :                                 2 GB
+    Average Memory :                             1.98 GB
+    Total Requested Memory :                     4.00 GB
+    Delta Memory :                               2.00 GB
+    Max Swap :                                   -
+    Max Processes :                              77
+    Max Threads :                                83
+    Run time :                                   3891 sec.
+    Turnaround time :                            3892 sec.
+
+The output (if any) follows:
+
+Clustering mutations for CRUK0514...
+
+
+PS:
+
+Read file <error_0.log> for stderr output of this job.
+

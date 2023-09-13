@@ -1,0 +1,158 @@
+Loading required package: KernSmooth
+KernSmooth 2.23 loaded
+Copyright M. P. Wand 1997-2009
+There were 50 or more warnings (use warnings() to see the first 50)
+Loading required package: coin
+Loading required package: survival
+
+Attaching package: ‘survival’
+
+The following object is masked from ‘package:future’:
+
+    cluster
+
+The following object is masked from ‘package:boot’:
+
+    aml
+
+There were 50 or more warnings (use warnings() to see the first 50)
+Loading required package: RColorBrewer
+Loading required package: wordcloud
+
+Attaching package: ‘wordcloud’
+
+The following object is masked from ‘package:gplots’:
+
+    textplot
+
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+The following `from` values were not present in `x`: 1A, 1, 2A, 2, 3
+Warning message:
+In brewer.pal(min(max.cols, no.optima), name = "Paired") :
+  minimal value for n is 3, returning requested palette with 3 different levels
+
+Loading required package: optparse
+Loading required package: boot
+Warning message:
+In grow.multi.trees(nestedlist = nested_pyclone, pyclone = test_pyclone,  :
+  Restricting number of clusters to simultaneously move to 5
+Loading required package: beeswarm
+There were 50 or more warnings (use warnings() to see the first 50)

@@ -46,7 +46,7 @@ def run_orchard_patient(patient, weights, tsv_dir, tree_dir, output_dir):
     for primary_site in primary_sites:
         print(f"Primary site: {primary_site}")
         run_name = f"{patient}_{primary_site}"
-        tree_fn = os.path.join(tree_dir, f"{patient}.results.npz")
+        tree_fn = os.path.join(tree_dir, f"{patient}_pyclone_clustered.results.npz")
         data = pt_util.get_adj_matrices_from_pairtree_results(tree_fn)
         tree, _ = data[0] # Use best tree
         find_labeling(tsv_fn, tree, custom_colors, primary_site, run_name, output_dir, weights)
