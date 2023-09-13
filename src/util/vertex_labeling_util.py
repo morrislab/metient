@@ -77,12 +77,14 @@ def get_path_matrix_tensor(A):
 
 def get_mutation_matrix_tensor(A):
     '''
-    A is a tensor adjacency matrix (where Aij = 1 if there is a path from i to j)
+    A is an numpy ndarray or tensor adjacency matrix (where Aij = 1 if there is a path from i to j)
 
     returns a mutation matrix B, which is a subclone x mutation binary matrix, where Bij = 1
     if subclone i has mutation j.
     '''
-    return torch.tensor(get_path_matrix(A.cpu().numpy().T, remove_self_loops=False), dtype = torch.float32)
+    if torch.is_tensor(A):
+        A = A.cpu().numpy()
+    return torch.tensor(get_path_matrix(A.T, remove_self_loops=False), dtype = torch.float32)
 
 def get_adj_matrix_from_edge_list(edge_list):
     T = []
