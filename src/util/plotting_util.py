@@ -335,14 +335,14 @@ def plot_loss_components(loss_dicts, weights):
     seed_losses = [weights.seed_site*e[SEEDING_KEY] if SEEDING_KEY in e else 0.0  for e in loss_dicts]
     data_fit_losses = [weights.data_fit*e[DATA_FIT_KEY] if DATA_FIT_KEY in e else 0.0  for e in loss_dicts]
     reg_losses = [weights.reg*e[REG_KEY] if REG_KEY in e else 0.0  for e in loss_dicts]
-    total_losses = [e[FULL_LOSS_KEY] for e in loss_dicts]
+    #total_losses = [e[FULL_LOSS_KEY] for e in loss_dicts]
 
     plt.plot([x for x in range(len(loss_dicts))],mig_losses, label="m")
     plt.plot([x for x in range(len(loss_dicts))],comig_losses, label="c")
     plt.plot([x for x in range(len(loss_dicts))],seed_losses, label="s")
     plt.plot([x for x in range(len(loss_dicts))],data_fit_losses, label="nll")
     plt.plot([x for x in range(len(loss_dicts))],reg_losses, label="reg")
-    plt.plot([x for x in range(len(loss_dicts))],total_losses, label="total_loss")
+    #plt.plot([x for x in range(len(loss_dicts))],total_losses, label="total_loss")
 
     plt.xlabel("epoch")
     plt.ylabel("loss")
@@ -674,7 +674,7 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx
     # we have to use graphviz in order to get multi-color edges :/
     dot = to_pydot(G).to_string().split("\n")
     # hack since there doesn't seem to be API to modify graph attributes...
-    dot.insert(1, 'graph[splines=false]; nodesep=0.7; ranksep=0.6; forcelabels=true; dpi=600; size=2.5;')
+    dot.insert(1, 'graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dpi=600; size=2.5;')
     #dot.insert(2, legend_dot)
     dot_str = ("\n").join(dot)
 
@@ -721,7 +721,7 @@ def plot_tree_deprecated(V, T, ordered_sites, custom_colors=None, custom_node_id
 
 
 def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, 
-                    node_idx_to_label, ordered_sites, max_iter, show):
+                    node_idx_to_label, ordered_sites, p, show):
     
     # Debugging information
     U_clipped = labeled_tree.U.cpu().clone().detach().numpy()
@@ -735,17 +735,20 @@ def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights,
     logger.debug(F_hat_df)
 
     # Loss information
-    loss, loss_dict = vert_label.objective(labeled_tree.labeling, labeled_tree.tree, ref_matrix, var_matrix, 
-                                           labeled_tree.U, B, labeled_tree.branch_lengths, O, weights, -1, 
-                                           max_iter, "constant")
+    V = labeled_tree.labeling
+    V = V.reshape(1, V.shape[0], V.shape[1]) # add batch dimension
+    loss, loss_dict = vert_label.evaluate(V, labeled_tree.tree, ref_matrix, var_matrix, 
+                                          labeled_tree.U, B, labeled_tree.branch_lengths, O, p, weights)
     if show:
         print(formatted_loss_string(loss_dict, weights))
 
     return loss_dict
 
-def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_matrix, var_matrix, B, O, G,
-                     weights, node_idx_to_label, ordered_sites, print_config, intermediate_data, custom_colors, 
-                     primary, max_iter, output_dir, run_name):
+def print_best_trees(losses_tensor, V, U, ref_matrix, var_matrix, B, O, G, T, weights, node_idx_to_label, 
+                     ordered_sites, print_config, intermediate_data, custom_colors, primary, output_dir, run_name):
+    
+    primary_idx = ordered_sites.index(primary)
+    p = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(ordered_sites)).T
 
     def _visualize_intermediate_trees(best_tree_idx):
         '''
@@ -764,7 +767,7 @@ def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_m
 
             tree = LabeledTree(full_trees[best_tree_idx], V[best_tree_idx], U[best_tree_idx], full_branch_lengths[best_tree_idx])
 
-            print_tree_info(tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, max_iter, print_config)
+            print_tree_info(tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, p, print_config)
             plot_tree(tree.labeling, tree.tree, G, ordered_sites, custom_colors, node_idx_to_label, show=print_config.visualize)
             plot_migration_graph(tree.labeling, tree.tree, ordered_sites, custom_colors, primary)
 
@@ -774,7 +777,7 @@ def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_m
     tree_set = set()
     # Iterate from best to worst tree, and only get trees with unique U or V matrices
     for i, loss_ix in enumerate(min_loss_indices):
-        labeled_tree = LabeledTree(full_trees[loss_ix], V[loss_ix], U[loss_ix], full_branch_lengths[loss_ix])
+        labeled_tree = LabeledTree(T, V[loss_ix], U, G)
         if labeled_tree not in tree_set:
             tree_set.add(labeled_tree)
             if len(k_trees_and_losses) < print_config.k_best_trees:
@@ -788,10 +791,10 @@ def print_best_trees(losses_tensor, V, U, full_trees, full_branch_lengths, ref_m
     figure_outputs = []
     pickle_outputs = {'ancestral_labelings':[], 'subclonal_presence_matrices':[], 
                       'full_adjacency_matrices':[], 'ordered_anatomical_sites':ordered_sites,
-                      'primary_site':primary_site_label, 'full_node_idx_to_label':[], 'losses':[]}
+                      'primary_site':primary, 'full_node_idx_to_label':[], 'losses':[]}
     for i, tup in enumerate(k_trees_and_losses):
         tree = tup[0]
-        loss_info = print_tree_info(tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, max_iter, show=False)
+        loss_info = print_tree_info(tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, p, show=False)
 
         tree_dot, edges, vertices_to_sites_map = plot_tree(tree.labeling, tree.tree, G, ordered_sites, custom_colors, node_idx_to_label, show=False)
         mig_graph_dot, mig_graph_edges = plot_migration_graph(tree.labeling, tree.tree, ordered_sites, custom_colors, primary, show=False)
@@ -823,9 +826,9 @@ def formatted_loss_string(loss_dict, weights):
     s += f"Data fit nll: {loss_dict[DATA_FIT_KEY]}\n"
 
     if weights.gen_dist != 0:
-        s += f"Genetic distance loss: {loss_dict[GEN_DIST_KEY]}\n"
+        s += f"Genetic distance loss: {round(float(loss_dict[GEN_DIST_KEY]), 3)}\n"
     if weights.organotrop != 0:
-        s += f"Organotropism loss: {loss_dict[ORGANOTROP_KEY]}\n"
+        s += f"Organotropism loss: {round(float(loss_dict[ORGANOTROP_KEY]), 3)}\n"
     return s
 
 
@@ -886,16 +889,19 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
         ax3.text(0.5, 0.5, formatted_loss_string(loss_info, weights), ha='center', va='center', fontsize=10)
         ax3.axis('off')
 
-    # Display and save the plot
     fig1 = plt.gcf()
-    fig1.savefig(os.path.join(output_dir, f'{run_name}.png'), dpi=300, bbox_inches='tight')
-    print(f"Saving {run_name} to {output_dir}")
 
     if print_config.visualize:
         plt.show()
 
-    # Save results to pickle file
-    with open(os.path.join(output_dir, f"{run_name}.pickle"), 'wb') as handle:
-        pickle.dump(pickle_outputs, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    if print_config.save_outputs:
+        if not os.path.isdir(output_dir):
+            raise ValueError(f"{output_dir} does not exist.")
+        
+        fig1.savefig(os.path.join(output_dir, f'{run_name}.png'), dpi=300, bbox_inches='tight')
+        print(f"Saving {run_name} to {output_dir}")
+        # Save results to pickle file
+        with open(os.path.join(output_dir, f"{run_name}.pickle"), 'wb') as handle:
+            pickle.dump(pickle_outputs, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
