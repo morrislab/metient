@@ -503,7 +503,7 @@ def get_genetic_distance_matrix_from_adj_matrix(adj_matrix, idx_to_character_lab
                 G[i][j] = num_mutations
 
     if normalize:
-        G = G / np.max(G)
+        G = G / np.sum(G)
     return torch.tensor(G, dtype = torch.float32)
 
 
