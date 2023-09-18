@@ -65,18 +65,19 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
 					                        batch_size=batch_size, custom_colors=custom_colors, weight_init_primary=weight_init_primary, lr_sched=lr_sched)
 
 class PrintConfig:
-    def __init__(self, visualize=True, verbose=False, viz_intermeds=False, k_best_trees=1, save_imgs=False):
+    def __init__(self, visualize=True, verbose=False, viz_intermeds=False, k_best_trees=3, save_outputs=True):
         '''
         visualize: bool, whether to visualize loss, best tree, and migration graph
         verbose: bool, whether to print debug info
         viz_intermeds: bool, whether to visualize intermediate solutions to best tree
         k_best_trees: int, number of best tree solutions to visualize (if 1, only show best tree)
+        save_outputs: bool, whether to save pngs and pickle files 
         '''
         self.visualize = visualize
         self.verbose = verbose 
         self.viz_intermeds = viz_intermeds
         self.k_best_trees = k_best_trees
-        self.save_imgs = save_imgs
+        self.save_outputs = save_outputs
 
 class Weights:
     def __init__(self, data_fit=0.2, mig=10.0, comig=7.0, seed_site=5.0, reg=2.0, gen_dist=0.0, organotrop=0.0):

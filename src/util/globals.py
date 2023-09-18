@@ -1,5 +1,8 @@
 U_CUTOFF = 0.05
-G_IDENTICAL_CLONE_VALUE = 0.0
+# the higher this value, the closer to 0.0 the genetic distance is when put into e^(GENETIC_ALPHA*x)
+G_IDENTICAL_CLONE_VALUE = 2.0
+ORGANOTROP_ALPHA = -5.0
+GENETIC_ALPHA = -5.0
 
 import logging
 logger = logging.getLogger('SGD')
