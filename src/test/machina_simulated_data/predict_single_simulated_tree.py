@@ -23,7 +23,7 @@ def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir
         ref_matrix, var_matrix, unique_sites= get_ref_var_matrices_from_machina_sim_data(ref_var_fn, pruned_idx_to_label, T)
 
         G = get_genetic_distance_matrix_from_adj_matrix(T, pruned_idx_to_label, ";")
-        print_config = PrintConfig(visualize=False, verbose=False, viz_intermeds=False, k_best_trees=5)
+        print_config = PrintConfig(visualize=False, verbose=False, viz_intermeds=False, k_best_trees=10)
         T_edges, labeling, G_edges, loss_info, time = get_migration_history(T, ref_matrix, var_matrix, unique_sites, 'P', pruned_idx_to_label,
                                                                             weights, print_config, out_dir, f"tree{tree_num}_seed{seed}", 
                                                                             G=G, max_iter=100, batch_size=batch_size, custom_colors=custom_colors, 
