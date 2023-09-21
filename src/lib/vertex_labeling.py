@@ -181,36 +181,6 @@ def no_cna_omega(shape):
     # TODO: don't hardcode omega here (omegas are all 1/2 since we're assuming there are no CNAs)
     return torch.ones(shape) * 0.5
 
-def get_lambdas(epoch, max_iter, lr_sched):
-    '''
-    Returns weights for subclonal presence loss and ancestral labeling loss,
-    and bools indicating if we need to calculate that loss at this iteration
-    (for perf optimization)
-    '''
-    calc_subclonal, calc_ancestral = True, True
-    lam1, lam2 = 1.0, 1.0
-    if epoch != -1: # to evaluate loss values after training is done
-        if lr_sched == "step":   
-            if epoch < max_iter/2:
-                lam1, lam2 = 1.0, 0.0
-                calc_ancestral = False
-            else:
-                lam1, lam2 = 0.0, 1.0
-                calc_subclonal = False
-        elif lr_sched == "em": 
-            if ((epoch//20) % 2 == 0):
-                lam1, lam2 = 1.0, 0.0
-                calc_ancestral = False
-            else:
-                lam1, lam2 = 0.0, 1.0
-                calc_subclonal = False
-        elif lr_sched == "linear":
-            l = (epoch+1)*(1.0/max_iter)
-            lam1 = 1.0 - l
-            lam2 = l
-
-    return lam1, lam2, calc_subclonal, calc_ancestral
-
 def evaluate(V, soft_V, A, ref, var, U, B, G, O, p, weights):
     '''
     Args:
@@ -224,10 +194,6 @@ def evaluate(V, soft_V, A, ref, var, U, B, G, O, p, weights):
         Lower values indicate lower branch lengths, i.e. more genetically similar.
         O: Array of frequencies with which the primary cancer type seeds site i (shape: num_anatomical_sites).
         weights: Weights object
-        epoch: number of current epoch, used to determine weighting in different learning rate schemes
-        max_iter: the maximum number of iterations to be run
-        lr_sched: how to weight the two tasks, see 'get_migration_history(...)' for documentation
-
     Returns:
         Loss to score this tree and labeling combo.
     '''
@@ -409,11 +375,6 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
 
         weight_init_primary: whether to initialize weights higher to favor vertex labeling of primary for all internal nodes
         
-        lr_sched: how to weight the tasks of (1) leaf node inference and (2) internal vertex labeling. options:
-            "step": (1) has weight=1 for first half of epochs and (2) has weight=0, and then we flip the weights for the last half of training
-            "constant": default, (1) and (2) weighted equally at each epoch
-            "em": (1) has weight=1 and (2) has weight=0 for 20 epochs, and we flip every 20 epochs (kind of like E-M)
-            "linear": (1) decreases linearly while (2) increases linearly at the same rate (1/max_iter)
     Returns:
         # TODO: return info for k best trees
         Corresponding info on the *best* tree:
@@ -521,6 +482,7 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
 
         v_loss_components.append(get_avg_loss_components(loss_comps))
 
+        # TODO: anneal smoothly?
         if i % 10 == 0:
             if lr_sched != "step" or (lr_sched == "step" and i > max_iter/2):
                 temp = np.maximum(temp * np.exp(-anneal_rate * i), final_temp)
@@ -536,8 +498,6 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
         if print_config.visualize:
             plot_util.plot_loss_components(v_loss_components, weights)
 
-        
-        _, best_tree_idx = torch.topk(full_loss, 1, largest=False, sorted=True)
         edges, vert_to_site_map, mig_graph_edges, loss_info = plot_util.print_best_trees(full_loss, V, soft_V, U, ref, var, B, O, G, T, 
                                                                                          weights,node_idx_to_label, ordered_sites,
                                                                                          print_config, intermediate_data, 
