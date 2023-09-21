@@ -26,7 +26,7 @@ def repeat_n(x, n):
     '''
     return x.repeat(n,1).reshape(n, x.shape[0], x.shape[1])
 
-def _ancestral_labeling_objective(V, A, G, O, p, weights):
+def _ancestral_labeling_objective(V, soft_V, A, G, O, p, weights):
     '''
     Args:
         V: Vertex labeling of the full tree (batch_size x num_sites x num_nodes)
@@ -80,6 +80,9 @@ def _ancestral_labeling_objective(V, A, G, O, p, weights):
     bin_site_trace = torch.diagonal(binarized_site_adj, offset=0, dim1=1, dim2=2).sum(dim=1)
     c = torch.sum(binarized_site_adj, dim=(1,2)) - bin_site_trace + repeated_temporal_migrations
 
+    # Entropy
+    entropy = -1*torch.sum(torch.mul(soft_V, torch.log2(soft_V)), dim=(1, 2))
+
     # 4. Genetic distance
     g = 0
     if G != None and weights.gen_dist != 0:
@@ -103,8 +106,8 @@ def _ancestral_labeling_objective(V, A, G, O, p, weights):
         organ_penalty = torch.mul(site_adj_no_diag[:,prim_site_idx,:], adjusted_freqs)
         o = torch.sum(organ_penalty, dim=(1))
     # Combine all 5 components with their weights
-    vertex_labeling_loss = (weights.mig*m + weights.seed_site*s + weights.comig*c + weights.gen_dist*g + weights.organotrop*o)
-    loss_components = {MIG_KEY: m, COMIG_KEY: c, SEEDING_KEY: s, ORGANOTROP_KEY: o, GEN_DIST_KEY: g}
+    vertex_labeling_loss = (weights.mig*m + weights.seed_site*s + weights.comig*c + weights.gen_dist*g + weights.organotrop*o+ entropy)
+    loss_components = {MIG_KEY: m, COMIG_KEY: c, SEEDING_KEY: s, ORGANOTROP_KEY: o, GEN_DIST_KEY: g, ENTROPY_KEY: entropy}
 
     return vertex_labeling_loss, loss_components
 
@@ -208,7 +211,7 @@ def get_lambdas(epoch, max_iter, lr_sched):
 
     return lam1, lam2, calc_subclonal, calc_ancestral
 
-def evaluate(V, A, ref, var, U, B, G, O, p, weights):
+def evaluate(V, soft_V, A, ref, var, U, B, G, O, p, weights):
     '''
     Args:
         V: Vertex labeling of the **full** tree (includes leaf nodes) (num_sites x num_nodes)
@@ -229,7 +232,7 @@ def evaluate(V, A, ref, var, U, B, G, O, p, weights):
         Loss to score this tree and labeling combo.
     '''
 
-    ancestral_labeling_loss, loss_dict_a = _ancestral_labeling_objective(V, A, G, O, p, weights)
+    ancestral_labeling_loss, loss_dict_a = _ancestral_labeling_objective(V, soft_V, A, G, O, p, weights)
     
     omega_v = no_cna_omega(ref.shape)
     subclonal_presence_loss, loss_dict_b = _subclonal_presence_objective(ref, var, omega_v, U, B, weights)
@@ -352,7 +355,7 @@ def compute_v_loss(U, X, T, ref, var, p, G, O, temp, hard, weights):
 
     softmax_X, softmax_X_soft = gumbel_softmax(X, temp, hard)
     V = stack_vertex_labeling(U, softmax_X, p, T)
-    loss, loss_components = _ancestral_labeling_objective(V, T, G, O, p, weights)
+    loss, loss_components = _ancestral_labeling_objective(V, softmax_X_soft, T, G, O, p, weights)
     return V, loss, loss_components, softmax_X_soft
     
 def get_avg_loss_components(loss_components):
@@ -371,7 +374,7 @@ def get_avg_loss_components(loss_components):
 def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_label,
                           weights, print_config, output_dir, run_name, 
                           G=None, O=None, max_iter=200, lr=0.1, init_temp=40, final_temp=0.01,
-                          batch_size=64, custom_colors=None, weight_init_primary=False, lr_sched="step"):
+                          batch_size=64, custom_colors=None, weight_init_primary=True, lr_sched="step"):
     '''
     Args:
         T: numpy ndarray or torch tensor (shape: num_internal_nodes x num_internal_nodes). Adjacency matrix (directed) of the internal nodes.
@@ -507,14 +510,14 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
     for i in tqdm(range(max_iter)):
 
         v_optimizer.zero_grad()
-        V, v_loss, loss_comps, Xs = compute_v_loss(U, X, T, ref, var, p, G, O, temp, hard, weights)
+        V, v_loss, loss_comps, soft_V = compute_v_loss(U, X, T, ref, var, p, G, O, temp, hard, weights)
         mean_loss = torch.mean(v_loss)
         mean_loss.backward()
         v_optimizer.step()
 
         with torch.no_grad():
             if i % 20 == 0:
-                intermediate_data.append([v_loss, V, U, G, Xs])
+                intermediate_data.append([v_loss, V, U, G, soft_V])
 
         v_loss_components.append(get_avg_loss_components(loss_comps))
 
@@ -528,14 +531,14 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
         print(f"Time elapsed: {time_elapsed}")
 
     with torch.no_grad():
-        full_loss, loss_dict = evaluate(V, T, ref, var, U, B, G, O, p, weights)
+        full_loss, loss_dict = evaluate(V, soft_V, T, ref, var, U, B, G, O, p, weights)
 
         if print_config.visualize:
             plot_util.plot_loss_components(v_loss_components, weights)
 
         
         _, best_tree_idx = torch.topk(full_loss, 1, largest=False, sorted=True)
-        edges, vert_to_site_map, mig_graph_edges, loss_info = plot_util.print_best_trees(full_loss, V, U, ref, var, B, O, G, T, 
+        edges, vert_to_site_map, mig_graph_edges, loss_info = plot_util.print_best_trees(full_loss, V, soft_V, U, ref, var, B, O, G, T, 
                                                                                          weights,node_idx_to_label, ordered_sites,
                                                                                          print_config, intermediate_data, 
                                                                                          custom_colors, primary_site_label, 

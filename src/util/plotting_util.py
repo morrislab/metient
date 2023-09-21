@@ -335,13 +335,16 @@ def plot_loss_components(loss_dicts, weights):
     seed_losses = [weights.seed_site*e[SEEDING_KEY] if SEEDING_KEY in e else 0.0  for e in loss_dicts]
     data_fit_losses = [weights.data_fit*e[DATA_FIT_KEY] if DATA_FIT_KEY in e else 0.0  for e in loss_dicts]
     reg_losses = [weights.reg*e[REG_KEY] if REG_KEY in e else 0.0  for e in loss_dicts]
+    neg_entropy = [weights.reg*e[ENTROPY_KEY] if ENTROPY_KEY in e else 0.0  for e in loss_dicts]
     #total_losses = [e[FULL_LOSS_KEY] for e in loss_dicts]
 
     plt.plot([x for x in range(len(loss_dicts))],mig_losses, label="m")
     plt.plot([x for x in range(len(loss_dicts))],comig_losses, label="c")
     plt.plot([x for x in range(len(loss_dicts))],seed_losses, label="s")
-    plt.plot([x for x in range(len(loss_dicts))],data_fit_losses, label="nll")
-    plt.plot([x for x in range(len(loss_dicts))],reg_losses, label="reg")
+    plt.plot([x for x in range(len(loss_dicts))],neg_entropy, label="neg. ent.")
+
+    # plt.plot([x for x in range(len(loss_dicts))],data_fit_losses, label="nll")
+    # plt.plot([x for x in range(len(loss_dicts))],reg_losses, label="reg")
     #plt.plot([x for x in range(len(loss_dicts))],total_losses, label="total_loss")
 
     plt.xlabel("epoch")
@@ -625,10 +628,10 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx
                                                                 shorten_label=False, pad=False)
 
 
-    color_map = { display_node_idx_to_label_map[i][0]:idx_to_color(custom_colors, (V[:,i] == 1).nonzero()[0][0].item()) for i in range(V.shape[1])}
+    color_map = { i:idx_to_color(custom_colors, (V[:,i] == 1).nonzero()[0][0].item()) for i in range(V.shape[1])}
     G = nx.DiGraph()
     node_options = {"label":"", "shape": "circle", "penwidth":3, 
-                    "fontname":"Lato", "fontsize":"11pt",
+                    "fontname":"Lato", "fontsize":"12pt",
                     "fixedsize":"true", "height":0.25}
 
     # TODO: come up w better scaling mechanism for genetic distance
@@ -640,20 +643,20 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx
         label_i, _ = display_node_idx_to_label_map[i]
         label_j, is_leaf = display_node_idx_to_label_map[j]
         
-        G.add_node(i, xlabel=label_i, fillcolor=color_map[label_i], 
-                    color=color_map[label_i], style="filled", **node_options)
-        G.add_node(j, xlabel="" if is_leaf else label_j, fillcolor=color_map[label_j], 
-                    color=color_map[label_j], style="solid" if is_leaf else "filled", **node_options)
+        G.add_node(i, xlabel=label_i, fillcolor=color_map[i], 
+                    color=color_map[i], style="filled", **node_options)
+        G.add_node(j, xlabel="" if is_leaf else label_j, fillcolor=color_map[j], 
+                    color=color_map[j], style="solid" if is_leaf else "filled", **node_options)
 
         style = "dashed" if is_leaf else "solid"
-        penwidth = 4 if is_leaf else 4.5
+        penwidth = 5 if is_leaf else 5.5
         xlabel = "" if is_leaf else label_j
 
         # We're iterating through i,j of the full tree (including leaf nodes),
         # while G only has genetic distances between internal nodes
         minlen = gen_dist[i, j].item() if (gen_dist != None and i < len(gen_dist) and j < len(gen_dist)) else 1.0
         #print(i, j, minlen)
-        G.add_edge(i, j,color=f'"{color_map[label_i]};0.5:{color_map[label_j]}"', 
+        G.add_edge(i, j,color=f'"{color_map[i]};0.5:{color_map[j]}"', 
                    penwidth=penwidth, arrowsize=0, style=style, minlen=minlen)
 
         edges.append((full_node_idx_to_label_map[i][0], full_node_idx_to_label_map[j][0]))
@@ -663,7 +666,7 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx
     root_label = display_node_idx_to_label_map[root_idx][0]
     G.add_node("normal", label="", xlabel=root_label, penwidth=3, style="invis")
     G.add_edge("normal", root_idx, label="", 
-                color=f'"{color_map[root_label]}"', 
+                color=f'"{color_map[root_idx]}"', 
                 penwidth=4, arrowsize=0, style="solid")
 
     assert(nx.is_tree(G))
@@ -720,7 +723,7 @@ def plot_tree_deprecated(V, T, ordered_sites, custom_colors=None, custom_node_id
     return edges, vertex_name_to_site_map
 
 
-def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights, 
+def print_tree_info(labeled_tree, soft_V, ref_matrix, var_matrix, B, O, weights, 
                     node_idx_to_label, ordered_sites, p, show):
     
     # Debugging information
@@ -737,14 +740,16 @@ def print_tree_info(labeled_tree, ref_matrix, var_matrix, B, O, weights,
     # Loss information
     V = labeled_tree.labeling
     V = V.reshape(1, V.shape[0], V.shape[1]) # add batch dimension
-    loss, loss_dict = vert_label.evaluate(V, labeled_tree.tree, ref_matrix, var_matrix, 
-                                          labeled_tree.U, B, labeled_tree.branch_lengths, O, p, weights)
+    soft_V = soft_V.reshape(1, soft_V.shape[0], soft_V.shape[1]) # add batch dimension
+    loss, loss_dict = vert_label.evaluate(V, soft_V, labeled_tree.tree, ref_matrix, var_matrix, 
+                                          labeled_tree.U, B, labeled_tree.branch_lengths, O,
+                                          p, weights)
     if show:
         print(formatted_loss_string(loss_dict, weights))
 
     return loss_dict
 
-def print_best_trees(losses_tensor, V, U, ref_matrix, var_matrix, B, O, G, T, weights, node_idx_to_label, 
+def print_best_trees(losses_tensor, V, soft_V, U, ref_matrix, var_matrix, B, O, G, T, weights, node_idx_to_label, 
                      ordered_sites, print_config, intermediate_data, custom_colors, primary, output_dir, run_name):
     
     primary_idx = ordered_sites.index(primary)
@@ -767,7 +772,7 @@ def print_best_trees(losses_tensor, V, U, ref_matrix, var_matrix, B, O, G, T, we
 
             tree = LabeledTree(full_trees[best_tree_idx], V[best_tree_idx], U[best_tree_idx], full_branch_lengths[best_tree_idx])
 
-            print_tree_info(tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, p, print_config)
+            print_tree_info(tree, soft_V[best_tree_idx], ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, p, print_config)
             plot_tree(tree.labeling, tree.tree, G, ordered_sites, custom_colors, node_idx_to_label, show=print_config.visualize)
             plot_migration_graph(tree.labeling, tree.tree, ordered_sites, custom_colors, primary)
 
@@ -794,7 +799,7 @@ def print_best_trees(losses_tensor, V, U, ref_matrix, var_matrix, B, O, G, T, we
                       'primary_site':primary, 'full_node_idx_to_label':[], 'losses':[]}
     for i, tup in enumerate(k_trees_and_losses):
         tree = tup[0]
-        loss_info = print_tree_info(tree, ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, p, show=False)
+        loss_info = print_tree_info(tree, soft_V[i], ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, p, show=False)
 
         tree_dot, edges, vertices_to_sites_map = plot_tree(tree.labeling, tree.tree, G, ordered_sites, custom_colors, node_idx_to_label, show=False)
         mig_graph_dot, mig_graph_edges = plot_migration_graph(tree.labeling, tree.tree, ordered_sites, custom_colors, primary, show=False)
@@ -822,7 +827,7 @@ def formatted_loss_string(loss_dict, weights):
     s += f"Migration num.: {int(loss_dict[MIG_KEY])}\n"
     s += f"Comigration num.: {int(loss_dict[COMIG_KEY])}\n"
     s += f"Seeding site num.: {int(loss_dict[SEEDING_KEY])}\n"
-
+    s += f"Neg. entropy: {round(float(loss_dict[ENTROPY_KEY]), 3)}\n"
     s += f"Data fit nll: {loss_dict[DATA_FIT_KEY]}\n"
 
     if weights.gen_dist != 0:
