@@ -11,7 +11,8 @@ if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
 
 class LabeledTree:
-    def __init__(self, tree, labeling, U, branch_lengths):
+    # TODO: remove tree from here
+    def __init__(self, tree, labeling):
         if (tree.shape[0] != tree.shape[1]):
             raise ValueError("Adjacency matrix should have shape (num_nodes x num_nodes)")
         if (tree.shape[0] != labeling.shape[1]):
@@ -19,16 +20,19 @@ class LabeledTree:
 
         self.tree = tree
         self.labeling = labeling
-        self.U = U
-        self.branch_lengths = branch_lengths
 
     def __eq__(self, other):
         return ( isinstance(other, LabeledTree) and 
-                (self.tree.numpy().tobytes() == other.tree.numpy().tobytes()) and
-                (self.labeling.numpy().tobytes() == other.labeling.numpy().tobytes()))
+                (self.tree.detach().numpy().tobytes() == other.tree.detach().numpy().tobytes()) and
+                (self.labeling.detach().numpy().tobytes() == other.labeling.detach().numpy().tobytes()))
 
     def __hash__(self):
-        return hash((self.tree.numpy().tobytes(), self.labeling.numpy().tobytes()))
+        return hash((self.tree.detach().numpy().tobytes(), self.labeling.detach().numpy().tobytes()))
+
+    def __str__(self):
+        A = str(np.where(self.tree == 1))
+        V = str(np.where(self.labeling == 1))
+        return f"Tree: {A}\nVertex Labeling: {V}"
 
 def get_path_matrix(T, remove_self_loops=False):
     # Path matrix that tells us if path exists from node i to node j
