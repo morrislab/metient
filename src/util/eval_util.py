@@ -5,7 +5,9 @@ import torch
 import os
 import re
 import pandas as pd
+import json
 
+from src.util.globals import *
 from src.util import plotting_util as plot_util
 
 ######### Methods taken directly from MACHINA repo #########
@@ -63,7 +65,7 @@ def parse_clone_tree(filename_T, filename_l):
         if labeling[u] != labeling[v]:
             migration_edges += [(u,v)]
 
-    return edges, migration_edges
+    return edges, migration_edges,labeling
 
 # Taken from MACHINA 
 def identify_seeding_clones(edge_list, migration_edge_list):
@@ -98,14 +100,12 @@ def multi_graph_to_set(edge_list):
     return res
 
 ########### Methods for evaluating Metient ouputs #############
-def metient_parse_clone_tree(pickle_fn, met_tree_num):
-    file = open(pickle_fn,'rb')
-    pckl = pickle.load(file)
-    V = pckl['ancestral_labelings'][met_tree_num]
-    A = pckl['full_adjacency_matrices'][met_tree_num]
-    sites = pckl['ordered_anatomical_sites']
+def metient_parse_clone_tree(results_dict, met_tree_num):
+    V = results_dict[OUT_LABElING_KEY][met_tree_num]
+    A = results_dict[OUT_ADJ_KEY]
+    sites = results_dict[OUT_SITES_KEY]
     G = plot_util.get_migration_graph(V, A)
-    idx_to_lbl = pckl['full_node_idx_to_label'][met_tree_num]
+    idx_to_lbl = results_dict[OUT_IDX_LABEL_KEY][met_tree_num]
     
     edges = [("GL", '0')]
     for i, j in plot_util.tree_iterator(A):
@@ -117,12 +117,10 @@ def metient_parse_clone_tree(pickle_fn, met_tree_num):
             migration_edges.append((idx_to_lbl[i][0], idx_to_lbl[j][0]))
     return edges, migration_edges
 
-def metient_parse_mig_graph(pickle_fn, met_tree_num):
-    file = open(pickle_fn,'rb')
-    pckl = pickle.load(file)
-    V = pckl['ancestral_labelings'][met_tree_num]
-    A = pckl['full_adjacency_matrices'][met_tree_num]
-    sites = pckl['ordered_anatomical_sites']
+def metient_parse_mig_graph(results_dict, met_tree_num):
+    V = results_dict[OUT_LABElING_KEY][met_tree_num]
+    A = results_dict[OUT_ADJ_KEY]
+    sites = results_dict[OUT_SITES_KEY]
     G = plot_util.get_migration_graph(V, A)
     migration_edges = []
     for i, row in enumerate(G):
@@ -131,6 +129,16 @@ def metient_parse_mig_graph(pickle_fn, met_tree_num):
                 for _ in range(int(val)):
                     migration_edges.append((sites[i], sites[j]))
     return migration_edges
+
+class HeapTree:
+    def __init__(self, loss, results_dict, met_tree_num):
+        self.loss = loss
+        self.results_dict = results_dict
+        self.met_tree_num = met_tree_num
+
+   # override the comparison operator
+    def __lt__(self, other):
+        return self.loss < other.loss
     
 def get_metient_min_loss_trees(site_mig_type_dir, seed, k, loss_thres=1.0):
     # Get all clone trees for the seed
@@ -141,25 +149,26 @@ def get_metient_min_loss_trees(site_mig_type_dir, seed, k, loss_thres=1.0):
     for tree_pickle in tree_pickles:
         clone_tree_num = os.path.basename(tree_pickle).replace("tree", "").replace(f"_seed{seed}.pickle", "")
         f = open(tree_pickle,'rb')
-        pckl = pickle.load(f)
-        for met_tree_num, loss in enumerate(pckl['losses']):
-            heapq.heappush(min_heap, (loss, clone_tree_num, met_tree_num))
+        results_dict = pickle.load(f)
+        for met_tree_num, loss in enumerate(results_dict['losses']):
+            heapq.heappush(min_heap, HeapTree(loss, results_dict, met_tree_num))
     out = []
-    min_loss = min_heap[0][0]
+    min_loss = min_heap[0].loss
+
     while len(out) < k and len(min_heap) > 0:
         item = heapq.heappop(min_heap)
         # only add tree if it's ~= to the min loss
-        if abs(min_loss-item[0]) <= loss_thres:
-            out.append((item[0], item[1], item[2]))
+        if abs(min_loss-item.loss) <= loss_thres:
+            out.append((item.loss, item.results_dict, item.met_tree_num))
         
     return out
 
 ######## Methods for comparing Metient outputs to ground truth ############
 
-def evaluate_seeding_clones(sim_clone_tree_fn, sim_vert_labeling_fn, metient_pickle_fn, met_tree_num):
-    edges_simulated, mig_edges_simulated = parse_clone_tree(sim_clone_tree_fn, sim_vert_labeling_fn)
+def evaluate_seeding_clones(sim_clone_tree_fn, sim_vert_labeling_fn, met_results_dict, met_tree_num):
+    edges_simulated, mig_edges_simulated, _ = parse_clone_tree(sim_clone_tree_fn, sim_vert_labeling_fn)
     seeding_clones_simulated = identify_seeding_clones(edges_simulated, mig_edges_simulated)
-    edges_inferred, mig_edges_inferred = metient_parse_clone_tree(metient_pickle_fn, met_tree_num)
+    edges_inferred, mig_edges_inferred = metient_parse_clone_tree(met_results_dict, met_tree_num)
     seeding_clones_inferred = identify_seeding_clones(edges_inferred, mig_edges_inferred)
     contains_resolved_polytomy = False
     for edge in edges_simulated:
@@ -174,9 +183,9 @@ def evaluate_seeding_clones(sim_clone_tree_fn, sim_vert_labeling_fn, metient_pic
 
     return recall, precision, F, contains_resolved_polytomy
 
-def evaluate_migration_graph(sim_mig_graph_fn, metient_pickle_fn, met_tree_num):
+def evaluate_migration_graph(sim_mig_graph_fn, met_results_dict, met_tree_num):
     edge_set_G_simulated = set(parse_migration_graph(sim_mig_graph_fn))
-    edge_set_G_inferred = set(metient_parse_mig_graph(metient_pickle_fn, met_tree_num))
+    edge_set_G_inferred = set(metient_parse_mig_graph(met_results_dict, met_tree_num))
     recall_G = float(len(edge_set_G_inferred & edge_set_G_simulated)) / float(len(edge_set_G_simulated))
     precision_G = float(len(edge_set_G_inferred & edge_set_G_simulated)) / float(len(edge_set_G_inferred))
 
@@ -187,9 +196,9 @@ def evaluate_migration_graph(sim_mig_graph_fn, metient_pickle_fn, met_tree_num):
 
     return recall_G, precision_G, F_G
 
-def evaluate_migration_multigraph(sim_mig_graph_fn, metient_pickle_fn, met_tree_num):
+def evaluate_migration_multigraph(sim_mig_graph_fn, met_results_dict, met_tree_num):
     edge_multiset_G_simulated = multi_graph_to_set(parse_migration_graph(sim_mig_graph_fn))
-    edge_multiset_G_inferred = multi_graph_to_set(metient_parse_mig_graph(metient_pickle_fn, met_tree_num))
+    edge_multiset_G_inferred = multi_graph_to_set(metient_parse_mig_graph(met_results_dict, met_tree_num))
     recall_G2 = float(len(edge_multiset_G_inferred & edge_multiset_G_simulated)) / float(len(edge_multiset_G_simulated))
     precision_G2 = float(len(edge_multiset_G_inferred & edge_multiset_G_simulated)) / float(len(edge_multiset_G_inferred))
     if recall_G2 != 0 and precision_G2 != 0:
