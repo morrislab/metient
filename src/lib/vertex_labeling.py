@@ -490,6 +490,7 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
 
         v_loss_components.append(get_avg_loss_components(loss_comps))
 
+        # TODO: anneal smoothly?
         if i % 10 == 0:
             temp = np.maximum(temp * np.exp(-anneal_rate * i), final_temp)
         temps.append(temp)
