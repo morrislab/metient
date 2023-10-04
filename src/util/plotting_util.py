@@ -5,13 +5,11 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import itertools
 import pydot
-from networkx.drawing.nx_pydot import graphviz_layout
 import torch
 from networkx.drawing.nx_pydot import to_pydot
 from graphviz import Source
 from PIL import Image as PILImage
 from IPython.display import Image, display
-import matplotlib.image as mpimg
 import io
 import matplotlib.gridspec as gridspec
 import math
@@ -211,12 +209,17 @@ def get_tracerx_seeding_pattern(V, A, ordered_sites, primary_site, full_node_idx
     primary_site: name of the primary site (must be an element of ordered_sites)
 
     TRACERx has a different definition of monoclonal vs. polyclonal:
-    "if all metastatic samples follow a monoclonal dissemination pattern, 
-    all shared clusters between the primary tumour and each metastasis were 
-    extracted. If all shared clusters overlapped across all metastatic samples, 
-    the case-level dissemination pattern was classified as monoclonal, whereas, 
-    if any metastatic sample shared additional clusters with the primary tumour, 
-    the overall dissemination pattern was defined as polyclonal."
+    "If only a single metastatic sample was considered for a case, the case-level 
+    dissemination pattern matched the metastasis level dissemination pattern. 
+    If multiple metastases were sampled and the dissemination pattern of any 
+    individual metastatic sample was defined as polyclonal, the case-level 
+    dissemination pattern was also defined as polyclonal. Conversely,if all metastatic 
+    samples follow a monoclonal dissemination pattern, all shared clusters between 
+    the primary tumour and each metastasis were extracted. If all shared clusters 
+    overlapped across all metastatic samples, the case-level dissemination pattern 
+    was classified as monoclonal, whereas,  if any metastatic sample shared 
+    additional clusters with the primary tumour, the overall dissemination pattern 
+    was defined as polyclonal."
 
     and they define monophyletic vs. polyphyletics as:
     "the origin of the seeding clusters was determined as monophyletic if all 
@@ -241,7 +244,9 @@ def get_tracerx_seeding_pattern(V, A, ordered_sites, primary_site, full_node_idx
 
     pattern = ""
     # 1) determine if monoclonal (no multi-eges) or polyclonal (multi-edges)
-    if ((G > 1).any()):
+    if len(ordered_sites) == 2:
+        pattern = "polyclonal " if ((G > 1).any()) else  "monoclonal "
+    elif ((G > 1).any()):
         pattern = "polyclonal "
     else:
         shared_clusters = get_shared_clusters(V, A, ordered_sites, primary_site, full_node_idx_to_label)
@@ -384,7 +389,7 @@ def tree_iterator(T):
     '''
     # enumerating through a torch tensor is pretty computationally expensive,
     # so convert to a sparse matrix to efficiently access non-zero values
-    T = T if isinstance(T, np.ndarray) else T.numpy()
+    T = T if isinstance(T, np.ndarray) else T.detach().numpy()
     T = sp.coo_matrix(T)
     for i, j, val in zip(T.row, T.col, T.data):
         yield i,j
@@ -467,7 +472,6 @@ def plot_migration_graph(V, A, ordered_sites, custom_colors, primary, show=True)
     if show:
         view_pydot(dot)
 
-    # TODO pass in printconfig save option 
     dot_lines = dot.to_string().split("\n")
     dot_lines.insert(1, 'dpi=600;size=3.5;')
     dot_str = ("\n").join(dot_lines)
@@ -723,18 +727,18 @@ def plot_tree_deprecated(V, T, ordered_sites, custom_colors=None, custom_node_id
     return edges, vertex_name_to_site_map
 
 
-def print_tree_info(labeled_tree, soft_V, ref_matrix, var_matrix, B, O, weights, 
+def print_tree_info(labeled_tree, U, soft_V, ref_matrix, var_matrix, B, G, O, weights, 
                     node_idx_to_label, ordered_sites, p, show):
     
     # Debugging information
-    U_clipped = labeled_tree.U.cpu().clone().detach().numpy()
+    U_clipped = U.cpu().clone().detach().numpy()
     U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
     logger.debug(f"\nU > {U_CUTOFF}\n")
     col_labels = ["norm"] + [truncated_cluster_name(node_idx_to_label[k]) if k in node_idx_to_label else "0" for k in range(U_clipped.shape[1] - 1)]
     df = pd.DataFrame(U_clipped, columns=col_labels, index=ordered_sites)
     logger.debug(df)
     logger.debug("\nF_hat")
-    F_hat_df = pd.DataFrame((labeled_tree.U @ B).cpu().detach().numpy(), index=ordered_sites)
+    F_hat_df = pd.DataFrame((U @ B).cpu().detach().numpy(), index=ordered_sites)
     logger.debug(F_hat_df)
 
     # Loss information
@@ -742,8 +746,7 @@ def print_tree_info(labeled_tree, soft_V, ref_matrix, var_matrix, B, O, weights,
     V = V.reshape(1, V.shape[0], V.shape[1]) # add batch dimension
     soft_V = soft_V.reshape(1, soft_V.shape[0], soft_V.shape[1]) # add batch dimension
     loss, loss_dict = vert_label.evaluate(V, soft_V, labeled_tree.tree, ref_matrix, var_matrix, 
-                                          labeled_tree.U, B, labeled_tree.branch_lengths, O,
-                                          p, weights)
+                                          U, B, G, O, p, weights)
     if show:
         print(formatted_loss_string(loss_dict, weights))
 
@@ -761,7 +764,7 @@ def print_best_trees(losses_tensor, V, soft_V, U, ref_matrix, var_matrix, B, O, 
         gets changed over iterations as the loss converges.
         '''
         for itr, data in enumerate(intermediate_data):
-            losses_tensor, full_trees, V, U, full_branch_lengths, soft_X = intermediate_data[itr][0], intermediate_data[itr][1], intermediate_data[itr][2], intermediate_data[itr][3], intermediate_data[itr][4], intermediate_data[itr][5]
+            _, V, soft_V = intermediate_data[itr][0], intermediate_data[itr][1], intermediate_data[itr][2]
             print("="*30 + " INTERMEDIATE TREE " + "="*30+"\n")
             print(f"Iteration: {itr*20}, Intermediate best tree idx {best_tree_idx}")
             # skip root index (which is root, and we know the vert. label)
@@ -770,9 +773,9 @@ def print_best_trees(losses_tensor, V, soft_V, U, ref_matrix, var_matrix, B, O, 
             logger.info("softmax_X\n")
             logger.info(softx_df)
 
-            tree = LabeledTree(full_trees[best_tree_idx], V[best_tree_idx], U[best_tree_idx], full_branch_lengths[best_tree_idx])
+            tree = LabeledTree(full_trees[best_tree_idx], V[best_tree_idx])
 
-            print_tree_info(tree, soft_V[best_tree_idx], ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, p, print_config)
+            print_tree_info(tree, U, soft_V[best_tree_idx], ref_matrix, var_matrix, B, G, O, weights, node_idx_to_label, ordered_sites, p, print_config)
             plot_tree(tree.labeling, tree.tree, G, ordered_sites, custom_colors, node_idx_to_label, show=print_config.visualize)
             plot_migration_graph(tree.labeling, tree.tree, ordered_sites, custom_colors, primary)
 
@@ -782,7 +785,7 @@ def print_best_trees(losses_tensor, V, soft_V, U, ref_matrix, var_matrix, B, O, 
     tree_set = set()
     # Iterate from best to worst tree, and only get trees with unique U or V matrices
     for i, loss_ix in enumerate(min_loss_indices):
-        labeled_tree = LabeledTree(T, V[loss_ix], U, G)
+        labeled_tree = LabeledTree(T, V[loss_ix])
         if labeled_tree not in tree_set:
             tree_set.add(labeled_tree)
             if len(k_trees_and_losses) < print_config.k_best_trees:
@@ -794,30 +797,29 @@ def print_best_trees(losses_tensor, V, soft_V, U, ref_matrix, var_matrix, B, O, 
 
     ret = None
     figure_outputs = []
-    pickle_outputs = {'ancestral_labelings':[], 'subclonal_presence_matrices':[], 
-                      'full_adjacency_matrices':[], 'ordered_anatomical_sites':ordered_sites,
-                      'primary_site':primary, 'full_node_idx_to_label':[], 'losses':[]}
-    for i, tup in enumerate(k_trees_and_losses):
-        tree = tup[0]
-        loss_info = print_tree_info(tree, soft_V[i], ref_matrix, var_matrix, B, O, weights, node_idx_to_label, ordered_sites, p, show=False)
+    pickle_outputs = {OUT_LABElING_KEY:[], OUT_LOSSES_KEY:[],OUT_IDX_LABEL_KEY:[],
+                      OUT_ADJ_KEY:T, OUT_SITES_KEY:ordered_sites,
+                      OUT_PRIMARY_KEY:primary, OUT_SUB_PRES_KEY:U,}
 
-        tree_dot, edges, vertices_to_sites_map = plot_tree(tree.labeling, tree.tree, G, ordered_sites, custom_colors, node_idx_to_label, show=False)
-        mig_graph_dot, mig_graph_edges = plot_migration_graph(tree.labeling, tree.tree, ordered_sites, custom_colors, primary, show=False)
+    with torch.no_grad():
+        for i, tup in enumerate(k_trees_and_losses):
+            tree = tup[0]
+            loss_info = print_tree_info(tree, U, soft_V[i], ref_matrix, var_matrix, B, G, O, weights, node_idx_to_label, ordered_sites, p, show=False)
 
-        seeding_pattern = get_seeding_pattern(tree.labeling, tree.tree)
-        figure_outputs.append((tree_dot, mig_graph_dot, loss_info, seeding_pattern))
-        pickle_outputs['ancestral_labelings'].append(tree.labeling)
-        pickle_outputs['subclonal_presence_matrices'].append(tree.U)
-        pickle_outputs['full_adjacency_matrices'].append(tree.tree)
-        pickle_outputs['losses'].append(loss_info['loss'])
-        full_tree_idx_to_label = get_full_tree_node_idx_to_label(tree.labeling, tree.tree, node_idx_to_label, ordered_sites,
-                                                                 shorten_label=False, pad=False)
-        pickle_outputs['full_node_idx_to_label'].append(full_tree_idx_to_label)
+            tree_dot, edges, vertices_to_sites_map = plot_tree(tree.labeling, tree.tree, G, ordered_sites, custom_colors, node_idx_to_label, show=False)
+            mig_graph_dot, mig_graph_edges = plot_migration_graph(tree.labeling, tree.tree, ordered_sites, custom_colors, primary, show=False)
 
-        if i == 0: # Best tree
-            ret = (edges, vertices_to_sites_map, mig_graph_edges, loss_info)
+            seeding_pattern = get_seeding_pattern(tree.labeling, tree.tree)
+            figure_outputs.append((tree_dot, mig_graph_dot, loss_info, seeding_pattern))
+            pickle_outputs[OUT_LABElING_KEY].append(tree.labeling)
+            pickle_outputs[OUT_LOSSES_KEY].append(loss_info['loss'])
+            full_tree_idx_to_label = get_full_tree_node_idx_to_label(tree.labeling, tree.tree, node_idx_to_label, ordered_sites,
+                                                                     shorten_label=False, pad=False)
+            pickle_outputs[OUT_IDX_LABEL_KEY].append(full_tree_idx_to_label)
+            if i == 0: # Best tree
+                ret = (edges, vertices_to_sites_map, mig_graph_edges, loss_info)
 
-    save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outputs, weights)
+        save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outputs, weights)
 
     return ret
 
@@ -839,74 +841,80 @@ def formatted_loss_string(loss_dict, weights):
 
 def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outputs, weights):
 
-    k = print_config.k_best_trees
-    sys_fonts = matplotlib.font_manager.findSystemFonts(fontpaths=None, fontext='ttf')
-    for font in sys_fonts:
-        if "Lato" in font:
-            matplotlib.font_manager.fontManager.addfont(font)
-            rcParams['font.family'] = 'Lato'
-
-    n = len(figure_outputs)
-
-    if k < n:
-        print("{k} unique best trees were not found ({n} were found). Retry with higher batch size if you want to try and get more trees.")
-
-    # Create a figure and subplots
-    #fig, axs = plt.subplots(3, k*2, figsize=(10, 8))
-
-    plt.suptitle(run_name)
-
-    z = 2 # number of trees displayed per row
-
-    nrows = math.ceil(k/z)
-    h = nrows*5
-    fig = plt.figure(figsize=(10,h))
-    
-    vspace = 1/nrows
-
-    for i, (tree_dot, mig_graph_dot, loss_info, seeding_pattern) in enumerate(figure_outputs):
-        tree = pgv.AGraph(string=tree_dot).draw(format="png", prog="dot", args="-Glabel=\"\"")
-        tree = PILImage.open(io.BytesIO(tree))
-        mig_graph = pgv.AGraph(string=mig_graph_dot).draw(format="png", prog="dot")
-        mig_graph = PILImage.open(io.BytesIO(mig_graph))
-
-        gs1 = gridspec.GridSpec(3, 3)
-
-        row = math.floor(i/2)
-        pad=0.02
-
-        # left = 0.0 if i is odd, 0.55 if even
-        # right = 0.45 if i is odd, 1.0 if even
-        gs1.update(left=0.0+((i%2)*0.53), right=0.47+0.55*(i%2), top=1-(row*vspace)-pad, bottom=1-((row+1)*vspace)+pad, wspace=0.05)
-        ax1 = plt.subplot(gs1[:-1, :])
-        ax2 = plt.subplot(gs1[-1, :-1])
-        ax3 = plt.subplot(gs1[-1, -1])
-
-        # Render and display each graph
-        ax1.imshow(tree)
-        ax1.axis('off')
-        ax1.set_title(f'Tree {i+1}\n{seeding_pattern}', fontsize=12, loc="left", va="top", x=-0.1, y=1.0)
-        #ax1.text(0.1, 0.65, seeding_pattern, fontname=fontname)
-
-        ax2.imshow(mig_graph)
-        ax2.axis('off')
-
-        ax3.text(0.5, 0.5, formatted_loss_string(loss_info, weights), ha='center', va='center', fontsize=10)
-        ax3.axis('off')
-
-    fig1 = plt.gcf()
-
     if print_config.visualize:
+        k = print_config.k_best_trees
+        sys_fonts = matplotlib.font_manager.findSystemFonts(fontpaths=None, fontext='ttf')
+        for font in sys_fonts:
+            if "Lato" in font:
+                matplotlib.font_manager.fontManager.addfont(font)
+                rcParams['font.family'] = 'Lato'
+
+        n = len(figure_outputs)
+
+        if k < n:
+            print("{k} unique best trees were not found ({n} were found). Retry with higher batch size if you want to try and get more trees.")
+            k = n
+        # Create a figure and subplots
+        #fig, axs = plt.subplots(3, k*2, figsize=(10, 8))
+
+        plt.suptitle(run_name)
+
+        z = 2 # number of trees displayed per row
+
+        nrows = math.ceil(k/z)
+        h = nrows*5
+        fig = plt.figure(figsize=(10,h))
+        
+        vspace = 1/nrows
+
+        for i, (tree_dot, mig_graph_dot, loss_info, seeding_pattern) in enumerate(figure_outputs):
+            tree = pgv.AGraph(string=tree_dot).draw(format="png", prog="dot", args="-Glabel=\"\"")
+            tree = PILImage.open(io.BytesIO(tree))
+            mig_graph = pgv.AGraph(string=mig_graph_dot).draw(format="png", prog="dot")
+            mig_graph = PILImage.open(io.BytesIO(mig_graph))
+
+            gs1 = gridspec.GridSpec(3, 3)
+
+            row = math.floor(i/2)
+            pad=0.02
+
+            # left = 0.0 if i is odd, 0.55 if even
+            # right = 0.45 if i is odd, 1.0 if even
+            gs1.update(left=0.0+((i%2)*0.53), right=0.47+0.55*(i%2), top=1-(row*vspace)-pad, bottom=1-((row+1)*vspace)+pad, wspace=0.05)
+            ax1 = plt.subplot(gs1[:-1, :])
+            ax2 = plt.subplot(gs1[-1, :-1])
+            ax3 = plt.subplot(gs1[-1, -1])
+
+            # Render and display each graph
+            ax1.imshow(tree)
+            ax1.axis('off')
+            ax1.set_title(f'Tree {i+1}\n{seeding_pattern}', fontsize=12, loc="left", va="top", x=-0.1, y=1.0)
+            #ax1.text(0.1, 0.65, seeding_pattern, fontname=fontname)
+
+            ax2.imshow(mig_graph)
+            ax2.axis('off')
+
+            ax3.text(0.5, 0.5, formatted_loss_string(loss_info, weights), ha='center', va='center', fontsize=10)
+            ax3.axis('off')
+
+        fig1 = plt.gcf()
         plt.show()
+        plt.close()
+        if print_config.save_outputs: fig1.savefig(os.path.join(output_dir, f'{run_name}.png'), dpi=300, bbox_inches='tight')
 
     if print_config.save_outputs:
         if not os.path.isdir(output_dir):
             raise ValueError(f"{output_dir} does not exist.")
-        
-        fig1.savefig(os.path.join(output_dir, f'{run_name}.png'), dpi=300, bbox_inches='tight')
-        print(f"Saving {run_name} to {output_dir}")
+        if print_config.verbose: print(f"Saving {run_name} to {output_dir}")
         # Save results to pickle file
         with open(os.path.join(output_dir, f"{run_name}.pickle"), 'wb') as handle:
             pickle.dump(pickle_outputs, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        # Save best dot to file
+        tree_dot, mig_graph_dot, _, _ = figure_outputs[0]
+        with open(os.path.join(output_dir, f"{run_name}.tree.dot"), 'w') as file:
+            file.write(tree_dot)
+        with open(os.path.join(output_dir, f"{run_name}.mig_graph.dot"), 'w') as file:
+            file.write(mig_graph_dot)
+
 
 

@@ -26,28 +26,13 @@ def repeat_n(x, n):
     '''
     return x.repeat(n,1).reshape(n, x.shape[0], x.shape[1])
 
-def _ancestral_labeling_objective(V, soft_V, A, G, O, p, weights):
-    '''
-    Args:
-        V: Vertex labeling of the full tree (batch_size x num_sites x num_nodes)
-        A: Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
-        G: Matrix of genetic distances between internal nodes (shape:  num_internal_nodes x num_internal_nodes).
-        Lower values indicate lower branch lengths, i.e. more genetically similar.
-        O: Array of frequencies with which the primary cancer type seeds site i (shape: num_anatomical_sites).
-        p: one-hot vector indicating site of the primary
-        weights: Weights object
-
-    Returns:
-        Loss to score the ancestral vertex labeling of the given tree. This combines (1) migration number, (2) seeding site
-        number, (3) comigration number, and optionally (4) genetic distance and (5) organotropism.
-    '''
+def get_parsimony_metrics(V, A):
 
     single_A = A
-    assert(A.shape[0]==A.shape[1]==V.shape[2])
     bs = V.shape[0]
     num_sites = V.shape[1]
     num_nodes = V.shape[2]
-    A = repeat_n(A, bs)
+    A = repeat_n(single_A, bs)
 
     # 1. Migration number
     VA = V @ A
@@ -80,15 +65,38 @@ def _ancestral_labeling_objective(V, soft_V, A, G, O, p, weights):
     bin_site_trace = torch.diagonal(binarized_site_adj, offset=0, dim1=1, dim2=2).sum(dim=1)
     c = torch.sum(binarized_site_adj, dim=(1,2)) - bin_site_trace + repeated_temporal_migrations
 
+    return m, c, s, X, site_adj_no_diag
+
+def _ancestral_labeling_objective(V, soft_V, A, G, O, p, weights):
+    '''
+    Args:
+        V: Vertex labeling of the full tree (batch_size x num_sites x num_nodes)
+        A: Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
+        G: Matrix of genetic distances between internal nodes (shape:  num_internal_nodes x num_internal_nodes).
+        Lower values indicate lower branch lengths, i.e. more genetically similar.
+        O: Array of frequencies with which the primary cancer type seeds site i (shape: num_anatomical_sites).
+        p: one-hot vector indicating site of the primary
+        weights: Weights object
+
+    Returns:
+        Loss to score the ancestral vertex labeling of the given tree. This combines (1) migration number, (2) seeding site
+        number, (3) comigration number, and optionally (4) genetic distance and (5) organotropism.
+    '''
+    bs = V.shape[0]
+    
+    assert(A.shape[0]==A.shape[1]==V.shape[2])
+
+    m, c, s, X, site_adj_no_diag = get_parsimony_metrics(V, A)
+
     # Entropy
-    entropy = -1*torch.sum(torch.mul(soft_V, torch.log2(soft_V)), dim=(1, 2))
+    entropy = -torch.sum(torch.mul(soft_V, torch.log2(soft_V)), dim=(1, 2)) / V.shape[2]
 
     # 4. Genetic distance
     g = 0
     if G != None and weights.gen_dist != 0:
         # calculate if 2 nodes are in diff sites and there's an edge between them (i.e there is a migration edge)
         G = repeat_n(G, bs)
-        R = torch.mul(A, (1-X))
+        R = torch.mul(repeat_n(A, bs), (1-X))
         adjusted_G = torch.exp(GENETIC_ALPHA*G)
         R = torch.mul(R, adjusted_G)
         g = torch.sum(R, dim=(1,2))
@@ -181,36 +189,6 @@ def no_cna_omega(shape):
     # TODO: don't hardcode omega here (omegas are all 1/2 since we're assuming there are no CNAs)
     return torch.ones(shape) * 0.5
 
-def get_lambdas(epoch, max_iter, lr_sched):
-    '''
-    Returns weights for subclonal presence loss and ancestral labeling loss,
-    and bools indicating if we need to calculate that loss at this iteration
-    (for perf optimization)
-    '''
-    calc_subclonal, calc_ancestral = True, True
-    lam1, lam2 = 1.0, 1.0
-    if epoch != -1: # to evaluate loss values after training is done
-        if lr_sched == "step":   
-            if epoch < max_iter/2:
-                lam1, lam2 = 1.0, 0.0
-                calc_ancestral = False
-            else:
-                lam1, lam2 = 0.0, 1.0
-                calc_subclonal = False
-        elif lr_sched == "em": 
-            if ((epoch//20) % 2 == 0):
-                lam1, lam2 = 1.0, 0.0
-                calc_ancestral = False
-            else:
-                lam1, lam2 = 0.0, 1.0
-                calc_subclonal = False
-        elif lr_sched == "linear":
-            l = (epoch+1)*(1.0/max_iter)
-            lam1 = 1.0 - l
-            lam2 = l
-
-    return lam1, lam2, calc_subclonal, calc_ancestral
-
 def evaluate(V, soft_V, A, ref, var, U, B, G, O, p, weights):
     '''
     Args:
@@ -224,10 +202,6 @@ def evaluate(V, soft_V, A, ref, var, U, B, G, O, p, weights):
         Lower values indicate lower branch lengths, i.e. more genetically similar.
         O: Array of frequencies with which the primary cancer type seeds site i (shape: num_anatomical_sites).
         weights: Weights object
-        epoch: number of current epoch, used to determine weighting in different learning rate schemes
-        max_iter: the maximum number of iterations to be run
-        lr_sched: how to weight the two tasks, see 'get_migration_history(...)' for documentation
-
     Returns:
         Loss to score this tree and labeling combo.
     '''
@@ -409,11 +383,6 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
 
         weight_init_primary: whether to initialize weights higher to favor vertex labeling of primary for all internal nodes
         
-        lr_sched: how to weight the tasks of (1) leaf node inference and (2) internal vertex labeling. options:
-            "step": (1) has weight=1 for first half of epochs and (2) has weight=0, and then we flip the weights for the last half of training
-            "constant": default, (1) and (2) weighted equally at each epoch
-            "em": (1) has weight=1 and (2) has weight=0 for 20 epochs, and we flip every 20 epochs (kind of like E-M)
-            "linear": (1) decreases linearly while (2) increases linearly at the same rate (1/max_iter)
     Returns:
         # TODO: return info for k best trees
         Corresponding info on the *best* tree:
@@ -464,7 +433,7 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
     if weight_init_primary:
         if p is None: raise ValueError(f"Cannot use weight_init_primary flag without inputting p vector")
         prim_site_idx = torch.nonzero(p)[0][0]
-        X[:batch_size//2,prim_site_idx,:] = 1
+        X[:batch_size//2,prim_site_idx,:] = 2 # TODO: how do we set this parameter?
 
     X.requires_grad = True
     v_optimizer = torch.optim.Adam([X], lr=lr)
@@ -517,13 +486,12 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
 
         with torch.no_grad():
             if i % 20 == 0:
-                intermediate_data.append([v_loss, V, U, G, soft_V])
+                intermediate_data.append([v_loss, V, soft_V])
 
         v_loss_components.append(get_avg_loss_components(loss_comps))
 
         if i % 10 == 0:
-            if lr_sched != "step" or (lr_sched == "step" and i > max_iter/2):
-                temp = np.maximum(temp * np.exp(-anneal_rate * i), final_temp)
+            temp = np.maximum(temp * np.exp(-anneal_rate * i), final_temp)
         temps.append(temp)
 
     time_elapsed = (datetime.datetime.now() - start_time).total_seconds()
@@ -536,8 +504,6 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
         if print_config.visualize:
             plot_util.plot_loss_components(v_loss_components, weights)
 
-        
-        _, best_tree_idx = torch.topk(full_loss, 1, largest=False, sorted=True)
         edges, vert_to_site_map, mig_graph_edges, loss_info = plot_util.print_best_trees(full_loss, V, soft_V, U, ref, var, B, O, G, T, 
                                                                                          weights,node_idx_to_label, ordered_sites,
                                                                                          print_config, intermediate_data, 
