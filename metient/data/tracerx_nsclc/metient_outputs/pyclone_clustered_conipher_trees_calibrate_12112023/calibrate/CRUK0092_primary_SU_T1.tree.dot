@@ -1,0 +1,28 @@
+strict digraph  {
+graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dpi=600; size=2.5;
+0 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('IL6R_PKHD1L1', False)"];
+1 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('IL22_TNRC6C', False)"];
+6 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('IL6R_PKHD1L1_LN_SU_FLN1', True)"];
+10 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('IL6R_PKHD1L1_primary_SU_T1', True)"];
+3 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('ITGAV_C1orf101', False)"];
+2 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('MFSD10_TARBP1', False)"];
+4 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('AC131097.3_RYR1', False)"];
+7 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('MFSD10_TARBP1_LN_SU_FLN1', True)"];
+5 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('3pol5', False)"];
+11 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('ITGAV_C1orf101_primary_SU_T1', True)"];
+9 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('AC131097.3_RYR1_LN_SU_FLN1', True)"];
+8 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('3pol5_LN_SU_FLN1', True)"];
+normal [label="", penwidth=3, style=invis, xlabel="('IL6R_PKHD1L1', False)"];
+0 -> 1  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="3.0", penwidth="5.5", style=solid];
+0 -> 6  [arrowsize=0, color="#c27ba0ff;0.5:#6aa84fff", minlen="1.204545497894287", penwidth="5.5", style=solid];
+0 -> 10  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="1.204545497894287", penwidth="5.5", style=solid];
+1 -> 3  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="1.454545497894287", penwidth="5.5", style=solid];
+3 -> 5  [arrowsize=0, color="#c27ba0ff;0.5:#6aa84fff", minlen="1.204545497894287", penwidth="5.5", style=solid];
+3 -> 11  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="1.204545497894287", penwidth="5.5", style=solid];
+2 -> 4  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.4090908765792847", penwidth="5.5", style=solid];
+2 -> 7  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.204545497894287", penwidth="5.5", style=solid];
+4 -> 9  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.204545497894287", penwidth="5.5", style=solid];
+5 -> 2  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="2.3636364936828613", penwidth="5.5", style=solid];
+5 -> 8  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.204545497894287", penwidth="5.5", style=solid];
+normal -> 0  [arrowsize=0, color="#c27ba0ff", label="", penwidth=4, style=solid];
+}

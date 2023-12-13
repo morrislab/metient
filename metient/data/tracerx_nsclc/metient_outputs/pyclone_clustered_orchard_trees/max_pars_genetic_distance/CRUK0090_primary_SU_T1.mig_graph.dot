@@ -1,0 +1,16 @@
+digraph  {
+dpi=600;size=3.5;
+metachronousMet_BP_T1 [color="#6aa84fff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+metachronousMet_BP_T2 [color="#c27ba0ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+metachronousMet_BR_T1 [color="#e69138ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+primary_SU_T1 [color="#be5742e1", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+metachronousMet_BP_T1 -> metachronousMet_BP_T2  [color="#6aa84fff;0.5:#c27ba0ff", key=0, penwidth=3];
+metachronousMet_BP_T1 -> metachronousMet_BP_T2  [color="#6aa84fff;0.5:#c27ba0ff", key=1, penwidth=3];
+metachronousMet_BP_T1 -> metachronousMet_BR_T1  [color="#6aa84fff;0.5:#e69138ff", key=0, penwidth=3];
+metachronousMet_BP_T1 -> metachronousMet_BR_T1  [color="#6aa84fff;0.5:#e69138ff", key=1, penwidth=3];
+primary_SU_T1 -> metachronousMet_BP_T1  [color="#be5742e1;0.5:#6aa84fff", key=0, penwidth=3];
+primary_SU_T1 -> metachronousMet_BP_T1  [color="#be5742e1;0.5:#6aa84fff", key=1, penwidth=3];
+primary_SU_T1 -> metachronousMet_BP_T1  [color="#be5742e1;0.5:#6aa84fff", key=2, penwidth=3];
+primary_SU_T1 -> metachronousMet_BP_T1  [color="#be5742e1;0.5:#6aa84fff", key=3, penwidth=3];
+primary_SU_T1 -> metachronousMet_BP_T1  [color="#be5742e1;0.5:#6aa84fff", key=4, penwidth=3];
+}

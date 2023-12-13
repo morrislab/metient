@@ -1,4 +1,0 @@
-	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	ploidy	purity	sampling_time_months_from_dx	sample_type	tumor_type	anatomical_site_broad
-0	0	I-H-133120-T10-1-D1-2	0	right paraspinal at L3 - R	0	ATRX_p.R250*_stop_gained_X:76940000;ALK_p.R1275Q_non_synonymous_codon_2:29432664	105.0	71.0	3.01	0.83	6.566666667	relapse	local_disease	pelvic
-1	1	I-H-133120-T11-1-D1-2	1	right paraspinal at T6 - FR	0	ATRX_p.R250*_stop_gained_X:76940000;ALK_p.R1275Q_non_synonymous_codon_2:29432664	108.0	60.0	2.69	0.74	40.43333333	frelapse	local_disease	thoracic
-2	2	I-H-133120-T9-1-D1-2	2	right retroperitoneal - TR	0	ATRX_p.R250*_stop_gained_X:76940000;ALK_p.R1275Q_non_synonymous_codon_2:29432664	85.0	58.0	3.01	0.83	4.133333333	t-resection	primary_disease	retroperitoneal

@@ -1,0 +1,20 @@
+digraph  {
+dpi=600;size=3.5;
+"Primary, ear" [color="#6aa84fff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+"Lymph node, cervical" [color="#c27ba0ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+"Locoregional, ear" [color="#e69138ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+"Distant, back" [color="#be5742e1", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+"Primary, ear" -> "Lymph node, cervical"  [color="#6aa84fff;0.5:#c27ba0ff", key=0, penwidth=3];
+"Primary, ear" -> "Lymph node, cervical"  [color="#6aa84fff;0.5:#c27ba0ff", key=1, penwidth=3];
+"Primary, ear" -> "Lymph node, cervical"  [color="#6aa84fff;0.5:#c27ba0ff", key=2, penwidth=3];
+"Primary, ear" -> "Lymph node, cervical"  [color="#6aa84fff;0.5:#c27ba0ff", key=3, penwidth=3];
+"Primary, ear" -> "Lymph node, cervical"  [color="#6aa84fff;0.5:#c27ba0ff", key=4, penwidth=3];
+"Primary, ear" -> "Locoregional, ear"  [color="#6aa84fff;0.5:#e69138ff", key=0, penwidth=3];
+"Primary, ear" -> "Locoregional, ear"  [color="#6aa84fff;0.5:#e69138ff", key=1, penwidth=3];
+"Primary, ear" -> "Locoregional, ear"  [color="#6aa84fff;0.5:#e69138ff", key=2, penwidth=3];
+"Primary, ear" -> "Distant, back"  [color="#6aa84fff;0.5:#be5742e1", key=0, penwidth=3];
+"Primary, ear" -> "Distant, back"  [color="#6aa84fff;0.5:#be5742e1", key=1, penwidth=3];
+"Primary, ear" -> "Distant, back"  [color="#6aa84fff;0.5:#be5742e1", key=2, penwidth=3];
+"Primary, ear" -> "Distant, back"  [color="#6aa84fff;0.5:#be5742e1", key=3, penwidth=3];
+"Primary, ear" -> "Distant, back"  [color="#6aa84fff;0.5:#be5742e1", key=4, penwidth=3];
+}

@@ -1,0 +1,32 @@
+strict digraph  {
+graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dpi=600; size=2.5;
+0 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('CCDC39_ROBO1', False)"];
+2 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('POLI_FBRS', False)"];
+8 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('ENPP3_ZNF408', False)"];
+10 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('CCDC39_ROBO1_LN_SU_FLN1', True)"];
+1 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('LRRC31_RP11-480I12.7', False)"];
+13 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('LRRC31_RP11-480I12.7_primary_SU_T1', True)"];
+7 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('UFD1L_TRAF4', False)"];
+3 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('SCPEP1_KLHL8', False)"];
+6 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('RAB11FIP3_PHGDH', False)"];
+11 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('SCPEP1_KLHL8_LN_SU_FLN1', True)"];
+4 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('ATP9B_SEPT4', False)"];
+9 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('AP1G2_ACTL6A', False)"];
+5 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('SCARF2_DYNC1LI2', False)"];
+12 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="('RAB11FIP3_PHGDH_LN_SU_FLN1', True)"];
+normal [label="", penwidth=3, style=invis, xlabel="('CCDC39_ROBO1', False)"];
+0 -> 2  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="2.843137264251709", penwidth="5.5", style=solid];
+0 -> 8  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="1.1176470518112183", penwidth="5.5", style=solid];
+0 -> 10  [arrowsize=0, color="#c27ba0ff;0.5:#6aa84fff", minlen="1.058823585510254", penwidth="5.5", style=solid];
+2 -> 7  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="1.1764706373214722", penwidth="5.5", style=solid];
+8 -> 5  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="1.2745097875595093", penwidth="5.5", style=solid];
+1 -> 13  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="1.058823585510254", penwidth="5.5", style=solid];
+7 -> 1  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="3.0", penwidth="5.5", style=solid];
+3 -> 6  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.2549020051956177", penwidth="5.5", style=solid];
+3 -> 11  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.058823585510254", penwidth="5.5", style=solid];
+6 -> 12  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.058823585510254", penwidth="5.5", style=solid];
+4 -> 9  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="1.1176470518112183", penwidth="5.5", style=solid];
+9 -> 3  [arrowsize=0, color="#c27ba0ff;0.5:#6aa84fff", minlen="1.529411792755127", penwidth="5.5", style=solid];
+5 -> 4  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="1.3333333730697632", penwidth="5.5", style=solid];
+normal -> 0  [arrowsize=0, color="#c27ba0ff", label="", penwidth=4, style=solid];
+}

@@ -1,0 +1,8 @@
+digraph  {
+dpi=600;size=3.5;
+Primary [color="#6aa84fff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+Lung [color="#c27ba0ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+Locoregional [color="#e69138ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+Primary -> Lung  [color="#6aa84fff;0.5:#c27ba0ff", key=0, penwidth=3];
+Primary -> Locoregional  [color="#6aa84fff;0.5:#e69138ff", key=0, penwidth=3];
+}

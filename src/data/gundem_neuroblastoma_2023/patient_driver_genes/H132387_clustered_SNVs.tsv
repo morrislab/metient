@@ -1,9 +1,0 @@
-	#sample_index	sample_label	anatomical_site_index	anatomical_site_label	character_index	character_label	ref	var	ploidy	purity	sampling_time_months_from_dx	sample_type	tumor_type	anatomical_site_broad
-0	0	E-H-131222-T1-1-D1-1	0	right pleural - D 0	0	ATRX_p.E555*_stop_gained_X:76939085	2.0	16.0	2.47	0.85	0.0	diagnosis	primary_disease	thoracic
-1	1	I-H-132387-T5-1-D1-2	1	right pleural - D 1	0	ATRX_p.E555*_stop_gained_X:76939085	2.0	32.0	2.4	0.99	0.0	diagnosis	primary_disease	thoracic
-2	2	I-H-132387-T6-1-D1-2	2	paraspinal at T8-T9 - R 2	0	ATRX_p.E555*_stop_gained_X:76939085	5.0	28.0	2.4	0.76	35.1	relapse	local_disease	thoracic
-3	3	I-H-132387-T7-1-D1-2	3	cervical paraspinal at C3 - FR 3	0	ATRX_p.E555*_stop_gained_X:76939085	8.0	28.0	2.35	0.81	66.36666667	frelapse	local_disease	cervical
-4	0	E-H-131222-T1-1-D1-1	0	right pleural - D 0	1	MTOR_p.V2006F_non_synonymous_codon_1:11188078	33.0	0.0	2.47	0.85	0.0	diagnosis	primary_disease	thoracic
-5	1	I-H-132387-T5-1-D1-2	1	right pleural - D 1	1	MTOR_p.V2006F_non_synonymous_codon_1:11188078	102.0	0.0	2.4	0.99	0.0	diagnosis	primary_disease	thoracic
-6	2	I-H-132387-T6-1-D1-2	2	paraspinal at T8-T9 - R 2	1	MTOR_p.V2006F_non_synonymous_codon_1:11188078	104.0	0.0	2.4	0.76	35.1	relapse	local_disease	thoracic
-7	3	I-H-132387-T7-1-D1-2	3	cervical paraspinal at C3 - FR 3	1	MTOR_p.V2006F_non_synonymous_codon_1:11188078	68.0	29.0	2.35	0.81	66.36666667	frelapse	local_disease	cervical

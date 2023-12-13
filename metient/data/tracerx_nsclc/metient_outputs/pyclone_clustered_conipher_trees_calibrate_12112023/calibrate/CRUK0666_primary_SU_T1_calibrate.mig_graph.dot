@@ -1,0 +1,5 @@
+digraph  {
+dpi=600;size=3.5;
+LN_SU_FLN1 [color="#6aa84fff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+primary_SU_T1 [color="#c27ba0ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+}

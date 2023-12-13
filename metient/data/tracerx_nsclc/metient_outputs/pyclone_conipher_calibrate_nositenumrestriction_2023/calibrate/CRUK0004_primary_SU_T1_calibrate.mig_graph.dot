@@ -1,0 +1,6 @@
+digraph  {
+dpi=600;size=3.5;
+metachronousMet_BP_LN1 [color="#6aa84fff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+primary_SU_T1 [color="#c27ba0ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+primary_SU_T1 -> metachronousMet_BP_LN1  [color="#c27ba0ff;0.5:#6aa84fff", key=0, penwidth=3];
+}

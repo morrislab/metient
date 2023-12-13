@@ -1,0 +1,32 @@
+strict digraph  {
+graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dpi=600; size=2.5;
+0 [color="#e69138ff", fillcolor="#e69138ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=DAPL1_TMEM130];
+1 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=WDR96_NOS1];
+10 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
+12 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
+13 [color="#e69138ff", fillcolor="#e69138ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
+7 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=GPATCH8_VANGL2];
+8 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=BACH2_BAZ1B];
+2 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=PSMD14_PFKP];
+11 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
+4 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=KCNJ2_EPHA10];
+6 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=SIRT4_EFCC1];
+3 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=CCND3_NCF2];
+5 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=EDC4_ATP1A3];
+9 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=MYH8_TTN];
+normal [label="", penwidth=3, style=invis, xlabel=DAPL1_TMEM130];
+0 -> 1  [arrowsize=0, color="#e69138ff;0.5:#6aa84fff", minlen="3.0", penwidth="5.5", style=solid];
+0 -> 10  [arrowsize=0, color="#e69138ff;0.5:#6aa84fff", minlen="1.0340136289596558", penwidth=5, style=dashed];
+0 -> 12  [arrowsize=0, color="#e69138ff;0.5:#c27ba0ff", minlen="1.0340136289596558", penwidth=5, style=dashed];
+0 -> 13  [arrowsize=0, color="#e69138ff;0.5:#e69138ff", minlen="1.0340136289596558", penwidth=5, style=dashed];
+1 -> 7  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.0816326141357422", penwidth="5.5", style=solid];
+1 -> 8  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.0816326141357422", penwidth="5.5", style=solid];
+7 -> 2  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.163265347480774", penwidth="5.5", style=solid];
+8 -> 4  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.0952380895614624", penwidth="5.5", style=solid];
+8 -> 9  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.0680272579193115", penwidth="5.5", style=solid];
+2 -> 11  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.0340136289596558", penwidth=5, style=dashed];
+4 -> 6  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.0816326141357422", penwidth="5.5", style=solid];
+6 -> 3  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.1496598720550537", penwidth="5.5", style=solid];
+6 -> 5  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.0952380895614624", penwidth="5.5", style=solid];
+normal -> 0  [arrowsize=0, color="#e69138ff", label="", penwidth=4, style=solid];
+}

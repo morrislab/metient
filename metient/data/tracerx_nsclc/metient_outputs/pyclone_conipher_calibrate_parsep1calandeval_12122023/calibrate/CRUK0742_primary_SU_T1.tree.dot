@@ -1,0 +1,24 @@
+strict digraph  {
+graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dpi=600; size=2.5;
+0 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=EIF2S1_ITPR1];
+3 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=DMBT1_LILRB5];
+6 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="0pol6"];
+1 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=NECAB3_SLC6A12];
+5 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=ISY1_ODF3];
+9 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
+4 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=LAMA3_DDB1];
+8 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
+2 [color="#c27ba0ff", fillcolor="#c27ba0ff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=HECW2_VIPAS39];
+7 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Lato, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
+normal [label="", penwidth=3, style=invis, xlabel=EIF2S1_ITPR1];
+0 -> 3  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="1.5", penwidth="5.5", style=solid];
+0 -> 6  [arrowsize=0, color="#c27ba0ff;0.5:#6aa84fff", minlen="1.2083333730697632", penwidth="5.5", style=solid];
+3 -> 1  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="3.0", penwidth="5.5", style=solid];
+3 -> 5  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="1.4166666269302368", penwidth="5.5", style=solid];
+3 -> 9  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="1.2083333730697632", penwidth=5, style=dashed];
+6 -> 4  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.5", penwidth="5.5", style=solid];
+6 -> 7  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.2083333730697632", penwidth=5, style=dashed];
+5 -> 2  [arrowsize=0, color="#c27ba0ff;0.5:#c27ba0ff", minlen="2.4166665077209473", penwidth="5.5", style=solid];
+4 -> 8  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.2083333730697632", penwidth=5, style=dashed];
+normal -> 0  [arrowsize=0, color="#c27ba0ff", label="", penwidth=4, style=solid];
+}

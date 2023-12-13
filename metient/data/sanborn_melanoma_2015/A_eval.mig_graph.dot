@@ -1,0 +1,10 @@
+digraph  {
+dpi=600;size=3.5;
+"Primary, forehead" [color="#6aa84fff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+Parotid [color="#c27ba0ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+"Locoregional 1" [color="#e69138ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+"Locoregional 2" [color="#be5742e1", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+"Primary, forehead" -> Parotid  [color="#6aa84fff;0.5:#c27ba0ff", key=0, penwidth=3];
+"Primary, forehead" -> "Locoregional 1"  [color="#6aa84fff;0.5:#e69138ff", key=0, penwidth=3];
+"Primary, forehead" -> "Locoregional 2"  [color="#6aa84fff;0.5:#be5742e1", key=0, penwidth=3];
+}

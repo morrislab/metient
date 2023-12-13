@@ -1,0 +1,12 @@
+digraph  {
+dpi=600;size=3.5;
+"Primary, heel" [color="#6aa84fff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+"Locoregional, heel 1" [color="#c27ba0ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+"Locoregional, heel 2" [color="#e69138ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+"Lymph node, groin" [color="#be5742e1", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+"Locoregional, heel 3" [color="#2496c8ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+"Primary, heel" -> "Locoregional, heel 1"  [color="#6aa84fff;0.5:#c27ba0ff", key=0, penwidth=3];
+"Primary, heel" -> "Locoregional, heel 2"  [color="#6aa84fff;0.5:#e69138ff", key=0, penwidth=3];
+"Primary, heel" -> "Lymph node, groin"  [color="#6aa84fff;0.5:#be5742e1", key=0, penwidth=3];
+"Locoregional, heel 2" -> "Locoregional, heel 3"  [color="#e69138ff;0.5:#2496c8ff", key=0, penwidth=3];
+}

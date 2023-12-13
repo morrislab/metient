@@ -1,0 +1,19 @@
+digraph  {
+dpi=600;size=3.5;
+LN_SU_FLN1 [color="#6aa84fff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+LN_SU_LN1 [color="#c27ba0ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+LN_SU_LN2 [color="#e69138ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+LN_SU_LN3 [color="#be5742e1", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+metachronousMet_BR_LN1 [color="#2496c8ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+primary_SU_T1 [color="#674ea7ff", fillcolor=white, fontname=Lato, penwidth="3.0", shape=box];
+LN_SU_FLN1 -> LN_SU_LN1  [color="#6aa84fff;0.5:#c27ba0ff", key=0, penwidth=3];
+LN_SU_FLN1 -> LN_SU_LN1  [color="#6aa84fff;0.5:#c27ba0ff", key=1, penwidth=3];
+LN_SU_FLN1 -> LN_SU_LN2  [color="#6aa84fff;0.5:#e69138ff", key=0, penwidth=3];
+LN_SU_FLN1 -> LN_SU_LN2  [color="#6aa84fff;0.5:#e69138ff", key=1, penwidth=3];
+LN_SU_FLN1 -> LN_SU_LN3  [color="#6aa84fff;0.5:#be5742e1", key=0, penwidth=3];
+LN_SU_FLN1 -> metachronousMet_BR_LN1  [color="#6aa84fff;0.5:#2496c8ff", key=0, penwidth=3];
+LN_SU_FLN1 -> metachronousMet_BR_LN1  [color="#6aa84fff;0.5:#2496c8ff", key=1, penwidth=3];
+primary_SU_T1 -> LN_SU_FLN1  [color="#674ea7ff;0.5:#6aa84fff", key=0, penwidth=3];
+primary_SU_T1 -> LN_SU_FLN1  [color="#674ea7ff;0.5:#6aa84fff", key=1, penwidth=3];
+primary_SU_T1 -> LN_SU_LN3  [color="#674ea7ff;0.5:#be5742e1", key=0, penwidth=3];
+}
