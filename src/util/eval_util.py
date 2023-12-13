@@ -6,9 +6,129 @@ import os
 import re
 import pandas as pd
 import json
+import joblib
+import gzip
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 from src.util.globals import *
 from src.util import plotting_util as plot_util
+import torch
+import torch.optim as optim
+
+
+def plot_cross_ent_chart(data_dict, output_dir):
+    fig = plt.figure(figsize=(2.5, 3),dpi=200)
+    
+    keys = list(data_dict.keys())
+    sorted_keys = sorted(keys, key=lambda x: x[0], reverse=True)
+    string_keys = [str((round(k[0], 2),round(k[1], 2),round(k[2], 2))) for k in sorted_keys]
+    values = [-1*data_dict[k].item() for k in sorted_keys]
+    snsfig = sns.barplot(x=string_keys, y=values, palette=sns.color_palette("muted"),
+                         order=string_keys)
+
+    snsfig.spines['top'].set_visible(False)
+    snsfig.spines['right'].set_visible(False)
+
+    plt.xlabel("Theta: (migration weight, seeding site weight, \nmigration delta weight)",fontsize=10)
+    plt.ylabel("-E(theta)",fontsize=15)
+    plt.xticks(fontsize=8, rotation=45)
+    plt.yticks(fontsize=12)
+    plt.ylim(min(values)-5, max(values)+5)
+    fig.savefig(os.path.join(output_dir, f"cross_entropy_distribution.png"), dpi=600, bbox_inches='tight', pad_inches=0.5) 
+    plt.close()
+
+def stable_softmax(x):
+    # Subtract the maximum value for numerical stability
+    x_max, _ = torch.max(x, dim=0, keepdim=True)
+    exp_x = torch.exp(x - x_max)
+    return exp_x / torch.sum(exp_x, dim=0)
+
+def cross_ent(loss_dicts, thetas, tau):
+    '''
+    Computes the cross entropy between the target distribution (genetic distance)
+    and the predicted distribution (parsimony) using the input thetas
+    TODO: add organotropism 
+    '''
+    theta_X = torch.zeros((len(loss_dicts)))
+    gen_dist_scores = torch.zeros((len(loss_dicts)))
+    for i, loss_dict in enumerate(loss_dicts):
+        m = loss_dict[MIG_KEY]
+        c = loss_dict[COMIG_KEY]
+        s = loss_dict[SEEDING_KEY]
+        g = loss_dict[GEN_DIST_KEY]
+        theta_X[i] = -1.0*(thetas[0]*m + thetas[1]*c + thetas[2]*s)
+        gen_dist_scores[i] = -tau*g
+    # print()
+    # print(theta_X, gen_dist_scores)
+    # this is in the case where there is no seeding detected (happens rarely in some datasets)
+    if torch.sum(theta_X) == 0 or torch.isnan(gen_dist_scores).any():
+        return 0.0
+    theta_X = stable_softmax(theta_X)
+    gen_dist_scores = stable_softmax(gen_dist_scores)
+    cross_ent = torch.mul(gen_dist_scores, torch.log2(theta_X+0.1))
+    # print("thetaX", theta_X, "gen_dist_scores", gen_dist_scores, "cross ent", cross_ent)
+
+    return -1*torch.sum(cross_ent)
+
+def get_pickle_filenames(pickle_files_dirs):
+    pickle_filenames = []
+    for pickle_files_dir in pickle_files_dirs:
+        for file in os.listdir(pickle_files_dir):
+            if ".pkl.gz" in file:
+                pickle_filenames.append(os.path.join(pickle_files_dir, file))
+    return pickle_filenames
+    
+def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=5.0):
+    '''
+    pickle_file_dirs: list of directories to search for Metient results
+    with .pkl.gz files
+
+    or, just pass the paths to the actual pickle files
+
+    Returns the parsimony weights which give the best cross entropy 
+    between the target distribution (genetic distance) and predicted 
+    distribution (parsimony) across all patients in pickle_files_dir
+    '''
+    if pickle_file_list == None :
+        pickle_file_list = get_pickle_filenames(pickle_file_dirs)
+    num_patients = 0
+    
+    #print("Restricting to patients wih > 2 sites")
+    all_loss_dicts = []
+    for pkl_file in pickle_file_list:
+        with gzip.open(pkl_file,'rb') as f:
+            pckl = pickle.load(f)
+        
+        sites = pckl[OUT_SITES_KEY]
+        # if len(sites) > 2:
+        loss_dicts = pckl[OUT_LOSS_DICT_KEY]
+        all_loss_dicts.append(loss_dicts)
+        
+    print("num patients", len(pickle_file_list), len(all_loss_dicts))
+    
+    raw_thetas = torch.tensor([1.0,1.0,1.0], requires_grad=True)
+    optimizer = optim.SGD([raw_thetas], lr=0.01)
+    max_iter = 200
+
+    for step in range(max_iter):
+        optimizer.zero_grad()
+        thetas = stable_softmax(raw_thetas)
+        total_cross_ent = 0.0
+        for patient_loss_dicts in all_loss_dicts:
+            patient_cross_ent = cross_ent(patient_loss_dicts, thetas, tau)
+            total_cross_ent += patient_cross_ent
+            # print("total_cross_ent", total_cross_ent)
+
+        total_cross_ent.backward()
+        optimizer.step()
+
+        if step % 10 == 0:
+            print(f"Step {step}: theta = {thetas}, Objective = {total_cross_ent.item()}")
+
+    print(f"Optimized thetas: {thetas}")
+
+    return [float(thetas[0]), float(thetas[1]), float(thetas[2])]
 
 ######### Methods taken directly from MACHINA repo #########
 
@@ -35,7 +155,6 @@ def get_mutations(edge_list, u):
     for i in s:
         if i.isdigit():
             mutations.add(int(i))
-    #print mutations
 
     for edge in edge_list:
         uu = edge[0]
@@ -101,8 +220,8 @@ def multi_graph_to_set(edge_list):
 
 ########### Methods for evaluating Metient ouputs #############
 def metient_parse_clone_tree(results_dict, met_tree_num):
-    V = results_dict[OUT_LABElING_KEY][met_tree_num]
-    A = results_dict[OUT_ADJ_KEY]
+    V = torch.tensor(results_dict[OUT_LABElING_KEY][met_tree_num])
+    A = torch.tensor(results_dict[OUT_ADJ_KEY][met_tree_num])
     sites = results_dict[OUT_SITES_KEY]
     G = plot_util.get_migration_graph(V, A)
     idx_to_lbl = results_dict[OUT_IDX_LABEL_KEY][met_tree_num]
@@ -118,8 +237,8 @@ def metient_parse_clone_tree(results_dict, met_tree_num):
     return edges, migration_edges
 
 def metient_parse_mig_graph(results_dict, met_tree_num):
-    V = results_dict[OUT_LABElING_KEY][met_tree_num]
-    A = results_dict[OUT_ADJ_KEY]
+    V = torch.tensor(results_dict[OUT_LABElING_KEY][met_tree_num])
+    A = torch.tensor(results_dict[OUT_ADJ_KEY][met_tree_num])
     sites = results_dict[OUT_SITES_KEY]
     G = plot_util.get_migration_graph(V, A)
     migration_edges = []
@@ -131,36 +250,36 @@ def metient_parse_mig_graph(results_dict, met_tree_num):
     return migration_edges
 
 class HeapTree:
-    def __init__(self, loss, results_dict, met_tree_num):
+    def __init__(self, loss, results_dict, met_tree_num, tree_num):
         self.loss = loss
         self.results_dict = results_dict
         self.met_tree_num = met_tree_num
+        self.tree_num = tree_num
 
    # override the comparison operator
     def __lt__(self, other):
         return self.loss < other.loss
     
-def get_metient_min_loss_trees(site_mig_type_dir, seed, k, loss_thres=1.0):
+def get_metient_min_loss_trees(site_mig_type_dir, seed, k, loss_thres=1.0, suffix=""):
     # Get all clone trees for the seed
-    tree_pickles = glob.glob(os.path.join(site_mig_type_dir, f"*_seed{seed}.pickle"))
+    tree_pickles = glob.glob(os.path.join(site_mig_type_dir, f"*_seed{seed}{suffix}.pkl.gz"))
     
     # Keep track of the best trees and losses
     min_heap = [] 
     for tree_pickle in tree_pickles:
-        clone_tree_num = os.path.basename(tree_pickle).replace("tree", "").replace(f"_seed{seed}.pickle", "")
-        f = open(tree_pickle,'rb')
-        results_dict = pickle.load(f)
+        clone_tree_num = os.path.basename(tree_pickle).replace("tree", "").replace(f"_seed{seed}{suffix}.pkl.gz", "")
+        with gzip.open(tree_pickle,'rb') as f:
+            results_dict = joblib.load(f)
         for met_tree_num, loss in enumerate(results_dict['losses']):
-            heapq.heappush(min_heap, HeapTree(loss, results_dict, met_tree_num))
+            heapq.heappush(min_heap, HeapTree(loss, results_dict, met_tree_num, clone_tree_num))
     out = []
     min_loss = min_heap[0].loss
-
     while len(out) < k and len(min_heap) > 0:
         item = heapq.heappop(min_heap)
         # only add tree if it's ~= to the min loss
         if abs(min_loss-item.loss) <= loss_thres:
             out.append((item.loss, item.results_dict, item.met_tree_num))
-        
+    print("# min loss trees:", len(out))
     return out
 
 ######## Methods for comparing Metient outputs to ground truth ############
