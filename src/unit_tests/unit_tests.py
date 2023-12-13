@@ -118,27 +118,27 @@ class TestSeedingPatternFromMigrationGraph(unittest.TestCase):
 	def test_seeding_pattern_from_mig_graph(self):
 		G = torch.tensor([[0,1,1], [0,0,0], [0,0,0]])
 		self.assertFalse(plot_util.is_cyclic(G))
-		self.assertEqual(plot_util.get_seeding_pattern_from_migration_graph(G), "monoclonal single-source seeding")
+		self.assertEqual(plot_util.get_seeding_pattern(G), "monoclonal single-source seeding")
 		
 		G = torch.tensor([[0,0,0], [0,2,3], [0,0,0]])
 		self.assertFalse(plot_util.is_cyclic(G))
-		self.assertEqual(plot_util.get_seeding_pattern_from_migration_graph(G), "polyclonal single-source seeding")
+		self.assertEqual(plot_util.get_seeding_pattern(G), "polyclonal single-source seeding")
 
 		G = torch.tensor([[0,1,0], [0,0,1], [0,0,0]])
 		self.assertFalse(plot_util.is_cyclic(G))
-		self.assertEqual(plot_util.get_seeding_pattern_from_migration_graph(G), "monoclonal multi-source seeding")
+		self.assertEqual(plot_util.get_seeding_pattern(G), "monoclonal multi-source seeding")
 
 		G = torch.tensor([[0,1,0], [0,0,2], [0,0,0]])
 		self.assertFalse(plot_util.is_cyclic(G))
-		self.assertEqual(plot_util.get_seeding_pattern_from_migration_graph(G), "polyclonal multi-source seeding")
+		self.assertEqual(plot_util.get_seeding_pattern(G), "polyclonal multi-source seeding")
 
 		G = torch.tensor([[0,1,1], [1,0,0], [1,0,0]])
 		self.assertTrue(plot_util.is_cyclic(G))
-		self.assertEqual(plot_util.get_seeding_pattern_from_migration_graph(G), "monoclonal reseeding")
+		self.assertEqual(plot_util.get_seeding_pattern(G), "monoclonal reseeding")
 
 		G = torch.tensor([[0,1,0], [2,0,0], [0,0,0]])
 		self.assertTrue(plot_util.is_cyclic(G))
-		self.assertEqual(plot_util.get_seeding_pattern_from_migration_graph(G), "polyclonal reseeding")
+		self.assertEqual(plot_util.get_seeding_pattern(G), "polyclonal reseeding")
 
 
 import glob
@@ -193,7 +193,8 @@ class TestTRACERxPreprocessing(unittest.TestCase):
 		# Load preprocessed data
 		patient_df = pd.read_csv(os.path.join(patient_tsv_dir, f"{patient_id}_SNVs.tsv"), sep="\t")
 		ssm_df = pd.read_csv(os.path.join(patient_tsv_dir, f"{patient_id}.ssm"), sep="\t")
-		params_json = json.load(open(os.path.join(patient_tsv_dir, f"{patient_id}.params.json")))
+		with open(os.path.join(patient_tsv_dir, f"{patient_id}.params.json")) as f:
+			params_json = json.load(f)
 		json_sample_names = params_json['samples']
 		#print(params_json['samples'])
 		#print(ssm_df['var_reads'])
@@ -228,7 +229,7 @@ class TestTRACERxPreprocessing(unittest.TestCase):
 
 	def _test_conipher_tsv(self, patient_id, conipher_tsv_dir, true_patient_data, true_sample_data, true_purity_ploidy):
 		'''
-		Tests tsvs used or input into CONIPHER (which does clustering via pyclone
+		Tests tsvs used for input into CONIPHER (which does clustering via pyclone
 		+ tree building). See: https://github.com/McGranahanLab/CONIPHER-wrapper
 		'''
 		patient_df = pd.read_csv(os.path.join(conipher_tsv_dir, f"{patient_id}_conipher_SNVs.tsv"), sep="\t")

@@ -3,11 +3,31 @@
 from src.lib import vertex_labeling as vert_label
 from src.util import plotting_util as plutil
 from src.util import data_extraction_util as dutil
+from src.util.globals import *
 
+def evaluate(T, ref, var, ordered_sites, primary_site, node_idx_to_label,
+             weights, print_config, output_dir, run_name, 
+             G=None, O=None, max_iter=100, lr=0.1, init_temp=40, final_temp=0.01,
+             batch_size=256, custom_colors=None, weight_init_primary=True,  solve_polytomies=False):
+    return vert_label.get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_label,
+                                            weights, print_config, output_dir, run_name, G=G, O=O, 
+                                            max_iter=max_iter, lr=lr, init_temp=init_temp, final_temp=final_temp,
+                                            batch_size=batch_size, custom_colors=custom_colors, 
+                                            weight_init_primary=weight_init_primary, mode='evaluate', solve_polytomies=solve_polytomies)
+
+def calibrate(Ts, ref_matrices, var_matrices, ordered_sites, primary_sites, node_idx_to_labels,
+              weights, print_config, output_dir, run_names, Gs=None, Os=None, max_iter=100, lr=0.1, init_temp=40, final_temp=0.01,
+              batch_size=256, custom_colors=None, weight_init_primary=True,  solve_polytomies=False):
+    return vert_label.calibrate(Ts, ref_matrices, var_matrices, ordered_sites, primary_sites, node_idx_to_labels,
+                                weights, print_config, output_dir, run_names,
+                                Gs=Gs, Os=Os, max_iter=max_iter, lr=lr, init_temp=init_temp, final_temp=final_temp,
+                                batch_size=batch_size, custom_colors=custom_colors, weight_init_primary=weight_init_primary, solve_polytomies=solve_polytomies)
+    
 def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_label,
                           weights, print_config, output_dir, run_name, 
-                          G=None, O=None, max_iter=200, lr=0.1, init_temp=40, final_temp=0.01,
-                          batch_size=64, custom_colors=None, weight_init_primary=False, lr_sched="step"):
+                          G=None, O=None, max_iter=100, lr=0.1, init_temp=40, final_temp=0.01,
+                          batch_size=256, custom_colors=None, weight_init_primary=True, 
+                          mode="evaluate", solve_polytomies=False):
     '''
     Args:
         T: numpy ndarray or torch tensor (shape: num_internal_nodes x num_internal_nodes). Adjacency matrix (directed) of the internal nodes.
@@ -42,12 +62,7 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
 
         weight_init_primary: whether to initialize weights higher to favor vertex labeling of primary for all internal nodes
         
-        lr_sched: how to weight the tasks of (1) leaf node inference and (2) internal vertex labeling. options:
-            "bi-level": outer objective is to learn vertex labeling, inner objective is to learn leaf nodes (subclonal presence)
-            "constant": default, (1) and (2) weighted equally at each epoch
-            "step": (1) has weight=1 for first half of epochs and (2) has weight=0, and then we flip the weights for the last half of training
-            "em": (1) has weight=1 and (2) has weight=0 for 20 epochs, and we flip every 20 epochs (kind of like E-M)
-            "linear": (1) decreases linearly while (2) increases linearly at the same rate (1/max_iter)
+        mode: "evaluate" or "calibrate"
     Returns:
         # TODO: return info for k best trees
         Corresponding info on the *best* tree:
@@ -60,9 +75,10 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
 
 
     return vert_label.get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_label,
-					                        weights, print_config, output_dir, run_name, 
-					                        G=G, O=O, max_iter=max_iter, lr=lr, init_temp=init_temp, final_temp=final_temp,
-					                        batch_size=batch_size, custom_colors=custom_colors, weight_init_primary=weight_init_primary, lr_sched=lr_sched)
+					                        weights, print_config, output_dir, run_name, G=G, O=O, 
+					                        max_iter=max_iter, lr=lr, init_temp=init_temp, final_temp=final_temp,
+					                        batch_size=batch_size, custom_colors=custom_colors, 
+                                            weight_init_primary=weight_init_primary, mode=mode, solve_polytomies=solve_polytomies)
 
 class PrintConfig:
     def __init__(self, visualize=True, verbose=False, viz_intermeds=False, k_best_trees=3, save_outputs=True):
@@ -80,7 +96,9 @@ class PrintConfig:
         self.save_outputs = save_outputs
 
 class Weights:
-    def __init__(self, data_fit=0.2, mig=10.0, comig=7.0, seed_site=5.0, reg=2.0, gen_dist=0.0, organotrop=0.0):
+    def __init__(self,  mig=[3.0], comig=0.5, seed_site=[1.0], gen_dist=0.0, organotrop=0.0, data_fit=0.2, reg=2.0, entropy=0.1):
+        if not (len(mig) >= 1 and len(seed_site) >= 1):
+            raise ValueError("Length of mig and seed_site should be at least 1 (if using just one weight for each, just pass an array of length 1)")
         self.data_fit = data_fit
         self.mig = mig
         self.comig = comig
@@ -88,8 +106,7 @@ class Weights:
         self.reg = reg
         self.gen_dist = gen_dist
         self.organotrop = organotrop
-
-
+        self.entropy = entropy
 
 
 ########### Data Extraction Utilities ############
