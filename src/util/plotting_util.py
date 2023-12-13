@@ -19,17 +19,16 @@ import os
 import pickle
 import pygraphviz as pgv
 from collections import deque
-
+import gzip
 import string
 
 # TODO: this cyclical import is not great
 import src.lib.vertex_labeling as vert_label
-from src.util.vertex_labeling_util import LabeledTree
+from src.util.vertex_labeling_util import LabeledTree, get_root_index, tree_iterator
 from src.util.globals import *
 
 import pandas as pd
 pd.options.display.float_format = '{:,.3f}'.format
-import scipy.sparse as sp
 
 import seaborn as sns
 
@@ -39,55 +38,35 @@ COLORS = ["#6aa84fff","#c27ba0ff", "#e69138ff", "#be5742e1", "#2496c8ff", "#674e
 if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
 
-def get_root_index(T):
-    '''
-    returns the root idx (node with no inbound edges) from adjacency matrix T
-    '''
-
-    candidates = set([x for x in range(len(T))])
-    for i, j in tree_iterator(T):
-        candidates.remove(j)
-    msg = "More than one" if len(candidates) > 1 else "No"
-    assert (len(candidates) == 1), f"{msg} root node detected"
-
-    return list(candidates)[0]
-
 def is_cyclic(G):
     '''
     returns True if graph contains cycles
     '''
-    
-    def _helper(v, visited, rec_stack):
- 
-        # Mark current node as visited and add to stack
-        visited[v] = True
-        rec_stack[v] = True
- 
-        # Recur for all neighbours if any neighbour is visited and in
-        # stack then graph is cyclic
-        neighbors = [i for i, value in enumerate(G[v]) if value > 0]
-        for neighbour in neighbors:
-            if visited[neighbour] == False:
-                if _helper(neighbour, visited, rec_stack) == True:
+    num_nodes = G.size(0)
+    visited = torch.zeros(num_nodes, dtype=torch.bool)
+    stack = torch.zeros(num_nodes, dtype=torch.bool)
+
+    def dfs(node):
+        visited[node] = True
+        stack[node] = True
+
+        for neighbor in range(num_nodes):
+            if G[node, neighbor] == 1:
+                if not visited[neighbor]:
+                    if dfs(neighbor):
+                        return True
+                elif stack[neighbor]:
                     return True
-            elif rec_stack[neighbour] == True:
+
+        stack[node] = False
+        return False
+
+    for node in range(num_nodes):
+        if not visited[node]:
+            if dfs(node):
                 return True
- 
-        # The node needs to be popped from recursion stack before 
-        # function ends
-        rec_stack[v] = False
-        return False
 
-    G = G.tolist() # this just makes things easier...
-    n = len(G)
-    visited = [False] * (n + 1)
-    rec_stack = [False] * (n + 1)
-    for node in range(n):
-        if visited[node] == False:
-            if _helper(node, visited, rec_stack) == True:
-                    return True
-        return False
-
+    return False
 
 def get_seeding_pattern(V, A):
     '''
@@ -95,7 +74,8 @@ def get_seeding_pattern(V, A):
     anatomical site that the node originated from (num_sites x num_nodes)
     A:  Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
 
-    returns: verbal description of the seeding pattern
+    returns: verbal description of the seeding pattern, one of:
+    {monoclonal, polyclonal} {single-source, multi-source, reseeding}
     '''
     G = get_migration_graph(V, A)
     pattern = ""
@@ -109,19 +89,44 @@ def get_seeding_pattern(V, A):
     non_zero = torch.where(G > 0)
     source_sites = non_zero[0]
     dest_sites = non_zero[1]
+    binarized_G = (G != 0).to(torch.int)
+
+    col_sums = torch.sum(binarized_G, axis=0)
+    # single-source means that each site is only seeded by ONE other site 
+    # (not that seeding site is 1)
+    is_single_source = torch.all(col_sums <= 1).item()
 
     unique_source_sites = torch.unique(source_sites)
 
     if len(unique_source_sites) == 0:
         return "no seeding"
-    elif len(unique_source_sites) == 1:
-        pattern += "single-source seeding"
     elif is_cyclic(G):
         pattern += "reseeding"
+    elif len(unique_source_sites) == 1 or is_single_source:
+        pattern += "single-source seeding"
     else:
         pattern += "multi-source seeding"
     return pattern
 
+def get_verbose_seeding_pattern(V, A):
+    '''
+    V: Vertex labeling matrix where columns are one-hot vectors representing the
+    anatomical site that the node originated from (num_sites x num_nodes)
+    A:  Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
+
+    returns: one of: {monoclonal, polyclonal} {primary single-source, single-source, multi-source, reseeding}
+    '''
+    pattern = get_seeding_pattern(V, A)
+    
+    G = get_migration_graph(V, A)
+    non_zero = torch.where(G > 0)    
+    unique_source_sites = torch.unique(non_zero[0])
+
+    if len(unique_source_sites) == 1:
+        items = pattern.split(" ")
+        items.insert(1, "primary")
+        return (" ").join(items)
+    return pattern
 
 def get_migration_edges(V, A):
     '''
@@ -335,22 +340,14 @@ def plot_temps(temps):
 def plot_loss_components(loss_dicts, weights):
     # if else statements to handle lr schedules where we do not calculate
     # all loss components at every epoch
-    mig_losses = [weights.mig*e[MIG_KEY] if MIG_KEY in e else 0.0 for e in loss_dicts]
-    comig_losses = [weights.comig*e[COMIG_KEY] if COMIG_KEY in e else 0.0  for e in loss_dicts]
-    seed_losses = [weights.seed_site*e[SEEDING_KEY] if SEEDING_KEY in e else 0.0  for e in loss_dicts]
-    data_fit_losses = [weights.data_fit*e[DATA_FIT_KEY] if DATA_FIT_KEY in e else 0.0  for e in loss_dicts]
-    reg_losses = [weights.reg*e[REG_KEY] if REG_KEY in e else 0.0  for e in loss_dicts]
-    neg_entropy = [weights.reg*e[ENTROPY_KEY] if ENTROPY_KEY in e else 0.0  for e in loss_dicts]
-    #total_losses = [e[FULL_LOSS_KEY] for e in loss_dicts]
+
+    mig_losses = [e[MIG_KEY] for e in loss_dicts]
+    seed_losses = [e[SEEDING_KEY] for e in loss_dicts]
+    neg_entropy = [e[ENTROPY_KEY] for e in loss_dicts]
 
     plt.plot([x for x in range(len(loss_dicts))],mig_losses, label="m")
-    plt.plot([x for x in range(len(loss_dicts))],comig_losses, label="c")
     plt.plot([x for x in range(len(loss_dicts))],seed_losses, label="s")
     plt.plot([x for x in range(len(loss_dicts))],neg_entropy, label="neg. ent.")
-
-    # plt.plot([x for x in range(len(loss_dicts))],data_fit_losses, label="nll")
-    # plt.plot([x for x in range(len(loss_dicts))],reg_losses, label="reg")
-    #plt.plot([x for x in range(len(loss_dicts))],total_losses, label="total_loss")
 
     plt.xlabel("epoch")
     plt.ylabel("loss")
@@ -382,17 +379,6 @@ def relabel_cluster(label, shorten, pad):
         return out.center(5)
     else:
         return out
-
-def tree_iterator(T):
-    '''
-    iterate an adjacency matrix, returning i and j for all values = 1
-    '''
-    # enumerating through a torch tensor is pretty computationally expensive,
-    # so convert to a sparse matrix to efficiently access non-zero values
-    T = T if isinstance(T, np.ndarray) else T.detach().numpy()
-    T = sp.coo_matrix(T)
-    for i, j, val in zip(T.row, T.col, T.data):
-        yield i,j
 
 def truncated_cluster_name(cluster_name):
     '''
@@ -590,7 +576,7 @@ def plot_averaged_tree(avg_edges, avg_node_colors, ordered_sites, custom_colors=
                     penwidth=rescaled_edge_weight(avg_edges[(label_i, label_j)]), arrowsize=0, fontname="Lato", 
                     fontsize="10pt", style=style)
 
-    assert(nx.is_tree(G))
+    #assert(nx.is_tree(G))
     # we have to use graphviz in order to get multi-color edges :/
     dot = to_pydot(G).to_string()
     # hack since there doesn't seem to be API to modify graph attributes...
@@ -626,11 +612,10 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx
     
     # these labels are used for display in plotting
     display_node_idx_to_label_map = get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites,
-                                                            shorten_label=True, pad=False)
+                                                                    shorten_label=True, pad=False)
     # these labels are used for writing out full vertex names to file
     full_node_idx_to_label_map = get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites,
-                                                                shorten_label=False, pad=False)
-
+                                                                 shorten_label=False, pad=False)
 
     color_map = { i:idx_to_color(custom_colors, (V[:,i] == 1).nonzero()[0][0].item()) for i in range(V.shape[1])}
     G = nx.DiGraph()
@@ -640,8 +625,9 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx
 
     # TODO: come up w better scaling mechanism for genetic distance
     if gen_dist != None:
-        gen_dist = gen_dist / torch.min(gen_dist[gen_dist>0])
-        gen_dist = torch.clamp(gen_dist, max=2) # for visualization purposes
+        gen_dist = ((gen_dist / torch.max(gen_dist[gen_dist>0]))*2.0) + 1
+        #gen_dist = torch.clamp(gen_dist, max=2) # for visualization purposes
+
     edges = []
     for i, j in tree_iterator(T):
         label_i, _ = display_node_idx_to_label_map[i]
@@ -659,6 +645,8 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx
         # We're iterating through i,j of the full tree (including leaf nodes),
         # while G only has genetic distances between internal nodes
         minlen = gen_dist[i, j].item() if (gen_dist != None and i < len(gen_dist) and j < len(gen_dist)) else 1.0
+        # TODO: make branch lengths a print config option
+        #minlen = 1.0
         #print(i, j, minlen)
         G.add_edge(i, j,color=f'"{color_map[i]};0.5:{color_map[j]}"', 
                    penwidth=penwidth, arrowsize=0, style=style, minlen=minlen)
@@ -693,131 +681,72 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx
     vertex_name_to_site_map = { full_node_idx_to_label_map[i][0]:ordered_sites[(V[:,i] == 1).nonzero()[0][0].item()] for i in range(V.shape[1])}
     return dot_str, edges, vertex_name_to_site_map
 
-# TODO: make this a diff option to display
-def plot_tree_deprecated(V, T, ordered_sites, custom_colors=None, custom_node_idx_to_label=None, show=True):
-
-    full_node_idx_to_label_map = get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites)
-
-    patches = []
-    for i, site in enumerate(ordered_sites):
-        patch = mpatches.Patch(color=idx_to_color(custom_colors, i), label=site)
-        patches.append(patch)
-
-    color_map = { full_node_idx_to_label_map[i]:idx_to_color(custom_colors, (V[:,i] == 1).nonzero()[0][0].item()) for i in range(V.shape[1])}
-    G = nx.DiGraph()
-    edges = []
-    for i, j in tree_iterator(T):
-        label_i = full_node_idx_to_label_map[i]
-        label_j = full_node_idx_to_label_map[j]
-        edges.append((label_i, label_j))
-        G.add_node(label_i, shape="circle", color=color_map[label_i], penwidth=3, fixedsize="true", fontname = "Lato", fontsize="10pt")
-        G.add_node(label_j, shape="circle", color=color_map[label_j], penwidth=3, fixedsize="true", fontname = "Lato", fontsize="10pt")
-        G.add_edge(label_i, label_j, color=f'"{color_map[label_i]};0.5:{color_map[label_j]}"', penwidth=3, arrowsize=0.75)
-
-    #assert(nx.is_tree(G))
-
-    nodes = [full_node_idx_to_label_map[i] for i in range(len(T))]
-
-    dot = to_pydot(G).to_string()
-    src = Source(dot) # dot is string containing DOT notation of graph
-    if show:
-        display(src)
-
-    vertex_name_to_site_map = { full_node_idx_to_label_map[i]:ordered_sites[(V[:,i] == 1).nonzero()[0][0].item()] for i in range(V.shape[1])}
-    return edges, vertex_name_to_site_map
-
-
-def print_tree_info(labeled_tree, U, soft_V, ref_matrix, var_matrix, B, G, O, weights, 
-                    node_idx_to_label, ordered_sites, p, show):
-    
-    # Debugging information
-    U_clipped = U.cpu().clone().detach().numpy()
-    U_clipped[np.where(U_clipped<U_CUTOFF)] = 0
-    logger.debug(f"\nU > {U_CUTOFF}\n")
-    col_labels = ["norm"] + [truncated_cluster_name(node_idx_to_label[k]) if k in node_idx_to_label else "0" for k in range(U_clipped.shape[1] - 1)]
-    df = pd.DataFrame(U_clipped, columns=col_labels, index=ordered_sites)
-    logger.debug(df)
-    logger.debug("\nF_hat")
-    F_hat_df = pd.DataFrame((U @ B).cpu().detach().numpy(), index=ordered_sites)
-    logger.debug(F_hat_df)
-
-    # Loss information
-    V = labeled_tree.labeling
+def get_loss_dict(V, soft_V, T, G, O, p, full_loss):
     V = V.reshape(1, V.shape[0], V.shape[1]) # add batch dimension
     soft_V = soft_V.reshape(1, soft_V.shape[0], soft_V.shape[1]) # add batch dimension
-    loss, loss_dict = vert_label.evaluate(V, soft_V, labeled_tree.tree, ref_matrix, var_matrix, 
-                                          U, B, G, O, p, weights)
-    if show:
-        print(formatted_loss_string(loss_dict, weights))
-
+    m, c, s, g, o = vert_label.get_ancestral_labeling_metrics(V, T, G, O, p)
+    e = vert_label.get_entropy(V, soft_V)
+    loss_dict = {MIG_KEY: m, COMIG_KEY:c, SEEDING_KEY: s, ORGANOTROP_KEY: o, GEN_DIST_KEY: g, ENTROPY_KEY: e}
+    loss_dict = {**loss_dict, **{FULL_LOSS_KEY: round(torch.mean(full_loss).item(), 3)}}
     return loss_dict
 
-def print_best_trees(losses_tensor, V, soft_V, U, ref_matrix, var_matrix, B, O, G, T, weights, node_idx_to_label, 
-                     ordered_sites, print_config, intermediate_data, custom_colors, primary, output_dir, run_name):
+def convert_lists_to_np_arrays(pickle_outputs, keys):
+    '''
+    makes unpickling these outputs much faster
+    '''
+    for key in keys:
+        if key in pickle_outputs:
+            pickle_outputs[key] = np.array(pickle_outputs[key])
+
+    return pickle_outputs
+
+def print_best_trees(min_loss_solutions, U, ref_matrix, var_matrix, O, weights, ordered_sites,
+                     print_config, custom_colors, primary, output_dir, run_name):
+    '''
+    min_loss_solutions is in order from lowest to highest loss 
+    '''
     
     primary_idx = ordered_sites.index(primary)
     p = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(ordered_sites)).T
 
-    def _visualize_intermediate_trees(best_tree_idx):
-        '''
-        Visualizes the best tree at intermediate iterations. This shows how the vertex labeling
-        gets changed over iterations as the loss converges.
-        '''
-        for itr, data in enumerate(intermediate_data):
-            _, V, soft_V = intermediate_data[itr][0], intermediate_data[itr][1], intermediate_data[itr][2]
-            print("="*30 + " INTERMEDIATE TREE " + "="*30+"\n")
-            print(f"Iteration: {itr*20}, Intermediate best tree idx {best_tree_idx}")
-            # skip root index (which is root, and we know the vert. label)
-            cols = [node_idx_to_label[i] for i in range(0,len(node_idx_to_label)) if i != get_root_index(full_trees[best_tree_idx])]
-            softx_df = pd.DataFrame(soft_X[best_tree_idx].cpu().detach().numpy(), columns=cols, index=ordered_sites)
-            logger.info("softmax_X\n")
-            logger.info(softx_df)
-
-            tree = LabeledTree(full_trees[best_tree_idx], V[best_tree_idx])
-
-            print_tree_info(tree, U, soft_V[best_tree_idx], ref_matrix, var_matrix, B, G, O, weights, node_idx_to_label, ordered_sites, p, print_config)
-            plot_tree(tree.labeling, tree.tree, G, ordered_sites, custom_colors, node_idx_to_label, show=print_config.visualize)
-            plot_migration_graph(tree.labeling, tree.tree, ordered_sites, custom_colors, primary)
-
-    # Get the top k unique trees
-    _, min_loss_indices = torch.topk(losses_tensor, len(losses_tensor), largest=False, sorted=True)
-    k_trees_and_losses = []
-    tree_set = set()
-    # Iterate from best to worst tree, and only get trees with unique U or V matrices
-    for i, loss_ix in enumerate(min_loss_indices):
-        labeled_tree = LabeledTree(T, V[loss_ix])
-        if labeled_tree not in tree_set:
-            tree_set.add(labeled_tree)
-            if len(k_trees_and_losses) < print_config.k_best_trees:
-                k_trees_and_losses.append((labeled_tree, losses_tensor[loss_ix]))
-
-        if i == 0 and print_config.viz_intermeds:
-            best_tree_idx = min_loss_indices[loss_ix]
-            _visualize_intermediate_trees(best_tree_idx)
-
     ret = None
     figure_outputs = []
     pickle_outputs = {OUT_LABElING_KEY:[], OUT_LOSSES_KEY:[],OUT_IDX_LABEL_KEY:[],
-                      OUT_ADJ_KEY:T, OUT_SITES_KEY:ordered_sites,
-                      OUT_PRIMARY_KEY:primary, OUT_SUB_PRES_KEY:U,}
+                      OUT_ADJ_KEY:[], OUT_SITES_KEY:ordered_sites, OUT_LOSS_DICT_KEY:[],
+                      OUT_PRIMARY_KEY:primary, OUT_SUB_PRES_KEY:U.numpy(), OUT_WEIGHTS_KEY:[],
+                      OUT_SOFTV_KEY:[], OUT_GEN_DIST_KEY:[]}
 
     with torch.no_grad():
-        for i, tup in enumerate(k_trees_and_losses):
-            tree = tup[0]
-            loss_info = print_tree_info(tree, U, soft_V[i], ref_matrix, var_matrix, B, G, O, weights, node_idx_to_label, ordered_sites, p, show=False)
+        for i, min_loss_solution in enumerate(min_loss_solutions):
+            V = min_loss_solution.V
+            soft_V = min_loss_solution.soft_V
+            T = min_loss_solution.T
+            G = min_loss_solution.G
+            full_loss = min_loss_solution.loss
+            node_idx_to_label = min_loss_solution.node_idx_to_label
+            loss_dict = get_loss_dict(V, soft_V, T, G, O, p, full_loss)
 
-            tree_dot, edges, vertices_to_sites_map = plot_tree(tree.labeling, tree.tree, G, ordered_sites, custom_colors, node_idx_to_label, show=False)
-            mig_graph_dot, mig_graph_edges = plot_migration_graph(tree.labeling, tree.tree, ordered_sites, custom_colors, primary, show=False)
+            tree_dot, edges, vertices_to_sites_map = plot_tree(V, T, G, ordered_sites, custom_colors, node_idx_to_label, show=False)
+            mig_graph_dot, mig_graph_edges = plot_migration_graph(V, T, ordered_sites, custom_colors, primary, show=False)
 
-            seeding_pattern = get_seeding_pattern(tree.labeling, tree.tree)
-            figure_outputs.append((tree_dot, mig_graph_dot, loss_info, seeding_pattern))
-            pickle_outputs[OUT_LABElING_KEY].append(tree.labeling)
-            pickle_outputs[OUT_LOSSES_KEY].append(loss_info['loss'])
-            full_tree_idx_to_label = get_full_tree_node_idx_to_label(tree.labeling, tree.tree, node_idx_to_label, ordered_sites,
+            seeding_pattern = get_seeding_pattern(V, T)
+            figure_outputs.append((tree_dot, mig_graph_dot, loss_dict, seeding_pattern))
+            pickle_outputs[OUT_LABElING_KEY].append(V.detach().numpy())
+            pickle_outputs[OUT_LOSSES_KEY].append(full_loss.numpy())
+            pickle_outputs[OUT_ADJ_KEY].append(T.detach().numpy())
+            pickle_outputs[OUT_SOFTV_KEY].append(soft_V.numpy())
+            if G != None:
+                pickle_outputs[OUT_GEN_DIST_KEY].append(G.numpy())
+            pickle_outputs[OUT_LOSS_DICT_KEY].append(loss_dict)
+            pickle_outputs[OUT_WEIGHTS_KEY].append((min_loss_solution.mig_weight, min_loss_solution.comig_weight, min_loss_solution.seed_weight))
+
+            full_tree_idx_to_label = get_full_tree_node_idx_to_label(V, T, node_idx_to_label, ordered_sites,
                                                                      shorten_label=False, pad=False)
             pickle_outputs[OUT_IDX_LABEL_KEY].append(full_tree_idx_to_label)
             if i == 0: # Best tree
-                ret = (edges, vertices_to_sites_map, mig_graph_edges, loss_info)
+                ret = (edges, vertices_to_sites_map, mig_graph_edges, loss_dict)
+
+        #pickle_outputs = convert_lists_to_np_arrays(pickle_outputs, [OUT_LABElING_KEY, OUT_LOSSES_KEY, OUT_ADJ_KEY, OUT_SOFTV_KEY, OUT_GEN_DIST_KEY])
 
         save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outputs, weights)
 
@@ -830,12 +759,11 @@ def formatted_loss_string(loss_dict, weights):
     s += f"Comigration num.: {int(loss_dict[COMIG_KEY])}\n"
     s += f"Seeding site num.: {int(loss_dict[SEEDING_KEY])}\n"
     s += f"Neg. entropy: {round(float(loss_dict[ENTROPY_KEY]), 3)}\n"
-    s += f"Data fit nll: {loss_dict[DATA_FIT_KEY]}\n"
 
     if weights.gen_dist != 0:
-        s += f"Genetic distance loss: {round(float(loss_dict[GEN_DIST_KEY]), 3)}\n"
+        s += f"Genetic dist. loss: {round(float(loss_dict[GEN_DIST_KEY]), 3)}\n"
     if weights.organotrop != 0:
-        s += f"Organotropism loss: {round(float(loss_dict[ORGANOTROP_KEY]), 3)}\n"
+        s += f"Organotrop. loss: {round(float(loss_dict[ORGANOTROP_KEY]), 3)}\n"
     return s
 
 
@@ -851,9 +779,15 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
 
         n = len(figure_outputs)
 
-        if k < n:
-            print("{k} unique best trees were not found ({n} were found). Retry with higher batch size if you want to try and get more trees.")
+        if n < k:
+            was = "was" if n==1 else "were"
+            print(f"{k} unique trees were not found ({n} {was} found). Retry with a higher sample size if you want to get more trees.")
             k = n
+
+        max_trees = 20
+        if n > max_trees:
+            print("More than 20 solutions detected, only plotting top 20 trees.")
+            k = max_trees
         # Create a figure and subplots
         #fig, axs = plt.subplots(3, k*2, figsize=(10, 8))
 
@@ -862,12 +796,14 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
         z = 2 # number of trees displayed per row
 
         nrows = math.ceil(k/z)
-        h = nrows*5
-        fig = plt.figure(figsize=(10,h))
+        h = nrows*2
+        fig = plt.figure(figsize=(5,h))
         
         vspace = 1/nrows
 
         for i, (tree_dot, mig_graph_dot, loss_info, seeding_pattern) in enumerate(figure_outputs):
+            if i >= max_trees:
+                break
             tree = pgv.AGraph(string=tree_dot).draw(format="png", prog="dot", args="-Glabel=\"\"")
             tree = PILImage.open(io.BytesIO(tree))
             mig_graph = pgv.AGraph(string=mig_graph_dot).draw(format="png", prog="dot")
@@ -876,7 +812,7 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
             gs1 = gridspec.GridSpec(3, 3)
 
             row = math.floor(i/2)
-            pad=0.02
+            pad = 0.02 if k < 20 else 0.001
 
             # left = 0.0 if i is odd, 0.55 if even
             # right = 0.45 if i is odd, 1.0 if even
@@ -894,21 +830,23 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
             ax2.imshow(mig_graph)
             ax2.axis('off')
 
-            ax3.text(0.5, 0.5, formatted_loss_string(loss_info, weights), ha='center', va='center', fontsize=10)
+            ax3.text(0.5, 0.5, formatted_loss_string(loss_info, weights), ha='center', va='center', fontsize=8)
             ax3.axis('off')
 
         fig1 = plt.gcf()
         plt.show()
         plt.close()
-        if print_config.save_outputs: fig1.savefig(os.path.join(output_dir, f'{run_name}.png'), dpi=300, bbox_inches='tight')
+        if print_config.save_outputs: 
+            fig1.savefig(os.path.join(output_dir, f'{run_name}.png'), dpi=150, bbox_inches='tight')
 
     if print_config.save_outputs:
         if not os.path.isdir(output_dir):
             raise ValueError(f"{output_dir} does not exist.")
         if print_config.verbose: print(f"Saving {run_name} to {output_dir}")
         # Save results to pickle file
-        with open(os.path.join(output_dir, f"{run_name}.pickle"), 'wb') as handle:
-            pickle.dump(pickle_outputs, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        # with open(os.path.join(output_dir, f"{run_name}.pickle"), 'wb') as handle:
+        with gzip.open(os.path.join(output_dir,f"{run_name}.pkl.gz"), 'wb') as gzip_file:
+            pickle.dump(pickle_outputs, gzip_file, protocol=pickle.HIGHEST_PROTOCOL)
         # Save best dot to file
         tree_dot, mig_graph_dot, _, _ = figure_outputs[0]
         with open(os.path.join(output_dir, f"{run_name}.tree.dot"), 'w') as file:
