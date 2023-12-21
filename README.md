@@ -11,7 +11,7 @@ pip install metient
 ```
 
 ## Tutorial
-A tutorial for running calibrate mode is available [here]()
+A tutorial for running calibrate mode is available [here](https://github.com/divyakoyy/metient/blob/main/metient_calibrate_tutorial.ipynb)
 
 
 ## Example of using the results of Metient for downstream analysis
