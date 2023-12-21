@@ -1,10 +1,11 @@
 
 import numpy as np
 import torch
-from util import plotting_util as plt_util
-from util import data_extraction_util as dutil
 import os
 import pandas as pd
+
+from metient.util import plotting_util as plt_util
+from metient.util import data_extraction_util as dutil
 
 # TODO: make more assertions on uniqueness and completeness of input csvs
 
@@ -209,7 +210,15 @@ def get_adj_matrix_from_parents(parents):
     T = np.delete(T, root_idx, 1)
     return T
 
-def get_adj_matrices_from_pairtree_results(pairtee_results_fn):
+def get_adj_matrices_from_pairtree_results(pairtee_results_fns):
+    if not isinstance(pairtee_results_fns, list):
+        return get_adj_matrix_from_pairtree_results(pairtee_results_fns)
+
+    assert(len(pairtee_results_fns) >= 1)
+
+    return [get_adj_matrix_from_pairtree_results(fn) for fn in pairtee_results_fns]
+
+def get_adj_matrix_from_pairtree_results(pairtee_results_fn):
     results = np.load(pairtee_results_fn)
     parent_vectors = results['struct']
     llhs = results['llh']
@@ -218,7 +227,7 @@ def get_adj_matrices_from_pairtree_results(pairtee_results_fn):
     data = []
     for parents_vector, llh in zip(parent_vectors, llhs):
         adj_matrix = get_adj_matrix_from_parents(parents_vector)
-        data.append((torch.tensor(adj_matrix, dtype = torch.float32), llh))
+        data.append(torch.tensor(adj_matrix, dtype = torch.float32))
     return data
 
 # Adapted from pairtree lib/vaf_plotter.py
