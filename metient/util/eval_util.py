@@ -10,12 +10,11 @@ import joblib
 import gzip
 import seaborn as sns
 import matplotlib.pyplot as plt
-
-from util.globals import *
-from util import plotting_util as plot_util
 import torch
 import torch.optim as optim
 
+from metient.util.globals import *
+from metient.util import plotting_util as plot_util
 
 def plot_cross_ent_chart(data_dict, output_dir):
     fig = plt.figure(figsize=(2.5, 3),dpi=200)
@@ -47,39 +46,52 @@ def stable_softmax(x):
 def cross_ent(loss_dicts, thetas, tau):
     '''
     Computes the cross entropy between the target distribution (genetic distance)
-    and the predicted distribution (parsimony) using the input thetas
-    TODO: add organotropism 
+    and the predicted distribution (parsimony) using the input thetas (which we are
+    trying to optimize)
     '''
     theta_X = torch.zeros((len(loss_dicts)))
     gen_dist_scores = torch.zeros((len(loss_dicts)))
+    organotrop_scores = torch.zeros((len(loss_dicts)))
     for i, loss_dict in enumerate(loss_dicts):
         m = loss_dict[MIG_KEY]
         c = loss_dict[COMIG_KEY]
         s = loss_dict[SEEDING_KEY]
         g = loss_dict[GEN_DIST_KEY]
+        o = loss_dict[ORGANOTROP_KEY]
         theta_X[i] = -1.0*(thetas[0]*m + thetas[1]*c + thetas[2]*s)
         gen_dist_scores[i] = -tau*g
-    # print()
-    # print(theta_X, gen_dist_scores)
+        organotrop_scores[i] = -tau*o
+    #print()
+    #print("theta x", theta_X, "\n gen dist", gen_dist_scores, "\n organotrop", organotrop_scores)
     # this is in the case where there is no seeding detected (happens rarely in some datasets)
     if torch.sum(theta_X) == 0 or torch.isnan(gen_dist_scores).any():
         return 0.0
     theta_X = stable_softmax(theta_X)
-    gen_dist_scores = stable_softmax(gen_dist_scores)
-    cross_ent = torch.mul(gen_dist_scores, torch.log2(theta_X+0.1))
-    # print("thetaX", theta_X, "gen_dist_scores", gen_dist_scores, "cross ent", cross_ent)
 
-    return -1*torch.sum(cross_ent)
+    cross_ent_sum = 0.0
+    if not torch.sum(gen_dist_scores == 0):
+        gen_dist_scores = stable_softmax(gen_dist_scores)
+        cross_ent_sum += -1*torch.sum(torch.mul(gen_dist_scores, torch.log2(theta_X+0.1)))
+    if not torch.sum(organotrop_scores == 0):
+        organotrop_scores = stable_softmax(organotrop_scores)
+        cross_ent_sum += -1*torch.sum(torch.mul(organotrop_scores, torch.log2(theta_X+0.1)))
 
-def get_pickle_filenames(pickle_files_dirs):
+    #cross_ent = torch.mul(gen_dist_scores, torch.log2(theta_X+0.1))
+    #print("thetaX", theta_X, "gen_dist_scores", gen_dist_scores, "organotrop_scores", organotrop_scores)
+
+    #print("cross_ent_sum", cross_ent_sum)
+    return cross_ent_sum
+
+def get_pickle_filenames(pickle_files_dirs, suffix=None):
     pickle_filenames = []
+    match = f"{suffix}.pkl.gz" if suffix != None else ".pkl.gz" 
     for pickle_files_dir in pickle_files_dirs:
         for file in os.listdir(pickle_files_dir):
-            if ".pkl.gz" in file:
+            if match in file:
                 pickle_filenames.append(os.path.join(pickle_files_dir, file))
     return pickle_filenames
     
-def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=5.0):
+def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3.0, suffix=None, use_min_tau=False):
     '''
     pickle_file_dirs: list of directories to search for Metient results
     with .pkl.gz files
@@ -91,9 +103,10 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=5
     distribution (parsimony) across all patients in pickle_files_dir
     '''
     if pickle_file_list == None :
-        pickle_file_list = get_pickle_filenames(pickle_file_dirs)
+        pickle_file_list = get_pickle_filenames(pickle_file_dirs, suffix)
     num_patients = 0
     
+    min_tau = float("inf")
     #print("Restricting to patients wih > 2 sites")
     all_loss_dicts = []
     for pkl_file in pickle_file_list:
@@ -104,8 +117,20 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=5
         # if len(sites) > 2:
         loss_dicts = pckl[OUT_LOSS_DICT_KEY]
         all_loss_dicts.append(loss_dicts)
+        if use_min_tau:
+            gen_dist_scores = torch.zeros((len(loss_dicts)))
+            for i, loss_dict in enumerate(loss_dicts):
+                gen_dist_scores[i] = loss_dict[GEN_DIST_KEY]
+            unique_gs = torch.unique(gen_dist_scores)
+            if len(unique_gs) >= 2:
+                print("gen dist diff", (unique_gs[1]-unique_gs[0]))
+                min_tau = min(min_tau, (unique_gs[1]-unique_gs[0]))
+    
+    if use_min_tau:
+        tau = min_tau
+        print("min_tau", tau)
         
-    print("num patients", len(pickle_file_list), len(all_loss_dicts))
+    print(f"Calibrating to {len(all_loss_dicts)} patients")
     
     raw_thetas = torch.tensor([1.0,1.0,1.0], requires_grad=True)
     optimizer = optim.SGD([raw_thetas], lr=0.01)
@@ -114,6 +139,7 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=5
     for step in range(max_iter):
         optimizer.zero_grad()
         thetas = stable_softmax(raw_thetas)
+        #thetas = torch.exp(raw_thetas)
         total_cross_ent = 0.0
         for patient_loss_dicts in all_loss_dicts:
             patient_cross_ent = cross_ent(patient_loss_dicts, thetas, tau)
@@ -124,7 +150,8 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=5
         optimizer.step()
 
         if step % 30 == 0:
-            print(f"Step {step}: theta = {thetas}, Objective = {total_cross_ent.item()}")
+            pass
+            #print(f"Step {step}: theta = {thetas}, Objective = {total_cross_ent.item()}")
 
     print(f"Optimized thetas: {thetas}")
 

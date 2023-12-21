@@ -6,12 +6,12 @@ from tqdm import tqdm
 import heapq
 import torchopt
 
-import metient as met
-from util import vertex_labeling_util as vutil
-from util import eval_util as eutil
-from util import plotting_util as plot_util
+from metient import metient as met
+from metient.util import vertex_labeling_util as vutil
+from metient.util import eval_util as eutil
+from metient.util import plotting_util as plot_util
 import torch.optim.lr_scheduler as lr_scheduler
-from util.globals import *
+from metient.util.globals import *
 
 from torch.distributions.binomial import Binomial
 
@@ -28,7 +28,7 @@ G_IDENTICAL_CLONE_VALUE = None
 # gumbel noise is initialized non-randomly for latent variables
 RANDOM_VALS = None
 LAST_P = None
-LAST_G = None
+SOLVE_POLYS = False
 
 if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
@@ -88,10 +88,13 @@ def get_ancestral_labeling_metrics(V, A, G, O, p, i=-1, max_iter=-1):
         R = torch.mul(A, (1-X))
         adjusted_G = -torch.log(G+0.01)
         R = torch.mul(R, adjusted_G)
+        # if bs == 1:
+        #     nonzero_indices =  torch.nonzero(R[0])
+        #     print("gen dist")
+        #     print("R\n", R)
+        #     print(nonzero_indices)
+        #     print(R[0][nonzero_indices])
 
-        # Access and print nonzero values
-        nonzero_indices = torch.nonzero(R)
-        nonzero_values = R[nonzero_indices[:,0], nonzero_indices[:,1],  nonzero_indices[:,2]]
         # TODO: get the average of genetic distance scores or normalize by max?
         g = torch.sum(R, dim=(1,2))/(m)
 
@@ -334,7 +337,6 @@ def full_adj_matrix(U, T, G):
         if G is not None:
             full_G[internal_node_idx, leaf_idx] = G_IDENTICAL_CLONE_VALUE
         leaf_idx += 1
-
     return full_adj, full_G, num_leaves
     
 def compute_u_loss(psi, ref, var, B, weights):
@@ -360,10 +362,6 @@ def get_full_G(T, G, poly_res, i=-1, max_iter=-1):
 
     if poly_res == None:
         return vutil.repeat_n(G, T.shape[0])
-
-    global LAST_G # this is expensive to compute, so hash it if we don't need to update it
-    if LAST_G != None and not update_adj_matrix(i, max_iter):
-        return LAST_G
 
     full_G = vutil.repeat_n(G, T.shape[0])
     # !!TODO: What should the genetic distance be??
@@ -745,6 +743,21 @@ def prune_bad_histories(solutions, O, p, weights, mode, U):
     Removes any solutions that are > parsimony_eps parsimony metrics
     away from the best solution
     '''
+    parsimony_eps = 1
+
+    def keep_tree(cand_metric, best_sum, best_pars_metrics):
+        if abs(best_sum - sum(cand_metric)) > parsimony_eps:
+            return False
+        if sum(cand_metric) == best_sum:
+            return True
+        # All these trees are +/- parsimony_eps, and they need to 
+        # improve at least one of the metrics compared to the best_pars_metrics
+        for best_metric in best_pars_metrics:
+            if cand_metric[0] < best_metric[0] or cand_metric[1] < best_metric[1] or cand_metric[2] < best_metric[2]:
+                return True
+        return False
+
+
 
     # Collect each solution's parsimony metrics
     all_pars_metrics = []
@@ -760,20 +773,19 @@ def prune_bad_histories(solutions, O, p, weights, mode, U):
         if pars_sum < best_sum:
             best_sum = pars_sum
 
+    # Find all pars metrics combinations that match the best sum
+    best_pars_metrics = set()
+    for i, pars_metrics in enumerate(all_pars_metrics):
+        pars_sum = sum(pars_metrics)
+        if pars_sum == best_sum:
+            best_pars_metrics.add(pars_metrics)
+
     pruned_solutions = []
-    bs = len(solutions)
-
-    # TODO: decide if this is the right parsimony epsilon in evaluate mode as well?
-    if mode == 'calibrate':
-        parsimony_eps = 1
-    elif mode == 'evaluate':
-        parsimony_eps = 1
-    #print("parsimony_eps", parsimony_eps)
-
+    
     # Go through and prune any solutions that are worse than the best sum
     # or made any mistakes
     for soln, pars_metrics in zip(solutions, all_pars_metrics):
-        if abs(best_sum - sum(pars_metrics)) <= parsimony_eps and not made_mistake(soln, U):
+        if keep_tree(pars_metrics, best_sum, best_pars_metrics) and not made_mistake(soln, U):
             pruned_solutions.append(soln)
 
     if len(pruned_solutions) == 0: 
@@ -781,7 +793,7 @@ def prune_bad_histories(solutions, O, p, weights, mode, U):
         # ideally this doesn't happen, but remove mistake detection so 
         # that we return some results
         for soln, pars_metrics in zip(solutions, all_pars_metrics):
-            if abs(best_sum - sum(pars_metrics)) <= parsimony_eps:
+            if keep_tree(pars_metrics, best_sum, best_pars_metrics):
                 pruned_solutions.append(soln)
 
     return pruned_solutions
@@ -855,7 +867,7 @@ def init_X(batch_size, num_sites, num_nodes_to_label, weight_init_primary, p, in
     # We're learning X, which is the vertex labeling of the internal nodes
     X = torch.rand(batch_size, num_sites, num_nodes_to_label)
     #print("X", X.shape)
-    eta = 4 # TODO: how do we set this parameter?
+    eta = 2 # TODO: how do we set this parameter?
     if weight_init_primary:
         # for each node, find which sites to bias labeling towards using
         # the sites it and its children are detected in
@@ -863,7 +875,7 @@ def init_X(batch_size, num_sites, num_nodes_to_label, weight_init_primary, p, in
         #print("nodes_w_children", nodes_w_children, "sites", sites)
         prim_site_idx = torch.nonzero(p)[0][0]
         #print("p", p, "prim_site_idx", prim_site_idx)
-        X[:,prim_site_idx,:] = (eta/2.0)
+        X[:,prim_site_idx,:] = eta
 
         for node_idx, sites in zip(nodes_w_children, sites):
             if node_idx == 0:
@@ -878,6 +890,9 @@ def init_X(batch_size, num_sites, num_nodes_to_label, weight_init_primary, p, in
 def update_adj_matrix(itr, max_iter):
     if itr == -1:
         return True
+    global SOLVE_POLYS
+    if not SOLVE_POLYS:
+        return False
     return itr > max_iter*1/3 and itr < max_iter*2/3
     # return itr > max_iter*1/2
 
@@ -899,10 +914,10 @@ def remove_leaf_nodes_idx_to_label_dicts(dicts):
     return new_dicts
 
 # TODO: should we not take weights as input for this?
-def calibrate(Ts, ref_matrices, var_matrices, ordered_sites, primary_sites, node_idx_to_labels,
-              weights, print_config, output_dir, run_names,
+def calibrate(Ts, ref_matrices, var_matrices, ordered_sites, primary_sites, 
+              node_idx_to_labels, weights, print_config, output_dir, run_names,
               Gs=None, Os=None, max_iter=100, lr=0.1, init_temp=40, final_temp=0.01,
-              batch_size=64, custom_colors=None, weight_init_primary=False,  solve_polytomies=False):
+              batch_size=64, custom_colors=None, weight_init_primary=True,  solve_polytomies=False):
     if not (len(Ts) == len(ref_matrices) == len(var_matrices) == len(ordered_sites) == len(primary_sites) == len(node_idx_to_labels) == len(run_names)):
         raise ValueError("Inputs ref_matrices, var_matrices, ordered_sites, primary_sites, node_idx_to_labels and run_names must have equal length (length = to number of patients in cohort")
     if (Gs == None and Os == None):
@@ -917,8 +932,8 @@ def calibrate(Ts, ref_matrices, var_matrices, ordered_sites, primary_sites, node
         return [torch.tensor(x) for x in lst]
 
     input_weights = copy.deepcopy(weights)
-    organotrop_weight = 0.0 if Os == None else (weights.organotrop if weights != None else 0.2)
-    gen_dist_weight = 0.0 if Gs == None else (weights.gen_dist if weights != None else 0.2)
+    organotrop_weight = 0.0 if Os == None else (weights.organotrop if weights != None else 0.1)
+    gen_dist_weight = 0.0 if Gs == None else (weights.gen_dist if weights != None else 0.1)
 
     weights = met.Weights(mig=DEFAULT_CALIBRATE_MIG_WEIGHTS, comig=DEFAULT_CALIBRATE_COMIG_WEIGHTS, 
                           seed_site=DEFAULT_CALIBRATE_SEED_WEIGHTS, gen_dist=gen_dist_weight, 
@@ -930,21 +945,22 @@ def calibrate(Ts, ref_matrices, var_matrices, ordered_sites, primary_sites, node
     print_config.k_best_trees = batch_size
 
     calibrate_dir = os.path.join(output_dir, "calibrate")
+
+    print(f"Saving results to {calibrate_dir}")
+
     if os.path.exists(calibrate_dir):
         shutil.rmtree(calibrate_dir)
         print(f"Overwriting existing directory at {calibrate_dir}")
     
     os.makedirs(calibrate_dir)
 
-    # TODO should we save the calibrate trees separately?
-    calibrate_suffix = "_calibrate"
     # 1. Go through each patient and get migration history in calibrate mode
     for i in range(len(Ts)):
         print("Calibrating for patient:", run_names[i])
         G = Gs[i] if Gs != None else None
         O = Os[i] if Os != None else None
         get_migration_history(Ts[i], ref_matrices[i], var_matrices[i], ordered_sites[i], primary_sites[i],
-                              node_idx_to_labels[i], weights, print_config, calibrate_dir, f"{run_names[i]}{calibrate_suffix}", 
+                              node_idx_to_labels[i], weights, print_config, calibrate_dir, f"{run_names[i]}", 
                               G=G, O=O, max_iter=max_iter, lr=lr, init_temp=init_temp, final_temp=final_temp,
                               batch_size=batch_size, custom_colors=custom_colors, weight_init_primary=weight_init_primary, 
                               mode="calibrate", solve_polytomies=solve_polytomies)
@@ -952,7 +968,6 @@ def calibrate(Ts, ref_matrices, var_matrices, ordered_sites, primary_sites, node
     # 2. Find the best theta for this cohort
     best_theta = eutil.get_max_cross_ent_thetas(pickle_file_dirs=[calibrate_dir])
     rounded_best_theta = [round(v,3) for v in best_theta]
-    print("BEST THETA", rounded_best_theta)
     with open(os.path.join(calibrate_dir, "best_theta.json"), 'w') as json_file:
         json.dump(rounded_best_theta, json_file, indent=2)
         
@@ -964,7 +979,7 @@ def calibrate(Ts, ref_matrices, var_matrices, ordered_sites, primary_sites, node
     
     for i in range(len(Ts)):
         O = Os[i] if Os != None else None
-        with gzip.open(os.path.join(calibrate_dir, f"{run_names[i]}{calibrate_suffix}.pkl.gz"), 'rb') as f:
+        with gzip.open(os.path.join(calibrate_dir, f"{run_names[i]}.pkl.gz"), 'rb') as f:
             pckl = pickle.load(f)
         saved_Ts = _convert_list_of_numpys_to_tensors(pckl[OUT_ADJ_KEY])
         saved_Vs = _convert_list_of_numpys_to_tensors(pckl[OUT_LABElING_KEY])
@@ -978,7 +993,7 @@ def calibrate(Ts, ref_matrices, var_matrices, ordered_sites, primary_sites, node
         final_solutions, _ = _get_best_final_solutions('evaluate', saved_Vs, saved_soft_Vs, saved_Ts, saved_Gs, O, p, weights,
                                                        print_config, None, saved_idx_to_label_dicts, calibrate_dir, run_names[i], 
                                                        saved_U, needs_pruning=False)
-        print("final_solutions:", len(final_solutions))
+        
         plot_util.print_best_trees(final_solutions, saved_U, ref_matrices[i], var_matrices[i], O,
                                   weights, ordered_sites[i], print_config, 
                                   custom_colors, primary_sites[i], 
@@ -989,7 +1004,7 @@ def calibrate(Ts, ref_matrices, var_matrices, ordered_sites, primary_sites, node
 
 def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_label,
                           weights, print_config, output_dir, run_name, 
-                          G=None, O=None, max_iter=200, lr=0.1, init_temp=40, final_temp=0.01,
+                          G=None, O=None, max_iter=100, lr=0.1, init_temp=40, final_temp=0.01,
                           batch_size=64, custom_colors=None, weight_init_primary=True, mode="evaluate",
                           solve_polytomies=False):
     '''
@@ -1064,9 +1079,13 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
     if mode == 'calibrate':
         if not ((weights.organotrop != 0.0 and O != None) or (weights.gen_dist != 0.0 and G != None)):
             raise ValueError(f"In calibrate mode, either organotropism or genetic distance matrices and weights must be set.")
+    for label in list(node_idx_to_label.values()):
+        if ":" in label:
+            raise ValueError(f"Unfortunately our visualization code uses pydot, which does not allow colons (:) in node names. Please use a different separator in the values of node_idx_to_label")
 
     # Don't alter the inputs in place
     T = copy.deepcopy(T)
+    G = copy.deepcopy(G)
     ref = copy.deepcopy(ref)
     var = copy.deepcopy(var)
     ordered_sites = copy.deepcopy(ordered_sites)
@@ -1075,9 +1094,8 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
 
     root_idx = vutil.get_root_index(T)
     if root_idx != 0:
-        print("original T", T, node_idx_to_label)
-        T, ref, var, node_idx_to_label = vutil.restructure_matrices(T, ref, var, node_idx_to_label)
-        print("restructured T", T, node_idx_to_label)
+        print(f"Restructuring adjacency matrix for {run_name} since root node is not at index 0")
+        T, ref, var, node_idx_to_label, G = vutil.restructure_matrices(T, ref, var, node_idx_to_label, G)
     assert(vutil.get_root_index(T) == 0)
 
     # TODO: convert to torch float 32 if its not already
@@ -1115,13 +1133,11 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
     B = torch.hstack([torch.ones(B.shape[0]).reshape(-1,1), B])
 
     # reinitialize globals as None (if module is not reloaded in between runs, this can cause problems)
-    global G_IDENTICAL_CLONE_VALUE, RANDOM_VALS, LAST_P, LAST_G
-    G_IDENTICAL_CLONE_VALUE = None
+    global RANDOM_VALS, LAST_P, G_IDENTICAL_CLONE_VALUE, SOLVE_POLYS
     RANDOM_VALS = None
     LAST_P = None
-    LAST_G = None
+    SOLVE_POLYS = solve_polytomies
 
-    # TODO: is genetic distance of identical clones this way fine?
     if G != None:
         G_IDENTICAL_CLONE_VALUE = torch.min(G[(G != 0)])/2.0
 
