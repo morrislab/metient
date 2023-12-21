@@ -2,13 +2,12 @@
 
 ## Installation
 
+
 ```bash
-git clone git@github.com:divyakoyy/met_history_prediction.git
-cd met_history_prediction
-conda create -n "met" python=3.8.8 ipython
-conda activate met
-pip3 install -r requirements.txt
-python setup.py install
+# mamba used for speed, can use conda instead if mamba is not installed
+mamba create -n "met" python=3.8.8 ipython
+mamba activate met
+pip install metient
 ```
 
 ## Test your installation
@@ -22,11 +21,7 @@ If everything goes well with installation, you should have output saved at `src/
 
 ```python
 import torch
-from src.lib import vertex_labeling
-from src.util import data_extraction_util as data_util
-from src.util import pairtree_data_extraction_util as pt_util
-from src.util import vertex_labeling_util as vert_util
-from src.util import plotting_util as plot_util
+from src.lib import metient
 import os
 
 # SET THESE VARIABLES
