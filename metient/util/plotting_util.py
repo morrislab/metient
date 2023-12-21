@@ -23,9 +23,9 @@ import gzip
 import string
 
 # TODO: this cyclical import is not great
-import lib.vertex_labeling as vert_label
-from util.vertex_labeling_util import LabeledTree, get_root_index, tree_iterator
-from util.globals import *
+import metient.lib.vertex_labeling as vert_label
+from metient.util.vertex_labeling_util import LabeledTree, get_root_index, tree_iterator
+from metient.util.globals import *
 
 import pandas as pd
 pd.options.display.float_format = '{:,.3f}'.format
@@ -77,6 +77,11 @@ def get_seeding_pattern(V, A):
     returns: verbal description of the seeding pattern, one of:
     {monoclonal, polyclonal} {single-source, multi-source, reseeding}
     '''
+    if not isinstance(V, torch.Tensor):
+        V = torch.tensor(V)
+    if not isinstance(A, torch.Tensor):
+        A = torch.tensor(A)
+
     G = get_migration_graph(V, A)
     pattern = ""
     # 1) determine if monoclonal (no multi-eges) or polyclonal (multi-edges)
@@ -625,7 +630,7 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx
 
     # TODO: come up w better scaling mechanism for genetic distance
     if gen_dist != None:
-        gen_dist = ((gen_dist / torch.max(gen_dist[gen_dist>0]))*2.0) + 1
+        gen_dist = ((gen_dist / torch.max(gen_dist[gen_dist>0]))*1.5) + 1
         #gen_dist = torch.clamp(gen_dist, max=2) # for visualization purposes
 
     edges = []
@@ -736,7 +741,7 @@ def print_best_trees(min_loss_solutions, U, ref_matrix, var_matrix, O, weights, 
             pickle_outputs[OUT_ADJ_KEY].append(T.detach().numpy())
             pickle_outputs[OUT_SOFTV_KEY].append(soft_V.numpy())
             if G != None:
-                pickle_outputs[OUT_GEN_DIST_KEY].append(G.numpy())
+                pickle_outputs[OUT_GEN_DIST_KEY].append(G.numpy())                
             pickle_outputs[OUT_LOSS_DICT_KEY].append(loss_dict)
             pickle_outputs[OUT_WEIGHTS_KEY].append((min_loss_solution.mig_weight, min_loss_solution.comig_weight, min_loss_solution.seed_weight))
 
@@ -778,7 +783,7 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
                 rcParams['font.family'] = 'Lato'
 
         n = len(figure_outputs)
-
+        print(run_name)
         if n < k:
             was = "was" if n==1 else "were"
             print(f"{k} unique trees were not found ({n} {was} found). Retry with a higher sample size if you want to get more trees.")
@@ -830,14 +835,14 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
             ax2.imshow(mig_graph)
             ax2.axis('off')
 
-            ax3.text(0.5, 0.5, formatted_loss_string(loss_info, weights), ha='center', va='center', fontsize=7)
+            ax3.text(0.5, 0.5, formatted_loss_string(loss_info, weights), ha='center', va='center', fontsize=8)
             ax3.axis('off')
 
         fig1 = plt.gcf()
         plt.show()
         plt.close()
         if print_config.save_outputs: 
-            fig1.savefig(os.path.join(output_dir, f'{run_name}.png'), dpi=150, bbox_inches='tight')
+            fig1.savefig(os.path.join(output_dir, f'{run_name}.png'), dpi=600, bbox_inches='tight')
 
     if print_config.save_outputs:
         if not os.path.isdir(output_dir):

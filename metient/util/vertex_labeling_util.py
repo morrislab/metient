@@ -4,7 +4,7 @@ import networkx as nx
 import math
 from queue import Queue
 
-from util.globals import *
+from metient.util.globals import *
 
 import scipy.sparse as sp
 import pandas as pd
@@ -87,7 +87,7 @@ def get_root_index(T):
 
     return list(candidates)[0]
 
-def restructure_matrices(adj_matrix, ref_matrix, var_matrix, node_idx_to_label):
+def restructure_matrices(adj_matrix,ref_matrix, var_matrix, node_idx_to_label, gen_dist_matrix):
     """
     Restructure the adjacency matrix, ref matrix and var matrix so that the node at index 0 becomes the root node.
 
@@ -105,13 +105,17 @@ def restructure_matrices(adj_matrix, ref_matrix, var_matrix, node_idx_to_label):
     swapped_adjacency_matrix = adj_matrix[new_order, :][:, new_order]
     swapped_ref_matrix = ref_matrix[:, new_order]
     swapped_var_matrix = var_matrix[:, new_order]
+    if gen_dist_matrix == None:
+        swapped_gen_dist_matrix = None
+    else:
+        swapped_gen_dist_matrix = gen_dist_matrix[new_order, :][:, new_order]
 
     original_root_label = node_idx_to_label[root_idx]
     original_node0_label = node_idx_to_label[0]
     node_idx_to_label[0] = original_root_label
     node_idx_to_label[root_idx] = original_node0_label
 
-    return swapped_adjacency_matrix, swapped_ref_matrix, swapped_var_matrix, node_idx_to_label
+    return swapped_adjacency_matrix, swapped_ref_matrix, swapped_var_matrix, node_idx_to_label, swapped_gen_dist_matrix
 
 
 def top_k_integers_by_count(lst, k, thres, cutoff):

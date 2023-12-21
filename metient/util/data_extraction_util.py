@@ -260,7 +260,46 @@ def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_idx_to_clust
 
     return torch.tensor(R, dtype=torch.float32), torch.tensor(V, dtype=torch.float32), list(unique_sites)
 
-def get_ref_var_matrices(tsv_filepath):
+def shorten_cluster_names(idx_to_full_cluster_label, split_char):
+    idx_to_cluster_label = dict()
+    for ix in idx_to_full_cluster_label:
+        og_label_muts = idx_to_full_cluster_label[ix].split(split_char) # e.g. CUL3:2:225371655:T;TRPM6:9:77431650:C
+        idx_to_cluster_label[ix] = og_label_muts[0]
+    return idx_to_cluster_label
+
+def get_ref_var_matrices(tsv_filepaths, split_char=None):
+    '''
+    tsv_filepaths: List of paths to tsvs (one for each patient). Expects columns:
+
+    ['#sample_index', 'sample_label', '#anatomical_site_index',
+    'anatomical_site_label', 'character_index', 'character_label', 'ref', 'var']
+
+    Returns:
+    (1) list of R matrices (num_samples x num_clusters) with the # of reference reads for each sample+cluster,
+    (2) list of V matrices (num_samples x num_clusters) with the # of variant reads for each sample+cluster,
+    (3) list of list of unique anatomical sites from the patient's data,
+    (4) list of dictionaries mapping index to character_label (based on input tsv, gives the index for each mutation name,
+    where these indices are used in R matrix, V matrix
+
+    For each of the returned lists, index 0 represents the patient at the first tsv_filepath, etc.
+    '''
+    if not isinstance(tsv_filepaths, list):
+        return get_ref_var_matrix(tsv_filepaths)
+
+    assert(len(tsv_filepaths) >= 1)
+
+    ref_matrices, var_matrices, ordered_sites, idx_to_label_dicts = [], [], [], []
+
+    for tsv_filepath in tsv_filepaths:
+        ref, var, sites, idx_to_label_dict =  get_ref_var_matrix(tsv_filepath, split_char=split_char)
+        ref_matrices.append(ref)
+        var_matrices.append(var)
+        ordered_sites.append(sites)
+        idx_to_label_dicts.append(idx_to_label_dict)
+
+    return ref_matrices, var_matrices, ordered_sites, idx_to_label_dicts 
+
+def get_ref_var_matrix(tsv_filepath, split_char=None):
     '''
     tsv_filepath: path to tsv with columns:
 
@@ -274,6 +313,7 @@ def get_ref_var_matrices(tsv_filepath):
     (4) dictionary mapping index to character_label (based on input tsv, gives the index for each mutation name,
     where these indices are used in R matrix, V matrix
     '''
+
     # For tsvs with very large fields
     csv.field_size_limit(sys.maxsize)
     # Get metadata
@@ -326,6 +366,8 @@ def get_ref_var_matrices(tsv_filepath):
                 character_label_to_idx[row[character_label_idx]] = int(row[mut_cluster_idx])
 
     idx_to_character_label = {v:k for k,v in character_label_to_idx.items()}
+    if split_char != None:
+        idx_to_character_label = shorten_cluster_names(idx_to_character_label, split_char)
     return torch.tensor(R, dtype=torch.float32), torch.tensor(V, dtype=torch.float32), list(unique_sites), idx_to_character_label
 
 def _get_adj_matrix_from_machina_tree(tree_edges, idx_to_character_label, remove_unseen_nodes=True, skip_polytomies=False):
@@ -486,6 +528,28 @@ def get_adj_matrix_from_machina_tree(character_label_to_idx, tree_filename, remo
             edges.append((node_i, node_j))
     return _get_adj_matrix_from_machina_tree(edges, character_label_to_idx, remove_unseen_nodes, skip_polytomies)
 
+def get_genetic_distance_matrices_from_adj_matrices(adj_matrices, idx_to_character_labels, split_char, normalize=True):
+    '''
+    Get the genetic distances between nodes by counting the number of mutations between
+    parent and child. idx_to_character_label's keys are expected to be mutation/cluster indices with
+    the mutation or mutations in that cluster (e.g. 'ENAM:4:71507837_DLG1:3:196793590'). split_char
+    indicates what the mutations in the cluster name are split by (if it's a cluster).
+
+    If a single adj_matrix or idx_to_character_label is inputted, a single genetic distance matrix is returned. 
+    Otherwise, a list of genetic distance matrices is returned.
+    '''
+    if not isinstance(adj_matrices, list):
+        return get_genetic_distance_matrix_from_adj_matrix(adj_matrices, idx_to_character_labels, split_char, normalize=normalize)
+
+    assert(len(adj_matrices) >= 1 and (len(adj_matrices) == len(idx_to_character_labels)))
+
+    gen_dist_matrices = []
+    for adj_matrix, idx_to_character_label in zip(adj_matrices, idx_to_character_labels):
+        gen_dist_matrix = get_genetic_distance_matrix_from_adj_matrix(adj_matrix, idx_to_character_label, split_char, normalize=normalize)
+        gen_dist_matrices.append(gen_dist_matrix)
+
+    return gen_dist_matrices
+
 def get_genetic_distance_matrix_from_adj_matrix(adj_matrix, idx_to_character_label, split_char, normalize=True):
     '''
     Get the genetic distances between nodes by counting the number of mutations between
@@ -499,7 +563,10 @@ def get_genetic_distance_matrix_from_adj_matrix(adj_matrix, idx_to_character_lab
         for j, val in enumerate(adj_row):
             if val == 1:
                 # This is the number of mutations the child node has accumulated compared to its parent
-                num_mutations = idx_to_character_label[j].count(split_char) + 1
+                if split_char == None: # not mutation clusters, just single mutations
+                    num_mutations = 1
+                else:
+                    num_mutations = idx_to_character_label[j].count(split_char) + 1
                 G[i][j] = num_mutations
 
     if normalize:
