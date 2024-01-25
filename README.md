@@ -21,9 +21,9 @@ There are two required inputs, a tsv file with the reference and variant counts 
 The fields for the tsv file:
 | Column name | Description |
 |----------|----------|
-| **anatomical_site_index** | 0-index for anatomical_site_label column | 
+| **anatomical_site_index** | Zero-based index for anatomical_site_label column | 
 | **anatomical_site_label** | Name of the anatomical site |
-| **character_index** | 0-index for character_label column. NOTE: this must correspond to the indices used in the tree .txt file|
+| **character_index** | Zero-based index for character_label column. NOTE: this must correspond to the indices used in the tree .txt file|
 | **character_label** | Name of the mutation or cluster of mutations. This is used in visualizations, so it should be short. NOTE: due to graphing dependencies, this string cannot contain colons. |
 | **ref** | The number of reads that map to the reference allele for this mutation or mutation cluster in this anatomical site. |
 | **var** | The number of reads that map to the variant allele for this mutation or mutation cluster in this anatomical site. |
