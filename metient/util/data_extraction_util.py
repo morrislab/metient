@@ -6,12 +6,31 @@ import copy
 from collections import OrderedDict
 import pandas as pd
 import sys
+from metient.util.globals import *
 
 # TODO: make more assertions on uniqueness and completeness of input csvs
 
 print("CUDA GPU:",torch.cuda.is_available())
 if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
+
+
+def get_adjacency_matrix_from_txt_edge_list(txt_file):
+    edges = []
+    max_idx = -1
+    with open(txt_file) as f:
+        for line in f:
+            s = line.strip().split(" ")
+            edge = (int(s[0]), int(s[1]))
+            edges.append(edge)
+            max_idx = max(edge[0], max_idx)
+            max_idx = max(edge[1], max_idx)
+
+    T = torch.zeros((max_idx+1,max_idx+1))
+    for edge in edges:
+        T[edge[0], edge[1]] = 1
+
+    return T
 
 
 def write_pooled_tsv_from_clusters(df, mut_name_to_cluster_id, cluster_id_to_cluster_name,
@@ -21,9 +40,8 @@ def write_pooled_tsv_from_clusters(df, mut_name_to_cluster_id, cluster_id_to_clu
     to the same cluster
 
     Args:
-        df: pandas DataFrame with reqiured columns: [#sample_index, sample_label, 
-        character_index, character_label, anatomical_site_index, anatomical_site_label, 
-        ref, var]
+        df: pandas DataFrame with reqiured columns: [character_index, character_label, 
+        anatomical_site_index, anatomical_site_label, ref, var, var_read_prob, site_category]
 
         mut_name_to_cluster_id: dictionary mapping mutation name ('character_label' in input df)
         to a cluster id
@@ -45,8 +63,8 @@ def write_pooled_tsv_from_clusters(df, mut_name_to_cluster_id, cluster_id_to_clu
 
     '''
 
-    required_cols = ["#sample_index", "sample_label", "anatomical_site_index", "anatomical_site_label", 
-                     "character_index", "character_label", "ref","var"]
+    required_cols = ["anatomical_site_index", "anatomical_site_label", 
+                     "character_index", "character_label", "ref","var", "var_read_prob", "site_category"]
     
     all_cols = required_cols + list(aggregation_rules.keys())
 
@@ -61,29 +79,29 @@ def write_pooled_tsv_from_clusters(df, mut_name_to_cluster_id, cluster_id_to_clu
     df.dropna(subset=['cluster'])
 
     # Pool reference and variant allele counts from all mutations within a cluster
-    pooled_df = df.drop(['character_label', 'character_index', '#sample_index', 'anatomical_site_index'], axis=1)
+    pooled_df = df.drop(['character_label', 'character_index', 'anatomical_site_index'], axis=1)
 
-    ref_var_rules = {'ref': np.sum, 'var': np.sum, 'sample_label': lambda x: ';'.join(set(x))}
+    # TODO: validate that site_category is the same for each anatomical site
+    ref_var_rules = {'ref': np.sum, 'var': np.sum, "var_read_prob": np.mean, 'site_category':'first'}
 
     pooled_df = pooled_df.groupby(['cluster', 'anatomical_site_label'], as_index=False).agg({**ref_var_rules, **aggregation_rules})
     
     pooled_df['character_label'] = pooled_df.apply(lambda row: cluster_id_to_cluster_name[row['cluster']], axis=1)
     
     # Add indices for mutations, samples and anatomical sites as needed for input format
-    pooled_df['character_index'] = pooled_df.apply(lambda row: list(pooled_df['character_label'].unique()).index(row["character_label"]), axis=1)
+    pooled_df['character_index'] = pooled_df['cluster'].astype(int)
     pooled_df['anatomical_site_index'] = pooled_df.apply(lambda row: list(pooled_df['anatomical_site_label'].unique()).index(row["anatomical_site_label"]), axis=1)
-    pooled_df['#sample_index'] = pooled_df.apply(lambda row: list(pooled_df['sample_label'].unique()).index(row["sample_label"]), axis=1)    
     
     pooled_df = pooled_df[all_cols]
     output_fn = os.path.join(output_dir, f"{patient_id}_clustered_SNVs.tsv")
     pooled_df.to_csv(output_fn, sep="\t")
 
-def write_pooled_tsv_from_pyclone_clusters(input_data_tsv_fn, clusters_tsv_fn, 
+def write_pooled_tsv_from_conipher_pyclone_clusters(input_data_tsv_fn, clusters_tsv_fn, 
                                            aggregation_rules, output_dir, patient_id,
                                            cluster_sep=";"):
 
     '''
-    After clustering with PyClone (see: https://github.com/Roth-Lab/pyclone),
+    After clustering with PyClone using CONIPHER (https://github.com/McGranahanLab/CONIPHER-wrapper),
     prepares tsvs by pooling mutations belonging to the same cluster
 
     Args:
@@ -113,6 +131,14 @@ def write_pooled_tsv_from_pyclone_clusters(input_data_tsv_fn, clusters_tsv_fn,
 
     '''
 
+    def _calc_var_read_prob(row):
+        major_cn = int(row['major_cn'])
+        minor_cn = int(row['minor_cn'])
+        p = float(row['purity'])
+        x = (p*(major_cn+minor_cn)+2*(1-p))
+        var_read_prob = (p*major_cn)/x
+        return var_read_prob
+
     df = pd.read_csv(input_data_tsv_fn, delimiter="\t", index_col=0)
     pyclone_df = pd.read_csv(clusters_tsv_fn, delimiter="\t")
     mut_name_to_cluster_id = dict()
@@ -123,7 +149,7 @@ def write_pooled_tsv_from_pyclone_clusters(input_data_tsv_fn, clusters_tsv_fn,
         cluster_id = pyclone_df[(pyclone_df['CHR']==int(mut_items[1]))&(pyclone_df['POS']==int(mut_items[2]))&(pyclone_df['REF']==mut_items[3])]['treeCLUSTER'].unique()
         assert(len(cluster_id) <= 1)
         if len(cluster_id) == 1:
-            cluster_id = cluster_id.item()
+            cluster_id = int(cluster_id.item())
             mut_name_to_cluster_id[row['character_label']] = cluster_id
             if cluster_id not in cluster_id_to_mut_names:
                 cluster_id_to_mut_names[cluster_id] = set()
@@ -132,9 +158,22 @@ def write_pooled_tsv_from_pyclone_clusters(input_data_tsv_fn, clusters_tsv_fn,
     # 2. Set new names for clustered mutations
     cluster_id_to_cluster_name = {k:cluster_sep.join(list(v)) for k,v in cluster_id_to_mut_names.items()}
 
+    print(patient_id, {k:v for k,v in list(mut_name_to_cluster_id.items())[:3]})
+    df['var_read_prob'] = df.apply(lambda row: _calc_var_read_prob(row), axis=1)
+    df['site_category'] = df.apply(lambda row: 'primary' if 'primary' in row['anatomical_site_label'] else 'metastasis', axis=1)
+
     # 3. Pool mutations and write to file
     write_pooled_tsv_from_clusters(df, mut_name_to_cluster_id, cluster_id_to_cluster_name,
                                    aggregation_rules, output_dir, patient_id)
+
+    # 4. Do some post-processing, i.e. adding number of mutations and shortening character label for display
+    output_fn = os.path.join(output_dir, f"{patient_id}_clustered_SNVs.tsv")
+    df = pd.read_csv(output_fn, sep="\t")
+
+    df['num_mutations'] = df.apply(lambda row: len(row['character_label'].split(cluster_sep)), axis=1)
+    df['full_label'] = df['character_label']
+    df['character_label'] = df.apply(lambda row:get_pruned_mut_label(row['character_label'], cluster_sep, ":"), axis=1)
+    df.to_csv(output_fn, sep="\t")
 
 def is_resolved_polytomy_cluster(cluster_label):
     '''
@@ -267,108 +306,155 @@ def shorten_cluster_names(idx_to_full_cluster_label, split_char):
         idx_to_cluster_label[ix] = og_label_muts[0]
     return idx_to_cluster_label
 
-def get_ref_var_matrices(tsv_filepaths, split_char=None):
+def get_ref_var_omega_matrices(tsv_filepaths):
     '''
     tsv_filepaths: List of paths to tsvs (one for each patient). Expects columns:
 
-    ['#sample_index', 'sample_label', '#anatomical_site_index',
-    'anatomical_site_label', 'character_index', 'character_label', 'ref', 'var']
-
+    ['anatomical_site_index', 'anatomical_site_label', 'character_index', 'character_label', 
+    'ref', 'var', 'var_read_prob']
     Returns:
     (1) list of R matrices (num_samples x num_clusters) with the # of reference reads for each sample+cluster,
     (2) list of V matrices (num_samples x num_clusters) with the # of variant reads for each sample+cluster,
-    (3) list of list of unique anatomical sites from the patient's data,
-    (4) list of dictionaries mapping index to character_label (based on input tsv, gives the index for each mutation name,
+    (3) list of omega matrices (num_samples x num_clusters) with the variant read probability of the mutation/mutation cluster in the sample,
+    (4) list of list of unique anatomical sites from the patient's data,
+    (5) list of dictionaries mapping index to character_label (based on input tsv, gives the index for each mutation name,
+    (6) list of dictionaries mapping index to number of mutations (if 'num_mutations' is passed, else None)
     where these indices are used in R matrix, V matrix
 
     For each of the returned lists, index 0 represents the patient at the first tsv_filepath, etc.
     '''
     if not isinstance(tsv_filepaths, list):
-        return get_ref_var_matrix(tsv_filepaths)
+        return get_ref_var_omega_matrix(tsv_filepaths)
 
     assert(len(tsv_filepaths) >= 1)
 
-    ref_matrices, var_matrices, ordered_sites, idx_to_label_dicts = [], [], [], []
+    ref_matrices, var_matrices, omega_matrices, ordered_sites, idx_to_label_dicts = [], [], [], [], []
+    idx_to_num_muts = None
 
     for tsv_filepath in tsv_filepaths:
-        ref, var, sites, idx_to_label_dict =  get_ref_var_matrix(tsv_filepath, split_char=split_char)
+        ref, var, omega, sites, idx_to_label_dict, idx_to_num_mut_dict =  get_ref_var_omega_matrix(tsv_filepath)
         ref_matrices.append(ref)
         var_matrices.append(var)
+        omega_matrices.append(omega)
         ordered_sites.append(sites)
         idx_to_label_dicts.append(idx_to_label_dict)
+        if idx_to_num_mut_dict != None:
+            if idx_to_num_muts == None:
+                idx_to_num_muts = []
+            idx_to_num_muts.append(idx_to_num_mut_dict)
 
-    return ref_matrices, var_matrices, ordered_sites, idx_to_label_dicts 
 
-def get_ref_var_matrix(tsv_filepath, split_char=None):
+    return ref_matrices, var_matrices, omega_matrices, ordered_sites, idx_to_label_dicts, idx_to_num_muts
+
+def get_pruned_mut_label(mut_label, cluster_split_char, mut_split_char):
+    gene_names = [item.split(mut_split_char)[0] for item in mut_label.split(cluster_split_char)]
+    gene_candidates = []
+    for gene in gene_names:
+        gene = gene.upper()
+        if gene in CANCER_DRIVER_GENES:
+            gene_candidates.append(gene)
+        elif gene in ENSEMBLE_TO_GENE_MAP:
+            gene_candidates.append(ENSEMBLE_TO_GENE_MAP[gene])
+    final_genes = gene_names if len(gene_candidates) == 0 else gene_candidates
+   
+    k = 2 if len(final_genes) > 2 else len(final_genes)
+    return "_".join(final_genes[:k])
+
+def get_primary_sites(tsv_filepath):
+    # For tsvs with very large fields
+    csv.field_size_limit(sys.maxsize)
+
+    df = pd.read_csv(tsv_filepath, sep="\t")
+    primary_sites = list(df[df['site_category']=='primary']['anatomical_site_label'].unique())
+    if len(primary_sites) < 1:
+        raise ValueError("No primary found in site_category column")
+
+    return primary_sites
+
+def get_ref_var_omega_matrix(tsv_filepath):
     '''
     tsv_filepath: path to tsv with columns:
 
-    ['#sample_index', 'sample_label', '#anatomical_site_index',
-    'anatomical_site_label', 'character_index', 'character_label', 'ref', 'var']
+    ['anatomical_site_index', 'anatomical_site_label', 'character_index', 'character_label', 
+    'ref', 'var', 'var_read_prob', 'site_category']
+
+    Optional additional flags: 'num_mutations'
 
     returns
     (1) R matrix (num_samples x num_clusters) with the # of reference reads for each sample+cluster,
     (2) V matrix (num_samples x num_clusters) with the # of variant reads for each sample+cluster,
-    (3) unique anatomical sites from the patient's data,
-    (4) dictionary mapping index to character_label (based on input tsv, gives the index for each mutation name,
-    where these indices are used in R matrix, V matrix
+    (3) omega matrix (num_samples x num_clusters) with the variant read probability of the mutation/mutation cluster in the sample,
+    (4) unique anatomical sites from the patient's data,
+    (5) dictionary mapping index to character_label (based on input tsv, gives the index for each mutation name,
+    where these indices are used in R matrix, V matrix)
+    (6) dictionary mapping index to number of mutations (if 'num_mutations' is passed, else None)
     '''
+
+    # TODO run clean check over tsv before processing
+    # - char index matches with char label every time (same for site index and site label)
+    # indices go from 0 to max
+    # var_read_prob and num mutations (if used) are same for each char label
+    # site labels are unique
 
     # For tsvs with very large fields
     csv.field_size_limit(sys.maxsize)
+
+    num_muts_idx = -1
     # Get metadata
     header_row_idx = -1
     with open(tsv_filepath) as f:
         tsv = csv.reader(f, delimiter="\t", quotechar='"')
         # Take a pass over the tsv to collect some metadata
         num_clusters = 0
-        num_samples = 0
+        num_sites = 0
 
         for i, row in enumerate(tsv):
-            if '#sample_index' in row: # is header row
+            if 'anatomical_site_label' in row: # is header row
                 header_row_idx = i
-                sample_idx = row.index('#sample_index')
+                
+                site_idx = row.index('anatomical_site_index')
+                site_label_idx = row.index('anatomical_site_label')
+                mut_cluster_idx = row.index('character_index')
+                character_label_idx = row.index('character_label')
                 ref_idx = row.index('ref')
                 var_idx = row.index('var')
-                mut_cluster_idx = row.index('character_index')
-                site_label_idx = row.index('anatomical_site_label')
-                character_label_idx = row.index('character_label')
+                omega_idx = row.index('var_read_prob')
+                if 'num_mutations' in row:
+                    num_muts_idx = row.index('num_mutations')
                 break
 
         assert (header_row_idx != -1), "No header provided in csv file"
 
         for i, row in enumerate(tsv):
             num_clusters = max(num_clusters, int(row[mut_cluster_idx]))
-            num_samples = max(num_samples, int(row[sample_idx]))
+            num_sites = max(num_sites, int(row[site_idx]))
         # 0 indexing
         num_clusters += 1
-        num_samples += 1
-
+        num_sites += 1
 
     # Build R and V matrices
-    character_label_to_idx = dict()
-    R = np.zeros((num_samples, num_clusters))
-    V = np.zeros((num_samples, num_clusters))
-    unique_sites = []
+    idx_to_character_label = dict()
+    R = np.zeros((num_sites, num_clusters))
+    V = np.zeros((num_sites, num_clusters))
+    omega = np.zeros((num_sites, num_clusters))
+    unique_sites = [""]*num_sites
+    idx_to_num_muts = dict() if num_muts_idx != -1 else None
     with open(tsv_filepath) as f:
         tsv = csv.reader(f, delimiter="\t", quotechar='"')
         for i, row in enumerate(tsv):
             if i <= header_row_idx: continue
-            R[int(float(row[sample_idx])), int(float(row[mut_cluster_idx]))] = int(float(row[ref_idx]))
-            V[int(float(row[sample_idx])), int(float(row[mut_cluster_idx]))] = int(float(row[var_idx]))
-
+            x = int(float(row[site_idx]))
+            y = int(float(row[mut_cluster_idx]))
+            R[x,y] = int(float(row[ref_idx]))
+            V[x,y] = int(float(row[var_idx]))
+            omega[x,y] = float(row[omega_idx])
             # collect additional metadata
-            # doing this as a list instead of a set so we preserve the order
-            # of the anatomical site labels in the same order as the sample indices
-            if row[site_label_idx] not in unique_sites:
-                unique_sites.append(row[site_label_idx])
-            if row[character_label_idx] not in character_label_to_idx:
-                character_label_to_idx[row[character_label_idx]] = int(row[mut_cluster_idx])
-
-    idx_to_character_label = {v:k for k,v in character_label_to_idx.items()}
-    if split_char != None:
-        idx_to_character_label = shorten_cluster_names(idx_to_character_label, split_char)
-    return torch.tensor(R, dtype=torch.float32), torch.tensor(V, dtype=torch.float32), list(unique_sites), idx_to_character_label
+            unique_sites[x] = row[site_label_idx]
+            idx_to_character_label[y] = row[character_label_idx]
+            if num_muts_idx != -1 and y not in idx_to_num_muts:
+                idx_to_num_muts[y] = float(row[num_muts_idx])
+        
+    return torch.tensor(R, dtype=torch.float32), torch.tensor(V, dtype=torch.float32), torch.tensor(omega, dtype=torch.float32), list(unique_sites), idx_to_character_label, idx_to_num_muts
 
 def _get_adj_matrix_from_machina_tree(tree_edges, idx_to_character_label, remove_unseen_nodes=True, skip_polytomies=False):
     '''
@@ -435,6 +521,15 @@ def _get_adj_matrix_from_machina_tree(tree_edges, idx_to_character_label, remove
     ret_dict = pruned_character_label_to_idx if remove_unseen_nodes else character_label_to_idx
     ret_dict = {v:k for k,v in ret_dict.items()}
     return T, ret_dict
+
+def get_index_to_cluster_label_from_corrected_sim_tsv(ref_var_fn):
+    df = pd.read_csv(ref_var_fn, sep="\t")
+    idx_to_label = {}
+    labels = df['character_label'].unique()
+    for label in labels:
+        idx = df[df['character_label']==label]['character_index'].unique().item()
+        idx_to_label[idx] = label
+    return idx_to_label
 
 def get_adj_matrices_from_spruce_mutation_trees(mut_trees_filename, idx_to_character_label, is_sim_data=False):
     '''
@@ -550,12 +645,10 @@ def get_genetic_distance_matrices_from_adj_matrices(adj_matrices, idx_to_charact
 
     return gen_dist_matrices
 
-def get_genetic_distance_matrix_from_adj_matrix(adj_matrix, idx_to_character_label, split_char, normalize=True):
+def get_genetic_distance_matrix_from_adj_matrix(adj_matrix, idx_to_num_muts, normalize=True):
     '''
-    Get the genetic distances between nodes by counting the number of mutations between
-    parent and child. idx_to_character_label's keys are expected to be mutation/cluster indices with
-    the mutation or mutations in that cluster (e.g. 'ENAM:4:71507837_DLG1:3:196793590'). split_char
-    indicates what the mutations in the cluster name are split by (if it's a cluster).
+    Get the genetic distances between nodes by using the number of mutations between parent and child. 
+    The number of mutations in a node is given in idx_to_num_muts.
     '''
     G = np.zeros(adj_matrix.shape)
 
@@ -563,10 +656,7 @@ def get_genetic_distance_matrix_from_adj_matrix(adj_matrix, idx_to_character_lab
         for j, val in enumerate(adj_row):
             if val == 1:
                 # This is the number of mutations the child node has accumulated compared to its parent
-                if split_char == None: # not mutation clusters, just single mutations
-                    num_mutations = 1
-                else:
-                    num_mutations = idx_to_character_label[j].count(split_char) + 1
+                num_mutations = idx_to_num_muts[j]
                 G[i][j] = num_mutations
 
     if normalize:
@@ -613,3 +703,34 @@ def get_organotropism_matrix_from_msk_met(ordered_sites, cancer_type, frequency_
         organotrop_arr[i] = met_freqs[metastatic_site].item()
 
     return torch.tensor(organotrop_arr, dtype = torch.float32)
+
+def load_pyclone_clusters(loci_fn, min_mut_thres=0):
+    '''
+    Returns (1) map of PyClone cluster ID to mutation names, 
+    and (2) list of all mutation names used in PyClone clustering
+
+    Filters clusters with less than min_mut_thres number of mutations
+    '''
+
+    # Load map from mutation name to PyClone cluster
+    cluster_id_to_mut_names = {}
+    cluster_df = pd.read_csv(loci_fn, sep="\t")
+    for i, row in cluster_df.iterrows():
+        cluster_id = row['cluster_id']
+        mutation_id = row['mutation_id']
+        if cluster_id not in cluster_id_to_mut_names:
+            cluster_id_to_mut_names[cluster_id] = set()
+        else:
+            cluster_id_to_mut_names[cluster_id].add(mutation_id)
+        
+    # Filter clusters with less than min_mut_thres mutations
+    final_cluster_id_to_mut_names = {}
+    mutations = set()
+    ix = 0
+    for _, v in cluster_id_to_mut_names.items():
+        if len(v) >= min_mut_thres:
+            mutations.update(v)
+            final_cluster_id_to_mut_names[ix] = list(v)
+            ix += 1
+
+    return final_cluster_id_to_mut_names, list(mutations)
