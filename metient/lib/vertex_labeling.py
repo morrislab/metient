@@ -8,6 +8,7 @@ import torchopt
 
 from metient import metient as met
 from metient.util import vertex_labeling_util as vutil
+from metient.util import data_extraction_util as dutil
 from metient.util import eval_util as eutil
 from metient.util import plotting_util as plot_util
 import torch.optim.lr_scheduler as lr_scheduler
@@ -201,7 +202,7 @@ def calc_llh(F_hat, R, V, omega_v, epsilon=1e-5):
         R: Refernce matrix (num_samples x num_mutation_clusters)
         V: Variant matrix (num_samples x num_mutation_clusters)
     Returns:
-        Data fit using the Binomial likelihood (p(x|F_hat)). See PairTree
+        Data fit using the Binomial likelihood (p(x|F_hat)). See PairTree (Wintersinger et. al.)
         supplement section 2.2 for details.
     '''
 
@@ -215,17 +216,12 @@ def calc_llh(F_hat, R, V, omega_v, epsilon=1e-5):
     #assert(np.allclose(1, phi[0]))
     P = torch.mul(omega_v, F_hat[:,1:])
 
-    # TODO: why these cutoffs?
-    #P = torch.maximum(P, epsilon)
-    #P = torch.minimum(P, 1 - epsilon)
-
     bin_dist = Binomial(N, P)
     F_llh = bin_dist.log_prob(V)
     #phi_llh = stats.binom.logpmf(V, N, P) / np.log(2)
     assert(not torch.any(F_llh.isnan()))
     assert(not torch.any(F_llh.isinf()))
 
-    # TODO: why the division by K-1 and S?
     llh_per_sample = -torch.sum(F_llh, axis=1) / (K-1)
     nlglh = torch.sum(llh_per_sample) / S
     return (F_llh, llh_per_sample, nlglh)
@@ -259,7 +255,6 @@ def no_cna_omega(shape):
     Returns omega values assuming no copy number alterations (0.5)
     Shape is (num_anatomical_sites x num_mutation_clusters)
     '''
-    # TODO: don't hardcode omega here (omegas are all 1/2 since we're assuming there are no CNAs)
     return torch.ones(shape) * 0.5
 
 def get_random_vals_fixed_seeds(shape):
@@ -278,7 +273,9 @@ def get_random_vals_fixed_seeds(shape):
     return RANDOM_VALS[shape]
 
 def sample_gumbel(shape, eps=1e-20):
-    G = get_random_vals_fixed_seeds(shape)
+    # TODO: fixed seed or no?
+    # G = get_random_vals_fixed_seeds(shape)
+    G = torch.rand(shape)
     return -torch.log(-torch.log(G + eps) + eps)
 
 def gumbel_softmax_sample(logits, temperature):
@@ -339,7 +336,7 @@ def full_adj_matrix(U, T, G):
         leaf_idx += 1
     return full_adj, full_G, num_leaves
     
-def compute_u_loss(psi, ref, var, B, weights):
+def compute_u_loss(psi, ref, var, omega, B, weights):
     '''
     Computes loss for latent variable U (dim: num_internal_nodes x num_sites)
     '''
@@ -347,8 +344,7 @@ def compute_u_loss(psi, ref, var, B, weights):
     # subclones in a given site should sum to 1
     U = torch.softmax(psi, dim=1)
     batch_size = U.shape[0]
-    omega_v = no_cna_omega(ref.shape)
-    u_loss, loss_dict_b = subclonal_presence_objective(ref, var, omega_v, U, B, weights)
+    u_loss, loss_dict_b = subclonal_presence_objective(ref, var, omega, U, B, weights)
     return U, u_loss
 
 def get_full_G(T, G, poly_res, i=-1, max_iter=-1):
@@ -738,8 +734,8 @@ def made_mistake(solution, U):
 
 def prune_bad_histories(solutions, O, p, weights, mode, U):
     '''
-    Detect mistakes and prune out those histories (this is specifically)
-    in datasets where there are branches of the tree with no U leaf nodes
+    Detect mistakes and prune out those histories (this is specifically
+    in datasets where there are branches of the tree with no U leaf nodes)
     Removes any solutions that are > parsimony_eps parsimony metrics
     away from the best solution
     '''
@@ -756,8 +752,6 @@ def prune_bad_histories(solutions, O, p, weights, mode, U):
             if cand_metric[0] < best_metric[0] or cand_metric[1] < best_metric[1] or cand_metric[2] < best_metric[2]:
                 return True
         return False
-
-
 
     # Collect each solution's parsimony metrics
     all_pars_metrics = []
@@ -781,7 +775,6 @@ def prune_bad_histories(solutions, O, p, weights, mode, U):
             best_pars_metrics.add(pars_metrics)
 
     pruned_solutions = []
-    
     # Go through and prune any solutions that are worse than the best sum
     # or made any mistakes
     for soln, pars_metrics in zip(solutions, all_pars_metrics):
@@ -789,7 +782,7 @@ def prune_bad_histories(solutions, O, p, weights, mode, U):
             pruned_solutions.append(soln)
 
     if len(pruned_solutions) == 0: 
-        print("no solutions without mistakes detected")
+        print("No solutions without mistakes detected")
         # ideally this doesn't happen, but remove mistake detection so 
         # that we return some results
         for soln, pars_metrics in zip(solutions, all_pars_metrics):
@@ -805,6 +798,13 @@ def _get_best_final_solutions(mode, best_Vs, best_soft_Vs, Ts, Gs, O, p, weights
     Return the top k solutions
     '''
 
+    def _to_tensor(t):
+        # When unloading these variables in calibrate mode, we load them as lists
+        # since if polytomy resolution is used, the tensors can be of different size
+        if torch.is_tensor(t):
+            return t
+        return torch.stack(t)
+
     # 1. Initialize weights for loss calculations based on what mode we're in
     input_weights = weights
     if mode == "evaluate":
@@ -818,13 +818,22 @@ def _get_best_final_solutions(mode, best_Vs, best_soft_Vs, Ts, Gs, O, p, weights
     mig_weights = get_mig_weight_vector(bs, input_weights)
     seed_weights = get_seed_site_weight_vector(bs, input_weights)
     solutions = []
-    for i, (V, soft_V, T, G, idx_label_dict) in enumerate(zip(best_Vs, best_soft_Vs, Ts, Gs, idx_label_dicts)):
-        reshaped_V = add_batch_dim(V)
-        reshaped_soft_V = add_batch_dim(soft_V)        
-        loss, loss_components = ancestral_labeling_objective(reshaped_V, reshaped_soft_V, T, G, O, p, weights)
-        # TODO: take mig_delta as input?
-        solutions.append(VertexLabelingSolution(loss, V, soft_V, T, G, idx_label_dict, mig_weights[i], input_weights.comig, seed_weights[i], i))
-    
+
+    # If we're not doing polytomy resolution, we can calculate ancestral labeling objectives in parallel (faster)
+    # since all Ts and Gs are the same size
+    if poly_res == None:
+        losses, _ = ancestral_labeling_objective(_to_tensor(best_Vs), _to_tensor(best_soft_Vs), _to_tensor(Ts), torch.stack(Gs), O, p, weights)
+        for i,loss in enumerate(losses):    
+            solutions.append(VertexLabelingSolution(loss, best_Vs[i], best_soft_Vs[i], Ts[i], Gs[i], idx_label_dicts[i], mig_weights[i], input_weights.comig, seed_weights[i], i))
+
+    else:
+        for i, (V, soft_V, T, G, idx_label_dict) in enumerate(zip(best_Vs, best_soft_Vs, Ts, Gs, idx_label_dicts)):
+            reshaped_V = add_batch_dim(V)
+            reshaped_soft_V = add_batch_dim(soft_V)        
+            loss, loss_components = ancestral_labeling_objective(reshaped_V, reshaped_soft_V, T, G, O, p, weights)
+            # TODO: take mig_delta as input?
+            solutions.append(VertexLabelingSolution(loss, V, soft_V, T, G, idx_label_dict, mig_weights[i], input_weights.comig, seed_weights[i], i))
+        
     # 3. Prune bad histories (anything less parsimonious than the best solution we find)
     if needs_pruning:
         pruned_solutions = prune_bad_histories(solutions, O, p, input_weights, mode, U)
@@ -863,26 +872,29 @@ def get_best_final_solutions(mode, best_Vs, best_soft_Vs, Ts, G, O, p, weights, 
     return _get_best_final_solutions(mode, best_Vs, best_soft_Vs, Ts, Gs, O, p, weights, print_config, 
                                      poly_res, idx_label_dicts, output_dir, run_name, U)
 
-def init_X(batch_size, num_sites, num_nodes_to_label, weight_init_primary, p, input_T, T, U):
+def init_X(batch_size, num_sites, num_nodes_to_label, bias_weights, p, input_T, T, U):
     # We're learning X, which is the vertex labeling of the internal nodes
     X = torch.rand(batch_size, num_sites, num_nodes_to_label)
     #print("X", X.shape)
     eta = 2 # TODO: how do we set this parameter?
-    if weight_init_primary:
+    if bias_weights:
+        # Make 4 partitions: (1) biased towards the primary, (2) biased towards the primary + sites of children/grandchildren
+        # (3) biased towards sites of children/grandchildren, (4) no bias
+        quart = batch_size // 4
         # for each node, find which sites to bias labeling towards using
         # the sites it and its children are detected in
         nodes_w_children, sites = vutil.get_k_or_more_children_nodes(input_T, T, U, 1, 1, cutoff=False)
         #print("nodes_w_children", nodes_w_children, "sites", sites)
         prim_site_idx = torch.nonzero(p)[0][0]
         #print("p", p, "prim_site_idx", prim_site_idx)
-        X[:,prim_site_idx,:] = eta
+        X[:quart*2,prim_site_idx,:] = eta
 
         for node_idx, sites in zip(nodes_w_children, sites):
             if node_idx == 0:
                 continue # we know the root labeling
             idx = node_idx - 1
             for site_idx in sites:
-                X[:,site_idx,idx] = eta
+                X[quart:quart*3,site_idx,idx] = eta
         #print("X", X[0])
     X.requires_grad = True
     return X
@@ -913,27 +925,24 @@ def remove_leaf_nodes_idx_to_label_dicts(dicts):
                 new_dicts[i][key] = new_dicts[i][key][0]
     return new_dicts
 
-# TODO: should we not take weights as input for this?
-def calibrate(Ts, ref_matrices, var_matrices, ordered_sites, primary_sites, 
-              node_idx_to_labels, weights, print_config, output_dir, run_names,
-              Gs=None, Os=None, max_iter=100, lr=0.1, init_temp=40, final_temp=0.01,
-              batch_size=64, custom_colors=None, weight_init_primary=True,  solve_polytomies=False):
-    if not (len(Ts) == len(ref_matrices) == len(var_matrices) == len(ordered_sites) == len(primary_sites) == len(node_idx_to_labels) == len(run_names)):
-        raise ValueError("Inputs ref_matrices, var_matrices, ordered_sites, primary_sites, node_idx_to_labels and run_names must have equal length (length = to number of patients in cohort")
-    if (Gs == None and Os == None):
-        raise ValueError("In calibrate mode, either Gs or Os should be input")
-    if (Gs != None and len(Gs) != len(Ts)):
-        raise ValueError("Length of Ts and Gs must be equal")
-    if (Os != None and len(Os) != len(Ts)):
-        raise ValueError("Length of Ts and Os must be equal")
 
+def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
+              Os, batch_size, custom_colors, bias_weights, solve_polytomies):
+
+    if not (len(tree_fns) == len(tsv_fns) == len(run_names)):
+        raise ValueError("Inputs Ts, tsv_fns, primary_sites and run_names must have equal length (length = number of patients in cohort")
+
+    if isinstance(tree_fns[0], str):
+        Ts = []
+        for tree_fn in tree_fns:
+            Ts.append(dutil.get_adjacency_matrix_from_txt_edge_list(tree_fn))
 
     def _convert_list_of_numpys_to_tensors(lst):
         return [torch.tensor(x) for x in lst]
 
-    input_weights = copy.deepcopy(weights)
-    organotrop_weight = 0.0 if Os == None else (weights.organotrop if weights != None else 0.1)
-    gen_dist_weight = 0.0 if Gs == None else (weights.gen_dist if weights != None else 0.1)
+    # TODO: what to do with weights in calibrate mode??
+    organotrop_weight = 0.0
+    gen_dist_weight = 0.0
 
     weights = met.Weights(mig=DEFAULT_CALIBRATE_MIG_WEIGHTS, comig=DEFAULT_CALIBRATE_COMIG_WEIGHTS, 
                           seed_site=DEFAULT_CALIBRATE_SEED_WEIGHTS, gen_dist=gen_dist_weight, 
@@ -942,7 +951,6 @@ def calibrate(Ts, ref_matrices, var_matrices, ordered_sites, primary_sites,
     visualize = print_config.visualize
     input_k = print_config.k_best_trees
     print_config.visualize = False
-    print_config.k_best_trees = batch_size
 
     calibrate_dir = os.path.join(output_dir, "calibrate")
 
@@ -957,101 +965,63 @@ def calibrate(Ts, ref_matrices, var_matrices, ordered_sites, primary_sites,
     # 1. Go through each patient and get migration history in calibrate mode
     for i in range(len(Ts)):
         print("Calibrating for patient:", run_names[i])
-        G = Gs[i] if Gs != None else None
         O = Os[i] if Os != None else None
-        get_migration_history(Ts[i], ref_matrices[i], var_matrices[i], ordered_sites[i], primary_sites[i],
-                              node_idx_to_labels[i], weights, print_config, calibrate_dir, f"{run_names[i]}", 
-                              G=G, O=O, max_iter=max_iter, lr=lr, init_temp=init_temp, final_temp=final_temp,
-                              batch_size=batch_size, custom_colors=custom_colors, weight_init_primary=weight_init_primary, 
-                              mode="calibrate", solve_polytomies=solve_polytomies)
+
+        primary_sites = dutil.get_primary_sites(tsv_fns[i])
+        if len(primary_sites) > 1:
+            print("Multiple primaries given. Running each as primary")
+
+        for primary_site in primary_sites:
+            get_migration_history(Ts[i], tsv_fns[i], primary_site, weights, print_config, calibrate_dir, f"{run_names[i]}_{primary_site}", 
+                                  O=O, batch_size=batch_size, custom_colors=custom_colors, bias_weights=bias_weights, 
+                                  mode="calibrate", solve_polytomies=solve_polytomies)
 
     # 2. Find the best theta for this cohort
     best_theta = eutil.get_max_cross_ent_thetas(pickle_file_dirs=[calibrate_dir])
     rounded_best_theta = [round(v,3) for v in best_theta]
     with open(os.path.join(calibrate_dir, "best_theta.json"), 'w') as json_file:
         json.dump(rounded_best_theta, json_file, indent=2)
+
+    ref_matrices, var_matrices, _, ordered_sites, _,_ = dutil.get_ref_var_omega_matrices(tsv_fns)
         
     # 3. Recalibrate trees using the best thetas
     print_config.visualize = visualize
     print_config.k_best_trees = input_k
     weights = met.Weights(mig=[best_theta[0]], comig=best_theta[1], seed_site=[best_theta[2]],
-                          gen_dist=input_weights.gen_dist if Gs != None else 0.0, organotrop=input_weights.organotrop if Os != None else 0.0)
+                          gen_dist=0.1, organotrop=0.1)
     
+    # 4. Use the saved trees to rescore trees, visualize and save
     for i in range(len(Ts)):
         O = Os[i] if Os != None else None
-        with gzip.open(os.path.join(calibrate_dir, f"{run_names[i]}.pkl.gz"), 'rb') as f:
-            pckl = pickle.load(f)
-        saved_Ts = _convert_list_of_numpys_to_tensors(pckl[OUT_ADJ_KEY])
-        saved_Vs = _convert_list_of_numpys_to_tensors(pckl[OUT_LABElING_KEY])
-        saved_soft_Vs = _convert_list_of_numpys_to_tensors(pckl[OUT_SOFTV_KEY])
-        saved_U = torch.tensor(pckl[OUT_SUB_PRES_KEY])
-        saved_Gs = _convert_list_of_numpys_to_tensors(pckl[OUT_GEN_DIST_KEY])
-        saved_idx_to_label_dicts = remove_leaf_nodes_idx_to_label_dicts(pckl[OUT_IDX_LABEL_KEY])
-        primary_idx = ordered_sites[i].index(primary_sites[i])
-        p = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(ordered_sites[i])).T
+        primary_sites = dutil.get_primary_sites(tsv_fns[i])
+        for primary_site in primary_sites:
+            run_name = f"{run_names[i]}_{primary_site}"
+            with gzip.open(os.path.join(calibrate_dir, f"{run_name}.pkl.gz"), 'rb') as f:
+                pckl = pickle.load(f)
+            saved_Ts = _convert_list_of_numpys_to_tensors(pckl[OUT_ADJ_KEY])
+            saved_Vs = _convert_list_of_numpys_to_tensors(pckl[OUT_LABElING_KEY])
+            saved_soft_Vs = _convert_list_of_numpys_to_tensors(pckl[OUT_SOFTV_KEY])
+            saved_U = torch.tensor(pckl[OUT_SUB_PRES_KEY])
+            saved_Gs = _convert_list_of_numpys_to_tensors(pckl[OUT_GEN_DIST_KEY])
+            saved_idx_to_label_dicts = remove_leaf_nodes_idx_to_label_dicts(pckl[OUT_IDX_LABEL_KEY])
+            primary_sites = dutil.get_primary_sites(tsv_fns[i])
         
-        final_solutions, _ = _get_best_final_solutions('evaluate', saved_Vs, saved_soft_Vs, saved_Ts, saved_Gs, O, p, weights,
-                                                       print_config, None, saved_idx_to_label_dicts, calibrate_dir, run_names[i], 
-                                                       saved_U, needs_pruning=False)
-        
-        plot_util.print_best_trees(final_solutions, saved_U, ref_matrices[i], var_matrices[i], O,
-                                  weights, ordered_sites[i], print_config, 
-                                  custom_colors, primary_sites[i], 
-                                  calibrate_dir, run_names[i])
+            primary_idx = ordered_sites[i].index(primary_site)
+            p = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(ordered_sites[i])).T
+            
+            final_solutions, _ = _get_best_final_solutions('evaluate', saved_Vs, saved_soft_Vs, saved_Ts, saved_Gs, O, p, weights,
+                                                           print_config, None, saved_idx_to_label_dicts, calibrate_dir, run_name, 
+                                                           saved_U, needs_pruning=False)
+            
+            plot_util.print_best_trees(final_solutions, saved_U, ref_matrices[i], var_matrices[i], O,
+                                      weights, ordered_sites[i], print_config, 
+                                      custom_colors, primary_site, 
+                                      calibrate_dir, run_name)
 
     return best_theta
 
+def validate_inputs(T, node_idx_to_label, ref, var, primary_site, ordered_sites, weights, G, O, mode):
 
-def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_label,
-                          weights, print_config, output_dir, run_name, 
-                          G=None, O=None, max_iter=100, lr=0.1, init_temp=40, final_temp=0.01,
-                          batch_size=64, custom_colors=None, weight_init_primary=True, mode="evaluate",
-                          solve_polytomies=False):
-    '''
-    Args:
-        T: numpy ndarray or torch tensor (shape: num_internal_nodes x num_internal_nodes). Adjacency matrix (directed) of the internal nodes.
-        
-        ref: numpy ndarray or torch tensor (shape: num_anatomical_sites x num_mutation_clusters). Reference matrix, i.e., num. reads that map to reference allele
-        
-        var: numpy ndarray or torch tensor (shape:  num_anatomical_sites x num_mutation_clusters). Variant matrix, i.e., num. reads that map to variant allele
-        
-        ordered_sites: list of the anatomical site names (e.g. ["breast", "lung_met"]) with length =  num_anatomical_sites) and 
-        the order matches the order of sites in the ref and var
-        
-        primary_site: name of the primary site (must be an element of ordered_sites)
-
-        node_idx_to_label: dictionary mapping vertex indices (corresponding to their index in T) to custom labels
-        for plotting
-
-        weights: Weight object for how much to penalize each component of the loss
-        
-        print_config: PrintConfig object with options on how to visualize output
-        
-        output_dir: path for where to save output trees to
-
-        run_name: e.g. patient name, used for naming output files.
-
-    Optional:
-        G: numpy ndarray or torch tensor (shape: num_internal_nodes x num_internal_nodes).
-        Matrix of genetic distances between internal nodes.
-        Lower values indicate lower branch lengths, i.e. more genetically similar.
-        
-        O: numpy ndarray or torch tensor (shape: num_anatomical_sites x  num_anatomical_sites).
-        Matrix of organotropism values between sites.
-
-        weight_init_primary: whether to initialize weights higher to favor vertex labeling of primary for all internal nodes
-
-        mode: can be "evaluate" or "calibrate"
-
-    Returns:
-        # TODO: return info for k best trees
-        Corresponding info on the *best* tree:
-        (1) edges of the tree (e.g. [('0', '1'), ('1', '2;3')])
-        (2) vertex labeling as a dictionary (e.g. {'0': 'P', '1;3': 'M1'}),
-        (3) edges for the migration graph (e.g. [('P', 'M1')])
-        (4) dictionary w/ loss values for each component of the loss
-        (5) how long (in seconds) the algorithm took to run
-    '''
     if not (T.shape[0] == T.shape[1]):
         raise ValueError(f"Number of tree nodes should be consistent (T.shape[0] == T.shape[1])")
     if (T.shape[0] != len(node_idx_to_label)):
@@ -1067,21 +1037,92 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
     if not primary_site in ordered_sites:
         raise ValueError(f"{primary_site} not in ordered_sites: {ordered_sites}")
     if (weights.gen_dist == 0.0 and G != None):
-        raise ValueError(f"G matrix was given but genetic distance parameter of weights is 0. Please set genetic distance weight to > 0.")
+        print(f"Warning: G matrix was given but genetic distance parameter of weights is 0.")
     if (weights.gen_dist != 0.0 and G == None):
         raise ValueError(f"G matrix was not given but genetic distance parameter of weights is non-zero. Please pass a G matrix.")
     if (weights.organotrop == 0.0 and O != None):
-        raise ValueError(f"O matrix was given but organotropism parameter of weights is 0. Please set organotropism weight to > 0.")
+        print(f"Warning: O matrix was given but organotropism parameter of weights is 0.")
     if (weights.organotrop != 0.0 and O == None):
         raise ValueError(f"O matrix was not given but organotropism parameter of weights is non-zero. Please pass an O matrix.")
     if mode != 'calibrate' and mode != 'evaluate':
         raise ValueError(f"Valid modes are 'evaluate' and 'calibrate'")
-    if mode == 'calibrate':
-        if not ((weights.organotrop != 0.0 and O != None) or (weights.gen_dist != 0.0 and G != None)):
-            raise ValueError(f"In calibrate mode, either organotropism or genetic distance matrices and weights must be set.")
     for label in list(node_idx_to_label.values()):
         if ":" in label:
-            raise ValueError(f"Unfortunately our visualization code uses pydot, which does not allow colons (:) in node names. Please use a different separator in the values of node_idx_to_label")
+            raise ValueError(f"Unfortunately our visualization code uses pydot, which does not allow colons (:) in node names. Please use a different separator in 'character_label' values.")
+        if len(label) > 20:
+            print("Warning: character_label length inputted is very long, we suggest shortening for visualization purposes")
+
+def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
+             O, batch_size, custom_colors, bias_weights, solve_polytomies):
+    
+    if isinstance(tree_fn, str):
+        T = dutil.get_adjacency_matrix_from_txt_edge_list(tree_fn)
+
+    primary_sites = dutil.get_primary_sites(tsv_fn)
+    if len(primary_sites) > 1:
+            print("Multiple primaries given. Running each as primary")
+
+    for primary_site in primary_sites:
+        get_migration_history(T, tsv_fn, primary_site, weights, print_config, output_dir, f"{run_name}_{primary_site}", 
+                              O=O, batch_size=batch_size, custom_colors=custom_colors, bias_weights=bias_weights, 
+                              mode="evaluate", solve_polytomies=solve_polytomies)
+
+
+
+def get_migration_history(T, tsv_fn, primary_site, weights, print_config, output_dir, run_name, 
+                          O=None, max_iter=75, lr=0.1, init_temp=40, final_temp=0.01,
+                          batch_size=-1, custom_colors=None, bias_weights=True, mode="evaluate",
+                          solve_polytomies=False):
+    '''
+    Args:
+        T: numpy ndarray or torch tensor (shape: num_internal_nodes x num_internal_nodes). Adjacency matrix (directed) of the internal nodes.
+        
+        tsv_fn: path to tsv with the required columns: 
+            ['anatomical_site_index', 'anatomical_site_label', 'character_index', 'character_label', 
+            'ref', 'var', 'var_read_prob']
+
+        weights: Weight object for how much to penalize each component of the loss
+        
+        print_config: PrintConfig object with options on how to visualize output
+        
+        output_dir: path for where to save output trees to
+
+        run_name: e.g. patient name, used for naming output files.
+
+    Optional:
+        
+        O: numpy ndarray or torch tensor (shape: num_anatomical_sites x  num_anatomical_sites).
+        Matrix of organotropism values between sites.
+
+        bias_weights: whether to initialize weights higher to favor vertex labeling of primary for all internal nodes
+
+        mode: can be "evaluate" or "calibrate"
+
+    Returns:
+        # TODO: return info for k best trees
+        Corresponding info on the *best* tree:
+        (1) edges of the tree (e.g. [('0', '1'), ('1', '2;3')])
+        (2) vertex labeling as a dictionary (e.g. {'0': 'P', '1;3': 'M1'}),
+        (3) edges for the migration graph (e.g. [('P', 'M1')])
+        (4) dictionary w/ loss values for each component of the loss
+        (5) how long (in seconds) the algorithm took to run
+    '''
+
+    ref, var, omega, ordered_sites, node_idx_to_label, idx_to_num_mutations = dutil.get_ref_var_omega_matrix(tsv_fn)
+    
+    G = None
+    # Genetic distance info is given
+    if idx_to_num_mutations != None:
+        G = dutil.get_genetic_distance_matrix_from_adj_matrix(T, idx_to_num_mutations)
+
+    validate_inputs(T, node_idx_to_label, ref, var, primary_site, ordered_sites, weights, G, O, mode)
+
+    if batch_size == -1:
+        batch_size = vutil.calculate_batch_size(T, ordered_sites)
+        print("Calculated batch size:", batch_size)
+        # when calibrating, we want to capture all pareto front trees and not prune yet!
+        if mode == 'calibrate':
+            print_config.k_best_trees = batch_size
 
     # Don't alter the inputs in place
     T = copy.deepcopy(T)
@@ -1150,7 +1191,7 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
     ############ Step 1, find a MAP estimate of U ############
     while u_diff > 1e-4 and i < 200:
         u_optimizer.zero_grad()
-        U, u_loss = compute_u_loss(psi, ref, var, B, weights)
+        U, u_loss = compute_u_loss(psi, ref, var, omega, B, weights)
         u_loss.backward()
         u_optimizer.step()
         u_diff = torch.abs(torch.norm(u_prev - U))
@@ -1178,7 +1219,7 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
         poly_res = None
 
     # We're learning X, which is the vertex labeling of the internal nodes
-    X = init_X(batch_size, num_sites, num_nodes_to_label, weight_init_primary, p, input_T, T, U)
+    X = init_X(batch_size, num_sites, num_nodes_to_label, bias_weights, p, input_T, T, U)
     
     v_optimizer = torch.optim.Adam([X], lr=lr)
     scheduler = lr_scheduler.LinearLR(v_optimizer, start_factor=1.0, end_factor=0.5, total_iters=max_iter)
@@ -1242,7 +1283,7 @@ def get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_
         # print("i", i, "v temp", v_temp, "t_temp", t_temp)
 
         prev_v_losses = v_losses
-
+            
 
     time_elapsed = (datetime.datetime.now() - start_time).total_seconds()
     if print_config.verbose:

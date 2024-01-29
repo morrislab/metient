@@ -38,6 +38,24 @@ class LabeledTree:
         return f"Tree: {A}\nVertex Labeling: {V}"
 
 
+def calculate_batch_size(T, sites):
+    num_nodes = T.shape[0]
+    num_sites = len(sites)
+    min_size = 256
+    if num_nodes > 15:
+        min_size += 1280 * (num_nodes // 2)
+
+        if num_sites > 3:
+            min_size += 1024 * (num_sites)
+
+    elif num_sites > 4:
+        min_size += 256 * (num_sites // 2)
+
+    # cap this to a reasonably high sample size
+    min_size = min(min_size, 60000)
+
+    return min_size
+
 def tree_iterator(T):
     '''
     iterate an adjacency matrix, returning i and j for all values = 1

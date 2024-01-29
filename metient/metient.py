@@ -7,20 +7,17 @@ from metient.util import pairtree_data_extraction_util as ptutil
 
 from metient.util.globals import *
 
-def evaluate(T, ref, var, ordered_sites, primary_site, node_idx_to_label,
-             weights, print_config, output_dir, run_name, G=None, O=None, batch_size=256, 
-             custom_colors=None, weight_init_primary=True, solve_polytomies=False):
-    return vert_label.get_migration_history(T, ref, var, ordered_sites, primary_site, node_idx_to_label,
-                                            weights, print_config, output_dir, run_name, G=G, O=O, 
-                                            batch_size=batch_size, custom_colors=custom_colors, 
-                                            weight_init_primary=weight_init_primary, mode='evaluate', solve_polytomies=solve_polytomies)
 
-def calibrate(Ts, ref_matrices, var_matrices, ordered_sites, primary_sites, node_idx_to_labels,
-              weights, print_config, output_dir, run_names, Gs=None, Os=None,
-              batch_size=256, custom_colors=None, weight_init_primary=True,  solve_polytomies=False):
-    return vert_label.calibrate(Ts, ref_matrices, var_matrices, ordered_sites, primary_sites, node_idx_to_labels,
-                                weights, print_config, output_dir, run_names, Gs=Gs, Os=Os, batch_size=batch_size, 
-                                custom_colors=custom_colors, weight_init_primary=weight_init_primary, solve_polytomies=solve_polytomies)
+def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
+             O=None, batch_size=-1, custom_colors=None, bias_weights=True, solve_polytomies=False):
+    return vert_label.evaluate(tree_fn, tsv_fn,weights, print_config, output_dir, run_name, 
+                               O=O, batch_size=batch_size, custom_colors=custom_colors, 
+                               bias_weights=bias_weights, solve_polytomies=solve_polytomies)
+
+def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, 
+              Os=None, batch_size=-1, custom_colors=None, bias_weights=True,  solve_polytomies=False):
+    return vert_label.calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, Os=Os, batch_size=batch_size, 
+                                custom_colors=custom_colors, bias_weights=bias_weights, solve_polytomies=solve_polytomies)
 
 class PrintConfig:
     def __init__(self, visualize=True, verbose=False, k_best_trees=3, save_outputs=True):
@@ -50,33 +47,26 @@ class Weights:
         self.organotrop = organotrop
         self.entropy = entropy
 
+def get_verbose_seeding_pattern(V, A):
+    '''
+    V: Vertex labeling matrix where columns are one-hot vectors representing the
+    anatomical site that the node originated from (num_sites x num_nodes)
+    A:  Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
+
+    returns: one of: {monoclonal, polyclonal} {primary single-source, single-source, multi-source, reseeding}
+    '''
+    return plutil.get_verbose_seeding_pattern(V, A)
+
+def get_migration_graph(V, A):
+    '''
+    V: Vertex labeling matrix where columns are one-hot vectors representing the
+    anatomical site that the node originated from (num_sites x num_nodes)
+    A:  Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
+    '''
+    return plutil.get_migration_graph(V, A)
+
 
 ########### Data Extraction Utilities ############
-
-# TODO: this API stucture is confusing when you have multiple trees per patient
-def get_ref_var_matrices(tsv_filepaths, split_char=None):
-    '''
-    Args:
-        - tsv_filepaths: either a single path or list of paths to tsvs (one for each patient). Expects columns:
-
-        ['sample_index', 'sample_label', 'anatomical_site_index',
-        'anatomical_site_label', 'character_index', 'character_label', 'ref', 'var']
-        - split_char: if clustering was used, indicates how the mutations in the 
-        character_label are split by. e.g. "_". If passed, we will shorten the character_label
-        in the dictionary mapping index to character_label that we return for visualization purposes
-
-    Returns:
-        If a list of tsv_filepaths is supplied, a list of each of the following is returned 
-        (otherwise, a single item of each is returned)
-        (1) R matrix (num_samples x num_clusters) with the # of reference reads for each sample+cluster,
-        (2) V matrix (num_samples x num_clusters) with the # of variant reads for each sample+cluster,
-        (3) list of unique anatomical sites from the patient's data,
-        (4) dictionary mapping index to character_label (based on input tsv, gives the index for each mutation name,
-        where these indices are used in R matrix, V matrix
-
-    For each of the returned lists, index 0 represents the patient at the first tsv_filepath, etc.
-    '''
-    return dutil.get_ref_var_matrices(tsv_filepaths, split_char=split_char)
 
 def get_adj_matrices_from_pairtree_results(pairtee_results_filepaths):
     '''
@@ -87,7 +77,6 @@ def get_adj_matrices_from_pairtree_results(pairtee_results_filepaths):
     Returns:
         If a list of pairtee_results_filepaths is supplied, a list of adjacency matrices is returned
         (otherwise, a single adjacency matrix is returned)
-        (1)
 
     '''
     return ptutil.get_adj_matrices_from_pairtree_results(pairtee_results_filepaths)
