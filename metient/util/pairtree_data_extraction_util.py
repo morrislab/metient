@@ -18,7 +18,7 @@ def write_pairtree_inputs(patient_data, patient_id, output_dir):
     '''
     Args:
         patient_data: pandas DataFrame with at least columns: [character_label, character_index
-        sample_label, var, ref]. character_label = name of mutation (e.g. "KCTD15:19:34584166:C"),
+        sample_label, var, ref, major_cn, minor_cn]. character_label = name of mutation (e.g. "KCTD15:19:34584166:C"),
         character_index = unique index for each character label, sample_label = name of the sample,
         (e.g. "tumor1_region1"), var = variant allele read count, ref = reference allele read count
         
@@ -53,12 +53,12 @@ def write_pairtree_inputs(patient_data, patient_id, output_dir):
                 ref = int(mut_patient_sample['ref'].values[0])
                 var_reads.append(str(var))
                 total_reads.append(str(var+ref))
-                # TODO: Add CNA and incorporate ploidy, for now assume no CNA and diploid cells
-                # var_read_prob = M/N, where N = 2 + (K - 2) * p (with K being the copy number 
-                # at that locus, and p being the fraction of cells which have a copy number of 
-                # K at the locus containing M. p is the purity of the sample if the copy number 
-                # abberation is clonal)
-                var_read_probs.append(str(0.5))
+                major_cn = int(mut_patient_sample['major_cn'].values[0])
+                minor_cn = int(mut_patient_sample['minor_cn'].values[0])
+                p = float(mut_patient_sample['purity'].values[0])
+                x = (p*(major_cn+minor_cn)+2*(1-p))
+                var_read_prob = (p*major_cn)/x
+                var_read_probs.append(str(var_read_prob))
 
             row += [",".join(var_reads), ",".join(total_reads), ",".join(var_read_probs)]
             f.write("\t".join(row))
@@ -205,9 +205,13 @@ def get_adj_matrix_from_parents(parents):
     I = np.identity(T.shape[0])
     T = np.logical_xor(T,I).astype(int) # remove self-loops
     # remove the normal subclone
-    root_idx = plt_util.get_root_index(T)
-    T = np.delete(T, root_idx, 0)
-    T = np.delete(T, root_idx, 1)
+    normal_clone_idx = plt_util.get_root_index(T)
+    # Assert that this is a monoprimary tree (normal subclone has one cancerous child)
+    if len(T[normal_clone_idx].nonzero()[0]) > 1:
+        raise ValueError("Normal subclone has more than one child node. Rerun Orchard with monoprimary flag (-p).")
+
+    T = np.delete(T, normal_clone_idx, 0)
+    T = np.delete(T, normal_clone_idx, 1)
     return T
 
 def get_adj_matrices_from_pairtree_results(pairtee_results_fns):

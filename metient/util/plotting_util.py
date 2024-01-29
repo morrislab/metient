@@ -77,10 +77,6 @@ def get_seeding_pattern(V, A):
     returns: verbal description of the seeding pattern, one of:
     {monoclonal, polyclonal} {single-source, multi-source, reseeding}
     '''
-    if not isinstance(V, torch.Tensor):
-        V = torch.tensor(V)
-    if not isinstance(A, torch.Tensor):
-        A = torch.tensor(A)
 
     G = get_migration_graph(V, A)
     pattern = ""
@@ -428,6 +424,10 @@ def get_migration_graph(V, A):
     anatomical site that the node originated from (num_sites x num_nodes)
     A:  Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
     '''
+    if not isinstance(V, torch.Tensor):
+        V = torch.tensor(V)
+    if not isinstance(A, torch.Tensor):
+        A = torch.tensor(A)
     migration_graph = (V @ A) @ V.T
     migration_graph_no_diag = torch.mul(migration_graph, 1-torch.eye(migration_graph.shape[0], migration_graph.shape[1]))
     

@@ -1,4 +1,0 @@
-id	name	var_reads	total_reads	var_read_prob
-m0	HRAS_p.Q61K_non_synonymous_codon_11:533875	29,12,43	115,95,79	0.5,0.5,0.5
-m1	FGFR1_p.N577K_non_synonymous_codon_8:38274849	1,5,0	107,104,76	0.5,0.5,0.5
-m2	NRAS_p.Q61K_non_synonymous_codon_1:115256530	0,12,0	75,89,64	0.5,0.5,0.5

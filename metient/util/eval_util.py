@@ -62,7 +62,7 @@ def cross_ent(loss_dicts, thetas, tau):
         gen_dist_scores[i] = -tau*g
         organotrop_scores[i] = -tau*o
     #print()
-    #print("theta x", theta_X, "\n gen dist", gen_dist_scores, "\n organotrop", organotrop_scores)
+    # print("theta x", theta_X, "\n gen dist", gen_dist_scores, "\n organotrop", organotrop_scores)
     # this is in the case where there is no seeding detected (happens rarely in some datasets)
     if torch.sum(theta_X) == 0 or torch.isnan(gen_dist_scores).any():
         return 0.0
