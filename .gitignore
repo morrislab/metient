@@ -4,6 +4,7 @@ metient/test/machina_simulated_data/predict_*.txt
 metient/test/machina_simulated_data/output_*.txt
 metient/data/rerun_machina_sims/
 metient/test/output_plots/.DS_Store
+metient/data
 **/.DS_Store
 .DS_Store
 **/*.params.json

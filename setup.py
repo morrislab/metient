@@ -4,4 +4,4 @@ with open('requirements.txt') as f:
     requirements = f.read().splitlines()
     #print(requirements)
 
-setup(name='metient', version='0.1.1', url="https://github.com/divyakoyy/metient.git", packages=['metient', 'metient.util', 'metient.lib'], install_requires=requirements,)
+setup(name='metient', version='0.1.1.dev1', url="https://github.com/divyakoyy/metient.git", packages=['metient', 'metient.util', 'metient.lib'], install_requires=requirements,)

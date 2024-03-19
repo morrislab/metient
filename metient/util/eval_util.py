@@ -12,6 +12,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import torch
 import torch.optim as optim
+import numpy as np
 
 from metient.util.globals import *
 from metient.util import plotting_util as plot_util
@@ -43,7 +44,7 @@ def stable_softmax(x):
     exp_x = torch.exp(x - x_max)
     return exp_x / torch.sum(exp_x, dim=0)
 
-def cross_ent(loss_dicts, thetas, tau):
+def cross_ent(loss_dicts, idx_to_label, thetas, tau, use_tree_weighting):
     '''
     Computes the cross entropy between the target distribution (genetic distance)
     and the predicted distribution (parsimony) using the input thetas (which we are
@@ -68,18 +69,21 @@ def cross_ent(loss_dicts, thetas, tau):
         return 0.0
     theta_X = stable_softmax(theta_X)
 
+    if use_tree_weighting:
+        wn = sum([1 for idx in idx_to_label if idx_to_label[idx][1]==False]) - 1
+        log_wn = np.log2(wn)
+    else:
+        log_wn = 1.0
+
     cross_ent_sum = 0.0
     if not torch.sum(gen_dist_scores == 0):
         gen_dist_scores = stable_softmax(gen_dist_scores)
-        cross_ent_sum += -1*torch.sum(torch.mul(gen_dist_scores, torch.log2(theta_X+0.1)))
+        cross_ent_sum += -log_wn*torch.sum(torch.mul(gen_dist_scores, torch.log2(theta_X+0.1)))
     if not torch.sum(organotrop_scores == 0):
         organotrop_scores = stable_softmax(organotrop_scores)
-        cross_ent_sum += -1*torch.sum(torch.mul(organotrop_scores, torch.log2(theta_X+0.1)))
+        cross_ent_sum += -log_wn*torch.sum(torch.mul(organotrop_scores, torch.log2(theta_X+0.1)))
 
-    #cross_ent = torch.mul(gen_dist_scores, torch.log2(theta_X+0.1))
-    #print("thetaX", theta_X, "gen_dist_scores", gen_dist_scores, "organotrop_scores", organotrop_scores)
-
-    #print("cross_ent_sum", cross_ent_sum)
+   
     return cross_ent_sum
 
 def get_pickle_filenames(pickle_files_dirs, suffix=None):
@@ -91,7 +95,8 @@ def get_pickle_filenames(pickle_files_dirs, suffix=None):
                 pickle_filenames.append(os.path.join(pickle_files_dir, file))
     return pickle_filenames
     
-def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3.0, suffix=None, use_min_tau=False):
+def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3.0, 
+                             suffix=None, use_min_tau=False, use_tree_weighting=False):
     '''
     pickle_file_dirs: list of directories to search for Metient results
     with .pkl.gz files
@@ -104,24 +109,24 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3
     '''
     if pickle_file_list == None :
         pickle_file_list = get_pickle_filenames(pickle_file_dirs, suffix)
-    num_patients = 0
     
     min_tau = float("inf")
-    #print("Restricting to patients wih > 2 sites")
-    all_loss_dicts = []
+    all_data = []
     for pkl_file in pickle_file_list:
         with gzip.open(pkl_file,'rb') as f:
             pckl = pickle.load(f)
         
-        sites = pckl[OUT_SITES_KEY]
+        # sites = pckl[OUT_SITES_KEY]
         # if len(sites) > 2:
         loss_dicts = pckl[OUT_LOSS_DICT_KEY]
-        all_loss_dicts.append(loss_dicts)
+        idx_to_label = pckl[OUT_IDX_LABEL_KEY][0]
+        all_data.append((loss_dicts, idx_to_label))
+
         if use_min_tau:
             gen_dist_scores = torch.zeros((len(loss_dicts)))
             for i, loss_dict in enumerate(loss_dicts):
                 gen_dist_scores[i] = loss_dict[GEN_DIST_KEY]
-            unique_gs = torch.unique(gen_dist_scores)
+            unique_gs,_ = torch.sort(torch.unique(gen_dist_scores))
             if len(unique_gs) >= 2:
                 print("gen dist diff", (unique_gs[1]-unique_gs[0]))
                 min_tau = min(min_tau, (unique_gs[1]-unique_gs[0]))
@@ -130,32 +135,62 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3
         tau = min_tau
         print("min_tau", tau)
         
-    print(f"Calibrating to {len(all_loss_dicts)} patients")
-    
-    raw_thetas = torch.tensor([1.0,1.0,1.0], requires_grad=True)
-    optimizer = optim.SGD([raw_thetas], lr=0.01)
-    max_iter = 200
+    print(f"Calibrating to {len(all_data)} patients")
 
+    patience = 30
+    min_delta = 0.001
+    current_patience = 0
+    best_loss = float('inf')
+    
+    thetas = torch.tensor([1.0,1.0,1.0], requires_grad=True)
+    optimizer = optim.SGD([thetas], lr=0.01)
+
+    max_iter = 1000
+    losses = []
     for step in range(max_iter):
         optimizer.zero_grad()
-        thetas = stable_softmax(raw_thetas)
-        #thetas = torch.exp(raw_thetas)
         total_cross_ent = 0.0
-        for patient_loss_dicts in all_loss_dicts:
-            patient_cross_ent = cross_ent(patient_loss_dicts, thetas, tau)
+        for patient_loss_dicts, idx_to_label in all_data:
+            patient_cross_ent = cross_ent(patient_loss_dicts, idx_to_label, thetas, tau, use_tree_weighting)
             total_cross_ent += patient_cross_ent
-            # print("total_cross_ent", total_cross_ent)
-
+        total_cross_ent = total_cross_ent/float(len(all_data))
         total_cross_ent.backward()
         optimizer.step()
+        losses.append(float(total_cross_ent))
 
-        if step % 30 == 0:
+        if step % 100 == 0:
             pass
-            #print(f"Step {step}: theta = {thetas}, Objective = {total_cross_ent.item()}")
+
+        # check if loss improved
+        if total_cross_ent < best_loss - min_delta:
+            best_loss = total_cross_ent
+            current_patience = 0
+        else:
+            current_patience += 1
+
+        # check if early stopping criteria met
+        if current_patience >= patience:
+            print(f"Early stopping after {step+1} epochs.")
+            max_iter = step + 1
+            break
+
+    thetas = stable_softmax(thetas)
 
     print(f"Optimized thetas: {thetas}")
 
+    # import matplotlib.pyplot as plt
+    # import numpy as np
+    # fig = plt.figure(figsize=(2, 2),dpi=200)
+    # plt.plot(range(1, max_iter + 1), losses, label='Training Loss')
+    # plt.title('Training Loss Over Iterations')
+    # plt.xlabel('Iterations')
+    # plt.ylabel('Loss')
+    # plt.legend()
+    # plt.show()
+
     return [float(thetas[0]), float(thetas[1]), float(thetas[2])]
+
+
 
 ######### Methods taken directly from MACHINA repo #########
 
