@@ -15,32 +15,33 @@ A tutorial for running calibrate mode is available [here](https://github.com/div
 
 
 ## Inputs
-There are two required inputs, a tsv file with the reference and variant counts for each sample and mutation or mutation cluster, and a txt file specifying the edges of the clone tree.
+There are two required inputs, a tsv file with the reference and variant counts for each sample and mutation, and a txt file specifying the edges of the clone tree.
 
 ### 1. **Tsv file**
-The fields for the tsv file:
+Each row in the tsv should correspond to the reference and variant read counts at a single locus in a single tumor sample. 
+
+The required fields for the tsv file:
 | Column name | Description |
 |----------|----------|
 | **anatomical_site_index** | Zero-based index for anatomical_site_label column | 
 | **anatomical_site_label** | Name of the anatomical site |
-| **character_index** | Zero-based index for character_label column. NOTE: this must correspond to the indices used in the tree .txt file|
 | **character_label** | Name of the mutation or cluster of mutations. This is used in visualizations, so it should be short. NOTE: due to graphing dependencies, this string cannot contain colons. |
+| **cluster_index** | If using a clustering method, the cluster index that this mutation belongs to. NOTE: this must correspond to the indices used in the tree txt file. |
 | **ref** | The number of reads that map to the reference allele for this mutation or mutation cluster in this anatomical site. |
 | **var** | The number of reads that map to the variant allele for this mutation or mutation cluster in this anatomical site. |
 | **var_read_prob** | Let j = character_index. This is the probabilty of observing a read from the variant allele for mutation at j in a cell bearing the mutation. Thus, if mutation at j occurred at a diploid locus, this should be 0.5. In a haploid cell (e.g., male sex chromosome), this should be 1.0. If a copy-number aberration (CNA) duplicated the reference allele in the lineage bearing mutation j prior to j occurring, there will be two reference alleles and a single variant allele in all cells bearing j, such that var_read_prob = 0.3333. This gives Metient the ability to correct for the effect CNAs have on the relationship between VAF (i.e., the proportion of alleles bearing the mutation) and subclonal frequency (i.e., the proportion of cells bearing the mutation). This is modeled around PairTree's VAF correction, see S2.2 of [PairTree's supplementary info](https://aacr.silverchair-cdn.com/aacr/content_public/journal/bloodcancerdiscov/3/3/10.1158_2643-3230.bcd-21-0092/9/bcd-21-0092_supplementary_information_suppsm_sf1-sf21.pdf?Expires=1709221974&Signature=dJH6~Dg-6gEb-S88i0wDGW28QZn16keQj34Vo2tAvJL2cUJrQo48afpHPp-a2zAwQa~ET6SDgw3hb3ITacB06GDUc3GYCdCgYtfPMjFGwygFj-Q9xf-c44VAvwiyliwsBXK1shZmURlFMwSjzkwRwasuWu50sMNmeJSoVyX3nQ-rRBlK93aDR5s9c0l-p4aGvTi6QmfKJPsxXaHB4Lz5yXSl3Xd~JPK-Y~ltC14epDRb~MiSPWUFCAiYetUXcQ7J7vd6b4XQKT9PnYkjQtUq55tLSoUkOGe5JkJ32NXCeoT~l-XD97pCeDYVDOYzAuOkAG0tDYrPebEh2TGTA3fnbA__&Key-Pair-Id=APKAIE5G5CRDK6RD3PGA) for more details. |
 | **site_category** | Must be one of `primary` or `metastasis`. If multiple primaries are specified (i.e., the true primary is not known), we will run Metient multiple times with each primary used as the true primary. Output files are saved with the suffix `_{anatomical_site_label}` to indicate which primary was used in that run. |
-| **num_mutations** | OPTIONAL. If you wish to use genetic distance, you can specify the number of mutations in this mutation cluster. |
 
-        anatomical_site_index    anatomical_site_label    character_index    character_label    ref    var     var_read_prob    site_category    num_mutations
+        anatomical_site_index    anatomical_site_label    cluster_index    character_label    ref    var     var_read_prob    site_category    num_mutations
         0    breast    0    HER2    982    78    0.43    primary   54 
-        0    breast    1    LAMA2   782    0    0.36    primary   15
-        0    breast    2    A2BP1   221    0    0.31    primary   8
+        0    breast    0    LAMA2   782    0    0.36    primary   15
+        0    breast    1    A2BP1   221    0    0.31    primary   8
         1    spinal    0    HER2    897    892    0.53    metastasis   54 
-        1    spinal    1    LAMA2   124    101    0.42    metastasis   15
-        1    spinal    2    A2BP1   341    89    0.22    metastasis   8
+        1    spinal    0    LAMA2   124    101    0.42    metastasis   15
+        1    spinal    1    A2BP1   341    89    0.22    metastasis   8
         
 ### 2. **Tree txt file**
-A .txt file where each line is an edge from the first index to the second index. Must correspond to the character_index column in the input tsv. 
+A .txt file where each line is an edge from the first index to the second index. Must correspond to the cluster_index column in the input tsv. 
 
         0   1
         0   2
