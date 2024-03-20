@@ -11,7 +11,7 @@ pip install metient
 ```
 
 ## Tutorial
-A tutorial for running calibrate mode is available [here](https://github.com/divyakoyy/metient/blob/main/metient_calibrate_tutorial.ipynb)
+A tutorial for running calibrate mode is available [here](https://github.com/divyakoyy/metient/blob/main/tutorial/metient_calibrate_tutorial.ipynb)
 
 
 ## Inputs
