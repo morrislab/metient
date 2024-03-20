@@ -42,3 +42,48 @@ class MinHeap():
 #     writer.writerows(file_output)
 # with open(os.path.join(output_dir, f"{run_name}_best_weights.txt"), 'w', newline='') as file:
 #     file.write(f"{best_pars_weights[0]}, {best_pars_weights[1]}")
+
+
+### Used to save tutorial inputs
+from metient.util import data_extraction_util as dutil
+import numpy as np
+
+def get_pyclone_conipher_clusters(df, clusters_tsv_fn):
+    pyclone_df = pd.read_csv(clusters_tsv_fn, delimiter="\t")
+    mut_name_to_cluster_id = dict()
+    cluster_id_to_mut_names = dict()
+    # 1. Get mapping between mutation names and PyClone cluster ids
+    for _, row in df.iterrows():
+        mut_items = row['character_label'].split(":")
+        cluster_id = pyclone_df[(pyclone_df['CHR']==int(mut_items[1]))&(pyclone_df['POS']==int(mut_items[2]))&(pyclone_df['REF']==mut_items[3])]['treeCLUSTER'].unique()
+        assert(len(cluster_id) <= 1)
+        if len(cluster_id) == 1:
+            cluster_id = int(cluster_id.item())
+            mut_name_to_cluster_id[row['character_label']] = cluster_id
+            if cluster_id not in cluster_id_to_mut_names:
+                cluster_id_to_mut_names[cluster_id] = set()
+            else:
+                cluster_id_to_mut_names[cluster_id].add(row['character_label'])
+       
+    # 2. Set new names for clustered mutations
+    cluster_id_to_cluster_name = {k:";".join(list(v)) for k,v in cluster_id_to_mut_names.items()}
+    return cluster_id_to_cluster_name, mut_name_to_cluster_id
+    
+import pandas as pd
+patients = ["CRUK0003", "CRUK0010", "CRUK0013", "CRUK0029" ]
+tracerx_dir = os.path.join(os.getcwd(), "metient", "data", "tracerx_nsclc")
+for patient in patients:
+    df = pd.read_csv(os.path.join(tracerx_dir, "patient_data", f"{patient}_SNVs.tsv"), delimiter="\t", index_col=0)
+    cluster_id_to_cluster_name, mut_name_to_cluster_id = get_pyclone_conipher_clusters(df, os.path.join(tracerx_dir, 'conipher_outputs', 'TreeBuilding', f"{patient}_conipher_SNVstreeTable_cleaned.tsv"))
+    df['var_read_prob'] = df.apply(lambda row: dutil.calc_var_read_prob(row['major_cn'], row['minor_cn'], row['purity']), axis=1)
+    df['site_category'] = df.apply(lambda row: 'primary' if 'primary' in row['anatomical_site_label'] else 'metastasis', axis=1)
+    df['cluster_index'] = df.apply(lambda row: mut_name_to_cluster_id[row['character_label']] if row['character_label'] in mut_name_to_cluster_id else np.nan, axis=1)
+    df['character_label'] = df.apply(lambda row: row['character_label'].split(":")[0], axis=1)
+    df = df.dropna(subset=['cluster_index'])
+    df = df[['anatomical_site_index', 'anatomical_site_label', 'cluster_index', 'character_label',
+             'ref', 'var', 'var_read_prob', 'site_category']]
+    print(df['cluster_index'].unique())
+    df['cluster_index'] = df['cluster_index'].astype(int)
+    print(df['cluster_index'].unique())
+    df.to_csv(os.path.join(os.getcwd(), "metient", "data", "tutorial","inputs", f"{patient}_SNVs.tsv"), sep="\t", index=False)
+    

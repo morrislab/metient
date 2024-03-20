@@ -109,7 +109,6 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3
     '''
     if pickle_file_list == None :
         pickle_file_list = get_pickle_filenames(pickle_file_dirs, suffix)
-    num_patients = 0
     
     min_tau = float("inf")
     all_data = []
@@ -139,14 +138,14 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3
     print(f"Calibrating to {len(all_data)} patients")
 
     patience = 30
-    min_delta = 0.0001
+    min_delta = 0.001
     current_patience = 0
     best_loss = float('inf')
     
     thetas = torch.tensor([1.0,1.0,1.0], requires_grad=True)
     optimizer = optim.SGD([thetas], lr=0.01)
 
-    max_iter = 3000
+    max_iter = 1000
     losses = []
     for step in range(max_iter):
         optimizer.zero_grad()
@@ -179,15 +178,15 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3
 
     print(f"Optimized thetas: {thetas}")
 
-    import matplotlib.pyplot as plt
-    import numpy as np
-    fig = plt.figure(figsize=(2, 2),dpi=200)
-    plt.plot(range(1, max_iter + 1), losses, label='Training Loss')
-    plt.title('Training Loss Over Iterations')
-    plt.xlabel('Iterations')
-    plt.ylabel('Loss')
-    plt.legend()
-    plt.show()
+    # import matplotlib.pyplot as plt
+    # import numpy as np
+    # fig = plt.figure(figsize=(2, 2),dpi=200)
+    # plt.plot(range(1, max_iter + 1), losses, label='Training Loss')
+    # plt.title('Training Loss Over Iterations')
+    # plt.xlabel('Iterations')
+    # plt.ylabel('Loss')
+    # plt.legend()
+    # plt.show()
 
     return [float(thetas[0]), float(thetas[1]), float(thetas[2])]
 
