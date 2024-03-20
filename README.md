@@ -23,11 +23,11 @@ Each row in the tsv should correspond to the reference and variant read counts a
 The required fields for the tsv file:
 | Column name | Description |
 |----------|----------|
-| **anatomical_site_index** | Zero-based index for anatomical_site_label column | 
+| **anatomical_site_index** | Zero-based index for anatomical_site_label column. Rows with the same anatomical site index and cluster_index will get pooled together.| 
 | **anatomical_site_label** | Name of the anatomical site |
 | **character_label** | Zero-based index for character_label column |
 | **character_label** | Name of the mutation or cluster of mutations. This is used in visualizations, so it should be short. NOTE: due to graphing dependencies, this string cannot contain colons. |
-| **cluster_index** | If using a clustering method, the cluster index that this mutation belongs to. NOTE: this must correspond to the indices used in the tree txt file. |
+| **cluster_index** | If using a clustering method, the cluster index that this mutation belongs to. NOTE: this must correspond to the indices used in the tree txt file. Rows with the same anatomical site index and cluster_index will get pooled together.|
 | **ref** | The number of reads that map to the reference allele for this mutation or mutation cluster in this anatomical site. |
 | **var** | The number of reads that map to the variant allele for this mutation or mutation cluster in this anatomical site. |
 | **site_category** | Must be one of `primary` or `metastasis`. If multiple primaries are specified (i.e., the true primary is not known), we will run Metient multiple times with each primary used as the true primary. Output files are saved with the suffix `_{anatomical_site_label}` to indicate which primary was used in that run. |
