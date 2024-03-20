@@ -142,19 +142,26 @@ def get_migration_edges(V, A):
     A:  Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
 
     Returns:
-        Adjacency matrix where Aij = 1 if there is a migration edge between nodes i and j
+        Returns a matrix where Yij = 1 if there is a migration edge between nodes i and j
     '''
     X = V.T @ V 
     Y = torch.mul(A, (1-X))
     return Y
 
-def get_shared_clusters(V, A, ordered_sites, primary_site, full_node_idx_to_label):
+def get_seeding_clusters(V, A, ordered_sites, full_node_idx_to_label):
     '''
     returns: list of list of lists with dim: (len(ordered_sites), len(ordered_sites), len(shared_clusters))
     where the innermost list contains the clusters that are shared between site i and site j
     '''
     Y = get_migration_edges(V,A)
-    
+    seeding_clusters = torch.nonzero(Y.any(dim=1)).squeeze()
+    # Check if it's a scalar (0D tensor)
+    if seeding_clusters.dim() == 0:
+        # Convert to a 1D tensor (vector)
+        seeding_clusters = seeding_clusters.unsqueeze(0)
+    seeding_clusters = [int(x) for x in seeding_clusters]
+    return seeding_clusters
+
     shared_clusters = [[[] for x in range(len(ordered_sites))] for y in range(len(ordered_sites))]
     for i,j in tree_iterator(Y):
         site_i = (V[:,i] == 1).nonzero()[0][0].item()
@@ -162,10 +169,10 @@ def get_shared_clusters(V, A, ordered_sites, primary_site, full_node_idx_to_labe
         assert(site_i != site_j)
         # if j is a subclonal presence leaf node, add i is the shared cluster 
         # (b/c i is the mutation cluster that j represents)
-        #if full_node_idx_to_label[j][1] == True:
-        shared_clusters[site_i][site_j].append(i)
-        # else:
-        #     shared_clusters[site_i][site_j].append(j)
+        if full_node_idx_to_label[j][1] == True:
+            shared_clusters[site_i][site_j].append(i)
+        else:
+            shared_clusters[site_i][site_j].append(j)
     return shared_clusters
 
 def find_highest_level_node(adj_matrix, nodes_to_check):
@@ -374,9 +381,10 @@ def get_tracerx_seeding_pattern(V, A, ordered_sites, primary_site, full_node_idx
 
     pattern = ""
     # 1) determine if monoclonal (only one clone seeds met(s)), else polyclonal
-    shared_clusters = get_shared_clusters(V, A, ordered_sites, primary_site, full_node_idx_to_label)
-    prim_to_met_clusters = shared_clusters[ordered_sites.index(primary_site)]
-    all_seeding_clusters = set([cluster for seeding_clusters in prim_to_met_clusters for cluster in seeding_clusters])
+    # shared_clusters = get_shared_clusters(V, A, ordered_sites, full_node_idx_to_label)
+    # prim_to_met_clusters = shared_clusters[ordered_sites.index(primary_site)]
+    # all_seeding_clusters = set([cluster for seeding_clusters in prim_to_met_clusters for cluster in seeding_clusters])
+    all_seeding_clusters = get_seeding_clusters(V, A, ordered_sites, full_node_idx_to_label)
     monoclonal = True if len(all_seeding_clusters) == 1 else False
     pattern = "monoclonal " if monoclonal else "polyclonal "
 
@@ -831,8 +839,8 @@ def convert_lists_to_np_arrays(pickle_outputs, keys):
 
     return pickle_outputs
 
-def print_best_trees(min_loss_solutions, U, ref_matrix, var_matrix, O, weights, ordered_sites,
-                     print_config, custom_colors, primary, output_dir, run_name):
+def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites,
+                    print_config, custom_colors, primary, output_dir, run_name):
     '''
     min_loss_solutions is in order from lowest to highest loss 
     '''
