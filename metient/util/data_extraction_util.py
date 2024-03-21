@@ -2,7 +2,6 @@ import csv
 import numpy as np
 import os
 import torch
-import copy
 from collections import OrderedDict
 import pandas as pd
 import sys
@@ -13,7 +12,6 @@ from metient.util.globals import *
 print("CUDA GPU:",torch.cuda.is_available())
 if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
-
 
 def get_adjacency_matrix_from_txt_edge_list(txt_file):
     edges = []
@@ -47,25 +45,11 @@ def pool_input_tsv(tsv_fn, output_dir, run_name):
     Pool reads from the same anatomical site index and cluster index
     '''
     df = pd.read_csv(tsv_fn, delimiter="\t")  
-    mut_idx_to_cluster_id = {}
-    cluster_id_to_mut_names = {}
-    for _,row in df.iterrows():
-        cid = int(row['cluster_index'])
-        mut_idx_to_cluster_id[int(row['character_index'])] = cid
-        if cid not in cluster_id_to_mut_names:
-            cluster_id_to_mut_names[cid] = set()
-        cluster_id_to_mut_names[cid].add(row['character_label'])
-    
-    cluster_id_to_cluster_name = {k:";".join(list(v)) for k,v in cluster_id_to_mut_names.items()}
-
-    df = df.drop(columns=["cluster_index",])
-    _, output_fn = write_pooled_tsv_from_clusters(df, mut_idx_to_cluster_id, cluster_id_to_cluster_name, {}, 
-                                                  output_dir, run_name, ";", None)
+    assert(set(df['site_category'])==set(['primary', 'metastasis']))
+    _, output_fn = write_pooled_tsv_from_clusters(df, {}, output_dir, run_name, None)
     return output_fn
 
-def write_pooled_tsv_from_clusters(df, mut_idx_to_cluster_id, cluster_id_to_cluster_name,
-                                   aggregation_rules, output_dir, patient_id, cluster_sep, 
-                                   mutation_sep):
+def write_pooled_tsv_from_clusters(df, aggregation_rules, output_dir, patient_id, mutation_sep):
     '''
     After clustering with any clustering algorithm, prepares tsvs by pooling mutations belonging 
     to the same cluster
@@ -94,7 +78,7 @@ def write_pooled_tsv_from_clusters(df, mut_idx_to_cluster_id, cluster_id_to_clus
 
     '''
 
-    required_cols = ["anatomical_site_index", "anatomical_site_label", 
+    required_cols = ["anatomical_site_index", "anatomical_site_label", "cluster_index",
                      "character_index", "character_label", "ref","var", 
                      "var_read_prob", "site_category"]
     
@@ -116,16 +100,12 @@ def write_pooled_tsv_from_clusters(df, mut_idx_to_cluster_id, cluster_id_to_clus
     df['ref'] = df.apply(lambda row: row['total_reads_corrected']-row['var'], axis=1)
     df['var_read_prob'] = 0.5
 
-    # Save the number of mutations in each cluster before pooling
-    cluster_id_to_num_muts = {}
-    for mut in mut_idx_to_cluster_id:
-        cid = mut_idx_to_cluster_id[mut]
-        if cid not in cluster_id_to_num_muts:
-            cluster_id_to_num_muts[cid] = 0
-        cluster_id_to_num_muts[cid] += 1
+    #df['cluster'] = df.apply(lambda row: mut_idx_to_cluster_id[row['character_index']] if row['character_index'] in mut_idx_to_cluster_id else np.nan, axis=1)
+    df = df.dropna(subset=['cluster_index'])
 
-    df['cluster'] = df.apply(lambda row: mut_idx_to_cluster_id[row['character_index']] if row['character_index'] in mut_idx_to_cluster_id else np.nan, axis=1)
-    df = df.dropna(subset=['cluster'])
+    # Save the number of mutations in each cluster before pooling
+    cluster_id_to_num_muts = df.groupby('cluster_index')['character_index'].nunique().to_dict()
+    cluster_id_to_mut_names = df.groupby('cluster_index')['character_label'].unique().apply(list).to_dict()
 
     # 2. Pool reference and variant allele counts from all mutations within a cluster
     pooled_df = df.drop(['character_label','character_index'], axis=1) # we're going to add this back in later
@@ -134,23 +114,20 @@ def write_pooled_tsv_from_clusters(df, mut_idx_to_cluster_id, cluster_id_to_clus
     ref_var_rules = {'ref': np.sum, 'var': np.sum,'total_reads_corrected': np.sum, "var_read_prob": 'first', 
                      'site_category':'first', 'anatomical_site_label':lambda x: ';'.join(set(x)),}
 
-    pooled_df = pooled_df.groupby(['cluster', 'anatomical_site_index'], as_index=False).agg({**ref_var_rules, **aggregation_rules})
-
-    pooled_df['character_label'] = pooled_df.apply(lambda row: cluster_id_to_cluster_name[row['cluster']], axis=1)
+    pooled_df = pooled_df.groupby(['cluster_index', 'anatomical_site_index'], as_index=False).agg({**ref_var_rules, **aggregation_rules})
 
     # 3. Add indices for mutations, samples and anatomical sites as needed for input format
-    pooled_df['character_index'] = pooled_df['cluster'].tolist()
+    pooled_df['character_index'] = pooled_df['cluster_index'].tolist()
     pooled_df['anatomical_site_index'] = pooled_df.apply(lambda row: list(pooled_df['anatomical_site_label'].unique()).index(row["anatomical_site_label"]), axis=1)
-    all_cols.append("total_reads_corrected")
-    pooled_df = pooled_df[all_cols]
-
+    
     # 4. Do some post-processing, e.g. adding number of mutations and shortening character label for display
     pooled_df['num_mutations'] = pooled_df.apply(lambda row:cluster_id_to_num_muts[int(row['character_index'])], axis=1)
-    pooled_df['full_label'] = pooled_df['character_label']
-    pooled_df['character_label'] = pooled_df.apply(lambda row:get_pruned_mut_label(row['character_label'], cluster_sep, mutation_sep), axis=1)
+    pooled_df['character_label'] = pooled_df.apply(lambda row:get_pruned_mut_label(cluster_id_to_mut_names[row['cluster_index']], mutation_sep), axis=1)
     pooled_df['total_reads_corrected'] = pooled_df['total_reads_corrected'].round(0).astype(int)
     pooled_df['var'] = pooled_df['var'].round(0).astype(int)
     pooled_df['ref'] = pooled_df.apply(lambda row: row['total_reads_corrected']-row['var'], axis=1)
+    all_cols.append('num_mutations')
+    pooled_df = pooled_df[all_cols]
 
     # Save
     output_fn = os.path.join(output_dir, f"{patient_id}_clustered_SNVs.tsv")
@@ -406,14 +383,14 @@ def get_ref_var_omega_matrices(tsv_filepaths):
 
     return ref_matrices, var_matrices, omega_matrices, ordered_sites, idx_to_label_dicts, idx_to_num_muts
 
-def get_pruned_mut_label(mut_label, cluster_sep, mutation_sep, k=2):
+def get_pruned_mut_label(mut_names, mutation_sep, k=2):
 
     # If mutation names contain colons (e.g. LOC1:9:12312321), take everything before the first 
     # colon for displaying since otherwise we can't display the label w/ our graphing library dependencies
     if mutation_sep != None:
-        gene_names = [item.split(mutation_sep)[0] for item in mut_label.split(cluster_sep)]
+        gene_names = [item.split(mutation_sep)[0] for item in mut_names]
     else:
-        gene_names = [item for item in mut_label.split(cluster_sep)]
+        gene_names = [item for item in mut_names]
 
     gene_candidates = set()
     for gene in gene_names:
@@ -588,15 +565,6 @@ def _get_adj_matrix_from_machina_tree(tree_edges, idx_to_character_label, remove
     ret_dict = pruned_character_label_to_idx if remove_unseen_nodes else character_label_to_idx
     ret_dict = {v:k for k,v in ret_dict.items()}
     return T, ret_dict
-
-def get_index_to_cluster_label_from_corrected_sim_tsv(ref_var_fn):
-    df = pd.read_csv(ref_var_fn, sep="\t")
-    idx_to_label = {}
-    labels = df['character_label'].unique()
-    for label in labels:
-        idx = df[df['character_label']==label]['character_index'].unique().item()
-        idx_to_label[idx] = label
-    return idx_to_label
 
 def get_adj_matrices_from_spruce_mutation_trees(mut_trees_filename, idx_to_character_label, is_sim_data=False):
     '''
