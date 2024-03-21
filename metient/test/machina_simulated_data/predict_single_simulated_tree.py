@@ -5,7 +5,7 @@ import matplotlib
 import argparse
 import datetime
 import fnmatch
-
+import pandas as pd
 from metient.metient import *
 from metient.lib.vertex_labeling import get_migration_history
 from metient.util import plotting_util as plot_util
@@ -40,7 +40,7 @@ def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir
         start_time = datetime.datetime.now()
 
         ref_var_fn = os.path.join(machina_sims_data_dir, f"{site}_clustered_input_corrected", f"cluster_{mig_type}_seed{seed}_tree{tree_num}.tsv")
-        corrected_idx_to_cluster_label = dutil.get_index_to_cluster_label_from_corrected_sim_tsv(ref_var_fn)
+        corrected_idx_to_cluster_label = get_index_to_cluster_label_from_corrected_sim_tsv(ref_var_fn)
         data = dutil.get_adj_matrices_from_spruce_mutation_trees(all_mut_trees_fn, idx_to_cluster_label, is_sim_data=True)
         assert(data[tree_num][1] == corrected_idx_to_cluster_label)
 
