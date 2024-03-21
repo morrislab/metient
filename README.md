@@ -18,7 +18,7 @@ A tutorial for running calibrate mode is available [here](https://github.com/div
 There are two required inputs, a tsv file with the reference and variant counts for each sample and mutation, and a txt file specifying the edges of the clone tree.
 
 ### 1. **Tsv file**
-Each row in the tsv should correspond to the reference and variant read counts at a single locus in a single tumor sample. 
+Each row in the tsv should correspond to the reference and variant read counts at a single locus in a single tumor sample.  
 
 The required fields for the tsv file:
 | Column name | Description |
