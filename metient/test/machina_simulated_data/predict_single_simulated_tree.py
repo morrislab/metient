@@ -11,6 +11,18 @@ from metient.lib.vertex_labeling import get_migration_history
 from metient.util import plotting_util as plot_util
 from metient.util.globals import *
 
+def get_index_to_cluster_label_from_corrected_sim_tsv(ref_var_fn):
+    df = pd.read_csv(ref_var_fn, sep="\t")
+    clstr_idx_to_label = {}
+    labels = df['character_label'].unique()
+    for label in labels:
+        idx = int(df[df['character_label']==label]['cluster_index'].unique().item())
+        if idx not in clstr_idx_to_label:
+            clstr_idx_to_label[idx] = []
+        clstr_idx_to_label[idx].append(str(label))
+    clstr_idx_to_label = {k:";".join(v) for k,v in clstr_idx_to_label.items()}
+    return clstr_idx_to_label
+
 def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir, weights, batch_size, weight_init_primary, perf_stats_fn, mode, solve_polytomies):
     print("solve_polytomies", solve_polytomies)
     print("wip", wip)
@@ -28,9 +40,9 @@ def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir
         start_time = datetime.datetime.now()
 
         ref_var_fn = os.path.join(machina_sims_data_dir, f"{site}_clustered_input_corrected", f"cluster_{mig_type}_seed{seed}_tree{tree_num}.tsv")
-        idx_to_cluster_label = dutil.get_index_to_cluster_label_from_corrected_sim_tsv(ref_var_fn)
+        corrected_idx_to_cluster_label = dutil.get_index_to_cluster_label_from_corrected_sim_tsv(ref_var_fn)
         data = dutil.get_adj_matrices_from_spruce_mutation_trees(all_mut_trees_fn, idx_to_cluster_label, is_sim_data=True)
-        assert(data[tree_num][1] == idx_to_cluster_label)
+        assert(data[tree_num][1] == corrected_idx_to_cluster_label)
 
         T = torch.tensor(data[tree_num][0], dtype = torch.float32)
 

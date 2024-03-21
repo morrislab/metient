@@ -919,7 +919,7 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
               Os, batch_size, custom_colors, bias_weights, solve_polytomies):
     
     if not (len(tree_fns) == len(tsv_fns) == len(run_names)):
-        raise ValueError("Inputs Ts, tsv_fns, primary_sites and run_names must have equal length (length = number of patients in cohort")
+        raise ValueError("Inputs Ts, tsv_fns, and run_names must have equal length (length = number of patients in cohort")
 
     if isinstance(tree_fns[0], str):
         Ts = []
