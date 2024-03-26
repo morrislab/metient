@@ -20,6 +20,7 @@ import pickle
 import gzip
 import matplotlib
 import json
+import pandas as pd
 
 VISUALIZE=False
 
@@ -34,9 +35,8 @@ def get_num_mut_trees(mut_tree_fn):
                 return int(line.strip().split()[0])
 
 def recalibrate(seed, tree_num, out_dir, ref_var_fn, data, weights, print_config, custom_colors, solve_polys):
-    input_T = torch.tensor(data[tree_num][0], dtype = torch.float32)
-    _, _, unique_sites= get_ref_var_matrices_from_machina_sim_data(ref_var_fn, data[tree_num][1], input_T)
-
+    df = pd.read_csv(ref_var_fn, delimiter="\t", index_col=False)  
+    unique_sites = set(df['anatomical_site_label'])
     with gzip.open(os.path.join(out_dir, f"tree{tree_num}_seed{seed}_calibrate.pkl.gz"), 'rb') as f:
         pckl = pickle.load(f)
     saved_Ts = _convert_list_of_numpys_to_tensors(pckl[OUT_ADJ_KEY])
