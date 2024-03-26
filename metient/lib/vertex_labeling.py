@@ -353,7 +353,8 @@ def get_full_G(T, G, poly_res, i=-1, max_iter=-1):
     # LAST_G = full_G
     return full_G
 
-def compute_v_loss(U, X, T, ref, var, p, G, O, v_temp, t_temp, hard, weights, i, max_iter, poly_res=None):
+def compute_v_loss(U, X, T, p, known_indices, unknown_indices, known_labelings,
+                   G, O, v_temp, t_temp, hard, weights, i, max_iter, poly_res=None):
     '''
     Computes loss for X (dim: batch_size x num_internal_nodes x num_sites)
     '''
@@ -371,11 +372,18 @@ def compute_v_loss(U, X, T, ref, var, p, G, O, v_temp, t_temp, hard, weights, i,
         bs = X.shape[0]
         L = vutil.repeat_n(L, bs)
         
+        full_internal_nodes_labeling = torch.zeros(bs, num_sites, len(known_indices)+len(unknown_indices))
+        full_internal_nodes_labeling[:,:,unknown_indices] = X
+        stacked_known_labelings = torch.vstack(known_labelings).T
+        stacked_known_labelings = vutil.repeat_n(stacked_known_labelings, bs)
+        #print(stacked_known_labelings.shape)
+        full_internal_nodes_labeling[:,:,known_indices] = stacked_known_labelings
+        
         if poly_res != None:
             # order is: given internal nodes, new poly nodes, leaf nodes from U
-            full_vert_labeling = torch.cat((X, vutil.repeat_n(poly_res.resolver_labeling, bs), L), dim=2)
+            full_vert_labeling = torch.cat((full_internal_nodes_labeling, vutil.repeat_n(poly_res.resolver_labeling, bs), L), dim=2)
         else:
-            full_vert_labeling = torch.cat((X, L), dim=2)
+            full_vert_labeling = torch.cat((full_internal_nodes_labeling, L), dim=2)
 
         p = vutil.repeat_n(p, bs)
         # Concatenate the left part, new column, and right part along the second dimension
@@ -860,6 +868,9 @@ def get_best_final_solutions(best_Vs, best_soft_Vs, Ts, G, O, p, weights, print_
                                      solve_polys, idx_label_dicts, U)
 
 def init_X(batch_size, num_sites, num_nodes_to_label, bias_weights, p, input_T, T, U):
+
+    nodes_w_children, biased_sites = vutil.get_k_or_more_children_nodes(input_T, T, U, 1, 1, cutoff=False)
+    
     # We're learning X, which is the vertex labeling of the internal nodes
     X = torch.rand(batch_size, num_sites, num_nodes_to_label)
     #print("X", X.shape)
@@ -876,17 +887,29 @@ def init_X(batch_size, num_sites, num_nodes_to_label, bias_weights, p, input_T, 
         # Bias for partitions [2-3]
         # For each node, find which sites to bias labeling towards
         # by using the sites it and its children are detected in
-        nodes_w_children, sites = vutil.get_k_or_more_children_nodes(input_T, T, U, 1, 1, cutoff=False)
-
-        for node_idx, sites in zip(nodes_w_children, sites):
+        for node_idx, sites in zip(nodes_w_children, biased_sites):
             if node_idx == 0:
                 continue # we know the root labeling
             idx = node_idx - 1
             for site_idx in sites:
                 X[quart:quart*3,site_idx,idx] = eta
-        #print("X", X[0])
+        print("X", X[0])
+    print(nodes_w_children, biased_sites)
+    known_indices = []
+    known_labelings = []
+    for node_idx, sites in zip(nodes_w_children, biased_sites):
+        if node_idx == 0:
+            continue # we know the root labeling
+        idx = node_idx - 1
+        if len(sites) == 1 and input_T[node_idx].sum() == 0:
+            known_indices.append(node_idx - 1) # indexing w.r.t X, which doesn't include root node
+            known_labelings.append(torch.eye(num_sites)[sites[0]].T)
+    known_labelings = known_labelings
+    unknown_indices = [x for x in range(num_nodes_to_label) if x not in known_indices]
+    print("known unkown", known_indices, unknown_indices,known_labelings)
+    X = X[:,:, unknown_indices]
     X.requires_grad = True
-    return X
+    return X, known_indices, unknown_indices, known_labelings
 
 def update_adj_matrix(itr, max_iter):
     if itr == -1:
@@ -1068,7 +1091,7 @@ def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name,
 
 
 def get_migration_history(T, tsv_fn, primary_site, weights, print_config, output_dir, run_name, 
-                          O=None, max_iter=75, lr=0.1, init_temp=40, final_temp=0.01,
+                          O=None, max_iter=100, lr=0.1, init_temp=40, final_temp=0.01,
                           batch_size=-1, custom_colors=None, bias_weights=True, mode="evaluate",
                           solve_polytomies=False):
     '''
@@ -1231,7 +1254,7 @@ def get_migration_history(T, tsv_fn, primary_site, weights, print_config, output
         poly_res = None
 
     # We're learning X, which is the vertex labeling of the internal nodes
-    X = init_X(batch_size, num_sites, num_nodes_to_label, bias_weights, p, input_T, T, U)
+    X, known_indices, unknown_indices, known_labelings = init_X(batch_size, num_sites, num_nodes_to_label, bias_weights, p, input_T, T, U)
     
     v_optimizer = torch.optim.Adam([X], lr=lr)
     scheduler = lr_scheduler.LinearLR(v_optimizer, start_factor=1.0, end_factor=0.5, total_iters=max_iter)
@@ -1267,7 +1290,8 @@ def get_migration_history(T, tsv_fn, primary_site, weights, print_config, output
         if solve_polytomies: 
             poly_optimizer.zero_grad()
         v_optimizer.zero_grad()
-        Vs, v_losses, loss_comps, soft_Vs, Ts = compute_v_loss(U, X, T, ref, var, p, G, O, v_temp, t_temp, hard, weights, i, max_iter, poly_res)
+        Vs, v_losses, loss_comps, soft_Vs, Ts = compute_v_loss(U, X, T, p, known_indices, unknown_indices, known_labelings, G, O, 
+                                                               v_temp, t_temp, hard, weights, i, max_iter, poly_res)
         mean_loss = torch.sum(v_losses)
         mean_loss.backward()
 

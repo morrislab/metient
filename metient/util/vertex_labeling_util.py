@@ -41,7 +41,7 @@ class LabeledTree:
 def calculate_batch_size(T, sites):
     num_nodes = T.shape[0]
     num_sites = len(sites)
-    min_size = 512
+    min_size = 1024
     if num_nodes > 15:
         min_size += 1024 * (num_nodes // 2)
         if num_sites > 3:
