@@ -46,14 +46,16 @@ def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir
 
         T = torch.tensor(data[tree_num][0], dtype = torch.float32)
 
+        pooled_tsv_fn = dutil.pool_input_tsv(ref_var_fn, out_dir, f"tmp_{site}_{mig_type}_{seed}_{tree_num}")
+
         print_config = PrintConfig(visualize=False, verbose=False, k_best_trees=batch_size, save_outputs=True)
 
-        T_edges, labeling, G_edges, loss_info, time = get_migration_history(T,  ref_var_fn, 'P', weights, print_config, out_dir, f"tree{tree_num}_seed{seed}_{mode}", 
+        T_edges, labeling, G_edges, loss_info, time = get_migration_history(T, pooled_tsv_fn, 'P', weights, print_config, out_dir, f"tree{tree_num}_seed{seed}_{mode}", 
                                                                             max_iter=100, batch_size=batch_size, custom_colors=custom_colors, 
                                                                             bias_weights=weight_init_primary, mode=mode, solve_polytomies=solve_polytomies)
 
         time_with_plotting = (datetime.datetime.now() - start_time).total_seconds()
-        
+        os.remove(pooled_tsv_fn) # cleanup pooled tsv
         perf_stats.append([site, mig_type, seed, tree_num, time, time_with_plotting])
 
         plot_util.write_tree(T_edges, os.path.join(out_dir, f"T_tree{tree_num}_seed{seed}_{mode}.predicted.tree"), add_germline_node=True)
