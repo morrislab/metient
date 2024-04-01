@@ -25,7 +25,7 @@ The required fields for the tsv file:
 |----------|----------|
 | **anatomical_site_index** | Zero-based index for anatomical_site_label column. Rows with the same anatomical site index and cluster_index will get pooled together.| 
 | **anatomical_site_label** | Name of the anatomical site |
-| **character_label** | Zero-based index for character_label column |
+| **character_index** | Zero-based index for character_label column |
 | **character_label** | Name of the mutation or cluster of mutations. This is used in visualizations, so it should be short. NOTE: due to graphing dependencies, this string cannot contain colons. |
 | **cluster_index** | If using a clustering method, the cluster index that this mutation belongs to. NOTE: this must correspond to the indices used in the tree txt file. Rows with the same anatomical site index and cluster_index will get pooled together.|
 | **ref** | The number of reads that map to the reference allele for this mutation or mutation cluster in this anatomical site. |
