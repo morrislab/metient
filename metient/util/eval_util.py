@@ -5,7 +5,6 @@ import torch
 import os
 import re
 import pandas as pd
-import json
 import joblib
 import gzip
 import seaborn as sns
@@ -137,8 +136,8 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3
         
     print(f"Calibrating to {len(all_data)} patients")
 
-    patience = 30
-    min_delta = 0.001
+    patience = 50
+    min_delta = 0.0001
     current_patience = 0
     best_loss = float('inf')
     
@@ -284,18 +283,17 @@ def multi_graph_to_set(edge_list):
 def metient_parse_clone_tree(results_dict, met_tree_num):
     V = torch.tensor(results_dict[OUT_LABElING_KEY][met_tree_num])
     A = torch.tensor(results_dict[OUT_ADJ_KEY][met_tree_num])
-    sites = results_dict[OUT_SITES_KEY]
-    G = plot_util.get_migration_graph(V, A)
     idx_to_lbl = results_dict[OUT_IDX_LABEL_KEY][met_tree_num]
-    
+    idx_to_string_label = {i:";".join(idx_to_lbl[i][0]) for i in idx_to_lbl}
+
     edges = [("GL", '0')]
     for i, j in plot_util.tree_iterator(A):
-        edges.append((idx_to_lbl[i][0], idx_to_lbl[j][0]))
+        edges.append((idx_to_string_label[i], idx_to_string_label[j]))
     
     migration_edges = []
     for i, j in plot_util.tree_iterator(A):
         if torch.argmax(V[:,i]) != torch.argmax(V[:,j]):
-            migration_edges.append((idx_to_lbl[i][0], idx_to_lbl[j][0]))
+            migration_edges.append((idx_to_string_label[i], idx_to_string_label[j]))
     return edges, migration_edges
 
 def metient_parse_mig_graph(results_dict, met_tree_num):

@@ -22,7 +22,7 @@ import matplotlib
 import json
 import pandas as pd
 
-VISUALIZE=False
+VISUALIZE=True
 
 def _convert_list_of_numpys_to_tensors(lst):
         return [torch.tensor(x) for x in lst]
@@ -34,9 +34,12 @@ def get_num_mut_trees(mut_tree_fn):
             if  "#trees" in line:
                 return int(line.strip().split()[0])
 
-def recalibrate(seed, tree_num, out_dir, ref_var_fn, data, weights, print_config, custom_colors, solve_polys):
+def recalibrate(seed, tree_num, out_dir, ref_var_fn, weights, print_config, custom_colors, solve_polys):
     df = pd.read_csv(ref_var_fn, delimiter="\t", index_col=False)  
-    unique_sites = set(df['anatomical_site_label'])
+    # Extract unique site labels in the order of site_index
+    sorted_tuples = sorted(zip(df['anatomical_site_index'].unique(), df['anatomical_site_label'].unique()))
+    unique_sites = [t[1] for t in sorted_tuples]
+
     with gzip.open(os.path.join(out_dir, f"tree{tree_num}_seed{seed}_calibrate.pkl.gz"), 'rb') as f:
         pckl = pickle.load(f)
     saved_Ts = _convert_list_of_numpys_to_tensors(pckl[OUT_ADJ_KEY])
@@ -68,7 +71,7 @@ parser.add_argument('run_name', type=str, help="Name of this run")
 parser.add_argument('--data_fit', type=float, help="Weight on data fit", default=0.2)
 parser.add_argument('--mig', type=float, help="Weight on migration number", default=10.0)
 parser.add_argument('--comig', type=float, help="Weight on comig", default=0.8)
-parser.add_argument('--seed', type=float, help="Weight on first 1/2 sample size of seeding site number", default=1.0)
+parser.add_argument('--seed', type=float, help="Weight on seeding site number", default=1.0)
 parser.add_argument('--reg', type=float, help="Weight on regularization", default=2.0)
 parser.add_argument('--gen', type=float, help="Weight on genetic distance", default=0.0)
 
@@ -112,7 +115,8 @@ for site in sites:
         for seed in seeds:
             files_to_check.append(os.path.join(predictions_dir, f"perf_stats_{site}_{mig_type}_{seed}.txt"))
             num_trees = get_num_mut_trees(os.path.join(machina_sims_data_dir, f"{site}_mut_trees", f"mut_trees_{mig_type}_seed{seed}.txt"))
-            job_time = math.ceil(num_trees*(1/11))+2
+            #job_time = math.ceil(num_trees*(1/11))+2 
+            job_time = math.ceil(num_trees*(1/2))+2 # TODO: 04/02 change this back
             python_cmd = [f"bsub -J metient_sim_{site}_{mig_type}_{seed}_{run_name} -n 8 -W {job_time}:00  -R rusage[mem=8] -o output_metient_sims_{run_name}.log -e error_metient_sims_{run_name}.log ./predict_single_simulated_tree.sh",
                           machina_sims_data_dir, site, mig_type, seed, str(args.data_fit), str(args.mig),
                           str(args.comig), str(args.seed), str(args.reg), str(args.gen),
@@ -178,17 +182,14 @@ for site in sites:
         for seed in seeds:
             cluster_fn = os.path.join(machina_sims_data_dir, f"{site}_clustered_input", f"cluster_{mig_type}_seed{seed}.txt")
             all_mut_trees_fn = os.path.join(machina_sims_data_dir, f"{site}_mut_trees", f"mut_trees_{mig_type}_seed{seed}.txt")
-            ref_var_fn = os.path.join(machina_sims_data_dir, f"{site}_clustered_input", f"cluster_{mig_type}_seed{seed}.tsv")
-
-            idx_to_cluster_label = get_idx_to_cluster_label(cluster_fn, ignore_polytomies=True)
-            data = get_adj_matrices_from_spruce_mutation_trees(all_mut_trees_fn, idx_to_cluster_label, is_sim_data=True)
             num_trees = get_num_mut_trees(os.path.join(machina_sims_data_dir, f"{site}_mut_trees", f"mut_trees_{mig_type}_seed{seed}.txt"))
             for tree_num in range(num_trees):
-                    recalibrate(seed, tree_num, out_dir,ref_var_fn, data, 
-                                weights, print_config, custom_colors,args.solve_polys)
-                    if num_completed % 10 == 0:
-                        print("***Num. recalibrated:***", num_completed)
-                    num_completed += 1
+                ref_var_fn = os.path.join(machina_sims_data_dir, f"{site}_clustered_input_corrected", f"cluster_{mig_type}_seed{seed}_tree{tree_num}.tsv")
+                recalibrate(seed, tree_num, out_dir,ref_var_fn, 
+                            weights, print_config, custom_colors,args.solve_polys)
+                if num_completed % 10 == 0:
+                    print("***Num. recalibrated:***", num_completed)
+                num_completed += 1
         mig_type_to_calibration_time[mig_type] += (datetime.datetime.now() - start_time).total_seconds()
 
 print("Migration type to calibration time\n", mig_type_to_calibration_time)

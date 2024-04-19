@@ -20,19 +20,18 @@ import pickle
 import pygraphviz as pgv
 from collections import deque
 import gzip
-import string
+import re
+import copy
 
 # TODO: this cyclical import is not great
 import metient.lib.vertex_labeling as vert_label
-from metient.util.vertex_labeling_util import LabeledTree, get_root_index, tree_iterator
+from metient.util.vertex_labeling_util import get_root_index, tree_iterator
 from metient.util.globals import *
 
 import pandas as pd
 pd.options.display.float_format = '{:,.3f}'.format
 
 import seaborn as sns
-
-COLORS = ["#6aa84fff","#c27ba0ff", "#e69138ff", "#be5742e1", "#2496c8ff", "#674ea7ff"] + sns.color_palette("Paired").as_hex()
 
 FONT = "Arial"
 
@@ -148,10 +147,9 @@ def get_migration_edges(V, A):
     Y = torch.mul(A, (1-X))
     return Y
 
-def get_seeding_clusters(V, A, ordered_sites, full_node_idx_to_label):
+def get_seeding_clusters(V, A):
     '''
-    returns: list of list of lists with dim: (len(ordered_sites), len(ordered_sites), len(shared_clusters))
-    where the innermost list contains the clusters that are shared between site i and site j
+    returns: list of nodes whose child is a different color
     '''
     Y = get_migration_edges(V,A)
     seeding_clusters = torch.nonzero(Y.any(dim=1)).squeeze()
@@ -162,18 +160,18 @@ def get_seeding_clusters(V, A, ordered_sites, full_node_idx_to_label):
     seeding_clusters = [int(x) for x in seeding_clusters]
     return seeding_clusters
 
-    shared_clusters = [[[] for x in range(len(ordered_sites))] for y in range(len(ordered_sites))]
-    for i,j in tree_iterator(Y):
-        site_i = (V[:,i] == 1).nonzero()[0][0].item()
-        site_j = (V[:,j] == 1).nonzero()[0][0].item()
-        assert(site_i != site_j)
-        # if j is a subclonal presence leaf node, add i is the shared cluster 
-        # (b/c i is the mutation cluster that j represents)
-        if full_node_idx_to_label[j][1] == True:
-            shared_clusters[site_i][site_j].append(i)
-        else:
-            shared_clusters[site_i][site_j].append(j)
-    return shared_clusters
+    # shared_clusters = [[[] for x in range(len(ordered_sites))] for y in range(len(ordered_sites))]
+    # for i,j in tree_iterator(Y):
+    #     site_i = (V[:,i] == 1).nonzero()[0][0].item()
+    #     site_j = (V[:,j] == 1).nonzero()[0][0].item()
+    #     assert(site_i != site_j)
+    #     # if j is a subclonal presence leaf node, add i is the shared cluster 
+    #     # (b/c i is the mutation cluster that j represents)
+    #     if full_node_idx_to_label[j][1] == True:
+    #         shared_clusters[site_i][site_j].append(i)
+    #     else:
+    #         shared_clusters[site_i][site_j].append(j)
+    # return shared_clusters
 
 def find_highest_level_node(adj_matrix, nodes_to_check):
     start_node = get_root_index(adj_matrix)
@@ -470,39 +468,63 @@ def view_pydot(pdot):
     plt = Image(pdot.create_png())
     display(plt)
 
-def relabel_cluster(label, shorten, pad):
-    if not shorten:
-        return label
+# def relabel_cluster(label, shorten):
+#     if not shorten:
+#         return label
 
-    out = ""
-    # e.g. 1_M2 -> 1_M2
-    if len(label) <=4 :
-        out = label
-    # e.g. 1;3;6;19_M2 -> 1_M2
-    elif ";" in label and "_" in label:
-        out = label[:label.find(";")] + label[label.find("_"):]
-    # e.g. 100_M2 -> 100_M2
-    elif "_" in label:
-        out = label
-    # e.g. 2;14;15 -> 2;14
+#     out = ""
+#     # e.g. 1_M2 -> 1_M2
+#     if len(label) <= 4 :
+#         out = label
+#     # e.g. 1;3;6;19_M2 -> 1_M2
+#     elif ";" in label and "_" in label:
+#         out = label[:label.find(";")] + label[label.find("_"):]
+#     # e.g. 100_M2 -> 100_M2
+#     elif "_" in label:
+#         out = label
+#     # e.g. 2;14;15 -> 2;14
+#     else:
+#         out = ";".join(label.split(";")[:2])
+    
+#     return out
+
+def contains_delim(s, delims):
+    for delim in delims:
+        if delim in s:
+            return True
+    return False
+
+def get_pruned_mut_label(mut_names, shorten_label, to_string):
+    if not shorten_label and not to_string:
+        return ([str(m) for m in mut_names])
+    elif not shorten_label and to_string:
+        return ";".join([str(m) for m in mut_names])
+    # If mutation name contains :, ;, _ (e.g. LOC1:9:123), take everything before the first colon for display
+    delims = [":", ";", "_"]
+    gene_names = []
+    for mut_name in mut_names:
+        mut_name = str(mut_name)
+        if not contains_delim(mut_name, delims):
+            gene_names.append(mut_name)
+        else:
+            gene_names.append(re.split(r"[_;:]", mut_name)[0])
+    # Try to find relevant cancer genes to label
+    gene_candidates = set()
+    for gene in gene_names:
+        gene = gene.upper()
+        if gene in CANCER_DRIVER_GENES:
+            gene_candidates.add(gene)
+        elif gene in ENSEMBLE_TO_GENE_MAP:
+            gene_candidates.add(ENSEMBLE_TO_GENE_MAP[gene])
+    final_genes = gene_names if len(gene_candidates) == 0 else gene_candidates
+   
+    k = 2 if len(final_genes) > 2 else len(final_genes)
+    if to_string:
+        return ";".join(list(final_genes)[:k])
     else:
-        out = ";".join(label.split(";")[:2])
-    if pad:
-        return out.center(5)
-    else:
-        return out
+        return list(final_genes)
 
-def truncated_cluster_name(cluster_name):
-    '''
-    Displays a max of two mutation names associated with the cluster (e.g. 9;15;19;23;26 -> 9;15)
-    Does nothing if the cluster name is not in above format
-    '''
-    assert(isinstance(cluster_name, str))
-    split_name = cluster_name.split(";")
-    truncated_name = ";".join(split_name) if len(split_name) <= 2 else ";".join(split_name[:2])
-    return truncated_name
-
-def get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites, shorten_label=True, pad=False):
+def get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites, shorten_label=True, to_string=False):
     '''
     custom_node_idx_to_label only gives the internal node labels, so build a map of
     node_idx to (label, is_leaf) 
@@ -511,22 +533,20 @@ def get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_site
     full_node_idx_to_label_map = dict()
     for i, j in tree_iterator(T):
         if i in custom_node_idx_to_label:
-            full_node_idx_to_label_map[i] = (relabel_cluster(custom_node_idx_to_label[i], shorten_label, pad), False)
+            full_node_idx_to_label_map[i] = (get_pruned_mut_label(custom_node_idx_to_label[i], shorten_label, to_string), False)
         if j in custom_node_idx_to_label:
-            full_node_idx_to_label_map[j] = (relabel_cluster(custom_node_idx_to_label[j], shorten_label, pad), False)
-        elif j not in custom_node_idx_to_label:
+            full_node_idx_to_label_map[j] = (get_pruned_mut_label(custom_node_idx_to_label[j], shorten_label, to_string), False)
+        elif j not in custom_node_idx_to_label: # observed clone leaf node
             site_idx = (V[:,j] == 1).nonzero()[0][0].item()
-            full_node_idx_to_label_map[j] = (relabel_cluster(f"{custom_node_idx_to_label[i]}_{ordered_sites[site_idx]}", shorten_label, pad), True)
+            labels = copy.deepcopy(custom_node_idx_to_label[i])
+            labels.append(ordered_sites[site_idx])
+            full_node_idx_to_label_map[j] = (get_pruned_mut_label(labels, shorten_label, to_string), True)
     return full_node_idx_to_label_map
 
 def idx_to_color(custom_colors, idx, alpha=1.0):
-    if custom_colors != None:
-        rgb = mcolors.to_rgb(custom_colors[idx])
-        rgb_alpha = (rgb[0], rgb[1], rgb[2], alpha)
-        return mcolors.to_hex(rgb_alpha, keep_alpha=True)
-
-    # TODO repeat colors in this case
-    assert(idx < len(COLORS))
+    rgb = mcolors.to_rgb(custom_colors[idx])
+    rgb_alpha = (rgb[0], rgb[1], rgb[2], alpha)
+    return mcolors.to_hex(rgb_alpha, keep_alpha=True)
     return COLORS[idx]
 
 def get_migration_graph(V, A):
@@ -560,10 +580,6 @@ def plot_migration_graph(V, A, ordered_sites, custom_colors, primary, show=True)
 
     Returns a list of edges (e.g. [('P' ,'M1'), ('P', 'M2')])
     '''
-    colors = custom_colors
-    if colors == None:
-        colors = COLORS
-    assert(len(ordered_sites) <= len(colors))
 
     # Reformat anatomical site strings if too long for display and there
     # is an easy way to split the string (abbreviation of some sort)
@@ -582,7 +598,7 @@ def plot_migration_graph(V, A, ordered_sites, custom_colors, primary, show=True)
     mig_graph_no_diag = get_migration_graph(V, A)
 
     G = nx.MultiDiGraph()
-    for node, color in zip(fmted_ordered_sites, colors):
+    for node, color in zip(fmted_ordered_sites, custom_colors):
         G.add_node(node, shape="box", color=color, fillcolor='white', fontname=FONT, penwidth=3.0)
 
     edges = []
@@ -590,7 +606,7 @@ def plot_migration_graph(V, A, ordered_sites, custom_colors, primary, show=True)
         for j, num_edges in enumerate(adj_row):
             if num_edges > 0:
                 for _ in range(int(num_edges.item())):
-                    G.add_edge(fmted_ordered_sites[i], fmted_ordered_sites[j], color=f'"{colors[i]};0.5:{colors[j]}"', penwidth=3)
+                    G.add_edge(fmted_ordered_sites[i], fmted_ordered_sites[j], color=f'"{custom_colors[i]};0.5:{custom_colors[j]}"', penwidth=3)
                     edges.append((fmted_ordered_sites[i], fmted_ordered_sites[j]))
 
     dot = nx.nx_pydot.to_pydot(G)
@@ -745,17 +761,16 @@ def generate_legend_dot(ordered_sites, custom_colors, node_options):
     return legend_dot
 
 
-def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx_to_label=None, show=True):
+def plot_tree(V, T, gen_dist, ordered_sites, custom_colors, custom_node_idx_to_label=None, show=True):
 
     # (1) Create full directed graph 
     
     # these labels are used for display in plotting
     display_node_idx_to_label_map = get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites,
-                                                                    shorten_label=True, pad=False)
+                                                                    shorten_label=True, to_string=True)
     # these labels are used for writing out full vertex names to file
     full_node_idx_to_label_map = get_full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites,
-                                                                 shorten_label=False, pad=False)
-
+                                                                 shorten_label=False, to_string=False)
     color_map = { i:idx_to_color(custom_colors, (V[:,i] == 1).nonzero()[0][0].item()) for i in range(V.shape[1])}
     G = nx.DiGraph()
     node_options = {"label":"", "shape": "circle", "penwidth":3, 
@@ -817,8 +832,8 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors=None, custom_node_idx
         view_pydot(dot)
 
 
-    vertex_name_to_site_map = { full_node_idx_to_label_map[i][0]:ordered_sites[(V[:,i] == 1).nonzero()[0][0].item()] for i in range(V.shape[1])}
-    return dot_str, edges, vertex_name_to_site_map
+    vertex_name_to_site_map = { ";".join(full_node_idx_to_label_map[i][0]):ordered_sites[(V[:,i] == 1).nonzero()[0][0].item()] for i in range(V.shape[1])}
+    return dot_str, edges, vertex_name_to_site_map, full_node_idx_to_label_map
 
 def get_loss_dict(V, soft_V, T, G, O, p, full_loss):
     V = V.reshape(1, V.shape[0], V.shape[1]) # add batch dimension
@@ -852,20 +867,26 @@ def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites,
     figure_outputs = []
     pickle_outputs = {OUT_LABElING_KEY:[], OUT_LOSSES_KEY:[],OUT_IDX_LABEL_KEY:[],
                       OUT_ADJ_KEY:[], OUT_SITES_KEY:ordered_sites, OUT_LOSS_DICT_KEY:[],
-                      OUT_PRIMARY_KEY:primary, OUT_SUB_PRES_KEY:U.numpy(), OUT_WEIGHTS_KEY:[],
+                      OUT_PRIMARY_KEY:primary, OUT_SUB_PRES_KEY:U.numpy() if U != None else np.array([]),
                       OUT_SOFTV_KEY:[], OUT_GEN_DIST_KEY:[]}
-
+    print("\nBest Vs")
     with torch.no_grad():
+        if custom_colors == None:
+            custom_colors = DEFAULT_COLORS
+            # Reorder so that green is always the primary
+            green_idx = custom_colors.index(DEFAULT_GREEN)
+            custom_colors[primary_idx], custom_colors[green_idx] = custom_colors[green_idx], custom_colors[primary_idx]
+
         for i, min_loss_solution in enumerate(min_loss_solutions):
             V = min_loss_solution.V
             soft_V = min_loss_solution.soft_V
             T = min_loss_solution.T
             G = min_loss_solution.G
             full_loss = min_loss_solution.loss
-            node_idx_to_label = min_loss_solution.node_idx_to_label
+            node_idx_to_label = min_loss_solution.idx_to_label
             loss_dict = get_loss_dict(V, soft_V, T, G, O, p, full_loss)
 
-            tree_dot, edges, vertices_to_sites_map = plot_tree(V, T, G, ordered_sites, custom_colors, node_idx_to_label, show=False)
+            tree_dot, edges, vertices_to_sites_map, full_tree_idx_to_label = plot_tree(V, T, G, ordered_sites, custom_colors, node_idx_to_label, show=False)
             mig_graph_dot, mig_graph_edges = plot_migration_graph(V, T, ordered_sites, custom_colors, primary, show=False)
 
             seeding_pattern = get_seeding_pattern(V, T)
@@ -877,10 +898,6 @@ def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites,
             if G != None:
                 pickle_outputs[OUT_GEN_DIST_KEY].append(G.numpy())                
             pickle_outputs[OUT_LOSS_DICT_KEY].append(loss_dict)
-            pickle_outputs[OUT_WEIGHTS_KEY].append((min_loss_solution.mig_weight, min_loss_solution.comig_weight, min_loss_solution.seed_weight))
-
-            full_tree_idx_to_label = get_full_tree_node_idx_to_label(V, T, node_idx_to_label, ordered_sites,
-                                                                     shorten_label=False, pad=False)
             pickle_outputs[OUT_IDX_LABEL_KEY].append(full_tree_idx_to_label)
             if i == 0: # Best tree
                 ret = (edges, vertices_to_sites_map, mig_graph_edges, loss_dict)

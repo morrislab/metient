@@ -42,7 +42,7 @@ def save_m5_m8_boxplot(joint_m5_df, joint_m8_df, run_name):
                         palette={"Metient":"#2496c8ff", "MACHINA":"#ff915fff"}, flierprops=flierprops, linewidth=1.5)
             add_stat_annotation(ax, data=df, x="seeding pattern", y=y, hue="method",
                                 box_pairs=box_pairs,
-                                test='t-test_welch', text_format='star', loc='inside', verbose=0, order=seeding_pattern_order, fontsize=18, comparisons_correction=None)
+                                test='t-test_paired', text_format='star', loc='inside', verbose=0, order=seeding_pattern_order, fontsize=18, comparisons_correction=None)
             ax.set(ylim=(-0.1, 1.1))
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
@@ -72,8 +72,17 @@ def save_boxplot(joint_df, run_name):
         flierprops = dict(marker='o', markersize=5, markeredgecolor='black', markerfacecolor='darkgrey')
         
         ax = axes[i]
-        sns.boxplot(ax=ax, x="seeding pattern", y=y, hue="method", data=joint_df, order=seeding_pattern_order, 
+
+        snsfig = sns.boxplot(ax=ax, x="seeding pattern", y=y, hue="method", data=joint_df, order=seeding_pattern_order, 
                     palette={"Metient":"#40908e", "MACHINA":"#ff915fff"}, flierprops=flierprops, linewidth=1.5)
+        # for i,box in enumerate([p for p in snsfig.patches if not p.get_label()]): 
+        #     color = box.get_facecolor()
+        #     box.set_edgecolor(color)
+        #     box.set_facecolor((0, 0, 0, 0))
+        #     # iterate over whiskers and median lines
+        #     for j in range(5*i,5*(i+1)):
+        #         snsfig.lines[j].set_color(color)
+
         add_stat_annotation(ax, data=joint_df, x="seeding pattern", y=y, hue="method",
                             box_pairs=box_pairs,
                             test='t-test_welch', text_format='star', loc='inside', verbose=0, order=seeding_pattern_order, fontsize=18, comparisons_correction=None)
@@ -115,8 +124,8 @@ if __name__ == "__main__":
 
     x = 0
     k = float("inf")
-    loss_thres = 0.0
-    suffix = "_calibrate"
+    loss_thres = 0.0 # floating point approximation leeway
+    suffix = "_evaluate"
 
     print(f"Finding {k} best trees within loss threshold of {loss_thres}")
     print(f"Matching files ending in {suffix}")
@@ -131,6 +140,7 @@ if __name__ == "__main__":
             print(seeds)
             assert(len(seeds)==10)
             for seed in seeds:
+                print(site, mig_type, seed)
                 #trees = [t[t.find("tree")+4:t.find("_seed")] for t in filenames if seed == t[t.find("seed")+4:t.find(".predicted")]]
                 tree_info = eutil.get_metient_min_loss_trees(predicted_site_mig_type_data_dir, seed, k, loss_thres=loss_thres, suffix=suffix)
                 for loss, results_dict, met_tree_num in tree_info:
@@ -147,7 +157,6 @@ if __name__ == "__main__":
                                                                                         results_dict, met_tree_num)
 
                     scores = [recall, precision, F, recall_G, precision_G, F_G, recall_G2, precision_G2, F_G2]
-                    #print(",".join(map(str, scores)))
 
                     # rename "S", "M", "R" -> "pS", "pM", "pR"
                     mig_name = mig_type if len(mig_type) == 2 else "p"+mig_type
@@ -167,9 +176,9 @@ if __name__ == "__main__":
     grad_m8_df = pd.DataFrame(grad_m8_f1_scores, columns=["seed", "seeding pattern",  "Migrating clones F1 score", "Migration graph F1 score"])
     grad_all_df = pd.DataFrame(all_f1_scores, columns=["seed", "seeding pattern",  "Migrating clones F1 score", "Migration graph F1 score"])
 
-    print(grad_m5_df)
-    print(grad_m8_df)
-    print(grad_all_df)
+    # print(grad_m5_df)
+    # print(grad_m8_df)
+    # print(grad_all_df)
     grad_m5_df = grad_m5_df.groupby(['seeding pattern','seed']).mean().assign(method="Metient")
     grad_m8_df = grad_m8_df.groupby(['seeding pattern','seed']).mean().assign(method="Metient")
     grad_all_df = grad_all_df.groupby(['seeding pattern','seed']).mean().assign(method="Metient")
@@ -179,16 +188,22 @@ if __name__ == "__main__":
 
     # print("\nGradient-based m8 avg F1 scores")
     # print(grad_m8_df.groupby('seeding pattern')[["Migrating clones F1 score", "Migration graph F1 score"]].mean())
-
-    print("\nGradient-based all avg F1 scores")
+    print("*"*50)
+    print("\nMetient all avg F1 scores")
     order = ["mS", "pS", "pM", "pR"]
     grad_all_df_summary = grad_all_df.groupby('seeding pattern')[["Migrating clones F1 score", "Migration graph F1 score"]].mean().reindex(order)
     print(grad_all_df_summary)
 
+    grad_micro_f1 = grad_all_df[["Migrating clones F1 score", "Migration graph F1 score"]].mean()
+
     print("Migrating clone scores")
-    print(" & ".join(["{:.3f}".format(x) for x in list(grad_all_df_summary['Migrating clones F1 score'])]))
+    clone_scores = list(grad_all_df_summary['Migrating clones F1 score'])
+    lst = ["{:.3f}".format(x) for x in clone_scores]+["{:.3f}".format(sum(clone_scores)/len(clone_scores))]+["{:.3f}".format(grad_micro_f1["Migrating clones F1 score"].item())]
+    print(" & ".join(lst))
     print("Migration graph scores")
-    print(" & ".join(["{:.3f}".format(x) for x in list(grad_all_df_summary['Migration graph F1 score'])]))
+    graph_scores = list(grad_all_df_summary['Migration graph F1 score'])
+    lst = ["{:.3f}".format(x) for x in graph_scores]+["{:.3f}".format(sum(graph_scores)/len(graph_scores))]+["{:.3f}".format(grad_micro_f1["Migration graph F1 score"].item())]
+    print(" & ".join(lst))
 
     # Load machina results
     machina_m5_df, machina_m8_df = eutil.load_machina_results(".")
@@ -211,7 +226,9 @@ if __name__ == "__main__":
     
     print("MACHINA all avg F1 scores")
     print(machina_all_df.groupby('seeding pattern')[["Migrating clones F1 score", "Migration graph F1 score"]].mean())
-
+    
+    mach_micro_f1 = machina_all_df[["Migrating clones F1 score", "Migration graph F1 score"]].mean()
+    print("Micro-F1", mach_micro_f1)
 
     joint_m5_df = pd.concat([grad_m5_df, machina_m5_df]).reset_index()
     joint_m8_df = pd.concat([grad_m8_df, machina_m8_df]).reset_index()
