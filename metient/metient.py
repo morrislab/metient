@@ -19,6 +19,12 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
     return vert_label.calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, Os=Os, batch_size=batch_size, 
                                 custom_colors=custom_colors, bias_weights=bias_weights, solve_polytomies=solve_polytomies)
 
+def calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names, 
+                               Os=None, batch_size=-1, custom_colors=None, bias_weights=True,  solve_polytomies=False):
+    return vert_label.calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names, Os=Os, batch_size=batch_size, 
+                                                 custom_colors=custom_colors, bias_weights=bias_weights, solve_polytomies=solve_polytomies)
+
+
 class PrintConfig:
     def __init__(self, visualize=True, verbose=False, k_best_trees=10, save_outputs=True):
         '''
@@ -34,10 +40,10 @@ class PrintConfig:
 
 class Weights:
     def __init__(self,  mig=10.0, comig=5.0, seed_site=1.0, gen_dist=0.0, organotrop=0.0, data_fit=0.2, reg=5.0, entropy=0.1):
-        if not isinstance(mig, list):
-            mig = [mig]
-        if not isinstance(seed_site, list):
-            seed_site = [seed_site]
+        # if not isinstance(mig, list):
+        #     mig = [mig]
+        # if not isinstance(seed_site, list):
+        #     seed_site = [seed_site]
         self.data_fit = data_fit
         self.mig = mig
         self.comig = comig

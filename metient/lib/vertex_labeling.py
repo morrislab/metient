@@ -4,7 +4,6 @@ import datetime
 from tqdm import tqdm
 from torch.distributions.binomial import Binomial
 import os
-import csv
 import copy
 import shutil
 import pickle
@@ -20,7 +19,7 @@ from metient.util import plotting_util as putil
 from metient.util.globals import *
 
 G_IDENTICAL_CLONE_VALUE = None
-
+torch.set_printoptions(precision=2)
 # gumbel noise is initialized non-randomly for latent variables
 RANDOM_VALS = None
 LAST_P = None
@@ -36,7 +35,6 @@ def get_ancestral_labeling_metrics(V, A, G, O, p, i=-1, max_iter=-1):
     single_A = A
     bs = V.shape[0]
     num_sites = V.shape[1]
-    num_nodes = V.shape[2]
     A = A if len(A.shape) == 3 else vutil.repeat_n(single_A, bs) 
 
     # 1. Migration number
@@ -51,7 +49,6 @@ def get_ancestral_labeling_metrics(V, A, G, O, p, i=-1, max_iter=-1):
     site_adj_no_diag = torch.mul(site_adj, vutil.repeat_n(1-torch.eye(num_sites, num_sites), bs))
     row_sums_site_adj = torch.sum(site_adj_no_diag, axis=2)
     # can only have a max of 1 for each site (it's either a seeding site or it's not)
-    
     binarized_row_sums_site_adj = torch.sigmoid(BINARY_ALPHA * (2*row_sums_site_adj - 1)) # sigmoid for soft thresholding
     s = torch.sum(binarized_row_sums_site_adj, dim=(1))
 
@@ -111,7 +108,8 @@ def get_ancestral_labeling_metrics(V, A, G, O, p, i=-1, max_iter=-1):
     return m, c, s, g, o
 
 def get_entropy(V, soft_V):
-    return -torch.sum(torch.mul(soft_V, torch.log2(soft_V)), dim=(1, 2)) / V.shape[2]
+    eps = 1e-7 # to avoid nans when values in soft_V get very close to 0
+    return -torch.sum(torch.mul(soft_V, torch.log2(soft_V+eps)), dim=(1, 2)) / V.shape[2]
 
 def get_repeating_weight_vector(bs, weight_list):
     repeat_times = bs // len(weight_list)
@@ -257,9 +255,14 @@ def sample_gumbel(shape, eps=1e-20):
     G = torch.rand(shape)
     return -torch.log(-torch.log(G + eps) + eps)
 
+def softmax_shifted_3d(X):
+    shifted = X - X.max(dim=1, keepdim=True)[0]
+    exps = torch.exp(shifted)
+    return exps / exps.sum(dim=1, keepdim=True)
+
 def gumbel_softmax_sample(logits, temperature):
     y = logits + sample_gumbel(logits.size())
-    return torch.nn.functional.softmax(y / temperature, dim=1)
+    return softmax_shifted_3d(y / temperature)
 
 def gumbel_softmax(logits, temperature, hard=False):
     '''
@@ -278,8 +281,10 @@ def gumbel_softmax(logits, temperature, hard=False):
     '''
     shape = logits.size()
     assert len(shape) == 3 # [batch_size, num_sites, num_nodes]
-
+    #print("logits\n", logits )
     y_soft = gumbel_softmax_sample(logits, temperature)
+    #print("temperature", temperature)
+    #print("y_soft\n", y_soft)
     if hard:
         _, k = y_soft.max(1)
         y_hard = torch.zeros(shape, dtype=logits.dtype).scatter_(1, torch.unsqueeze(k, 1), 1.0)
@@ -291,29 +296,6 @@ def gumbel_softmax(logits, temperature, hard=False):
     else:
         y = y_soft
     return y, y_soft
-
-def full_adj_matrix(U, T, G):
-    '''
-    All non-zero values of U represent extant clones (leaf nodes of the full tree).
-    For each of these non-zero values, we add an edge from parent clone to extant clone.
-    '''
-    U = U[:,1:] # don't include column for normal cells
-    num_leaves = (U > U_CUTOFF).nonzero().shape[0]
-    num_internal_nodes = T.shape[0]
-    full_adj = torch.nn.functional.pad(input=T, pad=(0, num_leaves, 0, num_leaves), mode='constant', value=0)
-    leaf_idx = num_internal_nodes
-    # Also add branch lengths (genetic distances) for the edges we're adding.
-    # Since all of these edges we're adding represent genetically identical clones,
-    # we are going to add a very small but non-zero value.
-    full_G = torch.nn.functional.pad(input=G, pad=(0, num_leaves, 0, num_leaves), mode='constant', value=0) if G is not None else None
-
-    # Iterate through the internal nodes that have nonzero values
-    for internal_node_idx in (U > U_CUTOFF).nonzero()[:,1]:
-        full_adj[internal_node_idx, leaf_idx] = 1
-        if G is not None:
-            full_G[internal_node_idx, leaf_idx] = G_IDENTICAL_CLONE_VALUE
-        leaf_idx += 1
-    return full_adj, full_G, num_leaves
     
 def compute_u_loss(psi, ref, var, omega, B, weights):
     '''
@@ -322,9 +304,10 @@ def compute_u_loss(psi, ref, var, omega, B, weights):
     # Using the softmax enforces that the row sums are 1, since the proprtions of
     # clones in a given site should sum to 1
     U = torch.softmax(psi, dim=1)
-    u_loss, loss_dict_b = subclonal_presence_objective(ref, var, omega, U, B, weights)
+    u_loss, _ = subclonal_presence_objective(ref, var, omega, U, B, weights)
     return U, u_loss
 
+# TODO we don't need this helper function anymore
 def get_full_G(T, G, poly_res, i=-1, max_iter=-1):
     '''
     If resolving polytomies, dynamically calculate branch lengths between
@@ -338,7 +321,7 @@ def get_full_G(T, G, poly_res, i=-1, max_iter=-1):
         return vutil.repeat_n(G, T.shape[0])
 
     full_G = vutil.repeat_n(G, T.shape[0])
-    # !!TODO: What should the genetic distance be??
+    # TODO: What should the genetic distance be??
     # resolver_indices = poly_res.resolver_indices
     # for batch_idx in range(T.shape[0]):
     #     for res_idx in resolver_indices:
@@ -353,44 +336,46 @@ def get_full_G(T, G, poly_res, i=-1, max_iter=-1):
     # LAST_G = full_G
     return full_G
 
-def compute_v_loss(U, X, T, p, known_indices, unknown_indices, known_labelings,
-                   G, O, v_temp, t_temp, hard, weights, i, max_iter, poly_res=None):
+def stack_vertex_labeling(L, X, p, poly_res):
     '''
-    Computes loss for X (dim: batch_size x num_internal_nodes x num_sites)
+    Use leaf labeling L and X (both of size batch_size x num_sites X num_internal_nodes)
+    to get the anatomical sites of the leaf nodes and the internal nodes (respectively). 
+    Stack the root labeling to get the full vertex labeling V. 
     '''
+    # Expand leaf node labeling L to be repeated batch_size times
+    bs = X.shape[0]
+    L = vutil.repeat_n(L, bs)
+    
+    if poly_res != None:
+        # order is: given internal nodes, new poly nodes, leaf nodes from U
+        full_vert_labeling = torch.cat((X, vutil.repeat_n(poly_res.resolver_labeling, bs), L), dim=2)
+    else:
+        full_vert_labeling = torch.cat((X, L), dim=2)
 
-    def stack_vertex_labeling(U, X, p):
-        '''
-        Use U and X (both of size batch_size x num_internal_nodes x num_sites)
-        to get the anatomical sites of the leaf nodes and the internal nodes (respectively). 
-        Stack the root labeling to get the full vertex labeling V. 
-        '''
-        U = U[:,1:] # don't include column for normal cells
-        num_sites = U.shape[0]
-        L = torch.nn.functional.one_hot((U > U_CUTOFF).nonzero()[:,0], num_classes=num_sites).T
-        # Expand leaf node labeling L to be repeated batch_size times
-        bs = X.shape[0]
-        L = vutil.repeat_n(L, bs)
-        
-        full_internal_nodes_labeling = torch.zeros(bs, num_sites, len(known_indices)+len(unknown_indices))
-        full_internal_nodes_labeling[:,:,unknown_indices] = X
-        stacked_known_labelings = torch.vstack(known_labelings).T
-        stacked_known_labelings = vutil.repeat_n(stacked_known_labelings, bs)
-        #print(stacked_known_labelings.shape)
-        full_internal_nodes_labeling[:,:,known_indices] = stacked_known_labelings
-        
-        if poly_res != None:
-            # order is: given internal nodes, new poly nodes, leaf nodes from U
-            full_vert_labeling = torch.cat((full_internal_nodes_labeling, vutil.repeat_n(poly_res.resolver_labeling, bs), L), dim=2)
-        else:
-            full_vert_labeling = torch.cat((full_internal_nodes_labeling, L), dim=2)
+    p = vutil.repeat_n(p, bs)
+    # Concatenate the left part, new column, and right part along the second dimension
+    return torch.cat((p, full_vert_labeling), dim=2)
 
-        p = vutil.repeat_n(p, bs)
-        # Concatenate the left part, new column, and right part along the second dimension
-        return torch.cat((p, full_vert_labeling), dim=2)
+def compute_v_loss(X, L, T, p, G, O, v_temp, t_temp, hard, weights, i, max_iter, poly_res=None):
+    '''
+    Args:
+        X: latent variable of labelings we are solving for. (batch_size x num_unknown_nodes x num_sites)
+            where num_unkown_nodes = len(T) - (len(known_indices)), or len(unknown_indices)
+        L: leaf node labels derived from U
+        T: Full adjacency matrix which includes clone tree nodes as well as leaf nodes which were
+            added from U > U_CUTOFF (observed in a site)
+        p: one-hot vector indicating site of the primary
+        G: Matrix of genetic distances between internal nodes (shape:  num_internal_nodes x num_internal_nodes).
+        Lower values indicate lower branch lengths, i.e. more genetically similar.
+        O: Array of frequencies with which the primary cancer type seeds site i (shape: num_anatomical_sites).  
 
+    Returns:
+        Loss of the labeling we're trying to learn (X) by computing maximum parsimony loss, organotropism, and
+        genetic distance loss (if weights for genetic distance and organotropism != 0)
+    '''
+    #print("X in compute v loss\n", X)
     softmax_X, softmax_X_soft = gumbel_softmax(X, v_temp, hard)
-    V = stack_vertex_labeling(U, softmax_X, p)
+    V = stack_vertex_labeling(L, softmax_X, p, poly_res)
 
     bs = X.shape[0]
     if poly_res != None:
@@ -419,16 +404,13 @@ def get_avg_loss_components(loss_components):
     return d
 
 class VertexLabelingSolution:
-    def __init__(self, loss, V, soft_V, T, G, node_idx_to_label, mig_weight, comig_weight, seed_weight, i):
+    def __init__(self, loss, V, soft_V, T, G, idx_to_label, i):
         self.loss = loss
         self.V = V
         self.soft_V = soft_V
         self.T = T
         self.G = G
-        self.node_idx_to_label = node_idx_to_label
-        self.mig_weight = mig_weight
-        self.seed_weight = seed_weight
-        self.comig_weight = comig_weight
+        self.idx_to_label = idx_to_label
         self.i = i
 
    # override the comparison operator
@@ -436,172 +418,22 @@ class VertexLabelingSolution:
         return self.loss < other.loss
 
 
-def get_weights_with_best_eval_loss(solutions, weights, O, p):
-    '''
-    Which parsimony weights give the best gen dist/organotrop
-    '''    
-    weights_to_loss = {}
-    
-    out = []
-    for i, soln in enumerate(solutions):
-        V, soft_V, T, G, mig_weight, seed_weight = soln.V, soln.soft_V, soln.T, soln.G, soln.mig_weight, soln.seed_weight
-        reshaped_V = add_batch_dim(V)
-        reshaped_soft_V = add_batch_dim(soft_V)
-        eval_loss, loss_components = ancestral_labeling_objective(reshaped_V, reshaped_soft_V, T, G, O, p, weights)
-        weights_at_i = (float(mig_weight), float(seed_weight))
-        if weights_at_i not in weights_to_loss:
-            weights_to_loss[weights_at_i] = []
-        weights_to_loss[weights_at_i].append(float(eval_loss))
-        out.append([float(mig_weight), float(seed_weight), float(eval_loss)])
+# def get_best_solutions(prev_v_losses, v_losses, Vs, soft_Vs, Ts, best_Vs, best_soft_Vs, best_Ts):
+#     '''
+#     Only update solutions where the loss has decreased
+#     '''
+#     # First iteration
+#     if best_Vs == None:
+#         return Vs, soft_Vs, Ts
+#     indices_to_update = torch.nonzero(v_losses < prev_v_losses).squeeze()
+#     best_Vs[indices_to_update] = Vs[indices_to_update]
+#     best_soft_Vs[indices_to_update] = soft_Vs[indices_to_update]
+#     best_Ts[indices_to_update] = Ts[indices_to_update]
+#     return best_Vs, best_soft_Vs, best_Ts
 
-    #print("weights_to_loss", weights_to_loss)
-    softmaxed_scores = torch.softmax(torch.tensor([item[2] for item in out]), dim=0)
-    weights_to_softmax_loss = dict()
-    for score, item in zip(softmaxed_scores, out):
-        weights_at_i = (item[0],item[1])
-        if weights_at_i not in weights_to_softmax_loss:
-            weights_to_softmax_loss[weights_at_i] = []
-        weights_to_softmax_loss[weights_at_i].append(score)
 
-    #print("weights_to_softmax_loss", weights_to_softmax_loss)
-    weights_to_avg_loss = {k:(sum(weights_to_loss[k])/len(weights_to_loss[k])) for k in weights_to_loss}
-    print("weights_to_avg_loss", weights_to_avg_loss)
 
-    best_weights = None
-    lowest_loss = min(list(weights_to_avg_loss.values()))
-
-    best_weights = [k for k,v in weights_to_avg_loss.items() if v == lowest_loss][0]
-    
-    out.insert(0, ["mig weight", "seed weight", "gen dist loss"])
-    return best_weights, out
-
-def get_best_solutions(prev_v_losses, v_losses, Vs, soft_Vs, Ts, best_Vs, best_soft_Vs, best_Ts):
-    '''
-    Only update solutions where the loss has decreased
-    '''
-    # First iteration
-    if best_Vs == None:
-        return Vs, soft_Vs, Ts
-    indices_to_update = torch.nonzero(v_losses < prev_v_losses).squeeze()
-    best_Vs[indices_to_update] = Vs[indices_to_update]
-    best_soft_Vs[indices_to_update] = soft_Vs[indices_to_update]
-    best_Ts[indices_to_update] = Ts[indices_to_update]
-    return best_Vs, best_soft_Vs, best_Ts
-
-from collections import OrderedDict
-import math
-
-class PolytomyResolver():
-
-    def __init__(self, input_T, T, G, U, num_leaves, bs, node_idx_to_label, nodes_w_polys, resolver_sites):
-        '''
-        This is post U matrix estimation, so T already has leaf nodes.
-        '''
-        
-        # 1. nodes_w_polys are the nodes have polytomies
-        #print("nodes_w_polys", nodes_w_polys, "resolver_sites", resolver_sites)
-        # 2. Pad the adjacency matrix so that there's room for the new resolver nodes
-        # (we place them in this order: given internal nodes, new resolver nodes, leaf nodes from U)
-        num_new_nodes = 0
-        for r in resolver_sites:
-            num_new_nodes += len(r)
-       # print("num_new_nodes", num_new_nodes)
-        num_internal_nodes = T.shape[0]-num_leaves
-        T = torch.nn.functional.pad(T, pad=(0, num_new_nodes, 0, num_new_nodes), mode='constant', value=0)
-        # 3. Shift T and G to make room for the new indices (so the order is input internal nodes, new poly nodes, leaves)
-        idx1 = num_internal_nodes
-        idx2 = num_internal_nodes+num_leaves
-        T = torch.cat((T[:,:idx1], T[:,idx2:], T[:,idx1:idx2]), dim=1)
-        if G != None:
-            G = torch.nn.functional.pad(G, pad=(0, num_new_nodes, 0, num_new_nodes), mode='constant', value=0)
-            G = torch.cat((G[:,:idx1], G[:,idx2:], G[:,idx1:idx2]), dim=1)
-
-        # 3. Get each polytomy's children (these are the positions we have to relearn)
-        children_of_polys = vutil.get_child_indices(T, nodes_w_polys)
-        #print("children_of_polys", children_of_polys)
-
-        # 4. Initialize a matrix to learn the polytomy structure
-        num_nodes_full_tree = T.shape[0]
-        poly_adj_matrix = vutil.repeat_n(torch.zeros((num_nodes_full_tree, len(children_of_polys)), dtype=torch.float32), bs)
-        resolver_indices = [x for x in range(num_internal_nodes, num_internal_nodes+num_new_nodes)]
-        #print("resolver_indices", resolver_indices)
-
-        nodes_w_polys_to_resolver_indices = OrderedDict()
-        start_new_node_idx = resolver_indices[0]
-        for parent_idx, r in zip(nodes_w_polys, resolver_sites):
-            num_new_nodes_for_poly = len(r)
-            if parent_idx not in nodes_w_polys_to_resolver_indices:
-                nodes_w_polys_to_resolver_indices[parent_idx] = []
-
-            for i in range(start_new_node_idx, start_new_node_idx+num_new_nodes_for_poly):
-                nodes_w_polys_to_resolver_indices[parent_idx].append(i)
-            start_new_node_idx += num_new_nodes_for_poly
-        #print("nodes_w_polys_to_resolver_indices", nodes_w_polys_to_resolver_indices)
-
-        resolver_labeling = torch.zeros(U.shape[0], len(resolver_indices))
-        t = 0
-        for sites in resolver_sites:
-            for site in sites:
-                resolver_labeling[site, t] = 1
-                t += 1
-        #print("resolver_labeling", resolver_labeling)
-
-        # print("resolver_indices", resolver_indices)
-        offset = 0
-        for parent_idx in nodes_w_polys:
-            child_indices = vutil.get_child_indices(T, [parent_idx])
-            # make the children of polytomies start out as children of their og parent
-            # with the option to "switch" to being the child of the new poly node
-            poly_adj_matrix[:,parent_idx,offset:(offset+len(child_indices))] = 1.0
-            # we only want to let these children choose between being the child
-            # of their original parent or the child of this new poly node, which
-            # we can do by setting all other indices to -inf
-            mask = torch.ones(num_nodes_full_tree, dtype=torch.bool)
-            new_nodes = nodes_w_polys_to_resolver_indices[parent_idx]
-            mask_indices = new_nodes + [parent_idx]
-            #print("parent_idx", parent_idx, "mask_indices", mask_indices)
-            mask[[mask_indices]] = 0
-            poly_adj_matrix[:,mask,offset:(offset+len(child_indices))] = float("-inf")
-            offset += len(child_indices)
-
-        poly_adj_matrix.requires_grad = True
-        
-        # 5. Initialize potential new nodes as children of the polytomy nodes
-        for i in nodes_w_polys:
-            for j in nodes_w_polys_to_resolver_indices[i]:
-                T[i,j] = 1.0
-                node_idx_to_label[j] = f"{i}pol{j}"
-                if G != None:
-                    G[i,j] = G_IDENTICAL_CLONE_VALUE
-
-        # 6. The genetic distance between a new node and its potential
-        # new children which "switch" is the same distance between the new
-        # node's parent and the child
-        resolver_index_to_parent_idx = {}
-        for poly_node in nodes_w_polys_to_resolver_indices:
-            new_nodes = nodes_w_polys_to_resolver_indices[poly_node]
-            for new_node_idx in new_nodes:
-                resolver_index_to_parent_idx[new_node_idx] = poly_node
-        #print("resolver_index_to_parent_idx", resolver_index_to_parent_idx)
-
-        if G != None:
-            for new_node_idx in resolver_indices:
-                parent_idx = resolver_index_to_parent_idx[new_node_idx]
-                potential_child_indices = vutil.get_child_indices(T, [parent_idx])
-                for child_idx in potential_child_indices:
-                    G[new_node_idx, child_idx] = G[parent_idx, child_idx]
-
-        self.latent_var = poly_adj_matrix
-        self.nodes_w_polys = nodes_w_polys
-        self.children_of_polys = children_of_polys
-        self.resolver_indices = resolver_indices
-        self.T = T
-        self.G = G
-        self.node_idx_to_label = node_idx_to_label
-        self.resolver_index_to_parent_idx = resolver_index_to_parent_idx
-        self.resolver_labeling = resolver_labeling
-
-def is_same_mig_hist_with_node_removed(T, V, remove_idx, poly_res, p):
+def is_same_mig_hist_with_node_removed(T, V, remove_idx, p):
     '''
     Returns True if migration #, comigration # and seeding # are
     the same after removing node at index remove_idx
@@ -609,7 +441,6 @@ def is_same_mig_hist_with_node_removed(T, V, remove_idx, poly_res, p):
     prev_m, prev_c, prev_s, _, _ = get_ancestral_labeling_metrics(add_batch_dim(V), T, None, None, p)
     # Attach all the children of the candidate removal node to
     # its parent, and then check if that changes the migration history or not
-
     candidate_T = T.clone().detach()
     candidate_V = V.clone().detach()
     parent_idx = np.where(T[:,remove_idx] > 0)[0][0]
@@ -625,6 +456,8 @@ def is_same_mig_hist_with_node_removed(T, V, remove_idx, poly_res, p):
 
 def remove_nodes(removal_indices, V, T, G, node_idx_to_label):
     '''
+    Remove polytomy resolver nodes from V, T, G and node_idx_to_label
+    if they didn't actually help
     '''
     # TODO: test if we need this, pytorch acting weird about no grad mode
     T = T.clone().detach()
@@ -671,10 +504,10 @@ def remove_extra_resolver_nodes(best_Vs, Ts, node_idx_to_label, G, poly_res, p):
             children_of_new_node = vutil.get_child_indices(T, [new_node_idx])
             if len(children_of_new_node) == 0:
                 nodes_to_remove.append(new_node_idx)
-            elif is_same_mig_hist_with_node_removed(T, V, new_node_idx, poly_res, p):
+            elif is_same_mig_hist_with_node_removed(T, V, new_node_idx, p):
                 nodes_to_remove.append(new_node_idx)
 
-        # Genetic distance matrix must get dynamically updated based on the resolved polytomies
+        
         if G != None:
             resolved_G = get_full_G(add_batch_dim(T), G, poly_res)[0]
         else:
@@ -686,29 +519,15 @@ def remove_extra_resolver_nodes(best_Vs, Ts, node_idx_to_label, G, poly_res, p):
         out_node_idx_to_labels.append(new_node_idx_to_label)
     return out_Vs, out_Ts, out_Gs, out_node_idx_to_labels
 
-
-# def is_less_parsimonious(pars_metrics, best_pars_metrics):
-    
-#     for best_pars_metric in best_pars_metrics:
-#         if not (pars_metrics[0] <= best_pars_metric[0] and pars_metrics[1] <= best_pars_metric[1] and pars_metrics[2] <= best_pars_metric[2]):
-#             return True
-#     return False
-
-def made_mistake(solution, U):
+def made_mistake(solution, num_internal_nodes):
     V = solution.V
     A = solution.T
     VA = V @ A
-    W = VA.T @ VA # 1 if two nodes' parents are the same color
-    X = V.T @ V # 1 if two nodes are the same color
     Y = torch.sum(torch.mul(VA.T, 1-V.T), axis=1) # Y has a 1 for every node where its parent has a diff color
     nonzero_indices = torch.nonzero(Y).squeeze()
-    U = U[:,1:] # don't include column for normal cells
-    num_sites = U.shape[0]
-    L = torch.nn.functional.one_hot((U > U_CUTOFF).nonzero()[:,0], num_classes=num_sites).T
-    num_internal_nodes = A.shape[0] - L.shape[1]
+
     if nonzero_indices.dim() == 0:
         return False
-    # print(nonzero_indices)
     for mig_node in nonzero_indices:
         # it's a leaf node itself!
         if mig_node > (num_internal_nodes-1):
@@ -717,42 +536,65 @@ def made_mistake(solution, U):
             return True
     return False
     
+def keep_tree(cand_metric, pattern, pattern_to_best_pars_sum, best_overall_sum, best_pars_metrics):
+    # Don't keep a tree if there is another solution with the same seeding pattern
+    # but a more parsimonious result
+    #print(cand_metric)
+    if sum(cand_metric) != pattern_to_best_pars_sum[pattern]:
+        return False
+    
+    if sum(cand_metric) == best_overall_sum:
+        return True
 
-def prune_bad_histories(solutions, O, p, weights, U):
+    # Don't keep any trees that are strictly worse than the best_pars_metrics
+    for best_metric in best_pars_metrics:
+        if cand_metric[0] < best_metric[0] or cand_metric[1] < best_metric[1] or cand_metric[2] < best_metric[2]:
+            return True
+    return False
+
+def map_pattern(V, T):
+    # Remove "monoclonal" or "polyclonal"
+    pattern = " ".join(putil.get_verbose_seeding_pattern(V,T).split()[1:])
+    # For the purposes of getting a representative set of trees, we treat
+    # reseeding as a subset of multi-source, but don't distinguish them
+    if pattern != "primary single-source seeding":
+        pattern = "not primary single-source seeding"
+    return pattern
+
+def expand_solutions(solutions, all_pars_metrics, all_patterns, O, p, weights):
+    expanded_solutions = []
+    expanded_pars_metrics = []
+    expanded_patterns = []
+    for soln, pars_metrics,pattern in zip(solutions, all_pars_metrics, all_patterns):
+        expanded_solutions.append(soln)
+        expanded_pars_metrics.append(pars_metrics)
+        expanded_patterns.append(pattern)
+
+        if pars_metrics[2] > 1:
+            seeding_clusters = putil.get_seeding_clusters(soln.V,soln.T)
+            new_V = copy.deepcopy(soln.V)
+            for s in seeding_clusters:
+                new_V[:,s] = p.T 
+            loss, _ = ancestral_labeling_objective(add_batch_dim(new_V), add_batch_dim(soln.soft_V), soln.T, soln.G, O, p, weights)
+            new_soln = VertexLabelingSolution(loss, new_V, soln.soft_V, soln.T, soln.G, soln.idx_to_label, soln.i)
+            if vutil.LabeledTree(soln.T, soln.V) not in expanded_solutions:
+                expanded_solutions.append(new_soln)
+                m, c, s, _, _ = get_ancestral_labeling_metrics(add_batch_dim(new_soln.V), new_soln.T, new_soln.G, O, p)
+                expanded_pars_metrics.append((int(m), int(c), int(s)))
+                expanded_patterns.append(map_pattern(new_soln.V,new_soln.T))
+    
+    return expanded_solutions, expanded_pars_metrics, expanded_patterns
+
+def prune_bad_histories(solutions, O, p, num_internal_nodes, weights):
     '''
+    Only keep the approximate pareto front of trees
+
     Detect mistakes and prune out those histories (this is specifically
     in datasets where there are branches of the tree with no U leaf nodes)
 
     Removes any solutions that are > parsimony_eps parsimony metrics
     away from the best solution
     '''
-    #parsimony_eps = 10
-
-    def keep_tree(cand_metric, pattern, pattern_to_best_pars_sum, best_overall_sum, best_pars_metrics):
-        # Don't keep a tree if there is another solution with the same seeding pattern
-        # but a more parsimonious result
-        if sum(cand_metric) != pattern_to_best_pars_sum[pattern]:
-            return False
-        # if abs(best_sum - sum(cand_metric)) > parsimony_eps:
-        #     return False
-        if sum(cand_metric) == best_overall_sum:
-            return True
-
-        # Don't keep any trees that are strictly worse than the best_pars_metrics
-        for best_metric in best_pars_metrics:
-            if cand_metric[0] < best_metric[0] or cand_metric[1] < best_metric[1] or cand_metric[2] < best_metric[2]:
-                return True
-        return False
-
-    def map_pattern(V, T):
-        # Remove "monoclonal" or "polyclonal"
-        pattern = " ".join(putil.get_verbose_seeding_pattern(V,T).split()[1:])
-        # For the purposes of getting a representative set of trees, we treat
-        # reseeding as a subset of multi-source, but don't distinguish them
-        if pattern != "primary single-source seeding":
-            pattern = "not primary single-source seeding"
-        return pattern
-
     # Collect each solution's parsimony metrics
     all_pars_metrics = []
     all_patterns = []
@@ -761,6 +603,8 @@ def prune_bad_histories(solutions, O, p, weights, U):
         m, c, s, _, _ = get_ancestral_labeling_metrics(add_batch_dim(V), T, G, O, p)
         all_pars_metrics.append((int(m), int(c), int(s)))
         all_patterns.append(map_pattern(V,T))
+
+    solutions, all_pars_metrics, all_patterns = expand_solutions(solutions, all_pars_metrics, all_patterns, O, p, weights)
 
     pattern_to_best_pars_sum = {p:float("inf") for p in set(all_patterns)}
     # Find the best parsimony sum per unique pattern
@@ -771,21 +615,23 @@ def prune_bad_histories(solutions, O, p, weights, U):
             best_overall_sum = pars_sum
         if pars_sum < pattern_to_best_pars_sum[pattern]:
             pattern_to_best_pars_sum[pattern] = pars_sum
-
-    print(pattern_to_best_pars_sum)
-
+    print("pattern_to_best_pars_sum", pattern_to_best_pars_sum)
     # Find all pars metrics combinations that match the best sum
     best_pars_metrics = set()
     for i, pars_metrics in enumerate(all_pars_metrics):
         pars_sum = sum(pars_metrics)
         if pars_sum == best_overall_sum:
             best_pars_metrics.add(pars_metrics)
+    print("best_pars_metrics", best_pars_metrics)
 
     pruned_solutions = []
     # Go through and prune any solutions that are worse than the best sum for the
     # same pattern or made any mistakes
     for soln, pars_metrics, pattern in zip(solutions, all_pars_metrics, all_patterns):
-        if keep_tree(pars_metrics, pattern, pattern_to_best_pars_sum, best_overall_sum, best_pars_metrics) and not made_mistake(soln, U):
+        # print(pattern, pars_metrics)
+        # print("made mistake", made_mistake(soln, U), "keep tree", keep_tree(pars_metrics, pattern, pattern_to_best_pars_sum, best_overall_sum, best_pars_metrics))
+        if keep_tree(pars_metrics, pattern, pattern_to_best_pars_sum, best_overall_sum, best_pars_metrics) and not made_mistake(soln, num_internal_nodes):
+        #if keep_tree(pars_metrics, pattern, pattern_to_best_pars_sum, best_overall_sum, best_pars_metrics):
             pruned_solutions.append(soln)
 
     if len(pruned_solutions) == 0: 
@@ -795,10 +641,11 @@ def prune_bad_histories(solutions, O, p, weights, U):
         for soln, pars_metrics, pattern in zip(solutions, all_pars_metrics, all_patterns):
             if keep_tree(pars_metrics, pattern, pattern_to_best_pars_sum, best_overall_sum, best_pars_metrics):
                 pruned_solutions.append(soln)
+
     return pruned_solutions
 
 def _get_best_final_solutions(best_Vs, best_soft_Vs, Ts, Gs, O, p, weights, print_config, 
-                              solve_polys, idx_label_dicts, U, needs_pruning=True):
+                              solve_polys, idx_label_dicts, num_internal_nodes, needs_pruning=True):
     '''
     Weigh solutions differently based on evaluate or calibrate mode. 
     Return the top k solutions
@@ -812,9 +659,9 @@ def _get_best_final_solutions(best_Vs, best_soft_Vs, Ts, Gs, O, p, weights, prin
         return torch.stack(t)
 
     # 1. Calculate loss for each solution
-    bs = len(best_Vs)
-    mig_weights = get_mig_weight_vector(bs, weights)
-    seed_weights = get_seed_site_weight_vector(bs, weights)
+    # bs = len(best_Vs)
+    # mig_weights = get_mig_weight_vector(bs, weights)
+    # seed_weights = get_seed_site_weight_vector(bs, weights)
     solutions = []
 
     # If we're not doing polytomy resolution, we can calculate ancestral labeling objectives in parallel (faster)
@@ -822,27 +669,29 @@ def _get_best_final_solutions(best_Vs, best_soft_Vs, Ts, Gs, O, p, weights, prin
     if solve_polys == False:
         losses, _ = ancestral_labeling_objective(_to_tensor(best_Vs), _to_tensor(best_soft_Vs), _to_tensor(Ts), torch.stack(Gs), O, p, weights)
         for i,loss in enumerate(losses):    
-            solutions.append(VertexLabelingSolution(loss, best_Vs[i], best_soft_Vs[i], Ts[i], Gs[i], idx_label_dicts[i], mig_weights[i], weights.comig, seed_weights[i], i))
+            solutions.append(VertexLabelingSolution(loss, best_Vs[i], best_soft_Vs[i], Ts[i], Gs[i], idx_label_dicts[i], i))
 
     else:
         for i, (V, soft_V, T, G, idx_label_dict) in enumerate(zip(best_Vs, best_soft_Vs, Ts, Gs, idx_label_dicts)):
             reshaped_V = add_batch_dim(V)
             reshaped_soft_V = add_batch_dim(soft_V)        
-            loss, loss_components = ancestral_labeling_objective(reshaped_V, reshaped_soft_V, T, G, O, p, weights)
+            loss, _ = ancestral_labeling_objective(reshaped_V, reshaped_soft_V, T, G, O, p, weights)
             # TODO: take mig_delta as input?
-            solutions.append(VertexLabelingSolution(loss, V, soft_V, T, G, idx_label_dict, mig_weights[i], weights.comig, seed_weights[i], i))
+            solutions.append(VertexLabelingSolution(loss, V, soft_V, T, G, idx_label_dict, i))
         
     if needs_pruning:
-        # 2. Prune bad histories (anything less parsimonious than the best solution we find)
-        pruned_solutions = prune_bad_histories(solutions, O, p, weights, U)
-        # 3. Make the solutions unique
+        # 2. Make the solutions unique
         unique_solutions = set()
         final_solutions = []
-        for soln in pruned_solutions:
+        for soln in solutions:
             tree = vutil.LabeledTree(soln.T, soln.V)
             if tree not in unique_solutions:
                 final_solutions.append(soln)
                 unique_solutions.add(tree)
+
+        # 3. Prune bad histories (anything less parsimonious than the best solution we find)
+        final_solutions = prune_bad_histories(final_solutions, O, p, num_internal_nodes, weights)
+        
     else:
         final_solutions = solutions
 
@@ -852,10 +701,11 @@ def _get_best_final_solutions(best_Vs, best_soft_Vs, Ts, Gs, O, p, weights, prin
     # 6. Return the k best solutions
     k = print_config.k_best_trees if len(final_solutions) >= print_config.k_best_trees else len(final_solutions)
     final_solutions = final_solutions[:k]
+    print("batch nums", [sln.i for sln in final_solutions])
     return final_solutions
 
 def get_best_final_solutions(best_Vs, best_soft_Vs, Ts, G, O, p, weights, print_config, 
-                             poly_res, node_idx_to_label, U):
+                             poly_res, node_idx_to_label, num_internal_nodes):
     '''
     Prune unecessary poly nodes (if they weren't used), then weigh solutions  
     differently based on evaluate or calibrate mode. 
@@ -865,15 +715,14 @@ def get_best_final_solutions(best_Vs, best_soft_Vs, Ts, G, O, p, weights, print_
     best_Vs, Ts, Gs, idx_label_dicts = remove_extra_resolver_nodes(best_Vs, Ts, node_idx_to_label, G, poly_res, p)
     solve_polys = True if poly_res != None else False
     return _get_best_final_solutions(best_Vs, best_soft_Vs, Ts, Gs, O, p, weights, print_config, 
-                                     solve_polys, idx_label_dicts, U)
+                                     solve_polys, idx_label_dicts, num_internal_nodes)
 
-def init_X(batch_size, num_sites, num_nodes_to_label, bias_weights, p, input_T, T, U):
+def init_X(batch_size, num_sites, num_nodes_to_label, bias_weights, p, input_T, T, idx_to_observed_sites):
 
-    nodes_w_children, biased_sites = vutil.get_k_or_more_children_nodes(input_T, T, U, 1, 1, cutoff=False)
+    nodes_w_children, biased_sites = vutil.get_k_or_more_children_nodes(input_T, T, idx_to_observed_sites, 1, False, 1, cutoff=False)
     
     # We're learning X, which is the vertex labeling of the internal nodes
     X = torch.rand(batch_size, num_sites, num_nodes_to_label)
-    #print("X", X.shape)
     eta = 3 # TODO: how do we set this parameter?
     if bias_weights:
         # Make 4 partitions: (1) biased towards the primary, (2) biased towards the primary + sites of children/grandchildren
@@ -891,25 +740,37 @@ def init_X(batch_size, num_sites, num_nodes_to_label, bias_weights, p, input_T, 
             if node_idx == 0:
                 continue # we know the root labeling
             idx = node_idx - 1
-            for site_idx in sites:
-                X[quart:quart*3,site_idx,idx] = eta
-        print("X", X[0])
-    print(nodes_w_children, biased_sites)
-    known_indices = []
-    known_labelings = []
-    for node_idx, sites in zip(nodes_w_children, biased_sites):
-        if node_idx == 0:
-            continue # we know the root labeling
-        idx = node_idx - 1
-        if len(sites) == 1 and input_T[node_idx].sum() == 0:
-            known_indices.append(node_idx - 1) # indexing w.r.t X, which doesn't include root node
-            known_labelings.append(torch.eye(num_sites)[sites[0]].T)
-    known_labelings = known_labelings
-    unknown_indices = [x for x in range(num_nodes_to_label) if x not in known_indices]
-    print("known unkown", known_indices, unknown_indices,known_labelings)
-    X = X[:,:, unknown_indices]
+            for i in range(num_sites):
+            #for site_idx in sites:
+                if i in sites or i == prim_site_idx:
+                    X[quart:quart*3,i,idx] = eta
+                else:
+                    X[quart:quart*3,i,idx] = float("-inf")
+                #X[:quart*2,site_idx,idx] = eta
+        print("X", X[quart+1,:,:])#[18,22,26,12]
+        print("X", X[quart+1,:,[18,22,26,12]])
+        print("X", X[0,:,:])
+    #print(nodes_w_children, biased_sites)
+
+    # For clone tree leaf nodes that are only observed in one site,
+    # we don't need to learn their labeling (the label should be the
+    # site it's detected in)
+    # known_indices = []
+    # known_labelings = []
+    # for node_idx, sites in zip(nodes_w_children, biased_sites):
+    #     if node_idx == 0:
+    #         continue # we know the root labeling
+    #     idx = node_idx - 1
+    #     if len(sites) == 1 and input_T[node_idx].sum() == 0:
+    #         known_indices.append(node_idx - 1) # indexing w.r.t X, which doesn't include root node
+    #         known_labelings.append(torch.eye(num_sites)[sites[0]].T)
+    # known_labelings = known_labelings
+    # unknown_indices = [x for x in range(num_nodes_to_label) if x not in known_indices]
+    # #print("known", known_indices, "unknown", unknown_indices,known_labelings)
+    # X = X[:,:, unknown_indices] # only include the unknown indices for inference
+                
     X.requires_grad = True
-    return X, known_indices, unknown_indices, known_labelings
+    return X
 
 def update_adj_matrix(itr, max_iter):
     if itr == -1:
@@ -937,9 +798,23 @@ def remove_leaf_nodes_idx_to_label_dicts(dicts):
                 new_dicts[i][key] = new_dicts[i][key][0]
     return new_dicts
 
+def _convert_list_of_numpys_to_tensors(lst):
+        return [torch.tensor(x) for x in lst]
+
+def calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names,
+                               Os, batch_size, custom_colors, bias_weights, solve_polytomies):
+    '''
+    Observed clone proportions are inputted (in tsv_fns), only labeling of clone tree is needed
+    '''
+    return calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
+                    Os, batch_size, custom_colors, bias_weights, solve_polytomies, estimate_observed_clones=False)
 
 def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
-              Os, batch_size, custom_colors, bias_weights, solve_polytomies):
+              Os, batch_size, custom_colors, bias_weights, solve_polytomies, estimate_observed_clones=True):
+    '''
+    Estimate observed clone proportions and labeling of clone tree for a cohort of patients,
+    calibrate parsimony weights to metastasis priors
+    '''
     
     if not (len(tree_fns) == len(tsv_fns) == len(run_names)):
         raise ValueError("Inputs Ts, tsv_fns, and run_names must have equal length (length = number of patients in cohort")
@@ -950,14 +825,16 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
             Ts.append(dutil.get_adjacency_matrix_from_txt_edge_list(tree_fn))
     else:
         Ts = tree_fns
-
-    def _convert_list_of_numpys_to_tensors(lst):
-        return [torch.tensor(x) for x in lst]
     
-    pooled_tsv_fns = []
-    for tsv_fn, run_name in zip(tsv_fns, run_names):
-        pooled_tsv_fns.append(dutil.pool_input_tsv(tsv_fn, output_dir, f"tmp_{run_name}"))
+    # If we're not estimating the observed clones, the tsv being inputted doesn't need to be pooled
+    if estimate_observed_clones:
+        pooled_tsv_fns = []
+        for tsv_fn, run_name in zip(tsv_fns, run_names):
+            pooled_tsv_fns.append(dutil.pool_input_tsv(tsv_fn, output_dir, f"tmp_{run_name}"))
+    else:
+        pooled_tsv_fns = tsv_fns
 
+    # Only use maximum parsimony metrics when initially searching for high likelihood trees
     weights = met.Weights(mig=DEFAULT_CALIBRATE_MIG_WEIGHTS, comig=DEFAULT_CALIBRATE_COMIG_WEIGHTS, 
                           seed_site=DEFAULT_CALIBRATE_SEED_WEIGHTS, gen_dist=0.0, 
                           organotrop=0.0)
@@ -988,7 +865,7 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
         for primary_site in primary_sites:
             get_migration_history(Ts[i], pooled_tsv_fns[i], primary_site, weights, print_config, calibrate_dir, f"{run_names[i]}_{primary_site}", 
                                   O=O, batch_size=batch_size, custom_colors=custom_colors, bias_weights=bias_weights, 
-                                  mode="calibrate", solve_polytomies=solve_polytomies)
+                                  mode="calibrate", solve_polytomies=solve_polytomies, estimate_observed_clones=estimate_observed_clones)
 
     # 2. Find the best theta for this cohort
     best_theta = eutil.get_max_cross_ent_thetas(pickle_file_dirs=[calibrate_dir])
@@ -996,7 +873,7 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
     with open(os.path.join(calibrate_dir, "best_theta.json"), 'w') as json_file:
         json.dump(rounded_best_theta, json_file, indent=2)
 
-    _, _, _, ordered_sites, _,_ = dutil.get_ref_var_omega_matrices(pooled_tsv_fns)
+    ordered_sites = dutil.extract_ordered_sites(pooled_tsv_fns)
         
     # 3. Recalibrate trees using the best thetas
     print_config.visualize = visualize
@@ -1004,7 +881,7 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
     weights = met.Weights(mig=[best_theta[0]*10], comig=best_theta[1]*10, seed_site=[best_theta[2]*10],
                           gen_dist=0.1, organotrop=0.1)
     
-    # 4. Use the saved trees to rescore trees, visualize and save
+    # 4. Use the saved trees to rescore trees, visualize, and re-save 
     for i in range(len(Ts)):
         O = Os[i] if Os != None else None
         primary_sites = dutil.get_primary_sites(pooled_tsv_fns[i])
@@ -1022,40 +899,38 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
         
             primary_idx = ordered_sites[i].index(primary_site)
             p = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(ordered_sites[i])).T
-            
+            num_internal_nodes = len(saved_idx_to_label_dicts[0])
+            print("num_internal_nodes", num_internal_nodes)
             final_solutions = _get_best_final_solutions(saved_Vs, saved_soft_Vs, saved_Ts, saved_Gs, O, p, weights,
-                                                        print_config, solve_polytomies, saved_idx_to_label_dicts, 
-                                                        saved_U, needs_pruning=False)
+                                                        print_config, solve_polytomies, saved_idx_to_label_dicts, num_internal_nodes,
+                                                        needs_pruning=False)
             
             putil.save_best_trees(final_solutions, saved_U, O,
                                   weights, ordered_sites[i], print_config, 
                                   custom_colors, primary_site, calibrate_dir, run_name)
     
-    for pooled_tsv_fn in pooled_tsv_fns:
-        os.remove(pooled_tsv_fn) # cleanup pooled tsv
+    if estimate_observed_clones:
+        for pooled_tsv_fn in pooled_tsv_fns:
+            os.remove(pooled_tsv_fn) # cleanup pooled tsv
 
     return best_theta
 
-def validate_inputs(T, node_idx_to_label, ref, var, primary_site, ordered_sites, weights, G, O, mode):
-
+def validate_inputs(T, node_idx_to_label, ref, var, primary_site, ordered_sites, weights, O, mode):
     if not (T.shape[0] == T.shape[1]):
         raise ValueError(f"Number of tree nodes should be consistent (T.shape[0] == T.shape[1])")
     if (T.shape[0] != len(node_idx_to_label)):
         raise ValueError(f"Number of node_idx_to_label needs to equal shape of adjacency matrix.")
-    if ref.shape != var.shape:
-        raise ValueError(f"ref and var must have identical shape, got {ref.shape} and {var.shape}")
-    if not (ref.shape[1] == var.shape[1] == T.shape[0]):
-        raise ValueError(f"Number of mutations/mutation clusters should be consistent (ref.shape[1] == var.shape[1] == T.shape[0])")
-    if not (ref.shape[0] == var.shape[0] == len(ordered_sites)):   
-        raise ValueError(f"Length of ordered_sites should be equal to ref and var dim 0")
+    if ref != None and var != None:
+        if ref.shape != var.shape:
+            raise ValueError(f"ref and var must have identical shape, got {ref.shape} and {var.shape}")
+        if not (ref.shape[1] == var.shape[1] == T.shape[0]):
+            raise ValueError(f"Number of mutations/mutation clusters should be consistent (ref.shape[1] == var.shape[1] == T.shape[0])")
+        if not (ref.shape[0] == var.shape[0] == len(ordered_sites)):   
+            raise ValueError(f"Length of ordered_sites should be equal to ref and var dim 0")
     if not vutil.is_tree(T):
         raise ValueError("Adjacency matrix T is empty or not a tree.")
     if not primary_site in ordered_sites:
         raise ValueError(f"{primary_site} not in ordered_sites: {ordered_sites}")
-    if (weights.gen_dist == 0.0 and G != None) and mode == "evaluate":
-        print(f"Warning: G matrix was given but genetic distance parameter of weights is 0.")
-    if (weights.gen_dist != 0.0 and G == None):
-        raise ValueError(f"G matrix was not given but genetic distance parameter of weights is non-zero. Please pass a G matrix.")
     if (weights.organotrop == 0.0 and O != None)  and mode == "evaluate":
         print(f"Warning: O matrix was given but organotropism parameter of weights is 0.")
     if (weights.organotrop != 0.0 and O == None):
@@ -1065,17 +940,15 @@ def validate_inputs(T, node_idx_to_label, ref, var, primary_site, ordered_sites,
     for label in list(node_idx_to_label.values()):
         if ":" in label:
             raise ValueError(f"Unfortunately our visualization code uses pydot, which does not allow colons (:) in node names. Please use a different separator in 'character_label' values.")
-        if len(label) > 20:
-            print("Warning: character_label length inputted is very long, we suggest shortening for visualization purposes")
 
 def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
              O, batch_size, custom_colors, bias_weights, solve_polytomies):
-    
-
     if isinstance(tree_fn, str):
         T = dutil.get_adjacency_matrix_from_txt_edge_list(tree_fn)
     else:
         T = tree_fn
+    assert isinstance(weights.mig, (float, int)), "Weights must be either a float or an int in evaluate mode"
+    assert isinstance(weights.seed_site, (float, int)), "Weights must be either a float or an int in evaluate mode"
 
     pooled_tsv_fn = dutil.pool_input_tsv(tsv_fn, output_dir, f"tmp_{run_name}")                   
     primary_sites = dutil.get_primary_sites(pooled_tsv_fn)
@@ -1089,9 +962,34 @@ def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name,
 
     os.remove(pooled_tsv_fn) # cleanup pooled tsv
 
+def optimize_umap(num_sites, num_internal_nodes, ref, var, omega, B, T, G, weights, lr):
+    # We're learning psi, which is the mixture matrix U (U = softmax(psi)), and tells us the existence
+    # and anatomical locations of the extant clones (U > U_CUTOFF)
+    psi = -1 * torch.rand(num_sites, num_internal_nodes + 1) # an extra column for normal cells
+    psi.requires_grad = True 
+    u_optimizer = torch.optim.Adam([psi], lr=lr)
 
-def get_migration_history(T, tsv_fn, primary_site, weights, print_config, output_dir, run_name, 
-                          O=None, max_iter=100, lr=0.1, init_temp=40, final_temp=0.01,
+    i = 0
+    u_prev = psi
+    u_diff = 1e9
+    losses = []
+   
+    while u_diff > 1e-5 and i < 300:
+        u_optimizer.zero_grad()
+        U, u_loss = compute_u_loss(psi, ref, var, omega, B, weights)
+        u_loss.backward()
+        u_optimizer.step()
+        u_diff = torch.abs(torch.norm(u_prev - U))
+        u_prev = U
+        i += 1
+        losses.append(u_loss.detach().numpy())
+    
+    T, G, L, idx_to_observed_sites = vutil.full_adj_matrix_using_inferred_observed_clones(U, T, G, num_sites, G_IDENTICAL_CLONE_VALUE)
+
+    return U, T, G, L, idx_to_observed_sites
+
+def get_migration_history(T, tsv_fn, primary_site, weights, print_config, output_dir, run_name, estimate_observed_clones=True,
+                          O=None, max_iter=1000, lr=0.05, init_temp=30, final_temp=0.01,
                           batch_size=-1, custom_colors=None, bias_weights=True, mode="evaluate",
                           solve_polytomies=False):
     '''
@@ -1128,18 +1026,30 @@ def get_migration_history(T, tsv_fn, primary_site, weights, print_config, output
         (5) how long (in seconds) the algorithm took to run
     '''
 
-    ref, var, omega, ordered_sites, node_idx_to_label, idx_to_num_mutations = dutil.get_ref_var_omega_matrix(tsv_fn)
+    torch.autograd.set_detect_anomaly(True)
+    if estimate_observed_clones:    
+        ref, var, omega, ordered_sites, node_idx_to_label, idx_to_num_mutations = dutil.get_ref_var_omega_matrix(tsv_fn)
+        ref = copy.deepcopy(ref)
+        var = copy.deepcopy(var)
+        print('ordered_sites', ordered_sites)
+        if not torch.is_tensor(ref):
+            ref = torch.tensor(ref, dtype=torch.float32)
+        if not torch.is_tensor(var):
+            var = torch.tensor(var, dtype=torch.float32)
+    else:
+        ref, var = None, None
+        ordered_sites, node_idx_to_label, idx_to_num_mutations, idx_to_observed_sites = dutil.extract_info_from_observed_clone_tsv(tsv_fn)
 
     G = None
     # Genetic distance info is given
     if idx_to_num_mutations != None:
         G = dutil.get_genetic_distance_matrix_from_adj_matrix(T, idx_to_num_mutations)
 
-    validate_inputs(T, node_idx_to_label, ref, var, primary_site, ordered_sites, weights, G, O, mode)
+    validate_inputs(T, node_idx_to_label, ref, var, primary_site, ordered_sites, weights, O, mode)
 
     if batch_size == -1:
         batch_size = vutil.calculate_batch_size(T, ordered_sites)
-        print("Calculated batch size:", batch_size)
+        #print("Calculated batch size:", batch_size)
     # when calibrating, we want to capture all pareto front trees and not prune yet!
     if mode == 'calibrate':
         print_config.k_best_trees = batch_size
@@ -1147,8 +1057,7 @@ def get_migration_history(T, tsv_fn, primary_site, weights, print_config, output
     # Don't alter the inputs in place
     T = copy.deepcopy(T)
     G = copy.deepcopy(G)
-    ref = copy.deepcopy(ref)
-    var = copy.deepcopy(var)
+    
     ordered_sites = copy.deepcopy(ordered_sites)
     primary_site = copy.deepcopy(primary_site)
     node_idx_to_label = copy.deepcopy(node_idx_to_label)
@@ -1160,88 +1069,56 @@ def get_migration_history(T, tsv_fn, primary_site, weights, print_config, output
         #print(T, "\n", ref, "\n",var, "\n",node_idx_to_label, "\n",G)
     assert(vutil.get_root_index(T) == 0)
 
-
     if not torch.is_tensor(T):
         T = torch.tensor(T, dtype=torch.float32)
-    if not torch.is_tensor(ref):
-        ref = torch.tensor(ref, dtype=torch.float32)
-    if not torch.is_tensor(var):
-        var = torch.tensor(var, dtype=torch.float32)
-
+    
     primary_idx = ordered_sites.index(primary_site)
     p = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(ordered_sites)).T
-    num_sites = ref.shape[0]
+    num_sites = len(ordered_sites)
     num_internal_nodes = T.shape[0]
-
-    # If we don't know the anatomical site of the primary tumor, we need to learn it
-    num_nodes_to_label = -1
-   
     assert(p.shape[1] == 1)
-    assert(p.shape[0] == ref.shape[0]) # num_anatomical_sites
+    assert(p.shape[0] == num_sites) # num_anatomical_sites
     num_nodes_to_label = num_internal_nodes - 1 # we don't need to learn the root labeling
     prim_site_idx = torch.nonzero(p)[0][0]
     primary_site_label = ordered_sites[prim_site_idx]
-
-    # We're learning psi, which is the mixture matrix U (U = softmax(psi)), and tells us the existence
-    # and anatomical locations of the extant clones (U > U_CUTOFF)
-    psi = -1 * torch.rand(num_sites, num_internal_nodes + 1) # an extra column for normal cells
-    psi.requires_grad = True 
-    u_optimizer = torch.optim.Adam([psi], lr=lr)
-
-    B = vutil.get_mutation_matrix_tensor(T)
-    # add a row of zeros to account for the non-cancerous root node
-    B = torch.vstack([torch.zeros(B.shape[1]), B])
-    # add a column of ones to indicate that every clone is a descendent of the non-cancerous root node
-    B = torch.hstack([torch.ones(B.shape[0]).reshape(-1,1), B])
 
     # reinitialize globals as None (if module is not reloaded in between runs, this can cause problems)
     global RANDOM_VALS, LAST_P, G_IDENTICAL_CLONE_VALUE, SOLVE_POLYS
     RANDOM_VALS = None
     LAST_P = None
     SOLVE_POLYS = solve_polytomies
-
     if G != None:
         G_IDENTICAL_CLONE_VALUE = torch.min(G[(G != 0)])/2.0
+   
+    B = vutil.get_mutation_matrix_tensor(T)
+    # add a row of zeros to account for the non-cancerous root node
+    B = torch.vstack([torch.zeros(B.shape[1]), B])
+    # add a column of ones to indicate that every clone is a descendent of the non-cancerous root node
+    B = torch.hstack([torch.ones(B.shape[0]).reshape(-1,1), B])
 
     start_time = datetime.datetime.now()
 
     input_T = copy.deepcopy(T)
-    i = 0
-    u_prev = psi
-    u_diff = 1e9
-    losses = []
-    ############ Step 1, find a MAP estimate of U ############
-    while u_diff > 1e-4 and i < 200:
-        u_optimizer.zero_grad()
-        U, u_loss = compute_u_loss(psi, ref, var, omega, B, weights)
-        u_loss.backward()
-        u_optimizer.step()
-        u_diff = torch.abs(torch.norm(u_prev - U))
-        u_prev = U
-        i += 1
-        losses.append(u_loss.detach().numpy())
-    
-    T, G, num_leaves = full_adj_matrix(U, T, G)
-    # putil.plot_temps(losses)
-    # import pandas as pd
-    # cols = ["GL"]+[";".join(node_idx_to_label[i].split(";")[:2]) for i in range(len(node_idx_to_label))]
-    # U_df = pd.DataFrame(U.detach().numpy(), index=ordered_sites, columns=cols)
-    # U_df = U_df.applymap(lambda x: 0 if x < U_CUTOFF else x)
 
-    # print("U\n", U_df)
-    # F_df = pd.DataFrame((var/(ref+var)).numpy(), index=ordered_sites, columns=cols[1:])
-    # print("F\n", F_df)
-    # Fhat_df = pd.DataFrame((U @ B).detach().numpy()[:,1:], index=ordered_sites, columns=cols[1:])
-    # print("F hat\n", Fhat_df)
+    ############ Step 1, find a MAP estimate of U ############
+    if estimate_observed_clones:
+        U, T, G, L, idx_to_observed_sites = optimize_umap(num_sites, num_internal_nodes, ref, var, omega, B, T, G, weights, lr)
+        #vutil.print_U(U, B, node_idx_to_label, ordered_sites, ref, var)
+    else:
+        # Add inputted observed clones as leaf nodes to T
+        U = None
+        T, G, L = vutil.full_adj_matrix_from_internal_node_idx_to_sites_present(input_T, G, idx_to_observed_sites, num_sites, G_IDENTICAL_CLONE_VALUE)
+    print("idx_to_observed_sites", idx_to_observed_sites)
+    num_leaves = L.shape[1]
 
     if solve_polytomies:
-        nodes_w_polys, resolver_sites = vutil.get_k_or_more_children_nodes(input_T, T, U, 3, 2)
+        nodes_w_polys, resolver_sites = vutil.get_k_or_more_children_nodes(input_T, T, idx_to_observed_sites, 3, True, 2)
         if len(nodes_w_polys) == 0:
             print("No potential polytomies to solve, not resolving polytomies.")
             poly_res = None
             solve_polytomies = False
         else:
-            poly_res = PolytomyResolver(input_T, T, G, U, num_leaves, batch_size, node_idx_to_label, nodes_w_polys, resolver_sites)
+            poly_res = vutil.PolytomyResolver(T, G, num_sites, num_leaves, batch_size, node_idx_to_label, nodes_w_polys, resolver_sites, G_IDENTICAL_CLONE_VALUE)
             T = poly_res.T
             print("T", T.shape)
             G = poly_res.G
@@ -1250,25 +1127,25 @@ def get_migration_history(T, tsv_fn, primary_site, weights, print_config, output
 
             poly_optimizer = torch.optim.Adam([poly_res.latent_var], lr=lr)
             print("num_nodes_to_label", num_nodes_to_label)
+            max_iter += 100
     else:
         poly_res = None
-
-    # We're learning X, which is the vertex labeling of the internal nodes
-    X, known_indices, unknown_indices, known_labelings = init_X(batch_size, num_sites, num_nodes_to_label, bias_weights, p, input_T, T, U)
     
+    # We're learning X, which is the vertex labeling of the internal nodes
+    print("ordered_sites", ordered_sites, "primary_site", primary_site, p)
+    X = init_X(batch_size, num_sites, num_nodes_to_label, bias_weights, p, input_T, T, idx_to_observed_sites)
     v_optimizer = torch.optim.Adam([X], lr=lr)
     scheduler = lr_scheduler.LinearLR(v_optimizer, start_factor=1.0, end_factor=0.5, total_iters=max_iter)
-
+    
     ############ Step 2, sample from V to estimate q(V) ############
 
     # Temperature and annealing
     v_temp = init_temp
     t_temp = init_temp
     hard = True
-    v_anneal_rate = 0.002
-    t_anneal_rate = 0.1
-    intermediate_data = []
-    temps = []
+    v_anneal_rate = 0.01
+    t_anneal_rate = 0.05
+    v_temps, t_temps = [], []
     v_loss_components = []
 
     # Calculate V only using maximum parsimony metrics
@@ -1280,47 +1157,57 @@ def get_migration_history(T, tsv_fn, primary_site, weights, print_config, output
         weights = met.Weights(mig=weights.mig, comig=weights.comig, seed_site=weights.seed_site, gen_dist=0.0, organotrop=0.0, data_fit=weights.data_fit, reg=weights.reg, entropy=weights.entropy)
         G, O = None, None
     
-    # Keep track of the best trees and losses
-    best_Vs, best_soft_Vs, best_Ts, = None, None, None
-    prev_v_losses = None
     j = 0
     k = 0
+    v_interval = 20
     for i in tqdm(range(max_iter)):
 
         if solve_polytomies: 
             poly_optimizer.zero_grad()
         v_optimizer.zero_grad()
-        Vs, v_losses, loss_comps, soft_Vs, Ts = compute_v_loss(U, X, T, p, known_indices, unknown_indices, known_labelings, G, O, 
-                                                               v_temp, t_temp, hard, weights, i, max_iter, poly_res)
-        mean_loss = torch.sum(v_losses)
+        Vs, v_losses, loss_comps, soft_Vs, Ts = compute_v_loss(X, L, T, p, G, O, v_temp, t_temp, hard, weights, i, max_iter, poly_res)
+        mean_loss = torch.mean(v_losses)
         mean_loss.backward()
 
         if solve_polytomies and update_adj_matrix(i, max_iter):
             poly_optimizer.step()
-            if i % 2 == 0:
+            if i % 20 == 0:
                 t_temp = np.maximum(t_temp * np.exp(-t_anneal_rate * j), final_temp)
             j += 1
 
         else:
             v_optimizer.step()
             scheduler.step()
-            if i % 5 == 0:
+            # print("i", i)
+            # print("X after grad descent step\n", X[0])
+            #v_temp = vutil.annealing_spiking(k, v_anneal_rate, init_temp, spike_interval=v_interval)
+            # if i %10==0:
+            #     print("[18,22,26,12,0,25,3,16,6,10,11]")
+            #     print(i, X[(batch_size//4)+2:(batch_size//4)+8,:,[18,22,26,12,0,25,3,16,6,10,11]])
+
+            if i % v_interval == 0:
                 v_temp = np.maximum(v_temp * np.exp(-v_anneal_rate * k), final_temp)
             k += 1
+        # print("learning rate", v_optimizer.param_groups[0]["lr"])
 
         if print_config.visualize:
             v_loss_components.append(get_avg_loss_components(loss_comps))
 
-        with torch.no_grad():
-            best_Vs, best_soft_Vs, best_Ts = get_best_solutions(prev_v_losses, v_losses, Vs, soft_Vs, Ts, best_Vs, best_soft_Vs, best_Ts)
-            
-        temps.append(v_temp)
+        v_temps.append(v_temp)
+        t_temps.append(t_temp)
+        # if i %10 == 0:
+        #     print(Vs, "\n",X, "\n", soft_Vs[0][0][0],"\n", soft_Vs)
 
-        # print("i", i, "v temp", v_temp, "t_temp", t_temp)
+        # if i > 75 and i < 80:
+        #     X = bottom_up(Ts, X, U, p, poly_res)
 
-        prev_v_losses = v_losses
-            
-
+    import matplotlib.pyplot as plt
+    plt.plot([x for x in range(len(v_temps))], v_temps, marker='.')
+    plt.show()
+    plt.close()
+    plt.plot([x for x in range(len(t_temps))], t_temps, marker='.')
+    plt.show()
+    
     time_elapsed = (datetime.datetime.now() - start_time).total_seconds()
     if print_config.verbose:
         print(f"Time elapsed: {time_elapsed}")
@@ -1331,23 +1218,17 @@ def get_migration_history(T, tsv_fn, primary_site, weights, print_config, output
             G, O = G_copy, O_copy
             weights = weights_copy
         
-        final_solutions = get_best_final_solutions(best_Vs, best_soft_Vs, best_Ts, G, O, p, weights,
-                                                   print_config, poly_res, node_idx_to_label, U)
+        final_solutions = get_best_final_solutions(Vs, soft_Vs, Ts, G, O, p, weights,
+                                                   print_config, poly_res, node_idx_to_label, input_T.shape[0])
 
         print("# final solutions:", len(final_solutions))
 
         if print_config.visualize:
             putil.plot_loss_components(v_loss_components, weights)
-            #putil.plot_temps(temps)
-
+            
         edges, vert_to_site_map, mig_graph_edges, loss_info = putil.save_best_trees(final_solutions, U, O, 
                                                                                     weights, ordered_sites,print_config, 
                                                                                     custom_colors, primary_site_label, 
-                                                                                    output_dir, run_name)
-
-        # avg_tree = putil.print_averaged_tree(losses_tensor, V, full_trees, node_idx_to_label, custom_colors,
-        #                                     ordered_sites, print_config)
-
-       
+                                                                                    output_dir, run_name)   
 
     return edges, vert_to_site_map, mig_graph_edges, loss_info, time_elapsed
