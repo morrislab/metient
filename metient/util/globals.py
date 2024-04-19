@@ -6,9 +6,14 @@ ORGANOTROP_ALPHA = -5.0
 
 BINARY_ALPHA = 100.0
 
-DEFAULT_CALIBRATE_MIG_WEIGHTS = [100.0]
-DEFAULT_CALIBRATE_SEED_WEIGHTS = [1.0]
-DEFAULT_CALIBRATE_COMIG_WEIGHTS = 5.0
+CLUSTER_SEP = "_"
+
+DEFAULT_CALIBRATE_MIG_WEIGHTS = [1.0,100.0]
+DEFAULT_CALIBRATE_SEED_WEIGHTS = [100.0,1.0]
+DEFAULT_CALIBRATE_COMIG_WEIGHTS = 50.0
+
+DEFAULT_COLORS = ["#6aa84f","#c27ba0", "#be5742e1", "#6fa8dc", "#e69138", "#9e9e9e", "brown", "black", "darkgreen", "purple", "blue"]*3
+DEFAULT_GREEN = "#6aa84f"
 
 import logging
 logger = logging.getLogger('SGD')
@@ -34,7 +39,6 @@ OUT_SITES_KEY = "ordered_anatomical_sites"
 OUT_PRIMARY_KEY = "primary_site"
 OUT_SUB_PRES_KEY = "subclonal_presence_matrices"
 OUT_LOSS_DICT_KEY = "loss_dict"
-OUT_WEIGHTS_KEY = "pars_weights"
 OUT_SOFTV_KEY = "soft_v"
 OUT_GEN_DIST_KEY = "gen_dist_matrices"
 

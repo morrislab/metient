@@ -77,11 +77,10 @@ def pool_input_tsv(tsv_fn, output_dir, run_name):
     valid_var_read_probs = (df['var_read_prob'] >= 0.0) & (df['var_read_prob'] <= 1.0)
     if not valid_var_read_probs.all():
         raise ValueError(f"All values in the var_read_prob column must be between 0.0 and 1.0 inclusive. Issue in: {tsv_fn}")
-
-    _, output_fn = write_pooled_tsv_from_clusters(df, {}, output_dir, run_name, None)
+    _, output_fn = write_pooled_tsv_from_clusters(df, {}, output_dir, run_name)
     return output_fn
 
-def write_pooled_tsv_from_clusters(df, aggregation_rules, output_dir, patient_id, mutation_sep):
+def write_pooled_tsv_from_clusters(df, aggregation_rules, output_dir, patient_id):
     '''
     After clustering with any clustering algorithm, prepares tsvs by pooling mutations belonging 
     to the same cluster and anatomical site index
@@ -132,7 +131,6 @@ def write_pooled_tsv_from_clusters(df, aggregation_rules, output_dir, patient_id
     df['ref'] = df.apply(lambda row: row['total_reads_corrected']-row['var'], axis=1)
     df['var_read_prob'] = 0.5
 
-    #df['cluster'] = df.apply(lambda row: mut_idx_to_cluster_id[row['character_index']] if row['character_index'] in mut_idx_to_cluster_id else np.nan, axis=1)
     df = df.dropna(subset=['cluster_index'])
 
     # Save the number of mutations in each cluster before pooling
@@ -153,7 +151,7 @@ def write_pooled_tsv_from_clusters(df, aggregation_rules, output_dir, patient_id
     
     # 4. Do some post-processing, e.g. adding number of mutations and shortening character label for display
     pooled_df['num_mutations'] = pooled_df.apply(lambda row:cluster_id_to_num_muts[int(row['character_index'])], axis=1)
-    pooled_df['character_label'] = pooled_df.apply(lambda row:get_pruned_mut_label(cluster_id_to_mut_names[row['cluster_index']], mutation_sep), axis=1)
+    pooled_df['character_label'] = pooled_df.apply(lambda row:cluster_id_to_mut_names[row['cluster_index']], axis=1)
     pooled_df['total_reads_corrected'] = pooled_df['total_reads_corrected'].round(0).astype(int)
     pooled_df['var'] = pooled_df['var'].round(0).astype(int)
     pooled_df['ref'] = pooled_df.apply(lambda row: row['total_reads_corrected']-row['var'], axis=1)
@@ -349,27 +347,6 @@ def get_ref_var_omega_matrices(tsv_filepaths):
 
     return ref_matrices, var_matrices, omega_matrices, ordered_sites, idx_to_label_dicts, idx_to_num_muts
 
-def get_pruned_mut_label(mut_names, mutation_sep, k=2):
-
-    # If mutation names contain colons (e.g. LOC1:9:12312321), take everything before the first 
-    # colon for displaying since otherwise we can't display the label w/ our graphing library dependencies
-    if mutation_sep != None:
-        gene_names = [str(item.split(mutation_sep)[0]) for item in mut_names]
-    else:
-        gene_names = [str(item) for item in mut_names]
-
-    gene_candidates = set()
-    for gene in gene_names:
-        gene = gene.upper()
-        if gene in CANCER_DRIVER_GENES:
-            gene_candidates.add(gene)
-        elif gene in ENSEMBLE_TO_GENE_MAP:
-            gene_candidates.add(ENSEMBLE_TO_GENE_MAP[gene])
-    final_genes = gene_names if len(gene_candidates) == 0 else gene_candidates
-   
-    k = k if len(final_genes) > k else len(final_genes)
-    return "_".join(list(final_genes)[:k])
-
 def get_primary_sites(tsv_filepath):
     # For tsvs with very large fields
     csv.field_size_limit(sys.maxsize)
@@ -380,6 +357,8 @@ def get_primary_sites(tsv_filepath):
         raise ValueError("No primary found in site_category column")
 
     return primary_sites
+
+import ast
 
 def get_ref_var_omega_matrix(tsv_filepath):
     '''
@@ -395,7 +374,7 @@ def get_ref_var_omega_matrix(tsv_filepath):
     (2) V matrix (num_samples x num_clusters) with the # of variant reads for each sample+cluster,
     (3) omega matrix (num_samples x num_clusters) with the variant read probability of the mutation/mutation cluster in the sample,
     (4) unique anatomical sites from the patient's data,
-    (5) dictionary mapping index to character_label (based on input tsv, gives the index for each mutation name,
+    (5) dictionary mapping index to mut_names (based on input tsv, gives the index for each mutation name,
     where these indices are used in R matrix, V matrix)
     (6) dictionary mapping index to number of mutations (if 'num_mutations' is passed, else None)
     '''
@@ -406,7 +385,7 @@ def get_ref_var_omega_matrix(tsv_filepath):
     num_sites = df['anatomical_site_index'].max() + 1
     num_clusters = df['cluster_index'].max() + 1
     # Build R and V matrices
-    idx_to_character_label = dict()
+    idx_to_mut_names = dict()
     R = np.zeros((num_sites, num_clusters))
     V = np.zeros((num_sites, num_clusters))
     omega = np.zeros((num_sites, num_clusters))
@@ -420,11 +399,56 @@ def get_ref_var_omega_matrix(tsv_filepath):
         omega[x,y] = float(row['var_read_prob'])
         # collect additional metadata
         unique_sites[x] = row['anatomical_site_label']
-        idx_to_character_label[y] = row['character_label']
+        # pandas won't let you save a list very easily, so it converts to string...this is a workaround
+        # to turn it back into a string
+        idx_to_mut_names[y] = ast.literal_eval(row['character_label'])
         if y not in idx_to_num_muts:
             idx_to_num_muts[y] = float(row['num_mutations'])
         
-    return torch.tensor(R, dtype=torch.float32), torch.tensor(V, dtype=torch.float32), torch.tensor(omega, dtype=torch.float32), list(unique_sites), idx_to_character_label, idx_to_num_muts
+    return torch.tensor(R, dtype=torch.float32), torch.tensor(V, dtype=torch.float32), torch.tensor(omega, dtype=torch.float32), list(unique_sites), idx_to_mut_names, idx_to_num_muts
+
+def extract_info_from_observed_clone_tsv(tsv_filename):
+    '''
+    When observed clones are inputted, we don't need to get ref or var information
+    '''
+    df = pd.read_csv(tsv_filename, delimiter="\t", index_col=False)  
+
+    num_sites = df['anatomical_site_index'].max() + 1
+    idx_to_label = dict()
+    idx_to_sites_present = dict()
+    unique_sites = [""]*num_sites
+    idx_to_num_muts = dict()
+    for _, row in df.iterrows():
+        x = int(row['anatomical_site_index'])
+        y = int(row['cluster_index'])
+        # collect additional metadata
+        unique_sites[x] = row['anatomical_site_label']
+        idx_to_label[y] = [row['cluster_label']]
+        if y not in idx_to_num_muts:
+            idx_to_num_muts[y] = float(row['num_mutations'])
+        if row['present'] == 1:
+            if y not in idx_to_sites_present:
+                idx_to_sites_present[y] = []
+            idx_to_sites_present[y].append(row['anatomical_site_index'])
+    return unique_sites, idx_to_label, idx_to_num_muts, idx_to_sites_present
+
+def extract_ordered_sites(tsv_filepaths):
+    def _extract_ordered_sites_from_single_tsv(tsv_filename):
+        df = pd.read_csv(tsv_filename, delimiter="\t", index_col=False)  
+        sorted_df = df.sort_values(by='anatomical_site_index')
+        # Get unique labels in the order of index
+        unique_site_labels_in_order = sorted_df['anatomical_site_label'].unique().tolist()
+        return unique_site_labels_in_order
+    
+    if not isinstance(tsv_filepaths, list):
+        return _extract_ordered_sites_from_single_tsv(tsv_filepaths)
+
+    assert(len(tsv_filepaths) >= 1)
+    ordered_sites = []
+    for fn in tsv_filepaths:
+        ordered_sites.append(_extract_ordered_sites_from_single_tsv(fn))
+    return ordered_sites
+    
 
 def _get_adj_matrix_from_machina_tree(tree_edges, idx_to_character_label, remove_unseen_nodes=True, skip_polytomies=False):
     '''
