@@ -11,7 +11,10 @@ pip install metient
 ```
 
 ## Tutorial
-A tutorial for running calibrate mode is available [here](https://github.com/divyakoyy/metient/blob/main/tutorial/metient_calibrate_tutorial.ipynb)
+
+There are different tutorials based on your use case:
+1. I have a cohort of cancer patients. I want Metient-calibrate to learn the most likely pattern of spread using genetic distance and/or organotropism. [Tutorial 1](1_metient_calibrate_infer_observed_clones_label_clone_tree_tutorial)
+2. I have a cohort of cancer patients and I know which clones are present in which sites. I want Metient-calibrate to learn the most likely pattern of spread using genetic distance and/or organotropism. [Tutorial 2](2_metient_calibrate_label_clone_tree_tutorial)
 
 
 ## Inputs
