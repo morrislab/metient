@@ -9,7 +9,10 @@ import pandas as pd
 from metient.metient import *
 from metient.lib.vertex_labeling import get_migration_history
 from metient.util import plotting_util as plot_util
+from metient.util import data_extraction_util as dutil
 from metient.util.globals import *
+
+VISUALIZE=False
 
 def get_index_to_cluster_label_from_corrected_sim_tsv(ref_var_fn):
     df = pd.read_csv(ref_var_fn, sep="\t")
@@ -23,6 +26,10 @@ def get_index_to_cluster_label_from_corrected_sim_tsv(ref_var_fn):
     clstr_idx_to_label = {k:";".join(v) for k,v in clstr_idx_to_label.items()}
     return clstr_idx_to_label
 
+def no_parsimony_weights(weights):
+    if (weights.mig == 0.0 or weights.mig == [0.0]) and weights.comig == 0 and (weights.seed_site == 0.0 or weights.seed_site == [0.0]):
+        return True
+
 def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir, weights, batch_size, weight_init_primary, perf_stats_fn, mode, solve_polytomies):
     print("solve_polytomies", solve_polytomies)
     print("wip", wip)
@@ -32,10 +39,12 @@ def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir
     all_mut_trees_fn = os.path.join(machina_sims_data_dir, f"{site}_mut_trees", f"mut_trees_{mig_type}_seed{seed}.txt")
     trees = fnmatch.filter(os.listdir(os.path.join(machina_sims_data_dir, f"{site}_clustered_input_corrected")), f"cluster_{mig_type}_seed{seed}_tree*.tsv")
 
-    idx_to_cluster_label = get_idx_to_cluster_label(cluster_fn, ignore_polytomies=True)
-    data = get_adj_matrices_from_spruce_mutation_trees(all_mut_trees_fn, idx_to_cluster_label, is_sim_data=True)
+    idx_to_cluster_label = dutil.get_idx_to_cluster_label(cluster_fn)
+    data = dutil.get_adj_matrices_from_spruce_mutation_trees(all_mut_trees_fn, idx_to_cluster_label, is_sim_data=True)
     custom_colors = [matplotlib.colors.to_hex(c) for c in ['limegreen', 'royalblue', 'hotpink', 'grey', 'saddlebrown', 'darkorange', 'purple', 'red', 'black', 'black', 'black', 'black']]
     perf_stats = []
+    needs_pruning = False if no_parsimony_weights(weights) else True
+    print("needs_pruning", needs_pruning)
     for tree_num in range(len(trees)):
         start_time = datetime.datetime.now()
 
@@ -47,11 +56,11 @@ def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir
         T = torch.tensor(data[tree_num][0], dtype = torch.float32)
 
         pooled_tsv_fn = dutil.pool_input_tsv(ref_var_fn, out_dir, f"tmp_{site}_{mig_type}_{seed}_{tree_num}")
-        print_config = PrintConfig(visualize=False, verbose=False, k_best_trees=batch_size, save_outputs=True)
-
+        print_config = PrintConfig(visualize=VISUALIZE, verbose=False, k_best_trees=batch_size, save_outputs=True)
+        
         T_edges, labeling, G_edges, loss_info, time = get_migration_history(T, pooled_tsv_fn, 'P', weights, print_config, out_dir, f"tree{tree_num}_seed{seed}_{mode}", 
                                                                             max_iter=100, batch_size=batch_size, custom_colors=custom_colors, 
-                                                                            bias_weights=weight_init_primary, mode=mode, solve_polytomies=solve_polytomies)
+                                                                            bias_weights=weight_init_primary, mode=mode, solve_polytomies=solve_polytomies, needs_pruning=needs_pruning)
 
         time_with_plotting = (datetime.datetime.now() - start_time).total_seconds()
         os.remove(pooled_tsv_fn) # cleanup pooled tsv
@@ -74,11 +83,9 @@ if __name__=="__main__":
     parser.add_argument('--mig_type', type=str, help="M, mS, R or S")
     parser.add_argument('--seed', type=int, help="tree seed")
 
-    parser.add_argument('--wdata_fit', type=float, help="Weight on data fit")
     parser.add_argument('--wmig', type=float, help="Weight on migration number")
     parser.add_argument('--wcomig', type=float, help="Weight on comig")
     parser.add_argument('--wseed', type=float, help="Weight on seeding site number")
-    parser.add_argument('--wreg', type=float, help="Weight on regularization")
     parser.add_argument('--wgen', type=float, help="Weight on genetic distance")
 
     parser.add_argument('--wip', type=str, help="Initialize weights higher to favor vertex labeling of primary for all internal nodes")
@@ -98,7 +105,7 @@ if __name__=="__main__":
                      seed_site=DEFAULT_CALIBRATE_SEED_WEIGHTS, gen_dist=args.wgen)
 
     elif args.mode == 'evaluate':
-        weights = Weights(data_fit=args.wdata_fit, mig=[args.wmig], comig=args.wcomig, seed_site=[args.wseed], reg=args.wreg, gen_dist=args.wgen)
+        weights = Weights(mig=[args.wmig], comig=args.wcomig, seed_site=[args.wseed], gen_dist=args.wgen)
     
     wip = True if args.wip == "True" else False
     solve_polytomies = True if args.solve_polys == "True" else False

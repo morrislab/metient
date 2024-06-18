@@ -41,43 +41,61 @@ def get_mut_to_cluster_map_from_pyclone_output(pyclone_cluster_fn, min_mut_thres
     return mut_name_to_clstr_id, clstr_id_to_name, mutation_names
 
 def _validate_combo(df, tsv_fn, col1, col2, message):
-        grouped = df.groupby(col1)[col2].unique()
-        valid_mapping = grouped.apply(lambda x: len(x) == 1).all()
-        if not valid_mapping:
-            raise ValueError(f"{message}. Issue in: {tsv_fn}")
-        
-def pool_input_tsv(tsv_fn, output_dir, run_name):
-    '''
-    Pool reads from the same anatomical site index and cluster index
-    '''
-    df = pd.read_csv(tsv_fn, delimiter="\t", index_col=False)  
+    grouped = df.groupby(col1)[col2].unique()
+    valid_mapping = grouped.apply(lambda x: len(x) == 1).all()
+    if not valid_mapping:
+        raise ValueError(f"{message}. Issue in: {tsv_fn}")
 
-    # Validate the input tsv
+def validate_unpooled_or_pooled_df(df, tsv_fn, index_cols):
+    '''
+    Validation needed for either unpooled or pooled tsv
+    '''
+
     assert(set(df['site_category'])==set(['primary', 'metastasis']))
+
     # Check if all index columns are whole numbers, and convert to int if needed
-    for index_col in ['anatomical_site_index', 'cluster_index', 'character_index']:
+    for index_col in index_cols:
         assert df[index_col].dtype in ['int64', 'float64'], f"{index_col} column is not int or float"
         if df[index_col].dtype == 'float64':
             is_whole_number = df[index_col].apply(lambda x: x.is_integer())
             has_decimal = not is_whole_number.all()
             if has_decimal:
                 raise ValueError(f"{index_col} column must contain whole numbers only. Issue in: {tsv_fn}")
+            
     df['cluster_index'] = df['cluster_index'].astype(int)
-    # Check that each character index maps to only one character label
-    _validate_combo(df, tsv_fn, 'character_index', 'character_label', "Each character index must correspond to the same character_label.")
+    
     # Check that each anatomical site index maps to only one anatomical site label
     _validate_combo(df, tsv_fn, 'anatomical_site_index', 'anatomical_site_label', "Each anatomical site index must correspond to the same anatomical site label.")
+    # Check that each anatomical site label maps to only one anatomical site index
+    _validate_combo(df, tsv_fn, 'anatomical_site_label','anatomical_site_index', "Each anatomical site label must correspond to the same anatomical site index.")
     # Check that each anatomical site index maps to only one site category
     _validate_combo(df, tsv_fn, 'anatomical_site_index', 'site_category', "Each unique anatomical site index must correspond to the same site_category.")
     # Check that all index columns go from 0 to max
     assert set(df['cluster_index']) == set(range(len(df['cluster_index'].unique()))), f"cluster_index values do not go from 0 to max. Issue in: {tsv_fn}"
     assert set(df['anatomical_site_index']) == set(range(len(df['anatomical_site_index'].unique()))), f"anatomical_site_index values do not go from 0 to max, Issue in: {tsv_fn}"
 
+def validate_prepooled_tsv(tsv_fn):
+    # Validate the input tsv
+    df = pd.read_csv(tsv_fn, delimiter="\t", index_col=False)  
+    index_cols = ['anatomical_site_index', 'cluster_index']
+    validate_unpooled_or_pooled_df(df, tsv_fn, index_cols)
+
+def pool_input_tsv(tsv_fn, output_dir, run_name):
+    '''
+    Pool reads from the same anatomical site index and cluster index
+    '''
+    df = pd.read_csv(tsv_fn, delimiter="\t", index_col=False)  
+    validate_unpooled_or_pooled_df(df, tsv_fn, ['anatomical_site_index', 'cluster_index', 'character_index'])
+    df['cluster_index'] = df['cluster_index'].astype(int)
+    # Check that each character index maps to only one character label
+    _validate_combo(df, tsv_fn, 'character_index', 'character_label', "Each character index must correspond to the same character_label.")
     # Check that all var_read_probs are between [0.0,1.0]
     valid_var_read_probs = (df['var_read_prob'] >= 0.0) & (df['var_read_prob'] <= 1.0)
     if not valid_var_read_probs.all():
         raise ValueError(f"All values in the var_read_prob column must be between 0.0 and 1.0 inclusive. Issue in: {tsv_fn}")
+    
     _, output_fn = write_pooled_tsv_from_clusters(df, {}, output_dir, run_name)
+    
     return output_fn
 
 def write_pooled_tsv_from_clusters(df, aggregation_rules, output_dir, patient_id):
@@ -121,7 +139,8 @@ def write_pooled_tsv_from_clusters(df, aggregation_rules, output_dir, patient_id
 
     if not set(all_cols) == set(df.columns):
         missing_columns = set(df.columns) - set(all_cols)
-        raise ValueError(f"Aggregation rules are required for all columns, missing rules for: {missing_columns}")
+        df.drop(columns=missing_columns, inplace=True)
+        print(f"WARNING: dropping extra columns without aggregation rules: {missing_columns}")
 
     # 1. Fix the value of each variant's total read count to account for the var_read_prob of each variant,
     # and then we can set var_read_prob to 0.5 (see PairTree's supplement, end of section S3.8)
@@ -130,7 +149,6 @@ def write_pooled_tsv_from_clusters(df, aggregation_rules, output_dir, patient_id
     df['var'] = df.apply(lambda row: min(row['var'], row['total_reads_corrected']), axis=1)
     df['ref'] = df.apply(lambda row: row['total_reads_corrected']-row['var'], axis=1)
     df['var_read_prob'] = 0.5
-
     df = df.dropna(subset=['cluster_index'])
 
     # Save the number of mutations in each cluster before pooling
@@ -144,7 +162,6 @@ def write_pooled_tsv_from_clusters(df, aggregation_rules, output_dir, patient_id
                      'site_category':'first', 'anatomical_site_label':lambda x: ';'.join(set(x)),}
 
     pooled_df = pooled_df.groupby(['cluster_index', 'anatomical_site_index'], as_index=False).agg({**ref_var_rules, **aggregation_rules})
-
     # 3. Add indices for mutations, samples and anatomical sites as needed for input format
     pooled_df['character_index'] = pooled_df['cluster_index'].tolist()
     pooled_df['anatomical_site_index'] = pooled_df.apply(lambda row: list(pooled_df['anatomical_site_label'].unique()).index(row["anatomical_site_label"]), axis=1)
@@ -156,6 +173,7 @@ def write_pooled_tsv_from_clusters(df, aggregation_rules, output_dir, patient_id
     pooled_df['var'] = pooled_df['var'].round(0).astype(int)
     pooled_df['ref'] = pooled_df.apply(lambda row: row['total_reads_corrected']-row['var'], axis=1)
     all_cols.append('num_mutations')
+
     pooled_df = pooled_df[all_cols]
 
     # Save
@@ -168,33 +186,16 @@ def write_pooled_tsv_from_clusters(df, aggregation_rules, output_dir, patient_id
 
     return pooled_df, output_fn
 
-def calc_var_read_prob(major_cn, minor_cn, purity):
+def calc_var_read_prob(major_cn, minor_cn, purity, diploid=True):
     major_cn = int(major_cn)
     minor_cn = int(minor_cn)
     p = float(purity)
-    x = (p*(major_cn+minor_cn)+2*(1-p))
+    factor = 2 if diploid else 1
+    x = (p*(major_cn+minor_cn)+factor*(1-p))
     var_read_prob = (p*major_cn)/x
     return var_read_prob
-    
-def is_resolved_polytomy_cluster(cluster_label):
-    '''
-    In MACHINA simulated data, cluster labels with non-numeric components (e.g. M2_1
-    instead of 1;3;4) represent polytomies
-    '''
-    is_polytomy = False
-    for mut in cluster_label.split(";"):
-        if not mut.isnumeric() and (mut.startswith('M') or mut.startswith('P')):
-            is_polytomy = True
-    return is_polytomy
 
-def is_leaf(cluster_label):
-    '''
-    In MACHINA simulated data, cluster labels that have underscores (e.g. 3;4_M2)
-    represent leaves
-    '''
-    return "_" in cluster_label and not is_resolved_polytomy_cluster(cluster_label)
-
-def get_idx_to_cluster_label(cluster_filepath, ignore_polytomies):
+def get_idx_to_cluster_label(cluster_filepath):
     '''
     Args:
         cluster_filepath: path to cluster file for MACHINA simulated data in the format:
@@ -206,9 +207,6 @@ def get_idx_to_cluster_label(cluster_filepath, ignore_polytomies):
         where each semi-colon separated number represents a mutation that belongs
         to cluster i where i is the file line number.
 
-        ignore_polytomies: whether to include resolved polytomies (which were found by
-        running PMH-TR) in the returned dictionary
-
     Returns:
         (1) a dictionary mapping cluster number to cluster name
         for e.g. for the file above, this would return:
@@ -219,93 +217,9 @@ def get_idx_to_cluster_label(cluster_filepath, ignore_polytomies):
         i = 0
         for line in f:
             label = line.strip()
-            if is_resolved_polytomy_cluster(label) and ignore_polytomies:
-                continue
             idx_to_cluster_label[i] = label
             i += 1
     return idx_to_cluster_label
-
-# # TODO: remove polytomy stuff?
-# def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_idx_to_cluster_label, T):
-#     '''
-#     tsv_filepath: path to tsv for machina simulated data (generated from create_conf_intervals_from_reads.py)
-
-#     tsv is expected to have columns: ['#sample_index', 'sample_label', 'anatomical_site_index',
-#     'anatomical_site_label', 'character_index', 'character_label', 'f_lb', 'f_ub', 'ref', 'var']
-
-#     pruned_idx_to_cluster_label:  dictionary mapping the cluster index to label, where 
-#     index corresponds to col index in the R matrix and V matrix returned. This isn't 1:1 
-#     with the 'character_label' to 'character_index' mapping in the tsv because we only keep the
-#     nodes which appear in the mutation tree, and re-index after removing unseen nodes
-#     (see _get_adj_matrix_from_machina_tree)
-
-#     T: adjacency matrix of the internal nodes.
-
-#     returns
-#     (1) R matrix (num_samples x num_clusters) with the # of reference reads for each sample+cluster,
-#     (2) V matrix (num_samples x num_clusters) with the # of variant reads for each sample+cluster,
-#     (3) unique anatomical sites from the patient's data
-#     '''
-
-#     assert(pruned_idx_to_cluster_label != None)
-#     assert(T != None)
-
-#     pruned_cluster_label_to_idx = {v:k for k,v in pruned_idx_to_cluster_label.items()}
-#     with open(tsv_filepath) as f:
-#         tsv = csv.reader(f, delimiter="\t", quotechar='"')
-#         # Take a pass over the tsv to collect some metadata
-#         num_samples = 0 # S
-#         for i, row in enumerate(tsv):
-#             # Get the position of columns in the csvs
-#             if i == 3:
-#                 sample_idx = row.index('#sample_index')
-#                 site_label_idx = row.index('anatomical_site_label')
-#                 cluster_label_idx = row.index('character_label')
-#                 ref_idx = row.index('ref')
-#                 var_idx = row.index('var')
-
-#             if i > 3:
-#                 num_samples = max(num_samples, int(row[sample_idx]))
-#         # 0 indexing
-#         num_samples += 1
-
-#     num_clusters = len(pruned_cluster_label_to_idx.keys())
-
-#     R = np.zeros((num_samples, num_clusters))
-#     V = np.zeros((num_samples, num_clusters))
-#     unique_sites = []
-#     with open(tsv_filepath) as f:
-#         tsv = csv.reader(f, delimiter="\t", quotechar='"')
-#         for i, row in enumerate(tsv):
-#             if i < 4: continue
-#             if row[cluster_label_idx] in pruned_cluster_label_to_idx:
-#                 mut_cluster_idx = pruned_cluster_label_to_idx[row[cluster_label_idx]]
-#                 R[int(row[sample_idx]), mut_cluster_idx] = int(row[ref_idx])
-#                 V[int(row[sample_idx]), mut_cluster_idx] = int(row[var_idx])
-
-#             # collect additional metadata
-#             # doing this as a list instead of a set so we preserve the order
-#             # of the anatomical site labels in the same order as the sample indices
-#             if row[site_label_idx] not in unique_sites:
-#                 unique_sites.append(row[site_label_idx])
-
-#     # Fill the columns in R and V with the resolved polytomies' parents data
-#     # (if there are resolved polytomies)
-#     for cluster_label in pruned_cluster_label_to_idx:
-#         if is_resolved_polytomy_cluster(cluster_label):
-#             res_polytomy_idx = pruned_cluster_label_to_idx[cluster_label]
-#             parent_idx = np.where(T[:,res_polytomy_idx] == 1)[0][0]
-#             R[:, res_polytomy_idx] = R[:, parent_idx]
-#             V[:, res_polytomy_idx] = V[:, parent_idx]
-
-#     return torch.tensor(R, dtype=torch.float32), torch.tensor(V, dtype=torch.float32), list(unique_sites)
-
-# def shorten_cluster_names(idx_to_full_cluster_label, split_char):
-#     idx_to_cluster_label = dict()
-#     for ix in idx_to_full_cluster_label:
-#         og_label_muts = idx_to_full_cluster_label[ix].split(split_char) # e.g. CUL3:2:225371655:T;TRPM6:9:77431650:C
-#         idx_to_cluster_label[ix] = og_label_muts[0]
-#     return idx_to_cluster_label
 
 def get_ref_var_omega_matrices(tsv_filepaths):
     '''
@@ -379,7 +293,6 @@ def get_ref_var_omega_matrix(tsv_filepath):
     (6) dictionary mapping index to number of mutations (if 'num_mutations' is passed, else None)
     '''
 
-
     df = pd.read_csv(tsv_filepath, delimiter="\t", index_col=False)  
 
     num_sites = df['anatomical_site_index'].max() + 1
@@ -448,9 +361,27 @@ def extract_ordered_sites(tsv_filepaths):
     for fn in tsv_filepaths:
         ordered_sites.append(_extract_ordered_sites_from_single_tsv(fn))
     return ordered_sites
-    
 
-def _get_adj_matrix_from_machina_tree(tree_edges, idx_to_character_label, remove_unseen_nodes=True, skip_polytomies=False):
+def extract_matrices_from_tsv(tsv_fn, estimate_observed_clones, T):
+    if estimate_observed_clones:    
+        ref, var, omega, ordered_sites, node_idx_to_label, idx_to_num_mutations = get_ref_var_omega_matrix(tsv_fn)
+        if not torch.is_tensor(ref):
+            ref = torch.tensor(ref, dtype=torch.float32)
+        if not torch.is_tensor(var):
+            var = torch.tensor(var, dtype=torch.float32)
+        idx_to_observed_sites = None # needs to be estimated later
+    else:
+        ref, var, omega = None, None, None
+        ordered_sites, node_idx_to_label, idx_to_num_mutations, idx_to_observed_sites = extract_info_from_observed_clone_tsv(tsv_fn)
+
+    G = None
+    # If genetic distance info is given, load into genetic distance matrix
+    if idx_to_num_mutations != None:
+        G = get_genetic_distance_matrix_from_adj_matrix(T, idx_to_num_mutations)
+
+    return ref, var, omega, ordered_sites, node_idx_to_label, idx_to_observed_sites, G
+
+def _get_adj_matrix_from_spruce_tree(tree_edges, idx_to_character_label, remove_unseen_nodes=True):
     '''
     Args:
         tree_edges: list of tuples where each tuple is an edge in the tree
@@ -459,9 +390,6 @@ def _get_adj_matrix_from_machina_tree(tree_edges, idx_to_character_label, remove
         is the nth node in the adjacency matrix).
         remove_unseen_nodes: if True, removes nodes that
         appear in the machina tsv file but do not appear in the reported tree
-        skip_polyomies: if True, checks for polytomies and skips over them. For example
-        if the tree is 0 -> polytomy -> 1, returns 0 -> 1. If the tree is 0 -> polytomy
-        returns 0.
 
     Returns:
         T: adjacency matrix where Tij = 1 if there is a path from i to j
@@ -472,8 +400,6 @@ def _get_adj_matrix_from_machina_tree(tree_edges, idx_to_character_label, remove
     num_internal_nodes = len(character_label_to_idx)
     T = np.zeros((num_internal_nodes, num_internal_nodes))
     seen_nodes = set()
-    # dict of { child_label : parent_label } needed to skip over polytomies
-    child_to_parent_map = {}
     for edge in tree_edges:
         node_i, node_j = edge[0], edge[1]
         seen_nodes.add(node_i)
@@ -481,20 +407,6 @@ def _get_adj_matrix_from_machina_tree(tree_edges, idx_to_character_label, remove
         # don't include the leaf/extant nodes (determined from U)
         if node_i in character_label_to_idx and node_j in character_label_to_idx:
             T[character_label_to_idx[node_i], character_label_to_idx[node_j]] = 1
-
-        # we don't want to include the leaf nodes, only internal nodes
-        if not is_leaf(node_j) and node_i != "GL":
-            child_to_parent_map[node_j] = node_i
-
-    # Fix missing connections
-    if skip_polytomies:
-        for child_label in child_to_parent_map:
-            parent_label = child_to_parent_map[child_label]
-            if is_resolved_polytomy_cluster(parent_label) and parent_label in child_to_parent_map:
-                # Connect the resolved polytomy's parent to the resolved polytomy's child
-                res_poly_parent = child_to_parent_map[parent_label]
-                if res_poly_parent in character_label_to_idx and child_label in character_label_to_idx:
-                    T[character_label_to_idx[res_poly_parent], character_label_to_idx[child_label]] = 1
 
     unseen_nodes = list(set(character_label_to_idx.keys()) - seen_nodes)
     pruned_character_label_to_idx = OrderedDict()
@@ -534,7 +446,7 @@ def get_adj_matrices_from_spruce_mutation_trees(mut_trees_filename, idx_to_chara
             if i < 3: continue
             # This marks the beginning of a tree
             if "#edges, tree" in line:
-                adj_matrix, pruned_idx_to_label = _get_adj_matrix_from_machina_tree(tree_data, idx_to_character_label)
+                adj_matrix, pruned_idx_to_label = _get_adj_matrix_from_spruce_tree(tree_data, idx_to_character_label)
                 out.append((adj_matrix, pruned_idx_to_label))
                 tree_data = []
             else:
@@ -546,50 +458,8 @@ def get_adj_matrices_from_spruce_mutation_trees(mut_trees_filename, idx_to_chara
                 else:
                     tree_data.append((nodes[0], nodes[1]))
 
-        adj_matrix, pruned_idx_to_label = _get_adj_matrix_from_machina_tree(tree_data, idx_to_character_label)
+        adj_matrix, pruned_idx_to_label = _get_adj_matrix_from_spruce_tree(tree_data, idx_to_character_label)
         out.append((adj_matrix, pruned_idx_to_label))
-    return out
-
-def get_adj_matrices_from_spruce_mutation_trees_no_pruning_reordering(mut_trees_filename, idx_to_character_label):
-    '''
-    When running MACHINA's generatemutationtrees executable (SPRUCE), it provides a txt file with
-    all possible mutation trees. See data/machina_simulated_data/mut_trees_m5/ for examples
-
-    Returns a list of trees for each tree in mut_trees_filename.
-        - T: adjacency matrix where Tij = 1 if there is a path from i to j
-        - idx_to_character_label: a dict mapping indices of the adj matrix T to character
-        labels 
-
-    Does not prine idx_to_character_label, and does not reorder indices like 
-    get_adj_matrices_from_spruce_mutation_trees does
-    '''
-
-    character_label_to_idx = {v:k for k,v in idx_to_character_label.items()}
-
-    def _build_tree(edges):
-        num_internal_nodes = len(character_label_to_idx)
-        T = np.zeros((num_internal_nodes, num_internal_nodes))
-        for edge in edges:
-            node_i, node_j = edge[0], edge[1]
-            T[character_label_to_idx[node_i], character_label_to_idx[node_j]] = 1
-        return T
-
-    out = []
-    with open(mut_trees_filename, 'r') as f:
-        tree_data = []
-        for i, line in enumerate(f):
-            if i < 3: continue
-            # This marks the beginning of a tree
-            if "#edges, tree" in line:
-                adj_matrix= _build_tree(tree_data)
-                out.append(adj_matrix)
-                tree_data = []
-            else:
-                nodes = line.strip().split()
-                tree_data.append((nodes[0], nodes[1]))
-
-        adj_matrix = _build_tree(tree_data)
-        out.append(adj_matrix)
     return out
 
 def get_adj_matrices_from_all_conipher_trees(mut_trees_filename):
@@ -624,31 +494,6 @@ def get_adj_matrices_from_all_conipher_trees(mut_trees_filename):
         out.append(adj_matrix)
     return out
 
-# TODO: take out skip polytomies functionality?
-def get_adj_matrix_from_machina_tree(character_label_to_idx, tree_filename, remove_unseen_nodes=True, skip_polytomies=False):
-    '''
-    character_label_to_idx: dictionary mapping character_label to index (machina
-    uses colors to represent subclones, so this would map 'pink' to n, if pink
-    is the nth node in the adjacency matrix).
-    tree_filename: path to .tree file
-    remove_unseen_nodes: if True, removes nodes that
-    appear in the machina tsv file but do not appear in the reported tree
-    skip_polyomies: if True, checks for polytomies and skips over them. For example
-    if the tree is 0 -> polytomy -> 1, returns 0 -> 1. If the tree is 0 -> polytomy
-    returns 0.
-
-    Returns:
-        T: adjacency matrix where Tij = 1 if there is a path from i to j
-        character_label_to_idx: a pruned character_label_to_idx where nodes that
-        appear in the machina tsv file but do not appear in the reported tree are removed
-    '''
-    edges = []
-    with open(tree_filename, 'r') as f:
-        for line in f:
-            nodes = line.strip().split()
-            node_i, node_j = nodes[0], nodes[1]
-            edges.append((node_i, node_j))
-    return _get_adj_matrix_from_machina_tree(edges, character_label_to_idx, remove_unseen_nodes, skip_polytomies)
 
 def get_genetic_distance_matrices_from_adj_matrices(adj_matrices, idx_to_character_labels, split_char, normalize=True):
     '''
@@ -689,7 +534,6 @@ def get_genetic_distance_matrix_from_adj_matrix(adj_matrix, idx_to_num_muts, nor
     if normalize:
         G = G / np.sum(G)
     return torch.tensor(G, dtype = torch.float32)
-
 
 def get_organotropism_matrix_from_msk_met(ordered_sites, cancer_type, frequency_csv, site_to_msk_met_map=None):
     '''
