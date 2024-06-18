@@ -102,11 +102,12 @@ def save_boxplot(joint_df, run_name):
 
 if __name__ == "__main__":
 
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 5:
         sys.stderr.write("Usage: %s <MACHINA_SIM_DATA_DIR> <PREDICTIONS_DATA_DIR> <RUN_NAME>\n" % sys.argv[0])
         sys.stderr.write("MACHINA_SIM_DATA_DIR: directory containing the true labelings\n")
         sys.stderr.write("PREDICTIONS_DATA_DIR: directory containing the predicted labelings\n")
         sys.stderr.write("RUN_NAME: Name of the run to use in output png naming.\n")
+        sys.stderr.write("SUFFIX: suffix to match pkl.gz files\n") # e.g. _calibrate
         sys.exit(1)
 
 
@@ -124,8 +125,8 @@ if __name__ == "__main__":
 
     x = 0
     k = float("inf")
-    loss_thres = 0.0 # floating point approximation leeway
-    suffix = "_evaluate"
+    loss_thres = 0.0
+    suffix = sys.argv[4]
 
     print(f"Finding {k} best trees within loss threshold of {loss_thres}")
     print(f"Matching files ending in {suffix}")

@@ -15,6 +15,7 @@ import numpy as np
 
 from metient.util.globals import *
 from metient.util import plotting_util as plot_util
+from metient.util import vertex_labeling_util as vutil
 
 def plot_cross_ent_chart(data_dict, output_dir):
     fig = plt.figure(figsize=(2.5, 3),dpi=200)
@@ -115,9 +116,15 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3
         with gzip.open(pkl_file,'rb') as f:
             pckl = pickle.load(f)
         
-        # sites = pckl[OUT_SITES_KEY]
-        # if len(sites) > 2:
         loss_dicts = pckl[OUT_LOSS_DICT_KEY]
+        pars_metrics = set()
+        for loss_dict in loss_dicts:
+            pars_metrics.add((loss_dict[MIG_KEY].item(),loss_dict[COMIG_KEY].item(),loss_dict[SEEDING_KEY].item()))
+        
+        # This patient won't change the cross entropy loss
+        if len(pars_metrics) == 1:
+            continue
+
         idx_to_label = pckl[OUT_IDX_LABEL_KEY][0]
         all_data.append((loss_dicts, idx_to_label))
 
@@ -130,6 +137,11 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3
                 print("gen dist diff", (unique_gs[1]-unique_gs[0]))
                 min_tau = min(min_tau, (unique_gs[1]-unique_gs[0]))
     
+    if len(all_data) == 0:
+        # TODO: 
+        print("WARNING: Unable to calibrate since no patients have Pareto optimal trees. Using default weighting, wm > wc > ws")
+        return [0.46, 0.29, 0.25] # these are estimated from multiple cancer cohorts
+    
     if use_min_tau:
         tau = min_tau
         print("min_tau", tau)
@@ -137,7 +149,7 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3
     print(f"Calibrating to {len(all_data)} patients")
 
     patience = 50
-    min_delta = 0.0001
+    min_delta = 0.00005
     current_patience = 0
     best_loss = float('inf')
     
@@ -287,11 +299,11 @@ def metient_parse_clone_tree(results_dict, met_tree_num):
     idx_to_string_label = {i:";".join(idx_to_lbl[i][0]) for i in idx_to_lbl}
 
     edges = [("GL", '0')]
-    for i, j in plot_util.tree_iterator(A):
+    for i, j in vutil.tree_iterator(A):
         edges.append((idx_to_string_label[i], idx_to_string_label[j]))
     
     migration_edges = []
-    for i, j in plot_util.tree_iterator(A):
+    for i, j in vutil.tree_iterator(A):
         if torch.argmax(V[:,i]) != torch.argmax(V[:,j]):
             migration_edges.append((idx_to_string_label[i], idx_to_string_label[j]))
     return edges, migration_edges
@@ -300,7 +312,7 @@ def metient_parse_mig_graph(results_dict, met_tree_num):
     V = torch.tensor(results_dict[OUT_LABElING_KEY][met_tree_num])
     A = torch.tensor(results_dict[OUT_ADJ_KEY][met_tree_num])
     sites = results_dict[OUT_SITES_KEY]
-    G = plot_util.get_migration_graph(V, A)
+    G = plot_util.migration_graph(V, A)
     migration_edges = []
     for i, row in enumerate(G):
         for j, val in enumerate(row):
@@ -353,6 +365,9 @@ def evaluate_seeding_clones(sim_clone_tree_fn, sim_vert_labeling_fn, met_results
     for edge in edges_simulated:
         if is_resolved_polytomy_cluster(edge[0]) or is_resolved_polytomy_cluster(edge[1]):
             contains_resolved_polytomy = True
+    # print("edges_inferred", edges_inferred, "seeding_clones_inferred", seeding_clones_inferred)
+    # print("edges_simulated", edges_simulated, "seeding_clones_simulated", seeding_clones_simulated)
+        
     recall = float(len(seeding_clones_inferred & seeding_clones_simulated)) / float(len(seeding_clones_simulated))
     precision = float(len(seeding_clones_inferred & seeding_clones_simulated)) / float(len(seeding_clones_inferred))
     if recall == 0 or precision == 0:
