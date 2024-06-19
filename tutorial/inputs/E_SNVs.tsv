@@ -1,0 +1,411 @@
+anatomical_site_index	anatomical_site_label	cluster_index	character_index	character_label	ref	var	var_read_prob	site_category
+0	Primary, left heel	1	0	PROM2	171	145	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	0	PROM2	217	186	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	0	PROM2	199	174	0.45	metastasis
+3	Lymph node metastasis, left groin	1	0	PROM2	203	158	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	0	PROM2	177	121	0.445	metastasis
+0	Primary, left heel	2	1	TTN	18	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	2	1	TTN	19	4	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	2	1	TTN	22	0	0.45	metastasis
+3	Lymph node metastasis, left groin	2	1	TTN	20	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	2	1	TTN	25	0	0.445	metastasis
+0	Primary, left heel	3	2	ORC1	97	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	3	2	ORC1	99	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	3	2	ORC1	99	0	0.45	metastasis
+3	Lymph node metastasis, left groin	3	2	ORC1	90	12	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	3	2	ORC1	74	0	0.445	metastasis
+0	Primary, left heel	1	3	GUSB	127	67	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	3	GUSB	149	110	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	3	GUSB	126	93	0.45	metastasis
+3	Lymph node metastasis, left groin	1	3	GUSB	111	94	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	3	GUSB	126	63	0.445	metastasis
+0	Primary, left heel	4	4	ECI1	62	10	0.4	primary
+1	Locoregional skin metastasis 1, left heel	4	4	ECI1	107	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	4	4	ECI1	100	0	0.45	metastasis
+3	Lymph node metastasis, left groin	4	4	ECI1	101	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	4	4	ECI1	69	0	0.445	metastasis
+0	Primary, left heel	1	5	FBXL7	346	226	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	5	FBXL7	370	267	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	5	FBXL7	439	315	0.45	metastasis
+3	Lymph node metastasis, left groin	1	5	FBXL7	359	270	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	5	FBXL7	375	247	0.445	metastasis
+0	Primary, left heel	1	6	SHANK1	49	37	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	6	SHANK1	64	47	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	6	SHANK1	68	34	0.45	metastasis
+3	Lymph node metastasis, left groin	1	6	SHANK1	67	58	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	6	SHANK1	48	36	0.445	metastasis
+0	Primary, left heel	1	7	SLC5A1	128	90	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	7	SLC5A1	170	145	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	7	SLC5A1	183	138	0.45	metastasis
+3	Lymph node metastasis, left groin	1	7	SLC5A1	184	103	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	7	SLC5A1	137	117	0.445	metastasis
+0	Primary, left heel	2	8	PTPN12	103	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	2	8	PTPN12	111	13	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	2	8	PTPN12	145	1	0.45	metastasis
+3	Lymph node metastasis, left groin	2	8	PTPN12	112	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	2	8	PTPN12	118	0	0.445	metastasis
+0	Primary, left heel	1	9	SLC4A9	56	26	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	9	SLC4A9	38	59	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	9	SLC4A9	50	59	0.45	metastasis
+3	Lymph node metastasis, left groin	1	9	SLC4A9	41	45	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	9	SLC4A9	48	39	0.445	metastasis
+0	Primary, left heel	1	10	SPPL2B	148	102	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	10	SPPL2B	144	118	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	10	SPPL2B	156	132	0.45	metastasis
+3	Lymph node metastasis, left groin	1	10	SPPL2B	116	113	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	10	SPPL2B	121	89	0.445	metastasis
+0	Primary, left heel	1	11	MESDC1	77	36	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	11	MESDC1	88	73	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	11	MESDC1	107	72	0.45	metastasis
+3	Lymph node metastasis, left groin	1	11	MESDC1	71	65	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	11	MESDC1	64	53	0.445	metastasis
+0	Primary, left heel	0	12	SDS	25	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	0	12	SDS	26	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	0	12	SDS	28	4	0.45	metastasis
+3	Lymph node metastasis, left groin	0	12	SDS	32	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	0	12	SDS	25	0	0.445	metastasis
+0	Primary, left heel	1	13	NRAS	298	176	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	13	NRAS	318	254	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	13	NRAS	380	234	0.45	metastasis
+3	Lymph node metastasis, left groin	1	13	NRAS	314	199	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	13	NRAS	275	251	0.445	metastasis
+0	Primary, left heel	2	14	MUC20	84	23	0.4	primary
+1	Locoregional skin metastasis 1, left heel	2	14	MUC20	95	26	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	2	14	MUC20	82	10	0.45	metastasis
+3	Lymph node metastasis, left groin	2	14	MUC20	97	14	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	2	14	MUC20	81	15	0.445	metastasis
+0	Primary, left heel	1	15	ZNF629	161	74	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	15	ZNF629	182	125	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	15	ZNF629	180	135	0.45	metastasis
+3	Lymph node metastasis, left groin	1	15	ZNF629	160	114	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	15	ZNF629	108	102	0.445	metastasis
+0	Primary, left heel	5	16	PTX4	74	1	0.4	primary
+1	Locoregional skin metastasis 1, left heel	5	16	PTX4	47	54	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	5	16	PTX4	73	47	0.45	metastasis
+3	Lymph node metastasis, left groin	5	16	PTX4	44	30	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	5	16	PTX4	36	29	0.445	metastasis
+0	Primary, left heel	1	17	DNAJC6	68	64	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	17	DNAJC6	99	75	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	17	DNAJC6	129	117	0.45	metastasis
+3	Lymph node metastasis, left groin	1	17	DNAJC6	89	63	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	17	DNAJC6	85	78	0.445	metastasis
+0	Primary, left heel	4	18	RNF148	768	289	0.4	primary
+1	Locoregional skin metastasis 1, left heel	4	18	RNF148	1518	2	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	4	18	RNF148	1708	0	0.45	metastasis
+3	Lymph node metastasis, left groin	4	18	RNF148	1220	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	4	18	RNF148	1498	0	0.445	metastasis
+0	Primary, left heel	5	19	HILS1	348	2	0.4	primary
+1	Locoregional skin metastasis 1, left heel	5	19	HILS1	247	189	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	5	19	HILS1	216	166	0.45	metastasis
+3	Lymph node metastasis, left groin	5	19	HILS1	211	185	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	5	19	HILS1	162	139	0.445	metastasis
+0	Primary, left heel	0	20	EPS8L3	637	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	0	20	EPS8L3	751	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	0	20	EPS8L3	560	275	0.45	metastasis
+3	Lymph node metastasis, left groin	0	20	EPS8L3	692	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	0	20	EPS8L3	674	0	0.445	metastasis
+0	Primary, left heel	1	21	RP1L1	90	80	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	21	RP1L1	112	86	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	21	RP1L1	108	90	0.45	metastasis
+3	Lymph node metastasis, left groin	1	21	RP1L1	110	65	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	21	RP1L1	85	67	0.445	metastasis
+0	Primary, left heel	1	22	LILRA2	122	65	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	22	LILRA2	160	88	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	22	LILRA2	135	94	0.45	metastasis
+3	Lymph node metastasis, left groin	1	22	LILRA2	114	90	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	22	LILRA2	110	83	0.445	metastasis
+0	Primary, left heel	1	23	ISG20	158	83	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	23	ISG20	150	112	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	23	ISG20	172	139	0.45	metastasis
+3	Lymph node metastasis, left groin	1	23	ISG20	173	99	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	23	ISG20	142	92	0.445	metastasis
+0	Primary, left heel	1	24	SLC18A1	214	107	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	24	SLC18A1	240	160	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	24	SLC18A1	254	165	0.45	metastasis
+3	Lymph node metastasis, left groin	1	24	SLC18A1	213	139	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	24	SLC18A1	207	141	0.445	metastasis
+0	Primary, left heel	5	25	LACTB	405	6	0.4	primary
+1	Locoregional skin metastasis 1, left heel	5	25	LACTB	283	223	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	5	25	LACTB	301	237	0.45	metastasis
+3	Lymph node metastasis, left groin	5	25	LACTB	268	223	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	5	25	LACTB	229	220	0.445	metastasis
+0	Primary, left heel	1	26	B3GNT6	1	7	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	26	B3GNT6	0	15	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	26	B3GNT6	1	7	0.45	metastasis
+3	Lymph node metastasis, left groin	1	26	B3GNT6	0	5	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	26	B3GNT6	0	10	0.445	metastasis
+0	Primary, left heel	5	27	ERBB4	132	2	0.4	primary
+1	Locoregional skin metastasis 1, left heel	5	27	ERBB4	79	74	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	5	27	ERBB4	116	90	0.45	metastasis
+3	Lymph node metastasis, left groin	5	27	ERBB4	95	72	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	5	27	ERBB4	96	83	0.445	metastasis
+0	Primary, left heel	1	28	ATP10B	4	1	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	28	ATP10B	3	8	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	28	ATP10B	8	9	0.45	metastasis
+3	Lymph node metastasis, left groin	1	28	ATP10B	2	5	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	28	ATP10B	9	5	0.445	metastasis
+0	Primary, left heel	4	29	ALPK3	22	4	0.4	primary
+1	Locoregional skin metastasis 1, left heel	4	29	ALPK3	21	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	4	29	ALPK3	28	0	0.45	metastasis
+3	Lymph node metastasis, left groin	4	29	ALPK3	15	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	4	29	ALPK3	16	0	0.445	metastasis
+0	Primary, left heel	1	30	SBSN	386	244	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	30	SBSN	420	339	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	30	SBSN	442	352	0.45	metastasis
+3	Lymph node metastasis, left groin	1	30	SBSN	424	343	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	30	SBSN	326	270	0.445	metastasis
+0	Primary, left heel	1	31	TRPM1	269	167	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	31	TRPM1	316	222	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	31	TRPM1	340	234	0.45	metastasis
+3	Lymph node metastasis, left groin	1	31	TRPM1	291	186	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	31	TRPM1	277	212	0.445	metastasis
+0	Primary, left heel	3	32	PSG3	14	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	3	32	PSG3	23	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	3	32	PSG3	24	1	0.45	metastasis
+3	Lymph node metastasis, left groin	3	32	PSG3	13	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	3	32	PSG3	13	4	0.445	metastasis
+0	Primary, left heel	1	33	ZNF865	235	182	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	33	ZNF865	254	224	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	33	ZNF865	265	218	0.45	metastasis
+3	Lymph node metastasis, left groin	1	33	ZNF865	249	218	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	33	ZNF865	236	144	0.445	metastasis
+0	Primary, left heel	1	34	NCOA2	103	52	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	34	NCOA2	114	84	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	34	NCOA2	102	82	0.45	metastasis
+3	Lymph node metastasis, left groin	1	34	NCOA2	99	50	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	34	NCOA2	94	49	0.445	metastasis
+0	Primary, left heel	1	35	RERGL	180	95	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	35	RERGL	215	107	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	35	RERGL	249	152	0.45	metastasis
+3	Lymph node metastasis, left groin	1	35	RERGL	205	108	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	35	RERGL	233	127	0.445	metastasis
+0	Primary, left heel	2	36	FLJ22184	23	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	2	36	FLJ22184	34	5	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	2	36	FLJ22184	29	0	0.45	metastasis
+3	Lymph node metastasis, left groin	2	36	FLJ22184	31	6	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	2	36	FLJ22184	16	0	0.445	metastasis
+0	Primary, left heel	3	37	IL18R1	138	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	3	37	IL18R1	191	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	3	37	IL18R1	227	0	0.45	metastasis
+3	Lymph node metastasis, left groin	3	37	IL18R1	130	28	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	3	37	IL18R1	180	0	0.445	metastasis
+0	Primary, left heel	0	38	CHRDL2	64	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	0	38	CHRDL2	74	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	0	38	CHRDL2	45	33	0.45	metastasis
+3	Lymph node metastasis, left groin	0	38	CHRDL2	72	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	0	38	CHRDL2	69	0	0.445	metastasis
+0	Primary, left heel	2	39	TRIL	11	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	2	39	TRIL	24	6	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	2	39	TRIL	8	0	0.45	metastasis
+3	Lymph node metastasis, left groin	2	39	TRIL	7	1	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	2	39	TRIL	10	0	0.445	metastasis
+0	Primary, left heel	1	40	EMG1	0	106	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	40	EMG1	0	163	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	40	EMG1	0	144	0.45	metastasis
+3	Lymph node metastasis, left groin	1	40	EMG1	0	128	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	40	EMG1	0	104	0.445	metastasis
+0	Primary, left heel	1	41	EXOSC10	206	101	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	41	EXOSC10	186	124	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	41	EXOSC10	235	145	0.45	metastasis
+3	Lymph node metastasis, left groin	1	41	EXOSC10	164	112	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	41	EXOSC10	148	131	0.445	metastasis
+0	Primary, left heel	1	42	ERCC8	13	11	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	42	ERCC8	14	16	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	42	ERCC8	18	24	0.45	metastasis
+3	Lymph node metastasis, left groin	1	42	ERCC8	15	12	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	42	ERCC8	20	10	0.445	metastasis
+0	Primary, left heel	1	43	GAlymph node metastasis, left groinT10	91	66	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	43	GAlymph node metastasis, left groinT10	119	99	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	43	GAlymph node metastasis, left groinT10	115	115	0.45	metastasis
+3	Lymph node metastasis, left groin	1	43	GAlymph node metastasis, left groinT10	120	97	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	43	GAlymph node metastasis, left groinT10	111	71	0.445	metastasis
+0	Primary, left heel	1	44	UTP15	181	129	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	44	UTP15	192	167	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	44	UTP15	225	178	0.45	metastasis
+3	Lymph node metastasis, left groin	1	44	UTP15	180	149	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	44	UTP15	215	123	0.445	metastasis
+0	Primary, left heel	1	45	LPPR5	87	57	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	45	LPPR5	91	75	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	45	LPPR5	93	78	0.45	metastasis
+3	Lymph node metastasis, left groin	1	45	LPPR5	82	80	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	45	LPPR5	100	71	0.445	metastasis
+0	Primary, left heel	1	46	HADHA	314	169	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	46	HADHA	366	281	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	46	HADHA	390	245	0.45	metastasis
+3	Lymph node metastasis, left groin	1	46	HADHA	286	218	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	46	HADHA	279	199	0.445	metastasis
+0	Primary, left heel	3	47	KCNK1	154	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	3	47	KCNK1	211	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	3	47	KCNK1	265	1	0.45	metastasis
+3	Lymph node metastasis, left groin	3	47	KCNK1	186	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	3	47	KCNK1	129	105	0.445	metastasis
+0	Primary, left heel	1	48	ARID1A	167	86	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	48	ARID1A	175	145	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	48	ARID1A	187	130	0.45	metastasis
+3	Lymph node metastasis, left groin	1	48	ARID1A	182	115	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	48	ARID1A	144	128	0.445	metastasis
+0	Primary, left heel	0	49	AIFM3	292	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	0	49	AIFM3	332	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	0	49	AIFM3	236	110	0.45	metastasis
+3	Lymph node metastasis, left groin	0	49	AIFM3	331	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	0	49	AIFM3	264	0	0.445	metastasis
+0	Primary, left heel	2	50	TMEM59	21	5	0.4	primary
+1	Locoregional skin metastasis 1, left heel	2	50	TMEM59	26	1	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	2	50	TMEM59	32	2	0.45	metastasis
+3	Lymph node metastasis, left groin	2	50	TMEM59	29	1	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	2	50	TMEM59	17	2	0.445	metastasis
+0	Primary, left heel	1	51	FBN2	92	36	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	51	FBN2	65	69	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	51	FBN2	79	66	0.45	metastasis
+3	Lymph node metastasis, left groin	1	51	FBN2	88	52	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	51	FBN2	69	60	0.445	metastasis
+0	Primary, left heel	1	52	KDM2B	154	65	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	52	KDM2B	126	101	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	52	KDM2B	114	99	0.45	metastasis
+3	Lymph node metastasis, left groin	1	52	KDM2B	163	97	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	52	KDM2B	93	69	0.445	metastasis
+0	Primary, left heel	4	53	UNC13A	18	4	0.4	primary
+1	Locoregional skin metastasis 1, left heel	4	53	UNC13A	22	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	4	53	UNC13A	28	0	0.45	metastasis
+3	Lymph node metastasis, left groin	4	53	UNC13A	24	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	4	53	UNC13A	14	0	0.445	metastasis
+0	Primary, left heel	3	54	DUSP26	111	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	3	54	DUSP26	137	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	3	54	DUSP26	133	0	0.45	metastasis
+3	Lymph node metastasis, left groin	3	54	DUSP26	80	49	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	3	54	DUSP26	129	0	0.445	metastasis
+0	Primary, left heel	1	55	MYO15A	160	129	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	55	MYO15A	160	149	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	55	MYO15A	157	108	0.45	metastasis
+3	Lymph node metastasis, left groin	1	55	MYO15A	136	96	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	55	MYO15A	91	77	0.445	metastasis
+0	Primary, left heel	2	56	SLC6A10P	18	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	2	56	SLC6A10P	17	1	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	2	56	SLC6A10P	19	2	0.45	metastasis
+3	Lymph node metastasis, left groin	2	56	SLC6A10P	15	4	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	2	56	SLC6A10P	12	1	0.445	metastasis
+0	Primary, left heel	1	57	ZZZ3	166	82	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	57	ZZZ3	167	115	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	57	ZZZ3	219	146	0.45	metastasis
+3	Lymph node metastasis, left groin	1	57	ZZZ3	145	111	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	57	ZZZ3	182	134	0.445	metastasis
+0	Primary, left heel	3	58	RAD51AP2	641	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	3	58	RAD51AP2	772	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	3	58	RAD51AP2	895	0	0.45	metastasis
+3	Lymph node metastasis, left groin	3	58	RAD51AP2	375	284	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	3	58	RAD51AP2	805	0	0.445	metastasis
+0	Primary, left heel	1	59	CDH9	114	72	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	59	CDH9	162	118	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	59	CDH9	170	110	0.45	metastasis
+3	Lymph node metastasis, left groin	1	59	CDH9	127	112	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	59	CDH9	182	144	0.445	metastasis
+0	Primary, left heel	1	60	PTPRC	100	57	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	60	PTPRC	120	82	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	60	PTPRC	174	100	0.45	metastasis
+3	Lymph node metastasis, left groin	1	60	PTPRC	101	90	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	60	PTPRC	108	96	0.445	metastasis
+0	Primary, left heel	1	61	MYT1L	218	128	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	61	MYT1L	223	243	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	61	MYT1L	319	220	0.45	metastasis
+3	Lymph node metastasis, left groin	1	61	MYT1L	230	207	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	61	MYT1L	270	172	0.445	metastasis
+0	Primary, left heel	3	62	ASPM	154	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	3	62	ASPM	220	1	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	3	62	ASPM	245	0	0.45	metastasis
+3	Lymph node metastasis, left groin	3	62	ASPM	163	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	3	62	ASPM	155	107	0.445	metastasis
+0	Primary, left heel	1	63	MAP3K10	59	47	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	63	MAP3K10	64	52	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	63	MAP3K10	64	49	0.45	metastasis
+3	Lymph node metastasis, left groin	1	63	MAP3K10	60	48	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	63	MAP3K10	51	44	0.445	metastasis
+0	Primary, left heel	1	64	DALRD3	285	169	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	64	DALRD3	354	255	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	64	DALRD3	346	257	0.45	metastasis
+3	Lymph node metastasis, left groin	1	64	DALRD3	272	213	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	64	DALRD3	229	213	0.445	metastasis
+0	Primary, left heel	3	65	SPATA20	234	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	3	65	SPATA20	260	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	3	65	SPATA20	300	0	0.45	metastasis
+3	Lymph node metastasis, left groin	3	65	SPATA20	137	75	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	3	65	SPATA20	242	0	0.445	metastasis
+0	Primary, left heel	1	66	ZNF267	55	38	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	66	ZNF267	90	63	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	66	ZNF267	118	80	0.45	metastasis
+3	Lymph node metastasis, left groin	1	66	ZNF267	69	49	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	66	ZNF267	88	78	0.445	metastasis
+0	Primary, left heel	3	67	MUC16	356	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	3	67	MUC16	459	1	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	3	67	MUC16	476	0	0.45	metastasis
+3	Lymph node metastasis, left groin	3	67	MUC16	473	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	3	67	MUC16	200	179	0.445	metastasis
+0	Primary, left heel	3	68	TGM4	28	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	3	68	TGM4	32	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	3	68	TGM4	39	0	0.45	metastasis
+3	Lymph node metastasis, left groin	3	68	TGM4	17	4	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	3	68	TGM4	34	0	0.445	metastasis
+0	Primary, left heel	0	69	ZNF829	669	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	0	69	ZNF829	978	17	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	0	69	ZNF829	568	110	0.45	metastasis
+3	Lymph node metastasis, left groin	0	69	ZNF829	938	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	0	69	ZNF829	738	0	0.445	metastasis
+0	Primary, left heel	1	70	CCDC24	111	53	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	70	CCDC24	118	87	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	70	CCDC24	96	95	0.45	metastasis
+3	Lymph node metastasis, left groin	1	70	CCDC24	88	54	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	70	CCDC24	89	82	0.445	metastasis
+0	Primary, left heel	1	71	UBE2O	160	67	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	71	UBE2O	148	111	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	71	UBE2O	179	139	0.45	metastasis
+3	Lymph node metastasis, left groin	1	71	UBE2O	146	117	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	71	UBE2O	108	76	0.445	metastasis
+0	Primary, left heel	2	72	RFPL3	20	4	0.4	primary
+1	Locoregional skin metastasis 1, left heel	2	72	RFPL3	38	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	2	72	RFPL3	27	1	0.45	metastasis
+3	Lymph node metastasis, left groin	2	72	RFPL3	27	1	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	2	72	RFPL3	24	7	0.445	metastasis
+0	Primary, left heel	1	73	FSIP2	58	43	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	73	FSIP2	61	66	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	73	FSIP2	75	66	0.45	metastasis
+3	Lymph node metastasis, left groin	1	73	FSIP2	59	53	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	73	FSIP2	58	49	0.445	metastasis
+0	Primary, left heel	3	74	TCRBV20S1	307	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	3	74	TCRBV20S1	354	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	3	74	TCRBV20S1	378	0	0.45	metastasis
+3	Lymph node metastasis, left groin	3	74	TCRBV20S1	297	43	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	3	74	TCRBV20S1	315	0	0.445	metastasis
+0	Primary, left heel	0	75	MLL4	56	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	0	75	MLL4	88	1	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	0	75	MLL4	66	30	0.45	metastasis
+3	Lymph node metastasis, left groin	0	75	MLL4	91	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	0	75	MLL4	82	0	0.445	metastasis
+0	Primary, left heel	1	76	FZD1	16	14	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	76	FZD1	17	20	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	76	FZD1	27	16	0.45	metastasis
+3	Lymph node metastasis, left groin	1	76	FZD1	21	11	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	76	FZD1	20	17	0.445	metastasis
+0	Primary, left heel	5	77	PHKG2	21	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	5	77	PHKG2	26	47	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	5	77	PHKG2	24	0	0.45	metastasis
+3	Lymph node metastasis, left groin	5	77	PHKG2	20	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	5	77	PHKG2	26	35	0.445	metastasis
+0	Primary, left heel	4	78	TMIGD2	19	4	0.4	primary
+1	Locoregional skin metastasis 1, left heel	4	78	TMIGD2	28	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	4	78	TMIGD2	25	0	0.45	metastasis
+3	Lymph node metastasis, left groin	4	78	TMIGD2	21	0	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	4	78	TMIGD2	24	0	0.445	metastasis
+0	Primary, left heel	1	79	TCERG1	18	11	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	79	TCERG1	31	29	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	79	TCERG1	25	20	0.45	metastasis
+3	Lymph node metastasis, left groin	1	79	TCERG1	16	15	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	79	TCERG1	28	16	0.445	metastasis
+0	Primary, left heel	3	80	SCRN1	295	0	0.4	primary
+1	Locoregional skin metastasis 1, left heel	3	80	SCRN1	373	0	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	3	80	SCRN1	436	0	0.45	metastasis
+3	Lymph node metastasis, left groin	3	80	SCRN1	258	58	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	3	80	SCRN1	327	0	0.445	metastasis
+0	Primary, left heel	1	81	MRPL28	95	73	0.4	primary
+1	Locoregional skin metastasis 1, left heel	1	81	MRPL28	131	98	0.45	metastasis
+2	Locoregional skin metastasis 2, left heel	1	81	MRPL28	131	96	0.45	metastasis
+3	Lymph node metastasis, left groin	1	81	MRPL28	108	98	0.445	metastasis
+4	Locoregional skin metastasis 3, left heel	1	81	MRPL28	102	73	0.445	metastasis
