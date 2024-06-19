@@ -1,7 +1,7 @@
 
+Metient is a python library that is easily installable via pip. It has been tested on Linux.
 
 ## Installation
-
 
 ```bash
 # mamba used for speed, can use conda instead if mamba is not installed
@@ -12,11 +12,13 @@ pip install metient
 
 ## Tutorial
 
-There are different tutorials based on your use case:
-1. I have a cohort of cancer patients. I want Metient-calibrate to learn the most likely pattern of spread using genetic distance and/or organotropism. [Tutorial 1](1_metient_calibrate_infer_observed_clones_label_clone_tree_tutorial)
-2. I have a cohort of cancer patients and I know which clones are present in which sites. I want Metient-calibrate to learn the most likely pattern of spread using genetic distance and/or organotropism. [Tutorial 2](2_metient_calibrate_label_clone_tree_tutorial)
-
-
+There are different Jupyter Notebook tutorials based on your use case:
+1. I have a cohort of patients (~5 or more patients) with the same cancer type. (Metient-calibrate)
+   - I want Metient to estimate which mutations/mutation clusters are present in which anatomical sites. [Tutorial 1](https://github.com/divyakoyy/metient/blob/main/tutorial/1_metient_calibrate_infer_observed_clones_label_clone_tree_tutorial)
+   - I know which mutations/mutation clusters are present in which anatomical sites.  [Tutorial 2](https://github.com/divyakoyy/metient/blob/main/tutorial/2_metient_calibrate_label_clone_tree_tutorial)
+3. I have a small number of patients, or I want to enforce my own parsimony metric weights. (Metient-evaluate)
+   - I want Metient to estimate which mutations/mutation clusters are present in which anatomical sites. [Tutorial 3](https://github.com/divyakoyy/metient/blob/main/tutorial/3_metient_evaluate_infer_observed_clones_label_clone_tree_tutorial)
+   - I know which mutations/mutation clusters are present in which anatomical sites. [Tutorial 4](https://github.com/divyakoyy/metient/blob/main/tutorial/4_metient_evaluate_label_clone_tree_tutorial)
 ## Inputs
 There are two required inputs, a tsv file with information for each sample and mutation/mutation cluster, and a txt file specifying the edges of the clone tree.
 
