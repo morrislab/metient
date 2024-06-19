@@ -27,81 +27,6 @@ PROGRESS_BAR = 0 # Keeps track of optimization progress using tqdm
 if torch.cuda.is_available():
     torch.set_default_tensor_type(torch.cuda.FloatTensor)
 
-def get_repeating_weight_vector(bs, weight_list):
-    # Calculate the number of times each weight should be repeated
-    total_weights = len(weight_list)
-    repeats = bs // total_weights
-    remaining_elements = bs % total_weights
-
-    # Create a list where each weight is repeated 'repeats' times
-    repeated_list = [weight for weight in weight_list for _ in range(repeats)]
-
-    # Add remaining elements to match the batch size exactly
-    if remaining_elements > 0:
-        additional_weights = weight_list[:remaining_elements]
-        additional_repeated = [weight for weight in additional_weights]
-        repeated_list += additional_repeated
-
-    # Convert the list to a tensor
-    weights_vec = torch.tensor(repeated_list)
-
-    return weights_vec
-
-def get_mig_weight_vector(bs, weights):
-    return get_repeating_weight_vector(bs, weights.mig)
-
-def get_seed_site_weight_vector(bs, weights):
-    return get_repeating_weight_vector(bs, weights.seed_site)
-
-def extract_metrics_from_loss_dict(loss_dict):
-    m, c, s = loss_dict[MIG_KEY].item(), loss_dict[COMIG_KEY].item(), loss_dict[SEEDING_KEY].item()
-    g = loss_dict[GEN_DIST_KEY].item()
-    o = loss_dict[ORGANOTROP_KEY].item()
-    e = loss_dict[ENTROPY_KEY].item()
-    return m, c, s, g, o, e
-
-def clone_tree_labeling_loss_with_computed_metrics(m, c, s, g, o, e, weights, bs=1):
-
-    # Combine all 5 components with their weights
-    # Explore different weightings
-    if isinstance(weights.mig, list) and isinstance(weights.seed_site, list):
-        mig_weights_vec = get_mig_weight_vector(bs, weights)
-        seeding_sites_weights_vec = get_seed_site_weight_vector(bs, weights)
-        mig_loss = torch.mul(mig_weights_vec, m)
-        seeding_loss = torch.mul(seeding_sites_weights_vec, s)
-        labeling_loss = (mig_loss + weights.comig*c + seeding_loss + weights.gen_dist*g + weights.organotrop*o+ weights.entropy*e)
-        
-    else:
-        mig_loss = weights.mig*m
-        seeding_loss = weights.seed_site*s
-        labeling_loss = (mig_loss + weights.comig*c + seeding_loss + weights.gen_dist*g + weights.organotrop*o+ weights.entropy*e)
-    return labeling_loss
-
-def clone_tree_labeling_objective(V, soft_V, A, G, O, p, weights, update_path_matrix):
-    '''
-    Args:
-        V: Vertex labeling of the full tree (batch_size x num_sites x num_nodes)
-        A: Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
-        G: Matrix of genetic distances between internal nodes (shape:  num_internal_nodes x num_internal_nodes).
-        Lower values indicate lower branch lengths, i.e. more genetically similar.
-        O: Array of frequencies with which the primary cancer type seeds site i (shape: num_anatomical_sites).
-        p: one-hot vector indicating site of the primary
-        weights: Weights object
-
-    Returns:
-        Loss to score the ancestral vertex labeling of the given tree. This combines (1) migration number, (2) seeding site
-        number, (3) comigration number, and optionally (4) genetic distance and (5) organotropism.
-    '''
-    
-    m, c, s, g, o = vutil.ancestral_labeling_metrics(V, A, G, O, p, update_path_matrix)
-    # Entropy
-    e = vutil.calc_entropy(V, soft_V)
-
-    labeling_loss = clone_tree_labeling_loss_with_computed_metrics(m, c, s, g, o, e, weights, bs=V.shape[0])
-
-    loss_dict = {MIG_KEY: m, COMIG_KEY:c, SEEDING_KEY: s, ORGANOTROP_KEY: o, GEN_DIST_KEY: g, ENTROPY_KEY: e}
-
-    return labeling_loss, loss_dict
 
 # Adapted from PairTree
 def calc_llh(F_hat, R, V, omega_v):
@@ -272,8 +197,8 @@ def compute_v_loss(X, L, T, p, G, O, v_temp, t_temp, weights, update_path_matrix
 
     if G != None:
         G = vutil.repeat_n(G, T.shape[0])
-    loss, loss_dicts = clone_tree_labeling_objective(V, softmax_X_soft, T, G, O, p, weights, update_path_matrix)
-    return V, loss, loss_dicts, softmax_X_soft, T
+    loss, _ = vutil.clone_tree_labeling_objective(V, softmax_X_soft, T, G, O, p, weights, update_path_matrix)
+    return V, loss, softmax_X_soft, T
     
 def get_avg_loss_components(loss_components):
     '''
@@ -288,112 +213,95 @@ def get_avg_loss_components(loss_components):
             d[key] = torch.mean(loss_components[key])
     return d
 
-def expand_solutions(best_Vs, best_soft_Vs, best_Ts, p):
+def expand_solutions(solution_set, weights, O, p):
     '''
     In hard (i.e. usually large input) cases where we are unable to find a 
     primary-only seeding solution, see if we can recover one by post-processing
     final solutions and removing any met-to-met migration edges, and add these
     to our final solution set
     '''
-    expanded_best_Ts, expanded_best_soft_Vs, expanded_best_Vs = [],[],[]
-    for T,soft_V,V in zip(best_Ts, best_soft_Vs, best_Vs):
-        expanded_best_Ts.append(T)
-        expanded_best_soft_Vs.append(soft_V)
-        expanded_best_Vs.append(V)
-        clusters = putil.seeding_clusters(V,T)
-        new_V = copy.deepcopy(V)
+    new_solutions = []
+    for solution in solution_set:
+        clusters = putil.seeding_clusters(solution.V,solution.T)
+        new_V = copy.deepcopy(solution.V)
         for s in clusters:
             new_V[:,s] = p.T 
-        expanded_best_Ts.append(T)
-        expanded_best_soft_Vs.append(soft_V)
-        expanded_best_Vs.append(new_V)
-    
-    return expanded_best_Vs, expanded_best_soft_Vs, expanded_best_Ts
+        loss, (m,c,s) = vutil.clone_tree_labeling_objective(new_V, solution.soft_V, solution.T, solution.G, O, p, weights, True)
+        new_solutions.append(vutil.VertexLabelingSolution(loss, m, c, s, new_V, solution.soft_V, solution.T, solution.G, solution.idx_to_label))
+    solution_set.extend(new_solutions)
+    return solution_set
 
-def prune_histories(solutions, O, p):
+def prune_histories(solutions):
     '''
-    Only keep the Pareto front of trees
+    Only keep the unique, Pareto front of trees
     '''
 
-    # Collect each solution's parsimony metrics
+    # Collect each unique solution's parsimony metrics
     all_pars_metrics = []
+    unique_labelings = set()
+    final_solutions = []
     for soln in solutions:
-        V, T, G = soln.V, soln.T, soln.G
-        m, c, s, _, _ = vutil.ancestral_labeling_metrics(vutil.add_batch_dim(V), T, G, O, p, True)
-        all_pars_metrics.append((int(m), int(c), int(s)))
-    #print("all pars metrics", set(all_pars_metrics))
-    pareto_metrics, pruned_solutions = vutil.pareto_front(solutions, all_pars_metrics)
+        tree = vutil.LabeledTree(soln.T, soln.V)
+        if tree not in unique_labelings:
+            final_solutions.append(soln)
+            unique_labelings.add(tree)
+            all_pars_metrics.append((soln.m, soln.c, soln.s))
+    # Keep the pareto front of trees
+    pareto_metrics, pruned_solutions = vutil.pareto_front(final_solutions, all_pars_metrics)
     print("pareto_metrics", set(pareto_metrics))
+
     return pruned_solutions
 
-def _get_best_final_solutions(best_Vs, best_soft_Vs, Ts, Gs, O, p, weights, print_config, 
-                              solve_polys, idx_label_dicts, needs_pruning=True):
+def rank_solutions(solution_set, print_config, needs_pruning=True):
     '''
     Return the sorted, top k solutions
-    '''
-
-    # 1. Calculate loss for each solution
-    solutions = []
-    # If we're not doing polytomy resolution, we can calculate ancestral labeling objectives in parallel (faster)
-    # since all Ts and Gs are the same size
-    if solve_polys == False:
-        losses, _ = clone_tree_labeling_objective(vutil.to_tensor(best_Vs), vutil.to_tensor(best_soft_Vs), vutil.to_tensor(Ts), torch.stack(Gs), O, p, weights, True)
-        for i,loss in enumerate(losses):    
-            solutions.append(vutil.VertexLabelingSolution(loss, best_Vs[i], best_soft_Vs[i], Ts[i], Gs[i], idx_label_dicts[i], i))
-
-    else:
-        for i, (V, soft_V, T, G, idx_label_dict) in enumerate(zip(best_Vs, best_soft_Vs, Ts, Gs, idx_label_dicts)):
-            reshaped_V = vutil.add_batch_dim(V)
-            reshaped_soft_V = vutil.add_batch_dim(soft_V)        
-            loss, _ = clone_tree_labeling_objective(reshaped_V, reshaped_soft_V, T, G, O, p, weights, True)
-            solutions.append(vutil.VertexLabelingSolution(loss, V, soft_V, T, G, idx_label_dict, i))
-        
+    '''        
+    # 1. Only keep unique, Pareto optimal histories
     if needs_pruning:
-        # 2. Prune bad histories (anything not in the pareto front)
-        solutions = prune_histories(solutions, O, p)
-        # 3. Make the solutions unique
-        unique_solutions = set()
-        final_solutions = []
-        for soln in solutions:
-            tree = vutil.LabeledTree(soln.T, soln.V)
-            if tree not in unique_solutions:
-                final_solutions.append(soln)
-                unique_solutions.add(tree)
-        
+        final_solutions = prune_histories(solution_set)
     else:
-        final_solutions = solutions
+        final_solutions = solution_set
 
-    # 4. Sort the solutions from lowest to highest loss
+    # 2. Sort the solutions from lowest to highest loss
     final_solutions = sorted(list(final_solutions))
 
-    # 5. Return the k best solutions
+    # 3. Return the k best solutions
     k = print_config.k_best_trees if len(final_solutions) >= print_config.k_best_trees else len(final_solutions)
     final_solutions = final_solutions[:k]
     return final_solutions
 
+def create_solution_set(best_Vs, best_soft_Vs, best_Ts, G, O, p, node_idx_to_label, weights):
+    # Make a solution set
+    losses, (ms,cs,ss) = vutil.clone_tree_labeling_objective(vutil.to_tensor(best_Vs), vutil.to_tensor(best_soft_Vs), vutil.to_tensor(best_Ts), torch.stack([G for _ in range(len(best_Vs))]), O, p, weights, True)
+    solution_set = []
+    for loss,m,c,s,V,soft_V,T in zip(losses,ms,cs,ss,best_Vs,best_soft_Vs,best_Ts):
+        solution_set.append(vutil.VertexLabelingSolution(loss, m, c, s, V, soft_V, T, G, node_idx_to_label))
+    return solution_set
+
 def get_best_final_solutions(best_Vs, best_soft_Vs, best_Ts, G, O, p, weights, print_config, 
-                             poly_res, node_idx_to_label, optimal_subtree_nodes, needs_pruning=True):
+                             poly_res, node_idx_to_label, needs_pruning=True):
     '''
     Prune unecessary poly nodes (if they weren't used) and return the top k solutions
     '''
-    best_Vs, best_soft_Vs, best_Ts = expand_solutions(best_Vs, best_soft_Vs, best_Ts, p)
+
+    solution_set = create_solution_set(best_Vs, best_soft_Vs, best_Ts, G, O, p, node_idx_to_label, weights)
+
+    solution_set = expand_solutions(solution_set, weights, O, p)
+
     # 1. Make solutions unique before we do all this remove node work which is time intensive
-    unique_solutions = set()
-    unique_best_Vs, unique_best_soft_Vs, unique_best_Ts = [],[], []
-    for V,soft_V, T in zip(best_Vs, best_soft_Vs, best_Ts):
-        tree = vutil.LabeledTree(T,V)
-        if tree not in unique_solutions:
-            unique_best_Vs.append(V)
-            unique_best_soft_Vs.append(soft_V)
-            unique_best_Ts.append(T)
-            unique_solutions.add(tree)
-    print("unique solutions", len(unique_solutions))
+    unique_labelings = set()
+    unique_solution_set = []
+    for soln in solution_set:
+        tree = vutil.LabeledTree(soln.T, soln.V)
+        if tree not in unique_labelings:
+            unique_solution_set.append(soln)
+            unique_labelings.add(tree)
+    # solution_set = prune_histories(solution_set)
+    # print("unique solutions", len(unique_solution_set))
     
-    # 2. Remove any extra resolver nodes that don't actually help
-    best_Vs, best_Ts, Gs, idx_label_dicts = prutil.remove_extra_resolver_nodes(unique_best_Vs, unique_best_Ts, node_idx_to_label, G, poly_res, p, optimal_subtree_nodes)
-    solve_polys = True if poly_res != None else False
-    return _get_best_final_solutions(best_Vs, unique_best_soft_Vs, best_Ts, Gs, O, p, weights, print_config, 
-                                     solve_polys, idx_label_dicts, needs_pruning)
+    #  Remove any extra resolver nodes that don't actually help # TODO: this takes a lot of time
+    unique_solution_set = prutil.remove_extra_resolver_nodes(unique_solution_set, poly_res, weights, O, p)
+    return rank_solutions(unique_solution_set, print_config, needs_pruning)
 
 def init_X(batch_size, num_sites, num_nodes_to_label, bias_weights, p, input_T, T, idx_to_observed_sites):
 
@@ -435,23 +343,6 @@ def update_path_matrix(itr, max_iter, solve_polytomies, second_optimization):
     # #     return False
     #     
     return itr > max_iter*1/3 and itr < max_iter*2/3
-
-def remove_leaf_nodes_idx_to_label_dicts(dicts):
-    '''
-    After running migration history inference, the leaf nodes 
-    (U nodes) get added to the idx to label dicts when plotting 
-    and saving to pickle files, so we don't want to do that twice
-    when in calibrate mode
-    '''
-    new_dicts = []
-    for i,dct in enumerate(dicts):
-        new_dicts.append(copy.deepcopy(dct))
-        for key in dct:
-            if dct[key][1] == True:
-                del new_dicts[i][key]
-            else:
-                new_dicts[i][key] = new_dicts[i][key][0]
-    return new_dicts
 
 def _convert_list_of_numpys_to_tensors(lst):
         return [torch.tensor(x) for x in lst]
@@ -570,7 +461,7 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
     # 3. Recalibrate trees using the best thetas
     print_config.visualize = visualize
     print_config.k_best_trees = input_k
-    weights = met.Weights(mig=[best_theta[0]*50], comig=best_theta[1]*50, seed_site=[best_theta[2]*50],
+    cal_weights = met.Weights(mig=[best_theta[0]*50], comig=best_theta[1]*50, seed_site=[best_theta[2]*50],
                           gen_dist=1.0, organotrop=1.0)
     
     # 4. Use the saved trees to rescore trees, visualize, and re-save 
@@ -581,24 +472,17 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
             run_name = f"{run_names[i]}_{primary_site}"
             with gzip.open(os.path.join(calibrate_dir, f"{run_name}.pkl.gz"), 'rb') as f:
                 pckl = pickle.load(f)
-            saved_Ts = _convert_list_of_numpys_to_tensors(pckl[OUT_ADJ_KEY])
-            saved_Vs = _convert_list_of_numpys_to_tensors(pckl[OUT_LABElING_KEY])
-            saved_soft_Vs = _convert_list_of_numpys_to_tensors(pckl[OUT_SOFTV_KEY])
+
             saved_U = torch.tensor(pckl[OUT_OBSERVED_CLONES_KEY])
-            saved_Gs = _convert_list_of_numpys_to_tensors(pckl[OUT_GEN_DIST_KEY])
-            saved_idx_to_label_dicts = remove_leaf_nodes_idx_to_label_dicts(pckl[OUT_IDX_LABEL_KEY])
             primary_sites = dutil.get_primary_sites(pooled_tsv_fns[i])
-        
             primary_idx = ordered_sites[i].index(primary_site)
             p = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(ordered_sites[i])).T
-            final_solutions = _get_best_final_solutions(saved_Vs, saved_soft_Vs, saved_Ts, saved_Gs, O, p, weights,
-                                                        print_config, solve_polytomies, saved_idx_to_label_dicts,
-                                                        needs_pruning=False)
+
+            reranked_solutions = rank_solutions(vutil.create_reweighted_solution_set_from_pckl(pckl, O, p, cal_weights),
+                                                print_config, needs_pruning=False)
             
-            putil.save_best_trees(final_solutions, saved_U, O,
-                                  weights, ordered_sites[i], print_config, 
-                                  custom_colors, primary_site, calibrate_dir, 
-                                  run_name)
+            putil.save_best_trees(reranked_solutions, saved_U, O, cal_weights, ordered_sites[i], print_config, 
+                                  custom_colors, primary_site, calibrate_dir, run_name)
     
     if estimate_observed_clones:
         for pooled_tsv_fn in pooled_tsv_fns:
@@ -709,7 +593,7 @@ def initalize_optimal_X_polyres(optimal_subtree_nodes,optimal_batch_nums, optimi
     poly_resolver_to_optimal_children = {}
     known_indices = []
     known_labelings = []
-    #print("optimal subtree sets", optimal_subtree_nodes)
+
     # Fix node labels and node edges
     for optimal_subtree_set,optimal_batch_num in zip(optimal_subtree_nodes,optimal_batch_nums):
         for node_idx in optimal_subtree_set:
@@ -740,8 +624,8 @@ def initalize_optimal_X_polyres(optimal_subtree_nodes,optimal_batch_nums, optimi
                     if parent_idx not in poly_resolver_to_optimal_children:
                         optimal_children = vutil.get_child_indices(optimized_Ts[optimal_batch_num,:,:], [parent_idx])
                         poly_resolver_to_optimal_children[parent_idx] = optimal_children
-    #print("poly_resolver_to_optimal_children", poly_resolver_to_optimal_children)
-    # Fix all other polytomy children s.t. they cannot move to be a child of the fixed node_idx,
+
+    # Fix all other polytomy children s.t. they cannot move to be a child of the fixed node_idx
     if poly_res != None:
         for parent_idx in poly_resolver_to_optimal_children:
             
@@ -794,7 +678,7 @@ def fix_optimal_subtrees(optimized_Ts, optimized_Vs, num_sites, num_nodes_to_lab
                                                               num_sites, num_nodes_to_label, bias_weights, p, 
                                                               input_T, T_w_leaves, idx_to_observed_sites, poly_res)
             
-    return X, poly_res, fixed_labeling, optimal_subtree_nodes
+    return X, poly_res, fixed_labeling
 
 def optimize_umap(num_sites, num_internal_nodes, ref, var, omega, B, T, G, weights, lr, identical_clone_gen_dist):
     # We're learning psi, which is the mixture matrix U (U = softmax(psi)), and tells us the existence
@@ -844,8 +728,8 @@ def optimize_V(X, L, input_T, p, G, O, init_temp, final_temp, v_anneal_rate,
         if solve_polytomies and update_path:
             poly_optimizer.zero_grad()
         v_optimizer.zero_grad()
-        V, v_losses, loss_comps, soft_V, T = compute_v_loss(X, L, input_T, p, G, O, v_temp, t_temp, weights, 
-                                                            update_path, fixed_labeling, poly_res)
+        V, v_losses, soft_V, T = compute_v_loss(X, L, input_T, p, G, O, v_temp, t_temp, weights, 
+                                                update_path, fixed_labeling, poly_res)
         mean_loss = torch.mean(v_losses)
         mean_loss.backward()
 
@@ -863,9 +747,6 @@ def optimize_V(X, L, input_T, p, G, O, init_temp, final_temp, v_anneal_rate,
                 v_temp = np.maximum(v_temp * np.exp(-v_anneal_rate * k), final_temp)
             k += 1
 
-        if print_config.visualize:
-            v_loss_components.append(get_avg_loss_components(loss_comps))
-
         v_temps.append(v_temp)
         t_temps.append(t_temp)
 
@@ -876,7 +757,7 @@ def optimize_V(X, L, input_T, p, G, O, init_temp, final_temp, v_anneal_rate,
     # fig = plt.figure(figsize=(1,1),dpi=100)
     # plt.plot([x for x in range(len(t_temps))], t_temps, marker='.'); plt.show(); plt.close()
 
-    return V, soft_V, T, loss_comps
+    return V, soft_V, T
     
 def get_migration_history(T, tsv_fn, primary_site, weights, print_config, output_dir, run_name, estimate_observed_clones=True,
                           O=None, max_iter=100, lr=0.05, init_temp=20, final_temp=0.01,
@@ -1010,17 +891,17 @@ def get_migration_history(T, tsv_fn, primary_site, weights, print_config, output
     global PROGRESS_BAR
     first_max_iter, second_max_iter = 66, max_iter
     PROGRESS_BAR = tqdm(total=first_max_iter+second_max_iter, position=0)
-    optimzed_Vs, optimzed_soft_Vs, optimzed_Ts, _ = optimize_V(X, L, T, p, G, O, init_temp, final_temp, v_anneal_rate, 
+    optimzed_Vs, optimzed_soft_Vs, optimzed_Ts = optimize_V(X, L, T, p, G, O, init_temp, final_temp, v_anneal_rate, 
                                                                t_anneal_rate, 15, lr, exploration_weights, first_max_iter, solve_polytomies, 
                                                                poly_res, print_config, False, None)
     
     # Identify optimal subtrees, keep them fixed, and solve for the rest of the tree
     # Also fix T (hooked to poly_res) if we're solving polytomies
-    X, poly_res, fixed_labeling, optimal_subtree_nodes = fix_optimal_subtrees(optimzed_Ts, optimzed_Vs, num_sites, num_nodes_to_label, 
-                                                                     bias_weights, p, input_T, T, idx_to_observed_sites, poly_res) 
-    optimzed_Vs, optimzed_soft_Vs, optimzed_Ts, _ = optimize_V(X, L, T, p, G, O, init_temp, final_temp, v_anneal_rate, 
-                                                               t_anneal_rate, 20, lr, exploration_weights, second_max_iter, False, 
-                                                               poly_res, print_config, True, fixed_labeling)
+    X, poly_res, fixed_labeling = fix_optimal_subtrees(optimzed_Ts, optimzed_Vs, num_sites, num_nodes_to_label, 
+                                                       bias_weights, p, input_T, T, idx_to_observed_sites, poly_res) 
+    optimzed_Vs, optimzed_soft_Vs, optimzed_Ts = optimize_V(X, L, T, p, G, O, init_temp, final_temp, v_anneal_rate, 
+                                                            t_anneal_rate, 20, lr, exploration_weights, second_max_iter, False, 
+                                                            poly_res, print_config, True, fixed_labeling)
     
     PROGRESS_BAR.close()
     time_elapsed = (datetime.datetime.now() - start_time).total_seconds()
@@ -1035,7 +916,7 @@ def get_migration_history(T, tsv_fn, primary_site, weights, print_config, output
         weights = input_weights
         
         final_solutions = get_best_final_solutions(optimzed_Vs, optimzed_soft_Vs, optimzed_Ts, G, O, p, weights,
-                                                   print_config, poly_res, node_idx_to_label, optimal_subtree_nodes, needs_pruning=needs_pruning)
+                                                   print_config, poly_res, node_idx_to_label, needs_pruning=needs_pruning)
 
         print("# final solutions:", len(final_solutions))
 
