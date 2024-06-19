@@ -14,11 +14,11 @@ pip install metient
 
 There are different Jupyter Notebook tutorials based on your use case:
 1. I have a cohort of patients (~5 or more patients) with the same cancer type. (Metient-calibrate)
-   - I want Metient to estimate which mutations/mutation clusters are present in which anatomical sites. [Tutorial 1](https://github.com/divyakoyy/metient/blob/main/tutorial/1_metient_calibrate_infer_observed_clones_label_clone_tree_tutorial)
-   - I know which mutations/mutation clusters are present in which anatomical sites.  [Tutorial 2](https://github.com/divyakoyy/metient/blob/main/tutorial/2_metient_calibrate_label_clone_tree_tutorial)
+   - I want Metient to estimate which mutations/mutation clusters are present in which anatomical sites. [Tutorial 1](tutorial/1_metient_calibrate_infer_observed_clones_label_clone_tree_tutorial.ipynb)
+   - I know which mutations/mutation clusters are present in which anatomical sites.  [Tutorial 2](tutorial/2_metient_calibrate_label_clone_tree_tutorial.ipynb)
 3. I have a small number of patients, or I want to enforce my own parsimony metric weights. (Metient-evaluate)
-   - I want Metient to estimate which mutations/mutation clusters are present in which anatomical sites. [Tutorial 3](https://github.com/divyakoyy/metient/blob/main/tutorial/3_metient_evaluate_infer_observed_clones_label_clone_tree_tutorial)
-   - I know which mutations/mutation clusters are present in which anatomical sites. [Tutorial 4](https://github.com/divyakoyy/metient/blob/main/tutorial/4_metient_evaluate_label_clone_tree_tutorial)
+   - I want Metient to estimate which mutations/mutation clusters are present in which anatomical sites. [Tutorial 3](tutorial/3_metient_evaluate_infer_observed_clones_label_clone_tree_tutorial.ipynb)
+   - I know which mutations/mutation clusters are present in which anatomical sites. [Tutorial 4](tutorial/4_metient_evaluate_label_clone_tree_tutorial.ipynb)
 ## Inputs
 There are two required inputs, a tsv file with information for each sample and mutation/mutation cluster, and a txt file specifying the edges of the clone tree.
 
@@ -28,7 +28,7 @@ There are two types of tsvs that are accepted, depending on if you'd like Metien
 
 #### 1a. If you would like Metient to estimate the prevalance of each cancer clone in each tumor site, use the following input tsv format.
 
-[1a example tsv](https://github.com/divyakoyy/metient/blob/main/tutorial/A_SNVs.tsv)
+[1a example tsv](tutorial/inputs/A_SNVs.tsv)
 
 Each row in this tsv should correspond to the reference and variant read counts at a single locus in a single tumor sample:
 | Column name | Description |
@@ -46,7 +46,7 @@ Each row in this tsv should correspond to the reference and variant read counts 
 
 #### 1b. If you would like to input the prevalence of each cancer clone in each tumor site, use the following input tsv format.
 
-[1b example tsv](https://github.com/divyakoyy/metient/blob/main/tutorial/CRUK0003_SNVs.tsv)
+[1b example tsv](tutorial/inputs/CRUK0003_SNVs.tsv)
 
 Each row in this tsv should correspond to a single mutation/mutation cluster in a single tumor sample:
 | Column name | Description |
@@ -63,7 +63,7 @@ Each row in this tsv should correspond to a single mutation/mutation cluster in 
 ### 2. **Tree txt file**
 A .txt file where each line is an edge from the first index to the second index. Must correspond to the cluster_index column in the input tsv. 
 
-[Example tree .txt file](https://github.com/divyakoyy/metient/blob/main/tutorial/A_tree.txt)
+[Example tree .txt file](tutorial/inputs/A_tree.txt)
 
 ## Outputs
 
