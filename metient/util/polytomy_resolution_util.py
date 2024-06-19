@@ -165,7 +165,7 @@ def remove_nodes(removal_indices, V, T, G, node_idx_to_label):
         new_node_idx_to_label[i] = copy_node_idx_to_label[key]
     return V, T, G, new_node_idx_to_label
 
-def remove_extra_resolver_nodes(best_Vs, best_Ts, node_idx_to_label, G, poly_res, p, optimal_subtree_nodes):
+def remove_extra_resolver_nodes(solution_set, poly_res, weights, O, p):
     '''
     If there are any resolver nodes that were added to resolve polytomies but they 
     weren't used (i.e. 1. they have no children or 2. they don't change the 
@@ -173,12 +173,11 @@ def remove_extra_resolver_nodes(best_Vs, best_Ts, node_idx_to_label, G, poly_res
     '''
 
     if poly_res == None:
-        return best_Vs, best_Ts, [G for _ in range(len(best_Vs))], [node_idx_to_label for _ in range(len(best_Vs))]
-    
-    prev_ms, prev_cs, prev_ss, _, _ = vutil.ancestral_labeling_metrics(vutil.to_tensor(best_Vs), vutil.to_tensor(best_Ts), None, None, p, True)
-    out_Vs, out_Ts, out_Gs, out_node_idx_to_labels = [], [],[],[]
-    for i, (V, T, prev_m, prev_c, prev_s) in enumerate(zip(best_Vs, best_Ts, prev_ms, prev_cs, prev_ss)):
-        #print("batch num", i, V.shape)
+        return solution_set
+    # prev_ms, prev_cs, prev_ss, _, _ = vutil.ancestral_labeling_metrics(vutil.to_tensor(best_Vs), vutil.to_tensor(best_Ts), None, None, p, True)
+    out_solution_set = []
+    for soln in solution_set:
+        V, T, prev_m, prev_c, prev_s = soln.V, soln.T, soln.m, soln.c, soln.s
         nodes_to_remove = []
         for new_node_idx in poly_res.resolver_indices:
             children_of_new_node = vutil.get_child_indices(T, [new_node_idx])
@@ -186,10 +185,12 @@ def remove_extra_resolver_nodes(best_Vs, best_Ts, node_idx_to_label, G, poly_res
                 nodes_to_remove.append(new_node_idx)
             elif is_same_mig_hist_with_node_removed(poly_res, T, V, new_node_idx, children_of_new_node, p, prev_m, prev_c, prev_s):
                 nodes_to_remove.append(new_node_idx)
-        
-        new_V, new_T, new_G, new_node_idx_to_label = remove_nodes(nodes_to_remove, V, T, G, node_idx_to_label)
-        out_Vs.append(new_V)
-        out_Ts.append(new_T)
-        out_Gs.append(new_G)
-        out_node_idx_to_labels.append(new_node_idx_to_label)
-    return out_Vs, out_Ts, out_Gs, out_node_idx_to_labels
+
+        if len(nodes_to_remove) != 0:
+            new_V, new_T, new_G, new_node_idx_to_label = remove_nodes(nodes_to_remove, V, T, soln.G, soln.idx_to_label)
+            loss, (new_m,new_c,new_s) = vutil.clone_tree_labeling_objective(new_V, soln.soft_V, new_T, new_G, O, p, weights, True)
+            out_solution_set.append(vutil.VertexLabelingSolution(loss,new_m,new_c,new_s,new_V,soln.soft_V,new_T,new_G,new_node_idx_to_label))
+        else:
+            out_solution_set.append(soln)
+
+    return out_solution_set

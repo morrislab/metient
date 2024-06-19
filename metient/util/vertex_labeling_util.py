@@ -5,6 +5,7 @@ import math
 from queue import Queue
 from metient.util.globals import *
 from collections import deque
+import copy
 
 import scipy.sparse as sp
 import pandas as pd
@@ -51,16 +52,25 @@ class LabeledTree:
         V = str(np.where(self.labeling == 1))
         return f"Tree: {A}\nVertex Labeling: {V}"
 
+def convert_pars_metric_to_int(x):
+    if isinstance(x, int):
+        return x
+    elif isinstance(x, torch.Tensor) and x.numel() == 1:
+        return int(x.item())  
+    raise ValueError(f"Got unexpected value for parsimony metric {x}")
+
 # Convenience object to package information needed for a final solution
 class VertexLabelingSolution:
-    def __init__(self, loss, V, soft_V, T, G, idx_to_label, i):
+    def __init__(self, loss, m, c, s, V, soft_V, T, G, idx_to_label):
         self.loss = loss
+        self.m = convert_pars_metric_to_int(m)
+        self.c = convert_pars_metric_to_int(c)
+        self.s = convert_pars_metric_to_int(s)
         self.V = V
-        self.soft_V = soft_V
         self.T = T
         self.G = G
         self.idx_to_label = idx_to_label
-        self.i = i
+        self.soft_V = soft_V
 
    # Override the comparison operator
     def __lt__(self, other):
@@ -131,11 +141,9 @@ def comigration_number(site_adj, A, VA, VT, X, update_path_matrix):
     global LAST_P # this is expensive to compute, so hash it if we don't need to update it
     if LAST_P != None and not update_path_matrix:
         P = LAST_P
-        print("using cached path")
     else:
         P = path_matrix(A, remove_self_loops=True)
         LAST_P = P
-        print("updating path")
 
     shared_path_and_par_and_self_color = torch.sum(torch.mul(P, shared_par_and_self_color), axis=2)
     repeated_temporal_migrations = torch.sum(torch.mul(shared_path_and_par_and_self_color, Y), axis=1)
@@ -233,6 +241,74 @@ def calc_entropy(V, soft_V):
     eps = 1e-7 # to avoid nans when values in soft_V get very close to 0
     return -torch.sum(torch.mul(soft_V, torch.log2(soft_V+eps)), dim=(1, 2)) / V.shape[2]
 
+def get_repeating_weight_vector(bs, weight_list):
+    # Calculate the number of times each weight should be repeated
+    total_weights = len(weight_list)
+    repeats = bs // total_weights
+    remaining_elements = bs % total_weights
+
+    # Create a list where each weight is repeated 'repeats' times
+    repeated_list = [weight for weight in weight_list for _ in range(repeats)]
+
+    # Add remaining elements to match the batch size exactly
+    if remaining_elements > 0:
+        additional_weights = weight_list[:remaining_elements]
+        additional_repeated = [weight for weight in additional_weights]
+        repeated_list += additional_repeated
+
+    # Convert the list to a tensor
+    weights_vec = torch.tensor(repeated_list)
+
+    return weights_vec
+
+def get_mig_weight_vector(bs, weights):
+    return get_repeating_weight_vector(bs, weights.mig)
+
+def get_seed_site_weight_vector(bs, weights):
+    return get_repeating_weight_vector(bs, weights.seed_site)
+
+def clone_tree_labeling_loss_with_computed_metrics(m, c, s, g, o, e, weights, bs=1):
+
+    # Combine all 5 components with their weights
+    # Explore different weightings
+    if isinstance(weights.mig, list) and isinstance(weights.seed_site, list):
+        mig_weights_vec = get_mig_weight_vector(bs, weights)
+        seeding_sites_weights_vec = get_seed_site_weight_vector(bs, weights)
+        mig_loss = torch.mul(mig_weights_vec, m)
+        seeding_loss = torch.mul(seeding_sites_weights_vec, s)
+        labeling_loss = (mig_loss + weights.comig*c + seeding_loss + weights.gen_dist*g + weights.organotrop*o+ weights.entropy*e)
+        
+    else:
+        mig_loss = weights.mig*m
+        seeding_loss = weights.seed_site*s
+        labeling_loss = (mig_loss + weights.comig*c + seeding_loss + weights.gen_dist*g + weights.organotrop*o+ weights.entropy*e)
+    return labeling_loss
+
+def clone_tree_labeling_objective(V, soft_V, A, G, O, p, weights, update_path_matrix):
+    '''
+    Args:
+        V: Vertex labeling of the full tree (batch_size x num_sites x num_nodes)
+        A: Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
+        G: Matrix of genetic distances between internal nodes (shape:  num_internal_nodes x num_internal_nodes).
+        Lower values indicate lower branch lengths, i.e. more genetically similar.
+        O: Array of frequencies with which the primary cancer type seeds site i (shape: num_anatomical_sites).
+        p: one-hot vector indicating site of the primary
+        weights: Weights object
+
+    Returns:
+        Loss to score the ancestral vertex labeling of the given tree. This combines (1) migration number, (2) seeding site
+        number, (3) comigration number, and optionally (4) genetic distance and (5) organotropism.
+    '''
+    V = add_batch_dim(V)
+    soft_V = add_batch_dim(soft_V)
+    m, c, s, g, o = ancestral_labeling_metrics(V, A, G, O, p, update_path_matrix)
+    # Entropy
+    e = calc_entropy(V, soft_V)
+
+    labeling_loss = clone_tree_labeling_loss_with_computed_metrics(m, c, s, g, o, e, weights, bs=V.shape[0])
+
+    return labeling_loss, (m, c, s)
+
 ######################################################
 ######### POST U MATRIX ESTIMATION UTILITIES #########
 ######################################################
@@ -299,12 +375,41 @@ def full_adj_matrix_using_inferred_observed_clones(U, input_T, input_G, num_site
 ######################################################
 
 def add_batch_dim(x):
+    if len(x.shape) == 3:
+        return x
     return x.reshape(1, x.shape[0], x.shape[1])
 
 def to_tensor(t):
     if torch.is_tensor(t):
         return t
     return torch.stack(t)
+
+def remove_leaf_nodes_idx_to_label_dicts(dicts):
+    '''
+    After running migration history inference, the leaf nodes 
+    (U nodes) get added to the idx to label dicts when plotting 
+    and saving to pickle files, so we don't want to do that twice
+    when in calibrate mode
+    '''
+    new_dicts = []
+    for i,dct in enumerate(dicts):
+        new_dicts.append(copy.deepcopy(dct))
+        for key in dct:
+            if dct[key][1] == True:
+                del new_dicts[i][key]
+            else:
+                new_dicts[i][key] = new_dicts[i][key][0]
+    return new_dicts
+
+def create_reweighted_solution_set_from_pckl(pckl, O, p, weights):
+    # Make a solution set from the pickled files
+    Ts, Vs, soft_Vs, Gs = pckl[OUT_ADJ_KEY], pckl[OUT_LABElING_KEY], pckl[OUT_SOFTV_KEY], pckl[OUT_GEN_DIST_KEY]
+    idx_to_label_dicts = remove_leaf_nodes_idx_to_label_dicts(pckl[OUT_IDX_LABEL_KEY])
+    solution_set = []
+    for T, V, soft_V, G, idx_to_label in zip(Ts, Vs, soft_Vs, Gs, idx_to_label_dicts):
+        loss, (m,c,s) = clone_tree_labeling_objective(torch.tensor(V), torch.tensor(soft_V), torch.tensor(T), torch.tensor(G), O, p, weights, True)
+        solution_set.append(VertexLabelingSolution(loss, m, c, s, torch.tensor(V), torch.tensor(soft_V), torch.tensor(T), torch.tensor(G), idx_to_label))
+    return solution_set
 
 def calculate_batch_size(T, sites, solve_polytomies):
     '''

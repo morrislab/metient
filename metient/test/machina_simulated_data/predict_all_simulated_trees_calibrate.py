@@ -10,9 +10,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from metient.metient import *
-from metient.lib.vertex_labeling import _get_best_final_solutions, remove_leaf_nodes_idx_to_label_dicts
+from metient.lib.vertex_labeling import rank_solutions
 from metient.util import eval_util as eutil
 from metient.util import plotting_util as plot_util
+from metient.util.vertex_labeling_util import create_reweighted_solution_set_from_pckl
 
 from metient.util.globals import *
 import torch
@@ -23,9 +24,6 @@ import json
 import pandas as pd
 
 VISUALIZE=False
-
-def _convert_list_of_numpys_to_tensors(lst):
-        return [torch.tensor(x) for x in lst]
 
 def get_num_mut_trees(mut_tree_fn):
     with open(mut_tree_fn, 'r') as f:
@@ -42,21 +40,15 @@ def recalibrate(seed, tree_num, out_dir, ref_var_fn, weights, print_config, cust
 
     with gzip.open(os.path.join(out_dir, f"tree{tree_num}_seed{seed}_calibrate.pkl.gz"), 'rb') as f:
         pckl = pickle.load(f)
-    saved_Ts = _convert_list_of_numpys_to_tensors(pckl[OUT_ADJ_KEY])
-    saved_Vs = _convert_list_of_numpys_to_tensors(pckl[OUT_LABElING_KEY])
-    saved_soft_Vs = _convert_list_of_numpys_to_tensors(pckl[OUT_SOFTV_KEY])
-    saved_U = torch.tensor(pckl[OUT_SUB_PRES_KEY])
-    saved_Gs = _convert_list_of_numpys_to_tensors(pckl[OUT_GEN_DIST_KEY])
-    saved_idx_to_label_dicts = remove_leaf_nodes_idx_to_label_dicts(pckl[OUT_IDX_LABEL_KEY])
     
+    saved_U = torch.tensor(pckl[OUT_OBSERVED_CLONES_KEY])
     primary_idx = unique_sites.index('P')
     p = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(unique_sites)).T
-    final_solutions = _get_best_final_solutions(saved_Vs, saved_soft_Vs, saved_Ts, saved_Gs, None, p, weights,
-                                                print_config, solve_polys, saved_idx_to_label_dicts, needs_pruning=False)
+    final_solutions = rank_solutions(create_reweighted_solution_set_from_pckl(pckl, None, p, weights),
+                                     print_config, needs_pruning=False)
     print("final_solutions:", len(final_solutions))
 
-    plot_util.save_best_trees(final_solutions, saved_U, None,
-                              weights, unique_sites, print_config, 
+    plot_util.save_best_trees(final_solutions, saved_U, None, weights, unique_sites, print_config, 
                               custom_colors, 'P', out_dir, f"tree{tree_num}_seed{seed}_calibrate")
 
     return 

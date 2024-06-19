@@ -139,7 +139,7 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3
     
     if len(all_data) == 0:
         # TODO: 
-        print("WARNING: Unable to calibrate since no patients have Pareto optimal trees. Using default weighting, wm > wc > ws")
+        print("WARNING: Unable to calibrate since no patients have multiple Pareto optimal trees. Using default weighting, wm > wc > ws")
         return [0.46, 0.29, 0.25] # these are estimated from multiple cancer cohorts
     
     if use_min_tau:

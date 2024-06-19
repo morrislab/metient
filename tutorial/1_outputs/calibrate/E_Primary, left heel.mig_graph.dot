@@ -1,0 +1,17 @@
+digraph  {
+dpi=600;size=3.5;
+"Primary,\n left heel" [color="#6aa84f", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+"Locoregional skin metastasis 1,\n left heel" [color="#be5742e1", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+"Locoregional skin metastasis 2,\n left heel" [color="#6fa8dc", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+"Lymph node metastasis,\n left groin" [color="#e69138", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+"Locoregional skin metastasis 3,\n left heel" [color="#9e9e9e", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+"Primary,\n left heel" -> "Locoregional skin metastasis 3,\n left heel"  [color="#6aa84f;0.5:#9e9e9e", key=0, penwidth=3];
+"Locoregional skin metastasis 3,\n left heel" -> "Primary,\n left heel"  [color="#9e9e9e;0.5:#6aa84f", key=0, penwidth=3];
+"Locoregional skin metastasis 3,\n left heel" -> "Locoregional skin metastasis 1,\n left heel"  [color="#9e9e9e;0.5:#be5742e1", key=0, penwidth=3];
+"Locoregional skin metastasis 3,\n left heel" -> "Locoregional skin metastasis 1,\n left heel"  [color="#9e9e9e;0.5:#be5742e1", key=1, penwidth=3];
+"Locoregional skin metastasis 3,\n left heel" -> "Locoregional skin metastasis 2,\n left heel"  [color="#9e9e9e;0.5:#6fa8dc", key=0, penwidth=3];
+"Locoregional skin metastasis 3,\n left heel" -> "Locoregional skin metastasis 2,\n left heel"  [color="#9e9e9e;0.5:#6fa8dc", key=1, penwidth=3];
+"Locoregional skin metastasis 3,\n left heel" -> "Lymph node metastasis,\n left groin"  [color="#9e9e9e;0.5:#e69138", key=0, penwidth=3];
+"Locoregional skin metastasis 3,\n left heel" -> "Lymph node metastasis,\n left groin"  [color="#9e9e9e;0.5:#e69138", key=1, penwidth=3];
+"Locoregional skin metastasis 3,\n left heel" -> "Lymph node metastasis,\n left groin"  [color="#9e9e9e;0.5:#e69138", key=2, penwidth=3];
+}

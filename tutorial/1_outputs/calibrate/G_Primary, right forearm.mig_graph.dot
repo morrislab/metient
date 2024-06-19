@@ -1,0 +1,10 @@
+digraph  {
+dpi=600;size=3.5;
+"Primary,\n right forearm" [color="#6aa84f", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+"Lung metastasis" [color="#be5742e1", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+"Locoregional skin metastasis,\n axilla" [color="#6fa8dc", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+"Primary,\n right forearm" -> "Lung metastasis"  [color="#6aa84f;0.5:#be5742e1", key=0, penwidth=3];
+"Primary,\n right forearm" -> "Lung metastasis"  [color="#6aa84f;0.5:#be5742e1", key=1, penwidth=3];
+"Primary,\n right forearm" -> "Locoregional skin metastasis,\n axilla"  [color="#6aa84f;0.5:#6fa8dc", key=0, penwidth=3];
+"Primary,\n right forearm" -> "Locoregional skin metastasis,\n axilla"  [color="#6aa84f;0.5:#6fa8dc", key=1, penwidth=3];
+}
