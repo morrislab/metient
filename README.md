@@ -1,5 +1,9 @@
+# Metient
+<img src="metient/logo.png" width="150">
 
-Metient is a python library that is easily installable via pip. It has been tested on Linux. Installation and running one of the tutorials should take ~5 minutes.
+**Metient** (**Met**astasis + gradi**ent**) is a tool to infer cancer-type specific metastatic spread.
+
+Metient is available a python library that is easily installable via pip. It has been tested on Linux. Installation and running one of the tutorials should take ~5 minutes.
 
 ## Installation
 
