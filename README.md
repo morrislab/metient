@@ -1,5 +1,5 @@
 
-Metient is a python library that is easily installable via pip. It has been tested on Linux.
+Metient is a python library that is easily installable via pip. It has been tested on Linux. Installation and running one of the tutorials should take ~5 minutes.
 
 ## Installation
 
