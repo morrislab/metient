@@ -15,6 +15,11 @@ pip install metient
 ```
 
 ## Tutorial
+To run the tutorial notebooks, clone this repo:
+```bash
+git clone git@github.com:morrislab/metient.git
+cd metient/tutorial/
+```
 
 There are different Jupyter Notebook tutorials based on your use case:
 1. I have a cohort of patients (~5 or more patients) with the same cancer type. (Metient-calibrate)
