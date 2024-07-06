@@ -1,6 +1,6 @@
 ### Wrapper API
 
-from metient.lib import vertex_labeling as vert_label
+from metient.lib import migration_history_inference as mig_hist
 from metient.util import plotting_util as plutil
 
 def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
@@ -26,9 +26,9 @@ def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name,
 
     Outputs migration history inferences for a single patient.
     '''
-    return vert_label.evaluate(tree_fn, tsv_fn,weights, print_config, output_dir, run_name, 
-                               O=O, batch_size=batch_size, custom_colors=custom_colors, 
-                               bias_weights=True, solve_polytomies=solve_polytomies)
+    return mig_hist.evaluate(tree_fn, tsv_fn,weights, print_config, output_dir, run_name, 
+                             O=O, batch_size=batch_size, custom_colors=custom_colors, 
+                             bias_weights=True, solve_polytomies=solve_polytomies)
 
 def evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
                                O=None, batch_size=-1, custom_colors=None, solve_polytomies=False):
@@ -53,8 +53,8 @@ def evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir
     
     Outputs migration history inferences for a single patient.
     '''
-    return vert_label.evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, O=O, batch_size=batch_size, 
-                                                 custom_colors=custom_colors, bias_weights=True, solve_polytomies=solve_polytomies)
+    return mig_hist.evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, O=O, batch_size=batch_size, 
+                                              custom_colors=custom_colors, bias_weights=True, solve_polytomies=solve_polytomies)
 
 def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, 
               Os=None, batch_size=-1, custom_colors=None, solve_polytomies=False):
@@ -80,8 +80,8 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
 
     Outputs migration history inferences for a full cohort.
     '''
-    return vert_label.calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, Os=Os, batch_size=batch_size, 
-                                custom_colors=custom_colors, bias_weights=True, solve_polytomies=solve_polytomies)
+    return mig_hist.calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, Os=Os, batch_size=batch_size, 
+                              custom_colors=custom_colors, bias_weights=True, solve_polytomies=solve_polytomies)
 
 def calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names, 
                                Os=None, batch_size=-1, custom_colors=None,  solve_polytomies=False):
@@ -107,8 +107,8 @@ def calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_
 
     Outputs migration history inferences for a full cohort.
     '''
-    return vert_label.calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names, Os=Os, batch_size=batch_size, 
-                                                 custom_colors=custom_colors, bias_weights=True, solve_polytomies=solve_polytomies)
+    return mig_hist.calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names, Os=Os, batch_size=batch_size, 
+                                               custom_colors=custom_colors, bias_weights=True, solve_polytomies=solve_polytomies)
 
 
 class PrintConfig:

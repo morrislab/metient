@@ -116,49 +116,37 @@ def seeding_pattern(V, A):
     A:  Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
 
     returns: verbal description of the seeding pattern, one of:
-    {monoclonal, polyclonal} {single-source, multi-source, reseeding}
+    {primary single-source, single-source, multi-source, reseeding}
     '''
     G = migration_graph(V, A)
     return seeding_pattern_with_G(G)
     
-# def verbose_seeding_pattern(V, A):
-#     '''
-#     V: Vertex labeling matrix where columns are one-hot vectors representing the
-#     anatomical site that the node originated from (num_sites x num_nodes)
-#     A:  Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
 
-#     returns: one of: {monoclonal, polyclonal} {primary single-source, single-source, multi-source, reseeding}
-#     '''
-#     pattern = seeding_pattern(V, A)
-#     G = migration_graph(V, A)
-#     non_zero = torch.where(G > 0)    
-#     unique_source_sites = torch.unique(non_zero[0])
-
-#     if len(unique_source_sites) == 1:
-#         items = pattern.split(" ")
-#         items.insert(1, "primary")
-#         return (" ").join(items)
-#     return pattern
-
-def migration_edges(V, A):
+def migration_edges(V, A, sites=None):
     '''
     V: Vertex labeling matrix where columns are one-hot vectors representing the
     anatomical site that the node originated from (num_sites x num_nodes)
     A:  Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
-
+    sites: optional, set of indices in range [0,num_sites) that you restrict migration edges to
     Returns:
-        Returns a matrix where Yij = 1 if there is a migration edge between nodes i and j
+        Returns a matrix where Yij = 1 if there is a migration edge from node i to node j
     '''
     X = V.T @ V 
     Y = torch.mul(A, (1-X))
+    # Remove migration edges to sites that we're not interested in 
+    if sites != None:
+        for i,j in vutil.tree_iterator(Y):
+            k = (V[:,j] == 1).nonzero()[0][0].item()
+            if k not in sites:
+                Y[i,j] = 0
     return Y
 
-def seeding_clusters(V, A):
+def seeding_clusters(V, A, sites=None):
     '''
     returns: list of nodes whose child is a different color
     '''
     V, A = prep_V_A_inputs(V, A)
-    Y = migration_edges(V,A)
+    Y = migration_edges(V,A, sites)
     seeding_clusters = torch.nonzero(Y.any(dim=1)).squeeze()
     # Check if it's a scalar (0D tensor)
     if seeding_clusters.dim() == 0:
@@ -243,8 +231,8 @@ def has_hamiltonian_path_with_set(adj_matrix, nodes_to_check):
         return True
     
     return False
-
-def phyleticity(V, A):
+                 
+def phyleticity(V, A, sites=None):
     '''
     If all nodes can be reached from the top level node in the seeding clusters,
     returns monophyletic, else polyphyletic
@@ -260,8 +248,7 @@ def phyleticity(V, A):
     
     V, A = prep_V_A_inputs(V, A)
     clonality = genetic_clonality(V,A)
-    all_seeding_clusters = seeding_clusters(V, A)
-
+    all_seeding_clusters = seeding_clusters(V, A, sites)
     if "monoclonal" in clonality:
         return "monophyletic"
 
@@ -269,10 +256,6 @@ def phyleticity(V, A):
     visited = [False] * num_nodes
     highest_node = mrca(A, all_seeding_clusters)
     
-    # trunk_nodes = find_tree_trunk(input_adj_matrix) # get the indices on the trunk of the input tree
-    # if highest_node in trunk_nodes:
-    #     return False
-
     # Check if all nodes can be reached from the top level node in the seeding
     # nodes (seeding node that is closest to the root)
     for node in all_seeding_clusters:
@@ -577,6 +560,7 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors, custom_node_idx_to_l
         edges.append((full_node_idx_to_label_map[i][0], full_node_idx_to_label_map[j][0]))
 
     # Add edge from normal to root 
+    # print("T", vutil.adjacency_matrix_to_edge_list(T))
     root_idx = vutil.get_root_index(T)
     root_label = display_node_idx_to_label_map[root_idx][0]
     G.add_node("normal", label="", xlabel=root_label, penwidth=3, style="invis")
