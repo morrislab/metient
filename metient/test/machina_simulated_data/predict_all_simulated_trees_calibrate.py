@@ -6,11 +6,9 @@ import argparse
 import datetime
 import math
 import time
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 from metient.metient import *
-from metient.lib.vertex_labeling import rank_solutions
+from metient.lib.migration_history_inference import rank_solutions
 from metient.util import eval_util as eutil
 from metient.util import plotting_util as plot_util
 from metient.util.vertex_labeling_util import create_reweighted_solution_set_from_pckl

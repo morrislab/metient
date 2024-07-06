@@ -20,6 +20,8 @@ if torch.cuda.is_available():
 ######################################################
 ##################### CLASSES ########################
 ######################################################
+
+    
 # Defines a unique adjacency matrix and vertex labeling
 class LabeledTree:
     def __init__(self, tree, labeling):
@@ -72,9 +74,26 @@ class VertexLabelingSolution:
         self.idx_to_label = idx_to_label
         self.soft_V = soft_V
 
-   # Override the comparison operator
+    # Override the comparison operator
     def __lt__(self, other):
         return self.loss < other.loss
+    
+    def _nonzero_tuple(self, tensor):
+        # Get the indices of non-zero elements and convert to a hashable form
+        indices = torch.nonzero(tensor, as_tuple=False)
+        return tuple(map(tuple, indices.tolist()))
+
+    def __hash__(self):
+        # Compute a hash based on the positions of non-zero entries
+        return hash((self._nonzero_tuple(self.V), self._nonzero_tuple(self.T)))
+
+    def __eq__(self, other):
+        # Check for equality based on the positions of non-zero entries in both tensors
+        if not isinstance(other, VertexLabelingSolution):
+            return False
+        return (self._nonzero_tuple(self.V) == self._nonzero_tuple(other.V) and
+                self._nonzero_tuple(self.T) == self._nonzero_tuple(other.T))
+
 
 
 # Convenience object to package information needed for known 
@@ -324,6 +343,7 @@ def get_leaf_labels_from_U(U):
                 if node_idx not in internal_node_idx_to_sites:
                     internal_node_idx_to_sites[node_idx] = []
                 internal_node_idx_to_sites[node_idx].append(site_idx)
+    
     return internal_node_idx_to_sites
 
 
@@ -370,9 +390,79 @@ def full_adj_matrix_using_inferred_observed_clones(U, input_T, input_G, num_site
     
     return full_adj, full_G, L, internal_node_idx_to_sites
 
+def remove_leaf_indices_not_observed_sites(removal_indices, U, input_T, T, G, node_idx_to_label, idx_to_observed_sites):
+    '''
+    Remove clone tree leaf nodes that are not detected in any sites. 
+    These are not well estimated
+    '''
+    if len(removal_indices) == 0:
+        return U, input_T, T, G, node_idx_to_label, idx_to_observed_sites
+    
+    for remove_idx in removal_indices:
+        child_indices = get_child_indices(T, [remove_idx])
+        assert len(child_indices) == 0
+
+    # Remove indices from input_T, full T (now with observed clones), U and G
+    T = np.delete(T, removal_indices, 0)
+    T = np.delete(T, removal_indices, 1)
+
+    # Remove indices from T, U and G
+    input_T = np.delete(input_T, removal_indices, 0)
+    input_T = np.delete(input_T, removal_indices, 1)
+
+    U = np.delete(U, removal_indices, 1)
+
+    if G != None: 
+        G = np.delete(G, removal_indices, 0)
+        G = np.delete(G, removal_indices, 1)
+
+    # Reindex the idx to label dict
+    new_node_idx_to_label, old_index_to_new_index = reindex_dict(node_idx_to_label, removal_indices)
+    new_idx_to_observed_sites = {}
+    for old_idx in idx_to_observed_sites:
+        new_idx = old_index_to_new_index[old_idx]
+        new_idx_to_observed_sites[new_idx] = idx_to_observed_sites[old_idx]
+
+    return U, input_T, T, G, new_node_idx_to_label, new_idx_to_observed_sites
+
 ######################################################
 ################## RANDOM UTILITIES ##################
 ######################################################
+
+def mutation_matrix_with_normal_cells(T):
+    B = mutation_matrix(T)
+    # Add a row of zeros to account for the non-cancerous root node
+    B = torch.vstack([torch.zeros(B.shape[1]), B])
+    # Add a column of ones to indicate that every clone is a descendent of the non-cancerous root node
+    B = torch.hstack([torch.ones(B.shape[0]).reshape(-1,1), B])
+    return B
+
+def adjacency_matrix_to_edge_list(adj_matrix):
+    edges = []
+    for i, j in tree_iterator(adj_matrix):
+        edges.append((i, j))
+    return edges
+
+def reindex_dict(original_dict, indices_to_remove):
+    # Create a new dictionary to hold the re-indexed entries
+    new_dict = {}
+    
+    old_index_to_new_index = {}
+    # Initialize the new index
+    new_index = 0
+    # Iterate through the original dictionary in sorted index order
+    for old_index in sorted(original_dict.keys()):
+        # Skip the indices that need to be removed
+        if old_index in indices_to_remove:
+            continue
+        
+        # Assign the new index to the current label
+        new_dict[new_index] = original_dict[old_index]
+        old_index_to_new_index[old_index] = new_index
+        # Increment the new index
+        new_index += 1
+    
+    return new_dict, old_index_to_new_index
 
 def add_batch_dim(x):
     if len(x.shape) == 3:
@@ -419,8 +509,8 @@ def calculate_batch_size(T, sites, solve_polytomies):
     '''
     num_nodes = T.shape[0]
     num_sites = len(sites)
-    min_size = 512
-    min_size += num_nodes*num_sites*10
+    min_size = 64
+    min_size += num_nodes*num_sites*4
 
     if solve_polytomies:
         min_size *= 2
@@ -489,7 +579,11 @@ def get_root_index(T):
     '''
 
     candidates = set([x for x in range(len(T))])
-    for i, j in tree_iterator(T):
+    #print("candidates", candidates)
+    for _, j in tree_iterator(T):
+        if j not in candidates:
+            print("T", adjacency_matrix_to_edge_list(T))
+            print("j", j)
         candidates.remove(j)
     msg = "More than one" if len(candidates) > 1 else "No"
     assert (len(candidates) == 1), f"{msg} root node detected"
@@ -729,6 +823,66 @@ def get_k_or_more_children_nodes(input_T, T, internal_node_idx_to_sites, k, incl
         filtered_node_indices.append(node_idx)
         all_resolver_sites.append(resolver_sites)
     return filtered_node_indices, all_resolver_sites
+
+def find_first_branching_point(adj_matrix):
+    out_degrees = adj_matrix.sum(dim=1)  # Calculate out-degrees of each node
+    for node, out_degree in enumerate(out_degrees):
+        if out_degree > 1:
+            return node
+    return None  # Return None if no branching point is found
+
+import torch
+import networkx as nx
+from itertools import product
+
+# Helper function to build a NetworkX tree from an adjacency matrix
+def build_tree(adj_matrix):
+    G = nx.DiGraph()
+    n = adj_matrix.shape[0]
+    for i in range(n):
+        for j in range(n):
+            if adj_matrix[i, j] == 1:
+                G.add_edge(i, j)
+    return G
+
+# Helper function to find the first common branching point in two graphs
+def find_first_branching_point(adj_matrix):
+    out_degrees = adj_matrix.sum(dim=1)  # Calculate out-degrees of each node
+    for node, out_degree in enumerate(out_degrees):
+        if out_degree > 1:
+            return node
+    return None  # Return None if no branching point is found
+
+# Helper function to extract subtrees rooted at the given node
+def extract_subtrees(G, root):
+    subtrees = []
+    for child in G.successors(root):
+        subtree = nx.dfs_tree(G, source=child)
+        subtrees.append(subtree)
+    return subtrees
+
+# Helper function to combine subtrees and labels from multiple solutions
+def combine_subtrees(subtrees_list, labels_list, common_root):
+    combinations = []
+    num_subtrees = len(subtrees_list[0])
+    
+    # Generate all combinations of subtrees from each solution
+    for indices in product(range(num_subtrees), repeat=len(subtrees_list)):
+        combined_adj_matrix = torch.zeros_like(subtrees_list[0][0].adj_matrix)
+        combined_labels = torch.zeros_like(labels_list[0])
+        
+        for i, idx in enumerate(indices):
+            subtree = subtrees_list[i][idx]
+            labels = labels_list[i]
+            # Combine adjacency matrices
+            for edge in subtree.edges:
+                combined_adj_matrix[edge[0], edge[1]] = 1
+            # Combine labels
+            for node in subtree.nodes:
+                combined_labels[:, node] = labels[:, node]
+        
+        combinations.append((combined_adj_matrix, combined_labels))
+    return combinations
 
 def get_child_indices(T, indices):
     '''
