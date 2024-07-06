@@ -34,6 +34,7 @@ If your jupyter notebook does not automatically recognize your conda environment
 pip install ipykernel
 python -m ipykernel install --user --name myenv --display-name "met"
 ```
+Then in the jupyter notebook, select Kernel > Change kernel > met.
 
 ## Inputs
 There are two required inputs, a tsv file with information for each sample and mutation/mutation cluster, and a txt file specifying the edges of the clone tree.
