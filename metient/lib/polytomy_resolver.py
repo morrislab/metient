@@ -1,12 +1,13 @@
 import torch
 from collections import OrderedDict
 from metient.util import vertex_labeling_util as vutil
+#from metient.lib.v_optimzer import VertexLabelingSolver
+
 import numpy as np
-import copy
 
 class PolytomyResolver():
 
-    def __init__(self, T, G, num_sites, num_leaves, bs, node_idx_to_label, nodes_w_polys, resolver_sites, identical_clone_value):
+    def __init__(self, v_optimizer, nodes_w_polys, resolver_sites):
         '''
         This is post U matrix estimation, so T already has leaf nodes.
         '''
@@ -14,10 +15,14 @@ class PolytomyResolver():
         # 1. Pad the adjacency matrix so that there's room for the new resolver nodes
         # nodes_w_polys are the nodes that have polytomies
         # (we place them in this order: given internal nodes, new resolver nodes, leaf nodes from U)
+        T, G = v_optimizer.T, v_optimizer.G
+        bs = v_optimizer.config['batch_size']
+
         num_new_nodes = 0
         for r in resolver_sites:
             num_new_nodes += len(r)
 
+        num_leaves = v_optimizer.L.shape[1]
         num_internal_nodes = T.shape[0]-num_leaves
         T = torch.nn.functional.pad(T, pad=(0, num_new_nodes, 0, num_new_nodes), mode='constant', value=0)
         # 2. Shift T and G to make room for the new indices (so the order is input internal nodes, new poly nodes, leaves)
@@ -47,7 +52,7 @@ class PolytomyResolver():
                 nodes_w_polys_to_resolver_indices[parent_idx].append(i)
             start_new_node_idx += num_new_nodes_for_poly
 
-        resolver_labeling = torch.zeros(num_sites, len(resolver_indices))
+        resolver_labeling = torch.zeros(v_optimizer.num_sites, len(resolver_indices))
         t = 0
         for sites in resolver_sites:
             for site in sites:
@@ -76,9 +81,9 @@ class PolytomyResolver():
         for i in nodes_w_polys:
             for j in nodes_w_polys_to_resolver_indices[i]:
                 T[i,j] = 1.0
-                node_idx_to_label[j] = [f"{i}pol{j}"]
+                v_optimizer.node_idx_to_label[j] = [f"{i}pol{j}"]
                 if G != None:
-                    G[i,j] = identical_clone_value
+                    G[i,j] = v_optimizer.config['identical_clone_gen_dist']
 
         # 6. The genetic distance between a new node and its potential
         # new children which "switch" is the same distance between the new
@@ -95,32 +100,65 @@ class PolytomyResolver():
                 potential_child_indices = vutil.get_child_indices(T, [parent_idx])
                 for child_idx in potential_child_indices:
                     G[new_node_idx, child_idx] = G[parent_idx, child_idx]
+
+        v_optimizer.T = T
+        v_optimizer.G = G
         self.latent_var = poly_adj_matrix
         self.nodes_w_polys = nodes_w_polys
         self.children_of_polys = children_of_polys
         self.resolver_indices = resolver_indices
-        self.T = T
-        self.G = G
-        self.node_idx_to_label = node_idx_to_label
         self.resolver_index_to_parent_idx = resolver_index_to_parent_idx
         self.resolver_labeling = resolver_labeling
 
-def is_same_mig_hist_with_node_removed(poly_res, T, V, remove_idx, children_of_removal_node, p, prev_m, prev_c, prev_s):
+def is_same_mig_hist_with_node_removed(poly_res, T, num_internal_nodes, V, remove_idx, children_of_removal_node, p, prev_m, prev_c, prev_s):
     '''
     Returns True if migration graph is the same or better after 
     removing node at index remove_idx
     '''
-    # If the polytomy resolver node is the same color as its parent and only has one child,
-    # or the resolver node only has one child that is the same color as it, the migration history
-    # won't change by removing the polytomy resolver node. 
-    # If that is not true, check to see if the migration history changes by removing the node
+
+    '''
+    If any of the following are true:
+        (1) the polytomy resolver node is the same color as its parent,
+        (2) the polytomy resolver node only has one child that is the same color as it,
+
+        # (1) the polytomy resolver node is the same color as its parent and only has one child,
+        # (2) the polytomy resolver node only has one child that is the same color as it,
+        # (3) the polytomy resolver node is the same color as its parent and all of its children (that are internal nodes) are the same color
+        # (4) the polytomy resolver node is the same color as its parent and only one of its children is a different color
+    the migration history won't change by removing the polytomy resolver node. 
+    
+    If that is not true, check to see if the migration history changes by removing the node
+    '''
     parent_idx = poly_res.resolver_index_to_parent_idx[remove_idx]
     # print(remove_idx, parent_idx, torch.argmax(V[:,parent_idx]).item(),torch.argmax(V[:,remove_idx]).item(), torch.argmax(V[:,parent_idx]).item()==torch.argmax(V[:,remove_idx]).item())
     remove_idx_color = torch.argmax(V[:,remove_idx]).item()
     is_same_color_as_parent = torch.argmax(V[:,parent_idx]).item() == remove_idx_color
     is_same_color_as_child = torch.argmax(V[:,children_of_removal_node[0]]).item() == remove_idx_color
-    if len(children_of_removal_node)==1 and (is_same_color_as_parent or is_same_color_as_child):
+    # Case 1
+    if is_same_color_as_parent:
         return True
+    
+    # Case 2
+    if len(children_of_removal_node)==1 and (is_same_color_as_child):
+        return True
+    
+    # is_same_color_as_all_children = True
+    # num_children_diff_color = 0
+    # for child in children_of_removal_node:
+    #     is_same_color_as_child = torch.argmax(V[:,child]).item() == remove_idx_color
+    #     # Is an internal node child and is not same color
+    #     if not is_same_color_as_child and child < num_internal_nodes:
+    #         is_same_color_as_all_children = False
+    #     if not is_same_color_as_child:
+    #         num_children_diff_color += 1
+    # # Case 3
+    # if is_same_color_as_parent and is_same_color_as_all_children:
+    #     return True
+    # # Case 4
+    # if is_same_color_as_parent and num_children_diff_color == 1:
+    #     return True
+    return False
+
     candidate_T, candidate_V = T.detach().clone(), V.detach().clone()
     # Attach children of the node to remove back to their original parent
     for child_idx in children_of_removal_node:
@@ -157,15 +195,11 @@ def remove_nodes(removal_indices, V, T, G, node_idx_to_label):
         G = np.delete(G, removal_indices, 1)
 
     # Reindex the idx to label dict
-    copy_node_idx_to_label = copy.deepcopy(node_idx_to_label)
-    for idx in removal_indices:
-        del copy_node_idx_to_label[idx]
-    new_node_idx_to_label = dict()
-    for i,key in enumerate(sorted(list(copy_node_idx_to_label.keys()))):
-        new_node_idx_to_label[i] = copy_node_idx_to_label[key]
+    new_node_idx_to_label, _= vutil.reindex_dict(node_idx_to_label, removal_indices)
+    
     return V, T, G, new_node_idx_to_label
 
-def remove_extra_resolver_nodes(solution_set, poly_res, weights, O, p):
+def remove_extra_resolver_nodes(solution_set, num_internal_nodes, poly_res, weights, O, p):
     '''
     If there are any resolver nodes that were added to resolve polytomies but they 
     weren't used (i.e. 1. they have no children or 2. they don't change the 
@@ -183,7 +217,7 @@ def remove_extra_resolver_nodes(solution_set, poly_res, weights, O, p):
             children_of_new_node = vutil.get_child_indices(T, [new_node_idx])
             if len(children_of_new_node) == 0:
                 nodes_to_remove.append(new_node_idx)
-            elif is_same_mig_hist_with_node_removed(poly_res, T, V, new_node_idx, children_of_new_node, p, prev_m, prev_c, prev_s):
+            elif is_same_mig_hist_with_node_removed(poly_res, T, num_internal_nodes,  V, new_node_idx, children_of_new_node, p, prev_m, prev_c, prev_s):
                 nodes_to_remove.append(new_node_idx)
 
         if len(nodes_to_remove) != 0:

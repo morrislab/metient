@@ -7,7 +7,7 @@ import datetime
 import fnmatch
 import pandas as pd
 from metient.metient import *
-from metient.lib.vertex_labeling import get_migration_history
+from metient.lib.migration_history_inference import infer_migration_history
 from metient.util import plotting_util as plot_util
 from metient.util import data_extraction_util as dutil
 from metient.util.globals import *
@@ -43,6 +43,7 @@ def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir
     data = dutil.get_adj_matrices_from_spruce_mutation_trees(all_mut_trees_fn, idx_to_cluster_label, is_sim_data=True)
     custom_colors = [matplotlib.colors.to_hex(c) for c in ['limegreen', 'royalblue', 'hotpink', 'grey', 'saddlebrown', 'darkorange', 'purple', 'red', 'black', 'black', 'black', 'black']]
     perf_stats = []
+    # This is for experiment when solving for migration histories using genetic distance only
     needs_pruning = False if no_parsimony_weights(weights) else True
     print("needs_pruning", needs_pruning)
     for tree_num in range(len(trees)):
@@ -58,9 +59,9 @@ def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir
         pooled_tsv_fn = dutil.pool_input_tsv(ref_var_fn, out_dir, f"tmp_{site}_{mig_type}_{seed}_{tree_num}")
         print_config = PrintConfig(visualize=VISUALIZE, verbose=False, k_best_trees=batch_size, save_outputs=True)
         
-        T_edges, labeling, G_edges, loss_info, time = get_migration_history(T, pooled_tsv_fn, 'P', weights, print_config, out_dir, f"tree{tree_num}_seed{seed}_{mode}", 
-                                                                            max_iter=100, batch_size=batch_size, custom_colors=custom_colors, 
-                                                                            bias_weights=weight_init_primary, mode=mode, solve_polytomies=solve_polytomies, needs_pruning=needs_pruning)
+        T_edges, labeling, G_edges, loss_info, time = infer_migration_history(T, pooled_tsv_fn, 'P', weights, print_config, out_dir, f"tree{tree_num}_seed{seed}_{mode}", 
+                                                                              batch_size=batch_size, custom_colors=custom_colors, needs_pruning=needs_pruning,
+                                                                              bias_weights=weight_init_primary, mode=mode, solve_polytomies=solve_polytomies)
 
         time_with_plotting = (datetime.datetime.now() - start_time).total_seconds()
         os.remove(pooled_tsv_fn) # cleanup pooled tsv
