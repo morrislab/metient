@@ -28,6 +28,14 @@ There are different Jupyter Notebook tutorials based on your use case:
 3. I have a small number of patients, or I want to enforce my own parsimony metric weights. (Metient-evaluate)
    - I want Metient to estimate which mutations/mutation clusters are present in which anatomical sites. [Tutorial 3](tutorial/3_metient_evaluate_infer_observed_clones_label_clone_tree_tutorial.ipynb)
    - I know which mutations/mutation clusters are present in which anatomical sites. [Tutorial 4](tutorial/4_metient_evaluate_label_clone_tree_tutorial.ipynb)
+  
+If your jupyter notebook does not automatically recognize your conda environment, run the following:
+```bash
+pip install ipykernel
+python -m ipykernel install --user --name myenv --display-name "met"
+```
+Then in the jupyter notebook, select Kernel > Change kernel > met.
+
 ## Inputs
 There are two required inputs, a tsv file with information for each sample and mutation/mutation cluster, and a txt file specifying the edges of the clone tree.
 
