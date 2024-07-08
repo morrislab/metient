@@ -107,7 +107,6 @@ def get_best_final_solutions(results, G, O, p, weights, print_config,
         unique_solution_set = prutil.remove_extra_resolver_nodes(unique_solution_set, num_internal_nodes, poly_res, weights, O, p)
         full_solution_set.extend(unique_solution_set)
 
-    print("full solution set size:", len(full_solution_set))
     return rank_solutions(full_solution_set, print_config, needs_pruning=needs_pruning)
 
 def recover_prim_ss_solutions(solution_set, unique_labelings, weights, O, p):
