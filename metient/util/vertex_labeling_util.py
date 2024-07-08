@@ -196,7 +196,7 @@ def organotropism_score(O, site_adj_no_diag, p, bs, num_sites):
     Args:
         - O: Array of frequencies with which the primary cancer type seeds site i (shape: num_anatomical_sites).
         - site_adj_no_diag: batch_size x num_sites x num_sites matrix, where each num_sites x num_sites
-        matrix has the number of migrations from site i to site j, and no same site migrations are included
+        matrix has the number of migrations from site i to site j, and no self loops
         - p: one-hot vector indicating site of the primary
         - bs: batch_size (number of samples)
         - num_sites: number of anatomical sites
@@ -212,9 +212,9 @@ def organotropism_score(O, site_adj_no_diag, p, bs, num_sites):
         prim_site_idx = torch.nonzero(p)[0][0]
         O = O.repeat(bs,1).reshape(bs, O.shape[0])
         adjusted_freqs = -torch.log(O+0.01)
-        binarized_site_adj = torch.sigmoid(BINARY_ALPHA * (2 * site_adj_no_diag - 1))
-        organ_penalty = torch.mul(binarized_site_adj[:,prim_site_idx,:], adjusted_freqs)
-        o = torch.sum(organ_penalty, dim=(1))/(num_sites-1)
+        num_mig_from_prim = site_adj_no_diag[:,prim_site_idx,:]
+        organ_penalty = torch.mul(num_mig_from_prim, adjusted_freqs)
+        o = torch.sum(organ_penalty, dim=(1))/torch.sum(num_mig_from_prim, dim=(1))
     return o
 
 def ancestral_labeling_metrics(V, A, G, O, p, update_path_matrix):
