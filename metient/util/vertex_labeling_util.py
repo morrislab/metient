@@ -517,7 +517,7 @@ def calculate_batch_size(T, sites, solve_polytomies):
 
     # cap this to a reasonably high sample size
     min_size = min(min_size, 60000)
-    print("calculate_batch_size", min_size)
+    #print("calculate_batch_size", min_size)
     return min_size
 
 def tree_iterator(T):

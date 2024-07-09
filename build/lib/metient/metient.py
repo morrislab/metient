@@ -126,13 +126,14 @@ class PrintConfig:
         self.save_outputs = save_outputs
 
 class Weights:
-    def __init__(self, mig=10.0, comig=5.0, seed_site=1.0, gen_dist=0.0, organotrop=0.0, data_fit=15.0, reg=0.5, entropy=0.01):
+    def __init__(self, mig=4.8, comig=3.0, seed_site=2.2, gen_dist=0.0, organotrop=0.0, data_fit=15.0, reg=0.5, entropy=0.01):
         '''
         The higher the inputted weight, the higher the penalty on that metric.
+
         Args:
-            mig: weight to place on migration number.
-            comig: weight to place on comigration number.
-            seed_site: weight to place on seeding site number.
+            mig: weight to place on migration number. Default is based on calibration to real data.
+            comig: weight to place on comigration number. Default is based on calibration to real data.
+            seed_site: weight to place on seeding site number. Default is based on calibration to real data.
             gen_dist: weight to place on genetic distance loss.
             organotrop: weight to place on organotropism loss.
             data_fit: weight to place on negative log likelihood loss of observed clone percentages.

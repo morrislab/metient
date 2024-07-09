@@ -1,0 +1,30 @@
+strict digraph  {
+graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dpi=600; size=2.5;
+0 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="ATM;ZBTB20"];
+2 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=CEP57];
+4 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=KLHL6];
+1 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="FGF12;ROBO4"];
+6 [color="#be5742ff", fillcolor="#be5742ff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
+7 [color="#e69138ff", fillcolor="#e69138ff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
+8 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
+9 [color="#6fa8dcff", fillcolor="#6fa8dcff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
+3 [color="#6fa8dcff", fillcolor="#6fa8dcff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="ENAM;DLG1"];
+10 [color="#6fa8dcff", fillcolor="#6fa8dcff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
+5 [color="#6fa8dcff", fillcolor="#6fa8dcff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="4pol5"];
+11 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
+12 [color="#6fa8dcff", fillcolor="#6fa8dcff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
+normal [label="", penwidth=3, style=invis, xlabel="ATM;ZBTB20"];
+0 -> 2  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.5", penwidth="5.5", style=solid];
+0 -> 4  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.5", penwidth="5.5", style=solid];
+2 -> 1  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="2.5", penwidth="5.5", style=solid];
+2 -> 8  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.25", penwidth=5, style=dashed];
+2 -> 9  [arrowsize=0, color="#6aa84fff;0.5:#6fa8dcff", minlen="1.25", penwidth=5, style=dashed];
+4 -> 5  [arrowsize=0, color="#6aa84fff;0.5:#6fa8dcff", minlen="1.25", penwidth="5.5", style=solid];
+4 -> 11  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.25", penwidth=5, style=dashed];
+1 -> 6  [arrowsize=0, color="#6aa84fff;0.5:#be5742ff", minlen="1.25", penwidth=5, style=dashed];
+1 -> 7  [arrowsize=0, color="#6aa84fff;0.5:#e69138ff", minlen="1.25", penwidth=5, style=dashed];
+3 -> 10  [arrowsize=0, color="#6fa8dcff;0.5:#6fa8dcff", minlen="1.25", penwidth=5, style=dashed];
+5 -> 3  [arrowsize=0, color="#6fa8dcff;0.5:#6fa8dcff", minlen="2.0", penwidth="5.5", style=solid];
+5 -> 12  [arrowsize=0, color="#6fa8dcff;0.5:#6fa8dcff", minlen="1.25", penwidth=5, style=dashed];
+normal -> 0  [arrowsize=0, color="#6aa84fff", label="", penwidth=4, style=solid];
+}
