@@ -1,60 +1,60 @@
 anatomical_site_index	anatomical_site_label	cluster_index	character_index	character_label	ref	var	var_read_prob	site_category
-0	Primary, forehead	1	0	ADCY5	213	118	0.38	primary
-1	Parotid metastasis	1	0	ADCY5	382	27	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	0	ADCY5	319	67	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	0	ADCY5	188	66	0.31	metastasis
-0	Primary, forehead	1	1	ZNF148	117	58	0.38	primary
-1	Parotid metastasis	1	1	ZNF148	259	12	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	1	ZNF148	207	36	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	1	ZNF148	110	54	0.31	metastasis
-0	Primary, forehead	2	2	FBXO40	174	82	0.38	primary
-1	Parotid metastasis	2	2	FBXO40	289	26	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	2	FBXO40	205	58	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	2	FBXO40	119	62	0.31	metastasis
-0	Primary, forehead	2	3	MMP3	34	22	0.38	primary
-1	Parotid metastasis	2	3	MMP3	65	4	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	3	MMP3	64	27	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	3	MMP3	40	11	0.31	metastasis
-0	Primary, forehead	2	4	DSCAML1	242	138	0.38	primary
-1	Parotid metastasis	2	4	DSCAML1	446	42	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	4	DSCAML1	345	92	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	4	DSCAML1	229	81	0.31	metastasis
-0	Primary, forehead	2	5	MCM2	31	16	0.38	primary
-1	Parotid metastasis	2	5	MCM2	62	5	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	5	MCM2	52	12	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	5	MCM2	44	15	0.31	metastasis
-0	Primary, forehead	2	6	KALRN	42	127	0.38	primary
-1	Parotid metastasis	2	6	KALRN	218	22	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	6	KALRN	136	65	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	6	KALRN	86	53	0.31	metastasis
-0	Primary, forehead	2	7	PLXND1	247	149	0.38	primary
-1	Parotid metastasis	2	7	PLXND1	398	25	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	7	PLXND1	298	72	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	7	PLXND1	182	89	0.31	metastasis
-0	Primary, forehead	2	8	PLCH1	115	79	0.38	primary
-1	Parotid metastasis	2	8	PLCH1	218	13	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	8	PLCH1	159	38	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	8	PLCH1	128	35	0.31	metastasis
-0	Primary, forehead	1	9	TREH	134	74	0.38	primary
-1	Parotid metastasis	1	9	TREH	224	17	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	9	TREH	164	28	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	9	TREH	106	53	0.31	metastasis
-0	Primary, forehead	2	10	DHX36	78	64	0.38	primary
-1	Parotid metastasis	2	10	DHX36	206	21	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	10	DHX36	155	42	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	10	DHX36	100	38	0.31	metastasis
-0	Primary, forehead	2	11	COX18	92	42	0.38	primary
-1	Parotid metastasis	2	11	COX18	212	17	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	11	COX18	82	35	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	11	COX18	76	30	0.31	metastasis
+0	Primary, forehead	0	0	ADCY5	213	118	0.38	primary
+1	Parotid metastasis	0	0	ADCY5	382	27	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	0	ADCY5	319	67	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	0	ADCY5	188	66	0.31	metastasis
+0	Primary, forehead	0	1	ZNF148	117	58	0.38	primary
+1	Parotid metastasis	0	1	ZNF148	259	12	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	1	ZNF148	207	36	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	1	ZNF148	110	54	0.31	metastasis
+0	Primary, forehead	0	2	FBXO40	174	82	0.38	primary
+1	Parotid metastasis	0	2	FBXO40	289	26	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	2	FBXO40	205	58	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	2	FBXO40	119	62	0.31	metastasis
+0	Primary, forehead	0	3	MMP3	34	22	0.38	primary
+1	Parotid metastasis	0	3	MMP3	65	4	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	3	MMP3	64	27	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	3	MMP3	40	11	0.31	metastasis
+0	Primary, forehead	0	4	DSCAML1	242	138	0.38	primary
+1	Parotid metastasis	0	4	DSCAML1	446	42	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	4	DSCAML1	345	92	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	4	DSCAML1	229	81	0.31	metastasis
+0	Primary, forehead	0	5	MCM2	31	16	0.38	primary
+1	Parotid metastasis	0	5	MCM2	62	5	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	5	MCM2	52	12	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	5	MCM2	44	15	0.31	metastasis
+0	Primary, forehead	0	6	KALRN	42	127	0.38	primary
+1	Parotid metastasis	0	6	KALRN	218	22	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	6	KALRN	136	65	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	6	KALRN	86	53	0.31	metastasis
+0	Primary, forehead	0	7	PLXND1	247	149	0.38	primary
+1	Parotid metastasis	0	7	PLXND1	398	25	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	7	PLXND1	298	72	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	7	PLXND1	182	89	0.31	metastasis
+0	Primary, forehead	0	8	PLCH1	115	79	0.38	primary
+1	Parotid metastasis	0	8	PLCH1	218	13	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	8	PLCH1	159	38	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	8	PLCH1	128	35	0.31	metastasis
+0	Primary, forehead	0	9	DHX36	78	64	0.38	primary
+1	Parotid metastasis	0	9	DHX36	206	21	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	9	DHX36	155	42	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	9	DHX36	100	38	0.31	metastasis
+0	Primary, forehead	0	10	TREH	134	74	0.38	primary
+1	Parotid metastasis	0	10	TREH	224	17	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	10	TREH	164	28	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	10	TREH	106	53	0.31	metastasis
+0	Primary, forehead	0	11	COX18	92	42	0.38	primary
+1	Parotid metastasis	0	11	COX18	212	17	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	11	COX18	82	35	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	11	COX18	76	30	0.31	metastasis
 0	Primary, forehead	0	12	TIPARP	987	607	0.38	primary
 1	Parotid metastasis	0	12	TIPARP	1668	207	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	12	TIPARP	1500	312	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	12	TIPARP	945	379	0.31	metastasis
-0	Primary, forehead	2	13	NLGN1	275	161	0.38	primary
-1	Parotid metastasis	2	13	NLGN1	499	39	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	13	NLGN1	450	117	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	13	NLGN1	259	99	0.31	metastasis
+0	Primary, forehead	0	13	NLGN1	275	161	0.38	primary
+1	Parotid metastasis	0	13	NLGN1	499	39	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	13	NLGN1	450	117	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	13	NLGN1	259	99	0.31	metastasis
 0	Primary, forehead	0	14	DMP1	135	90	0.38	primary
 1	Parotid metastasis	0	14	DMP1	282	35	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	14	DMP1	210	51	0.21	metastasis
@@ -63,194 +63,194 @@ anatomical_site_index	anatomical_site_label	cluster_index	character_index	charac
 1	Parotid metastasis	0	15	PRR23A	106	12	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	15	PRR23A	83	19	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	15	PRR23A	41	22	0.31	metastasis
-0	Primary, forehead	2	16	SPICE1	384	231	0.38	primary
-1	Parotid metastasis	2	16	SPICE1	644	52	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	16	SPICE1	586	169	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	16	SPICE1	335	135	0.31	metastasis
+0	Primary, forehead	0	16	SPICE1	384	231	0.38	primary
+1	Parotid metastasis	0	16	SPICE1	644	52	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	16	SPICE1	586	169	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	16	SPICE1	335	135	0.31	metastasis
 0	Primary, forehead	0	17	FRAS1	144	86	0.38	primary
 1	Parotid metastasis	0	17	FRAS1	327	40	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	17	FRAS1	245	64	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	17	FRAS1	136	56	0.31	metastasis
-0	Primary, forehead	3	18	FGF12	376	0	0.38	primary
-1	Parotid metastasis	3	18	FGF12	461	36	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	3	18	FGF12	375	0	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	3	18	FGF12	188	76	0.31	metastasis
-0	Primary, forehead	2	19	OR8B2	24	6	0.38	primary
-1	Parotid metastasis	2	19	OR8B2	23	4	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	19	OR8B2	28	10	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	19	OR8B2	15	3	0.31	metastasis
-0	Primary, forehead	0	20	ECT2	110	68	0.38	primary
-1	Parotid metastasis	0	20	ECT2	238	26	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	0	20	ECT2	173	29	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	0	20	ECT2	122	38	0.31	metastasis
-0	Primary, forehead	0	21	FRAS1	127	92	0.38	primary
-1	Parotid metastasis	0	21	FRAS1	245	41	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	0	21	FRAS1	173	54	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	0	21	FRAS1	91	58	0.31	metastasis
-0	Primary, forehead	0	22	MUC4	5	4	0.38	primary
-1	Parotid metastasis	0	22	MUC4	6	4	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	0	22	MUC4	3	2	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	0	22	MUC4	0	1	0.31	metastasis
-0	Primary, forehead	1	23	UGT2B7	106	47	0.38	primary
-1	Parotid metastasis	1	23	UGT2B7	185	15	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	23	UGT2B7	170	27	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	23	UGT2B7	84	35	0.31	metastasis
-0	Primary, forehead	2	24	UBE4A	216	141	0.38	primary
-1	Parotid metastasis	2	24	UBE4A	354	35	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	24	UBE4A	288	75	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	24	UBE4A	181	72	0.31	metastasis
-0	Primary, forehead	3	25	ROBO4	249	0	0.38	primary
-1	Parotid metastasis	3	25	ROBO4	301	20	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	3	25	ROBO4	252	0	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	3	25	ROBO4	133	51	0.31	metastasis
-0	Primary, forehead	2	26	LRRIQ4	652	359	0.38	primary
-1	Parotid metastasis	2	26	LRRIQ4	1030	102	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	26	LRRIQ4	815	219	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	26	LRRIQ4	502	231	0.31	metastasis
-0	Primary, forehead	2	27	ENAM	324	176	0.38	primary
-1	Parotid metastasis	2	27	ENAM	495	49	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	27	ENAM	445	127	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	27	ENAM	248	108	0.31	metastasis
-0	Primary, forehead	2	28	WDFY3	226	120	0.38	primary
-1	Parotid metastasis	2	28	WDFY3	416	31	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	28	WDFY3	287	79	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	28	WDFY3	194	78	0.31	metastasis
-0	Primary, forehead	1	29	C11orf88	203	86	0.38	primary
-1	Parotid metastasis	1	29	C11orf88	385	28	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	29	C11orf88	263	57	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	29	C11orf88	204	46	0.31	metastasis
-0	Primary, forehead	1	30	SERPINI1	213	87	0.38	primary
-1	Parotid metastasis	1	30	SERPINI1	411	30	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	30	SERPINI1	315	69	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	30	SERPINI1	207	73	0.31	metastasis
+0	Primary, forehead	1	18	FGF12	376	0	0.38	primary
+1	Parotid metastasis	1	18	FGF12	461	36	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	1	18	FGF12	375	0	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	1	18	FGF12	188	76	0.31	metastasis
+0	Primary, forehead	0	19	OR8B2	24	6	0.38	primary
+1	Parotid metastasis	0	19	OR8B2	23	4	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	19	OR8B2	28	10	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	19	OR8B2	15	3	0.31	metastasis
+0	Primary, forehead	0	20	MUC4	5	4	0.38	primary
+1	Parotid metastasis	0	20	MUC4	6	4	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	20	MUC4	3	2	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	20	MUC4	0	1	0.31	metastasis
+0	Primary, forehead	0	21	ECT2	110	68	0.38	primary
+1	Parotid metastasis	0	21	ECT2	238	26	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	21	ECT2	173	29	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	21	ECT2	122	38	0.31	metastasis
+0	Primary, forehead	0	22	FRAS1	127	92	0.38	primary
+1	Parotid metastasis	0	22	FRAS1	245	41	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	22	FRAS1	173	54	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	22	FRAS1	91	58	0.31	metastasis
+0	Primary, forehead	0	23	UGT2B7	106	47	0.38	primary
+1	Parotid metastasis	0	23	UGT2B7	185	15	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	23	UGT2B7	170	27	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	23	UGT2B7	84	35	0.31	metastasis
+0	Primary, forehead	0	24	UBE4A	216	141	0.38	primary
+1	Parotid metastasis	0	24	UBE4A	354	35	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	24	UBE4A	288	75	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	24	UBE4A	181	72	0.31	metastasis
+0	Primary, forehead	1	25	ROBO4	249	0	0.38	primary
+1	Parotid metastasis	1	25	ROBO4	301	20	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	1	25	ROBO4	252	0	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	1	25	ROBO4	133	51	0.31	metastasis
+0	Primary, forehead	0	26	LRRIQ4	652	359	0.38	primary
+1	Parotid metastasis	0	26	LRRIQ4	1030	102	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	26	LRRIQ4	815	219	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	26	LRRIQ4	502	231	0.31	metastasis
+0	Primary, forehead	0	27	ENAM	324	176	0.38	primary
+1	Parotid metastasis	0	27	ENAM	495	49	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	27	ENAM	445	127	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	27	ENAM	248	108	0.31	metastasis
+0	Primary, forehead	0	28	WDFY3	226	120	0.38	primary
+1	Parotid metastasis	0	28	WDFY3	416	31	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	28	WDFY3	287	79	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	28	WDFY3	194	78	0.31	metastasis
+0	Primary, forehead	0	29	C11orf88	203	86	0.38	primary
+1	Parotid metastasis	0	29	C11orf88	385	28	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	29	C11orf88	263	57	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	29	C11orf88	204	46	0.31	metastasis
+0	Primary, forehead	0	30	SERPINI1	213	87	0.38	primary
+1	Parotid metastasis	0	30	SERPINI1	411	30	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	30	SERPINI1	315	69	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	30	SERPINI1	207	73	0.31	metastasis
 0	Primary, forehead	0	31	RASSF6	117	65	0.38	primary
 1	Parotid metastasis	0	31	RASSF6	255	23	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	31	RASSF6	220	49	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	31	RASSF6	104	69	0.31	metastasis
-0	Primary, forehead	1	32	KIRREL3	182	75	0.38	primary
-1	Parotid metastasis	1	32	KIRREL3	257	20	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	32	KIRREL3	179	26	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	32	KIRREL3	130	54	0.31	metastasis
-0	Primary, forehead	2	33	LRRC15	151	106	0.38	primary
-1	Parotid metastasis	2	33	LRRC15	296	18	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	33	LRRC15	180	45	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	33	LRRC15	142	57	0.31	metastasis
-0	Primary, forehead	2	34	CEP164	30	12	0.38	primary
-1	Parotid metastasis	2	34	CEP164	53	3	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	34	CEP164	38	9	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	34	CEP164	22	17	0.31	metastasis
-0	Primary, forehead	1	35	ZBTB16	297	131	0.38	primary
-1	Parotid metastasis	1	35	ZBTB16	406	32	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	35	ZBTB16	326	86	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	35	ZBTB16	225	84	0.31	metastasis
-0	Primary, forehead	2	36	DDI1	178	134	0.38	primary
-1	Parotid metastasis	2	36	DDI1	304	28	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	36	DDI1	192	58	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	36	DDI1	131	67	0.31	metastasis
-0	Primary, forehead	1	37	SLC9A9	73	29	0.38	primary
-1	Parotid metastasis	1	37	SLC9A9	115	6	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	37	SLC9A9	104	23	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	37	SLC9A9	55	16	0.31	metastasis
-0	Primary, forehead	1	38	FAM172BP	244	120	0.38	primary
-1	Parotid metastasis	1	38	FAM172BP	491	41	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	38	FAM172BP	370	77	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	38	FAM172BP	228	96	0.31	metastasis
+0	Primary, forehead	0	32	KIRREL3	182	75	0.38	primary
+1	Parotid metastasis	0	32	KIRREL3	257	20	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	32	KIRREL3	179	26	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	32	KIRREL3	130	54	0.31	metastasis
+0	Primary, forehead	0	33	LRRC15	151	106	0.38	primary
+1	Parotid metastasis	0	33	LRRC15	296	18	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	33	LRRC15	180	45	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	33	LRRC15	142	57	0.31	metastasis
+0	Primary, forehead	0	34	CEP164	30	12	0.38	primary
+1	Parotid metastasis	0	34	CEP164	53	3	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	34	CEP164	38	9	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	34	CEP164	22	17	0.31	metastasis
+0	Primary, forehead	0	35	ZBTB16	297	131	0.38	primary
+1	Parotid metastasis	0	35	ZBTB16	406	32	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	35	ZBTB16	326	86	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	35	ZBTB16	225	84	0.31	metastasis
+0	Primary, forehead	0	36	DDI1	178	134	0.38	primary
+1	Parotid metastasis	0	36	DDI1	304	28	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	36	DDI1	192	58	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	36	DDI1	131	67	0.31	metastasis
+0	Primary, forehead	0	37	SLC9A9	73	29	0.38	primary
+1	Parotid metastasis	0	37	SLC9A9	115	6	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	37	SLC9A9	104	23	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	37	SLC9A9	55	16	0.31	metastasis
+0	Primary, forehead	0	38	FAM172BP	244	120	0.38	primary
+1	Parotid metastasis	0	38	FAM172BP	491	41	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	38	FAM172BP	370	77	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	38	FAM172BP	228	96	0.31	metastasis
 0	Primary, forehead	0	39	PARP14	83	55	0.38	primary
 1	Parotid metastasis	0	39	PARP14	166	24	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	39	PARP14	130	48	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	39	PARP14	85	33	0.31	metastasis
-0	Primary, forehead	2	40	FAT3	303	176	0.38	primary
-1	Parotid metastasis	2	40	FAT3	600	46	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	40	FAT3	493	111	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	40	FAT3	292	134	0.31	metastasis
-0	Primary, forehead	2	41	KBTBD12	73	40	0.38	primary
-1	Parotid metastasis	2	41	KBTBD12	128	10	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	41	KBTBD12	77	26	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	41	KBTBD12	70	29	0.31	metastasis
-0	Primary, forehead	5	42	KLHL6	106	67	0.38	primary
-1	Parotid metastasis	5	42	KLHL6	211	0	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	5	42	KLHL6	131	44	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	5	42	KLHL6	164	0	0.31	metastasis
-0	Primary, forehead	2	43	OR8B12	160	97	0.38	primary
-1	Parotid metastasis	2	43	OR8B12	327	31	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	43	OR8B12	246	64	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	43	OR8B12	159	67	0.31	metastasis
-0	Primary, forehead	1	44	MUC4	97	64	0.38	primary
-1	Parotid metastasis	1	44	MUC4	182	10	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	44	MUC4	102	15	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	44	MUC4	124	35	0.31	metastasis
-0	Primary, forehead	2	45	TMEM108	166	76	0.38	primary
-1	Parotid metastasis	2	45	TMEM108	265	21	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	45	TMEM108	188	54	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	45	TMEM108	95	44	0.31	metastasis
-0	Primary, forehead	4	46	ENAM	178	0	0.38	primary
-1	Parotid metastasis	4	46	ENAM	280	0	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	4	46	ENAM	222	27	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	4	46	ENAM	150	0	0.31	metastasis
-0	Primary, forehead	1	47	CBL	151	57	0.38	primary
-1	Parotid metastasis	1	47	CBL	236	11	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	47	CBL	201	37	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	47	CBL	134	41	0.31	metastasis
-0	Primary, forehead	1	48	OR8B12	86	41	0.38	primary
-1	Parotid metastasis	1	48	OR8B12	176	10	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	48	OR8B12	136	26	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	48	OR8B12	85	36	0.31	metastasis
-0	Primary, forehead	2	49	SMC4	7	8	0.38	primary
-1	Parotid metastasis	2	49	SMC4	30	2	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	49	SMC4	22	5	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	49	SMC4	14	7	0.31	metastasis
-0	Primary, forehead	2	50	KIAA1731	211	106	0.38	primary
-1	Parotid metastasis	2	50	KIAA1731	373	24	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	50	KIAA1731	288	93	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	50	KIAA1731	212	76	0.31	metastasis
-0	Primary, forehead	1	51	TOPBP1	258	110	0.38	primary
-1	Parotid metastasis	1	51	TOPBP1	471	38	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	51	TOPBP1	365	68	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	51	TOPBP1	172	82	0.31	metastasis
-0	Primary, forehead	2	52	FAM55B	341	198	0.38	primary
-1	Parotid metastasis	2	52	FAM55B	689	45	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	52	FAM55B	573	143	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	52	FAM55B	329	154	0.31	metastasis
-0	Primary, forehead	2	53	C3orf72	92	49	0.38	primary
-1	Parotid metastasis	2	53	C3orf72	147	11	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	53	C3orf72	111	32	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	53	C3orf72	79	26	0.31	metastasis
-0	Primary, forehead	4	54	DLG1	219	0	0.38	primary
-1	Parotid metastasis	4	54	DLG1	244	0	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	4	54	DLG1	185	26	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	4	54	DLG1	229	0	0.31	metastasis
+0	Primary, forehead	0	40	FAT3	303	176	0.38	primary
+1	Parotid metastasis	0	40	FAT3	600	46	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	40	FAT3	493	111	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	40	FAT3	292	134	0.31	metastasis
+0	Primary, forehead	0	41	KBTBD12	73	40	0.38	primary
+1	Parotid metastasis	0	41	KBTBD12	128	10	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	41	KBTBD12	77	26	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	41	KBTBD12	70	29	0.31	metastasis
+0	Primary, forehead	4	42	KLHL6	106	67	0.38	primary
+1	Parotid metastasis	4	42	KLHL6	211	0	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	4	42	KLHL6	131	44	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	4	42	KLHL6	164	0	0.31	metastasis
+0	Primary, forehead	0	43	OR8B12	160	97	0.38	primary
+1	Parotid metastasis	0	43	OR8B12	327	31	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	43	OR8B12	246	64	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	43	OR8B12	159	67	0.31	metastasis
+0	Primary, forehead	0	44	MUC4	97	64	0.38	primary
+1	Parotid metastasis	0	44	MUC4	182	10	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	44	MUC4	102	15	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	44	MUC4	124	35	0.31	metastasis
+0	Primary, forehead	0	45	TMEM108	166	76	0.38	primary
+1	Parotid metastasis	0	45	TMEM108	265	21	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	45	TMEM108	188	54	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	45	TMEM108	95	44	0.31	metastasis
+0	Primary, forehead	3	46	ENAM	178	0	0.38	primary
+1	Parotid metastasis	3	46	ENAM	280	0	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	3	46	ENAM	222	27	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	3	46	ENAM	150	0	0.31	metastasis
+0	Primary, forehead	0	47	CBL	151	57	0.38	primary
+1	Parotid metastasis	0	47	CBL	236	11	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	47	CBL	201	37	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	47	CBL	134	41	0.31	metastasis
+0	Primary, forehead	0	48	OR8B12	86	41	0.38	primary
+1	Parotid metastasis	0	48	OR8B12	176	10	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	48	OR8B12	136	26	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	48	OR8B12	85	36	0.31	metastasis
+0	Primary, forehead	0	49	SMC4	7	8	0.38	primary
+1	Parotid metastasis	0	49	SMC4	30	2	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	49	SMC4	22	5	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	49	SMC4	14	7	0.31	metastasis
+0	Primary, forehead	0	50	KIAA1731	211	106	0.38	primary
+1	Parotid metastasis	0	50	KIAA1731	373	24	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	50	KIAA1731	288	93	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	50	KIAA1731	212	76	0.31	metastasis
+0	Primary, forehead	0	51	TOPBP1	258	110	0.38	primary
+1	Parotid metastasis	0	51	TOPBP1	471	38	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	51	TOPBP1	365	68	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	51	TOPBP1	172	82	0.31	metastasis
+0	Primary, forehead	0	52	FAM55B	341	198	0.38	primary
+1	Parotid metastasis	0	52	FAM55B	689	45	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	52	FAM55B	573	143	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	52	FAM55B	329	154	0.31	metastasis
+0	Primary, forehead	0	53	C3orf72	92	49	0.38	primary
+1	Parotid metastasis	0	53	C3orf72	147	11	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	53	C3orf72	111	32	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	53	C3orf72	79	26	0.31	metastasis
+0	Primary, forehead	3	54	DLG1	219	0	0.38	primary
+1	Parotid metastasis	3	54	DLG1	244	0	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	3	54	DLG1	185	26	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	3	54	DLG1	229	0	0.31	metastasis
 0	Primary, forehead	0	55	DGKG	69	48	0.38	primary
 1	Parotid metastasis	0	55	DGKG	97	18	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	55	DGKG	101	26	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	55	DGKG	65	30	0.31	metastasis
-0	Primary, forehead	1	56	OLFR959	7	4	0.38	primary
-1	Parotid metastasis	1	56	OLFR959	9	1	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	56	OLFR959	18	0	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	56	OLFR959	8	4	0.31	metastasis
+0	Primary, forehead	0	56	OLFR959	7	4	0.38	primary
+1	Parotid metastasis	0	56	OLFR959	9	1	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	56	OLFR959	18	0	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	56	OLFR959	8	4	0.31	metastasis
 0	Primary, forehead	0	57	TMPRSS13	90	63	0.38	primary
 1	Parotid metastasis	0	57	TMPRSS13	199	23	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	57	TMPRSS13	150	41	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	57	TMPRSS13	88	39	0.31	metastasis
-0	Primary, forehead	1	58	ART3	370	156	0.38	primary
-1	Parotid metastasis	1	58	ART3	737	70	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	58	ART3	517	97	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	58	ART3	339	146	0.31	metastasis
-0	Primary, forehead	2	59	FAT3	324	192	0.38	primary
-1	Parotid metastasis	2	59	FAT3	677	55	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	59	FAT3	562	137	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	59	FAT3	299	158	0.31	metastasis
+0	Primary, forehead	0	58	ART3	370	156	0.38	primary
+1	Parotid metastasis	0	58	ART3	737	70	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	58	ART3	517	97	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	58	ART3	339	146	0.31	metastasis
+0	Primary, forehead	0	59	FAT3	324	192	0.38	primary
+1	Parotid metastasis	0	59	FAT3	677	55	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	59	FAT3	562	137	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	59	FAT3	299	158	0.31	metastasis
 0	Primary, forehead	0	60	IFT122	72	57	0.38	primary
 1	Parotid metastasis	0	60	IFT122	154	27	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	60	IFT122	131	37	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	60	IFT122	66	39	0.31	metastasis
-0	Primary, forehead	2	61	ATM	85	61	0.38	primary
-1	Parotid metastasis	2	61	ATM	202	17	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	61	ATM	149	34	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	61	ATM	94	48	0.31	metastasis
-0	Primary, forehead	1	62	PRDM10	110	48	0.38	primary
-1	Parotid metastasis	1	62	PRDM10	158	15	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	62	PRDM10	124	26	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	62	PRDM10	101	33	0.31	metastasis
+0	Primary, forehead	0	61	ATM	85	61	0.38	primary
+1	Parotid metastasis	0	61	ATM	202	17	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	61	ATM	149	34	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	61	ATM	94	48	0.31	metastasis
+0	Primary, forehead	0	62	PRDM10	110	48	0.38	primary
+1	Parotid metastasis	0	62	PRDM10	158	15	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	62	PRDM10	124	26	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	62	PRDM10	101	33	0.31	metastasis
 0	Primary, forehead	0	63	CLSTN2	123	79	0.38	primary
 1	Parotid metastasis	0	63	CLSTN2	210	26	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	63	CLSTN2	146	41	0.21	metastasis
@@ -259,14 +259,14 @@ anatomical_site_index	anatomical_site_label	cluster_index	character_index	charac
 1	Parotid metastasis	0	64	CD96	704	71	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	64	CD96	636	151	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	64	CD96	336	146	0.31	metastasis
-0	Primary, forehead	0	65	KBTBD12	178	120	0.38	primary
-1	Parotid metastasis	0	65	KBTBD12	411	54	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	0	65	KBTBD12	308	78	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	0	65	KBTBD12	194	97	0.31	metastasis
-0	Primary, forehead	2	66	KALRN	93	52	0.38	primary
-1	Parotid metastasis	2	66	KALRN	140	11	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	66	KALRN	110	25	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	66	KALRN	72	30	0.31	metastasis
+0	Primary, forehead	0	65	KALRN	93	52	0.38	primary
+1	Parotid metastasis	0	65	KALRN	140	11	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	65	KALRN	110	25	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	65	KALRN	72	30	0.31	metastasis
+0	Primary, forehead	0	66	KBTBD12	178	120	0.38	primary
+1	Parotid metastasis	0	66	KBTBD12	411	54	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	66	KBTBD12	308	78	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	66	KBTBD12	194	97	0.31	metastasis
 0	Primary, forehead	0	67	2013-09-11 00	154	91	0.38	primary
 1	Parotid metastasis	0	67	2013-09-11 00	317	39	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	67	2013-09-11 00	270	41	0.21	metastasis
@@ -279,94 +279,94 @@ anatomical_site_index	anatomical_site_label	cluster_index	character_index	charac
 1	Parotid metastasis	0	69	CASP5	265	37	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	69	CASP5	256	67	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	69	CASP5	143	72	0.31	metastasis
-0	Primary, forehead	2	70	UPK2	488	259	0.38	primary
-1	Parotid metastasis	2	70	UPK2	756	81	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	70	UPK2	476	126	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	70	UPK2	360	120	0.31	metastasis
-0	Primary, forehead	2	71	SEC31A	69	55	0.38	primary
-1	Parotid metastasis	2	71	SEC31A	158	14	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	71	SEC31A	129	38	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	71	SEC31A	74	35	0.31	metastasis
-0	Primary, forehead	2	72	FAM172BP	433	244	0.38	primary
-1	Parotid metastasis	2	72	FAM172BP	756	76	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	72	FAM172BP	627	156	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	72	FAM172BP	367	160	0.31	metastasis
-0	Primary, forehead	1	73	TFDP2	143	58	0.38	primary
-1	Parotid metastasis	1	73	TFDP2	246	19	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	73	TFDP2	191	36	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	73	TFDP2	113	41	0.31	metastasis
+0	Primary, forehead	0	70	UPK2	488	259	0.38	primary
+1	Parotid metastasis	0	70	UPK2	756	81	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	70	UPK2	476	126	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	70	UPK2	360	120	0.31	metastasis
+0	Primary, forehead	0	71	SEC31A	69	55	0.38	primary
+1	Parotid metastasis	0	71	SEC31A	158	14	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	71	SEC31A	129	38	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	71	SEC31A	74	35	0.31	metastasis
+0	Primary, forehead	0	72	FAM172BP	433	244	0.38	primary
+1	Parotid metastasis	0	72	FAM172BP	756	76	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	72	FAM172BP	627	156	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	72	FAM172BP	367	160	0.31	metastasis
+0	Primary, forehead	0	73	HEPN1	368	194	0.38	primary
+1	Parotid metastasis	0	73	HEPN1	679	71	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	73	HEPN1	518	125	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	73	HEPN1	341	143	0.31	metastasis
 0	Primary, forehead	0	74	BCL9L	81	56	0.38	primary
 1	Parotid metastasis	0	74	BCL9L	90	12	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	74	BCL9L	99	27	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	74	BCL9L	46	35	0.31	metastasis
-0	Primary, forehead	0	75	HEPN1	368	194	0.38	primary
-1	Parotid metastasis	0	75	HEPN1	679	71	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	0	75	HEPN1	518	125	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	0	75	HEPN1	341	143	0.31	metastasis
-0	Primary, forehead	2	76	THAP9	60	41	0.38	primary
-1	Parotid metastasis	2	76	THAP9	146	15	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	76	THAP9	125	34	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	76	THAP9	70	25	0.31	metastasis
+0	Primary, forehead	0	75	TFDP2	143	58	0.38	primary
+1	Parotid metastasis	0	75	TFDP2	246	19	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	75	TFDP2	191	36	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	75	TFDP2	113	41	0.31	metastasis
+0	Primary, forehead	0	76	THAP9	60	41	0.38	primary
+1	Parotid metastasis	0	76	THAP9	146	15	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	76	THAP9	125	34	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	76	THAP9	70	25	0.31	metastasis
 0	Primary, forehead	0	77	CSN3	1029	607	0.38	primary
 1	Parotid metastasis	0	77	CSN3	1957	242	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	77	CSN3	1617	385	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	77	CSN3	836	374	0.31	metastasis
-0	Primary, forehead	2	78	ADCY5	215	134	0.38	primary
-1	Parotid metastasis	2	78	ADCY5	351	39	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	78	ADCY5	293	75	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	78	ADCY5	173	63	0.31	metastasis
-0	Primary, forehead	2	79	SLC12A8	130	95	0.38	primary
-1	Parotid metastasis	2	79	SLC12A8	258	30	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	79	SLC12A8	162	52	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	79	SLC12A8	127	54	0.31	metastasis
-0	Primary, forehead	1	80	DYNC2H1	445	255	0.38	primary
-1	Parotid metastasis	1	80	DYNC2H1	838	75	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	80	DYNC2H1	749	146	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	80	DYNC2H1	400	174	0.31	metastasis
-0	Primary, forehead	2	81	ATP1B3	248	134	0.38	primary
-1	Parotid metastasis	2	81	ATP1B3	464	35	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	81	ATP1B3	386	97	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	81	ATP1B3	203	87	0.31	metastasis
-0	Primary, forehead	2	82	SHROOM3	102	58	0.38	primary
-1	Parotid metastasis	2	82	SHROOM3	177	15	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	82	SHROOM3	112	29	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	82	SHROOM3	73	33	0.31	metastasis
-0	Primary, forehead	1	83	CPN2	188	83	0.38	primary
-1	Parotid metastasis	1	83	CPN2	256	30	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	83	CPN2	204	46	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	83	CPN2	146	37	0.31	metastasis
-0	Primary, forehead	2	84	ABCG4	102	57	0.38	primary
-1	Parotid metastasis	2	84	ABCG4	151	11	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	84	ABCG4	122	31	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	84	ABCG4	58	38	0.31	metastasis
-0	Primary, forehead	1	85	LPHN3	136	97	0.38	primary
-1	Parotid metastasis	1	85	LPHN3	285	18	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	85	LPHN3	221	31	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	85	LPHN3	115	47	0.31	metastasis
-0	Primary, forehead	1	86	SLC9A10	125	66	0.38	primary
-1	Parotid metastasis	1	86	SLC9A10	268	14	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	86	SLC9A10	182	27	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	86	SLC9A10	98	42	0.31	metastasis
-0	Primary, forehead	2	87	LPHN3	391	205	0.38	primary
-1	Parotid metastasis	2	87	LPHN3	627	65	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	87	LPHN3	556	151	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	87	LPHN3	286	99	0.31	metastasis
-0	Primary, forehead	0	88	SIDT1	67	37	0.38	primary
-1	Parotid metastasis	0	88	SIDT1	74	9	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	0	88	SIDT1	67	16	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	0	88	SIDT1	54	24	0.31	metastasis
-0	Primary, forehead	2	89	ACRV1	119	84	0.38	primary
-1	Parotid metastasis	2	89	ACRV1	251	19	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	89	ACRV1	157	40	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	89	ACRV1	124	62	0.31	metastasis
-0	Primary, forehead	2	90	ATP2C1	57	27	0.38	primary
-1	Parotid metastasis	2	90	ATP2C1	104	9	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	90	ATP2C1	68	19	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	90	ATP2C1	47	24	0.31	metastasis
-0	Primary, forehead	1	91	ZIC1	307	166	0.38	primary
-1	Parotid metastasis	1	91	ZIC1	594	44	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	91	ZIC1	399	88	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	91	ZIC1	270	117	0.31	metastasis
+0	Primary, forehead	0	78	ADCY5	215	134	0.38	primary
+1	Parotid metastasis	0	78	ADCY5	351	39	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	78	ADCY5	293	75	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	78	ADCY5	173	63	0.31	metastasis
+0	Primary, forehead	0	79	SLC12A8	130	95	0.38	primary
+1	Parotid metastasis	0	79	SLC12A8	258	30	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	79	SLC12A8	162	52	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	79	SLC12A8	127	54	0.31	metastasis
+0	Primary, forehead	0	80	DYNC2H1	445	255	0.38	primary
+1	Parotid metastasis	0	80	DYNC2H1	838	75	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	80	DYNC2H1	749	146	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	80	DYNC2H1	400	174	0.31	metastasis
+0	Primary, forehead	0	81	ATP1B3	248	134	0.38	primary
+1	Parotid metastasis	0	81	ATP1B3	464	35	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	81	ATP1B3	386	97	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	81	ATP1B3	203	87	0.31	metastasis
+0	Primary, forehead	0	82	SHROOM3	102	58	0.38	primary
+1	Parotid metastasis	0	82	SHROOM3	177	15	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	82	SHROOM3	112	29	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	82	SHROOM3	73	33	0.31	metastasis
+0	Primary, forehead	0	83	CPN2	188	83	0.38	primary
+1	Parotid metastasis	0	83	CPN2	256	30	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	83	CPN2	204	46	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	83	CPN2	146	37	0.31	metastasis
+0	Primary, forehead	0	84	ABCG4	102	57	0.38	primary
+1	Parotid metastasis	0	84	ABCG4	151	11	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	84	ABCG4	122	31	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	84	ABCG4	58	38	0.31	metastasis
+0	Primary, forehead	0	85	LPHN3	136	97	0.38	primary
+1	Parotid metastasis	0	85	LPHN3	285	18	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	85	LPHN3	221	31	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	85	LPHN3	115	47	0.31	metastasis
+0	Primary, forehead	0	86	SLC9A10	125	66	0.38	primary
+1	Parotid metastasis	0	86	SLC9A10	268	14	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	86	SLC9A10	182	27	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	86	SLC9A10	98	42	0.31	metastasis
+0	Primary, forehead	0	87	LPHN3	391	205	0.38	primary
+1	Parotid metastasis	0	87	LPHN3	627	65	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	87	LPHN3	556	151	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	87	LPHN3	286	99	0.31	metastasis
+0	Primary, forehead	0	88	ACRV1	119	84	0.38	primary
+1	Parotid metastasis	0	88	ACRV1	251	19	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	88	ACRV1	157	40	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	88	ACRV1	124	62	0.31	metastasis
+0	Primary, forehead	0	89	SIDT1	67	37	0.38	primary
+1	Parotid metastasis	0	89	SIDT1	74	9	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	89	SIDT1	67	16	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	89	SIDT1	54	24	0.31	metastasis
+0	Primary, forehead	0	90	ATP2C1	57	27	0.38	primary
+1	Parotid metastasis	0	90	ATP2C1	104	9	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	90	ATP2C1	68	19	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	90	ATP2C1	47	24	0.31	metastasis
+0	Primary, forehead	0	91	ZIC1	307	166	0.38	primary
+1	Parotid metastasis	0	91	ZIC1	594	44	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	91	ZIC1	399	88	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	91	ZIC1	270	117	0.31	metastasis
 0	Primary, forehead	0	92	HMBS	340	218	0.38	primary
 1	Parotid metastasis	0	92	HMBS	550	67	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	92	HMBS	447	116	0.21	metastasis
@@ -375,10 +375,10 @@ anatomical_site_index	anatomical_site_label	cluster_index	character_index	charac
 1	Parotid metastasis	0	93	DYNC2H1	188	21	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	93	DYNC2H1	105	27	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	93	DYNC2H1	77	31	0.31	metastasis
-0	Primary, forehead	1	94	MRPS22	119	63	0.38	primary
-1	Parotid metastasis	1	94	MRPS22	210	15	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	94	MRPS22	213	31	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	94	MRPS22	87	42	0.31	metastasis
+0	Primary, forehead	0	94	MRPS22	119	63	0.38	primary
+1	Parotid metastasis	0	94	MRPS22	210	15	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	94	MRPS22	213	31	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	94	MRPS22	87	42	0.31	metastasis
 0	Primary, forehead	0	95	LRRC33	238	171	0.38	primary
 1	Parotid metastasis	0	95	LRRC33	437	75	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	95	LRRC33	319	74	0.21	metastasis
@@ -387,38 +387,38 @@ anatomical_site_index	anatomical_site_label	cluster_index	character_index	charac
 1	Parotid metastasis	0	96	PARL	214	25	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	96	PARL	177	42	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	96	PARL	91	44	0.31	metastasis
-0	Primary, forehead	2	97	SIAE	125	92	0.38	primary
-1	Parotid metastasis	2	97	SIAE	230	19	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	97	SIAE	206	36	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	97	SIAE	104	44	0.31	metastasis
-0	Primary, forehead	2	98	PVRL1	58	26	0.38	primary
-1	Parotid metastasis	2	98	PVRL1	111	10	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	98	PVRL1	53	18	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	98	PVRL1	46	21	0.31	metastasis
-0	Primary, forehead	1	99	KLHL24	97	39	0.38	primary
-1	Parotid metastasis	1	99	KLHL24	151	10	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	99	KLHL24	114	17	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	99	KLHL24	76	29	0.31	metastasis
-0	Primary, forehead	0	100	CEP57	46	14	0.38	primary
-1	Parotid metastasis	0	100	CEP57	63	14	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	0	100	CEP57	87	4	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	0	100	CEP57	34	17	0.31	metastasis
-0	Primary, forehead	2	101	PPP2R3A	186	106	0.38	primary
-1	Parotid metastasis	2	101	PPP2R3A	395	25	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	101	PPP2R3A	291	69	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	101	PPP2R3A	181	83	0.31	metastasis
-0	Primary, forehead	2	102	ZC3H12C	146	98	0.38	primary
-1	Parotid metastasis	2	102	ZC3H12C	313	26	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	102	ZC3H12C	266	70	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	102	ZC3H12C	154	71	0.31	metastasis
-0	Primary, forehead	1	103	RASSF6	48	16	0.38	primary
-1	Parotid metastasis	1	103	RASSF6	86	9	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	103	RASSF6	46	5	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	103	RASSF6	37	6	0.31	metastasis
-0	Primary, forehead	0	104	PLD1	264	177	0.38	primary
-1	Parotid metastasis	0	104	PLD1	443	49	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	0	104	PLD1	334	73	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	0	104	PLD1	194	103	0.31	metastasis
+0	Primary, forehead	0	97	SIAE	125	92	0.38	primary
+1	Parotid metastasis	0	97	SIAE	230	19	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	97	SIAE	206	36	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	97	SIAE	104	44	0.31	metastasis
+0	Primary, forehead	0	98	PVRL1	58	26	0.38	primary
+1	Parotid metastasis	0	98	PVRL1	111	10	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	98	PVRL1	53	18	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	98	PVRL1	46	21	0.31	metastasis
+0	Primary, forehead	0	99	KLHL24	97	39	0.38	primary
+1	Parotid metastasis	0	99	KLHL24	151	10	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	99	KLHL24	114	17	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	99	KLHL24	76	29	0.31	metastasis
+0	Primary, forehead	2	100	CEP57	46	14	0.38	primary
+1	Parotid metastasis	2	100	CEP57	63	14	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	2	100	CEP57	87	4	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	2	100	CEP57	34	17	0.31	metastasis
+0	Primary, forehead	0	101	PPP2R3A	186	106	0.38	primary
+1	Parotid metastasis	0	101	PPP2R3A	395	25	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	101	PPP2R3A	291	69	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	101	PPP2R3A	181	83	0.31	metastasis
+0	Primary, forehead	0	102	ZC3H12C	146	98	0.38	primary
+1	Parotid metastasis	0	102	ZC3H12C	313	26	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	102	ZC3H12C	266	70	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	102	ZC3H12C	154	71	0.31	metastasis
+0	Primary, forehead	0	103	PLD1	264	177	0.38	primary
+1	Parotid metastasis	0	103	PLD1	443	49	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	103	PLD1	334	73	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	103	PLD1	194	103	0.31	metastasis
+0	Primary, forehead	0	104	RASSF6	48	16	0.38	primary
+1	Parotid metastasis	0	104	RASSF6	86	9	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	104	RASSF6	46	5	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	104	RASSF6	37	6	0.31	metastasis
 0	Primary, forehead	0	105	CCDC67	211	91	0.38	primary
 1	Parotid metastasis	0	105	CCDC67	395	54	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	105	CCDC67	294	76	0.21	metastasis
@@ -427,10 +427,10 @@ anatomical_site_index	anatomical_site_label	cluster_index	character_index	charac
 1	Parotid metastasis	0	106	GRSF1	459	46	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	106	GRSF1	363	71	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	106	GRSF1	204	92	0.31	metastasis
-0	Primary, forehead	2	107	TRIM29	88	47	0.38	primary
-1	Parotid metastasis	2	107	TRIM29	139	14	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	107	TRIM29	110	39	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	107	TRIM29	60	21	0.31	metastasis
+0	Primary, forehead	0	107	TRIM29	88	47	0.38	primary
+1	Parotid metastasis	0	107	TRIM29	139	14	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	107	TRIM29	110	39	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	107	TRIM29	60	21	0.31	metastasis
 0	Primary, forehead	0	108	TMEM25	216	123	0.38	primary
 1	Parotid metastasis	0	108	TMEM25	343	40	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	108	TMEM25	263	67	0.21	metastasis
@@ -439,58 +439,58 @@ anatomical_site_index	anatomical_site_label	cluster_index	character_index	charac
 1	Parotid metastasis	0	109	MUC13	154	20	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	109	MUC13	136	36	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	109	MUC13	63	28	0.31	metastasis
-0	Primary, forehead	3	110	C11orf93	456	0	0.38	primary
-1	Parotid metastasis	3	110	C11orf93	510	50	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	3	110	C11orf93	485	0	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	3	110	C11orf93	247	122	0.31	metastasis
+0	Primary, forehead	1	110	C11orf93	456	0	0.38	primary
+1	Parotid metastasis	1	110	C11orf93	510	50	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	1	110	C11orf93	485	0	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	1	110	C11orf93	247	122	0.31	metastasis
 0	Primary, forehead	0	111	SENP7	100	53	0.38	primary
 1	Parotid metastasis	0	111	SENP7	146	20	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	111	SENP7	166	32	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	111	SENP7	70	44	0.31	metastasis
-0	Primary, forehead	2	112	OR8A1	512	345	0.38	primary
-1	Parotid metastasis	2	112	OR8A1	989	77	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	112	OR8A1	686	198	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	112	OR8A1	487	212	0.31	metastasis
-0	Primary, forehead	0	113	VWA5A	126	55	0.38	primary
-1	Parotid metastasis	0	113	VWA5A	183	22	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	0	113	VWA5A	144	38	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	0	113	VWA5A	111	39	0.31	metastasis
-0	Primary, forehead	2	114	NOX4	17	18	0.38	primary
-1	Parotid metastasis	2	114	NOX4	61	3	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	114	NOX4	47	13	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	114	NOX4	25	9	0.31	metastasis
+0	Primary, forehead	0	112	OR8A1	512	345	0.38	primary
+1	Parotid metastasis	0	112	OR8A1	989	77	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	112	OR8A1	686	198	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	112	OR8A1	487	212	0.31	metastasis
+0	Primary, forehead	0	113	NOX4	17	18	0.38	primary
+1	Parotid metastasis	0	113	NOX4	61	3	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	113	NOX4	47	13	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	113	NOX4	25	9	0.31	metastasis
+0	Primary, forehead	0	114	VWA5A	126	55	0.38	primary
+1	Parotid metastasis	0	114	VWA5A	183	22	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	114	VWA5A	144	38	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	114	VWA5A	111	39	0.31	metastasis
 0	Primary, forehead	0	115	ARHGAP32	97	43	0.38	primary
 1	Parotid metastasis	0	115	ARHGAP32	149	18	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	115	ARHGAP32	134	26	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	115	ARHGAP32	72	38	0.31	metastasis
-0	Primary, forehead	2	116	AMBN	264	136	0.38	primary
-1	Parotid metastasis	2	116	AMBN	512	51	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	116	AMBN	337	89	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	116	AMBN	202	95	0.31	metastasis
+0	Primary, forehead	0	116	AMBN	264	136	0.38	primary
+1	Parotid metastasis	0	116	AMBN	512	51	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	116	AMBN	337	89	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	116	AMBN	202	95	0.31	metastasis
 0	Primary, forehead	0	117	EHHADH	704	412	0.38	primary
 1	Parotid metastasis	0	117	EHHADH	1149	128	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	117	EHHADH	1016	238	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	117	EHHADH	591	246	0.31	metastasis
-0	Primary, forehead	1	118	SLC9A10	229	137	0.38	primary
-1	Parotid metastasis	1	118	SLC9A10	482	29	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	118	SLC9A10	458	90	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	118	SLC9A10	252	93	0.31	metastasis
-0	Primary, forehead	2	119	TECTA	264	170	0.38	primary
-1	Parotid metastasis	2	119	TECTA	499	47	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	119	TECTA	359	95	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	119	TECTA	236	102	0.31	metastasis
-0	Primary, forehead	1	120	USP13	252	131	0.38	primary
-1	Parotid metastasis	1	120	USP13	452	26	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	120	USP13	348	67	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	120	USP13	197	92	0.31	metastasis
-0	Primary, forehead	1	121	KBTBD3	271	156	0.38	primary
-1	Parotid metastasis	1	121	KBTBD3	590	54	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	121	KBTBD3	540	108	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	121	KBTBD3	306	118	0.31	metastasis
-0	Primary, forehead	2	122	GSK3B	296	182	0.38	primary
-1	Parotid metastasis	2	122	GSK3B	674	54	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	122	GSK3B	484	113	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	122	GSK3B	318	116	0.31	metastasis
+0	Primary, forehead	0	118	SLC9A10	229	137	0.38	primary
+1	Parotid metastasis	0	118	SLC9A10	482	29	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	118	SLC9A10	458	90	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	118	SLC9A10	252	93	0.31	metastasis
+0	Primary, forehead	0	119	TECTA	264	170	0.38	primary
+1	Parotid metastasis	0	119	TECTA	499	47	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	119	TECTA	359	95	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	119	TECTA	236	102	0.31	metastasis
+0	Primary, forehead	0	120	KBTBD3	271	156	0.38	primary
+1	Parotid metastasis	0	120	KBTBD3	590	54	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	120	KBTBD3	540	108	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	120	KBTBD3	306	118	0.31	metastasis
+0	Primary, forehead	0	121	USP13	252	131	0.38	primary
+1	Parotid metastasis	0	121	USP13	452	26	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	121	USP13	348	67	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	121	USP13	197	92	0.31	metastasis
+0	Primary, forehead	0	122	GSK3B	296	182	0.38	primary
+1	Parotid metastasis	0	122	GSK3B	674	54	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	122	GSK3B	484	113	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	122	GSK3B	318	116	0.31	metastasis
 0	Primary, forehead	0	123	MYLK	572	313	0.38	primary
 1	Parotid metastasis	0	123	MYLK	915	105	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	123	MYLK	741	151	0.21	metastasis
@@ -499,42 +499,42 @@ anatomical_site_index	anatomical_site_label	cluster_index	character_index	charac
 1	Parotid metastasis	0	124	KIAA2018	221	35	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	124	KIAA2018	190	43	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	124	KIAA2018	141	46	0.31	metastasis
-0	Primary, forehead	0	125	ROPN1B	20	10	0.38	primary
-1	Parotid metastasis	0	125	ROPN1B	42	7	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	0	125	ROPN1B	29	7	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	0	125	ROPN1B	23	9	0.31	metastasis
-0	Primary, forehead	2	126	EPHA6	116	67	0.38	primary
-1	Parotid metastasis	2	126	EPHA6	200	8	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	126	EPHA6	139	42	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	126	EPHA6	88	33	0.31	metastasis
-0	Primary, forehead	1	127	ATR	188	91	0.38	primary
-1	Parotid metastasis	1	127	ATR	404	29	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	1	127	ATR	294	60	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	1	127	ATR	190	86	0.31	metastasis
-0	Primary, forehead	2	128	MUC4	47	23	0.38	primary
-1	Parotid metastasis	2	128	MUC4	85	3	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	128	MUC4	53	16	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	128	MUC4	46	9	0.31	metastasis
-0	Primary, forehead	2	129	CLCN2	68	49	0.38	primary
-1	Parotid metastasis	2	129	CLCN2	125	1	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	129	CLCN2	103	24	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	129	CLCN2	55	34	0.31	metastasis
-0	Primary, forehead	2	130	2013-09-11 00	21	17	0.38	primary
-1	Parotid metastasis	2	130	2013-09-11 00	47	5	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	130	2013-09-11 00	24	14	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	130	2013-09-11 00	25	7	0.31	metastasis
-0	Primary, forehead	2	131	C4orf40	494	307	0.38	primary
-1	Parotid metastasis	2	131	C4orf40	942	91	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	131	C4orf40	746	181	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	131	C4orf40	533	197	0.31	metastasis
+0	Primary, forehead	0	125	EPHA6	116	67	0.38	primary
+1	Parotid metastasis	0	125	EPHA6	200	8	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	125	EPHA6	139	42	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	125	EPHA6	88	33	0.31	metastasis
+0	Primary, forehead	0	126	ROPN1B	20	10	0.38	primary
+1	Parotid metastasis	0	126	ROPN1B	42	7	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	126	ROPN1B	29	7	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	126	ROPN1B	23	9	0.31	metastasis
+0	Primary, forehead	0	127	ATR	188	91	0.38	primary
+1	Parotid metastasis	0	127	ATR	404	29	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	127	ATR	294	60	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	127	ATR	190	86	0.31	metastasis
+0	Primary, forehead	0	128	MUC4	47	23	0.38	primary
+1	Parotid metastasis	0	128	MUC4	85	3	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	128	MUC4	53	16	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	128	MUC4	46	9	0.31	metastasis
+0	Primary, forehead	0	129	CLCN2	68	49	0.38	primary
+1	Parotid metastasis	0	129	CLCN2	125	1	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	129	CLCN2	103	24	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	129	CLCN2	55	34	0.31	metastasis
+0	Primary, forehead	0	130	2013-09-11 00	21	17	0.38	primary
+1	Parotid metastasis	0	130	2013-09-11 00	47	5	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	130	2013-09-11 00	24	14	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	130	2013-09-11 00	25	7	0.31	metastasis
+0	Primary, forehead	0	131	C4orf40	494	307	0.38	primary
+1	Parotid metastasis	0	131	C4orf40	942	91	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	131	C4orf40	746	181	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	131	C4orf40	533	197	0.31	metastasis
 0	Primary, forehead	0	132	ABCG2	272	129	0.38	primary
 1	Parotid metastasis	0	132	ABCG2	466	55	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	132	ABCG2	378	79	0.21	metastasis
 3	Locoregional skin metastasis 2, angle jaw	0	132	ABCG2	222	126	0.31	metastasis
-0	Primary, forehead	2	133	TECTA	122	106	0.38	primary
-1	Parotid metastasis	2	133	TECTA	289	32	0.105	metastasis
-2	Locoregional skin metastasis 1, forehead	2	133	TECTA	202	65	0.21	metastasis
-3	Locoregional skin metastasis 2, angle jaw	2	133	TECTA	120	55	0.31	metastasis
+0	Primary, forehead	0	133	TECTA	122	106	0.38	primary
+1	Parotid metastasis	0	133	TECTA	289	32	0.105	metastasis
+2	Locoregional skin metastasis 1, forehead	0	133	TECTA	202	65	0.21	metastasis
+3	Locoregional skin metastasis 2, angle jaw	0	133	TECTA	120	55	0.31	metastasis
 0	Primary, forehead	0	134	ANKRD17	160	116	0.38	primary
 1	Parotid metastasis	0	134	ANKRD17	302	33	0.105	metastasis
 2	Locoregional skin metastasis 1, forehead	0	134	ANKRD17	278	68	0.21	metastasis

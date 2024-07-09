@@ -1,163 +1,163 @@
 anatomical_site_index	anatomical_site_label	cluster_index	character_index	character_label	ref	var	var_read_prob	site_category
-0	Primary, right forearm	3	0	ASXL3	208	109	0.31	primary
-1	Lung metastasis	3	0	ASXL3	172	69	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	0	ASXL3	160	169	0.46	metastasis
-0	Primary, right forearm	3	1	NOL4	241	99	0.31	primary
-1	Lung metastasis	3	1	NOL4	171	71	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	1	NOL4	228	186	0.46	metastasis
-0	Primary, right forearm	3	2	LOXHD1	312	127	0.31	primary
-1	Lung metastasis	3	2	LOXHD1	185	92	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	2	LOXHD1	256	216	0.46	metastasis
-0	Primary, right forearm	3	3	PTPN13	107	52	0.31	primary
-1	Lung metastasis	3	3	PTPN13	81	40	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	3	PTPN13	100	109	0.46	metastasis
-0	Primary, right forearm	3	4	ADNP2	493	224	0.31	primary
-1	Lung metastasis	3	4	ADNP2	395	188	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	4	ADNP2	461	394	0.46	metastasis
+0	Primary, right forearm	1	0	ASXL3	208	109	0.31	primary
+1	Lung metastasis	1	0	ASXL3	172	69	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	0	ASXL3	160	169	0.46	metastasis
+0	Primary, right forearm	1	1	NOL4	241	99	0.31	primary
+1	Lung metastasis	1	1	NOL4	171	71	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	1	NOL4	228	186	0.46	metastasis
+0	Primary, right forearm	1	2	LOXHD1	312	127	0.31	primary
+1	Lung metastasis	1	2	LOXHD1	185	92	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	2	LOXHD1	256	216	0.46	metastasis
+0	Primary, right forearm	1	3	PTPN13	107	52	0.31	primary
+1	Lung metastasis	1	3	PTPN13	81	40	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	3	PTPN13	100	109	0.46	metastasis
+0	Primary, right forearm	1	4	ADNP2	493	224	0.31	primary
+1	Lung metastasis	1	4	ADNP2	395	188	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	4	ADNP2	461	394	0.46	metastasis
 0	Primary, right forearm	1	5	INTU	149	72	0.31	primary
 1	Lung metastasis	1	5	INTU	103	38	0.315	metastasis
 2	Locoregional skin metastasis, axilla	1	5	INTU	172	110	0.46	metastasis
-0	Primary, right forearm	3	6	SERPINB2	173	73	0.31	primary
-1	Lung metastasis	3	6	SERPINB2	111	69	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	6	SERPINB2	135	123	0.46	metastasis
-0	Primary, right forearm	3	7	DCC	83	47	0.31	primary
-1	Lung metastasis	3	7	DCC	60	31	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	7	DCC	93	81	0.46	metastasis
-0	Primary, right forearm	3	8	C18orf63	104	32	0.31	primary
-1	Lung metastasis	3	8	C18orf63	69	37	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	8	C18orf63	84	97	0.46	metastasis
-0	Primary, right forearm	3	9	KIAA0232	87	35	0.31	primary
-1	Lung metastasis	3	9	KIAA0232	72	25	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	9	KIAA0232	100	104	0.46	metastasis
-0	Primary, right forearm	3	10	DCC	256	86	0.31	primary
-1	Lung metastasis	3	10	DCC	177	81	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	10	DCC	253	198	0.46	metastasis
-0	Primary, right forearm	3	11	FAT1	136	54	0.31	primary
-1	Lung metastasis	3	11	FAT1	106	56	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	11	FAT1	140	94	0.46	metastasis
-0	Primary, right forearm	3	12	DSEL	185	96	0.31	primary
-1	Lung metastasis	3	12	DSEL	154	69	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	12	DSEL	209	211	0.46	metastasis
+0	Primary, right forearm	1	6	SERPINB2	173	73	0.31	primary
+1	Lung metastasis	1	6	SERPINB2	111	69	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	6	SERPINB2	135	123	0.46	metastasis
+0	Primary, right forearm	1	7	DCC	83	47	0.31	primary
+1	Lung metastasis	1	7	DCC	60	31	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	7	DCC	93	81	0.46	metastasis
+0	Primary, right forearm	1	8	C18orf63	104	32	0.31	primary
+1	Lung metastasis	1	8	C18orf63	69	37	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	8	C18orf63	84	97	0.46	metastasis
+0	Primary, right forearm	1	9	KIAA0232	87	35	0.31	primary
+1	Lung metastasis	1	9	KIAA0232	72	25	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	9	KIAA0232	100	104	0.46	metastasis
+0	Primary, right forearm	1	10	DCC	256	86	0.31	primary
+1	Lung metastasis	1	10	DCC	177	81	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	10	DCC	253	198	0.46	metastasis
+0	Primary, right forearm	1	11	FAT1	136	54	0.31	primary
+1	Lung metastasis	1	11	FAT1	106	56	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	11	FAT1	140	94	0.46	metastasis
+0	Primary, right forearm	1	12	DSEL	185	96	0.31	primary
+1	Lung metastasis	1	12	DSEL	154	69	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	12	DSEL	209	211	0.46	metastasis
 0	Primary, right forearm	1	13	FRAS1	227	76	0.31	primary
 1	Lung metastasis	1	13	FRAS1	156	57	0.315	metastasis
 2	Locoregional skin metastasis, axilla	1	13	FRAS1	251	154	0.46	metastasis
-0	Primary, right forearm	3	14	DCHS2	142	67	0.31	primary
-1	Lung metastasis	3	14	DCHS2	93	30	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	14	DCHS2	127	98	0.46	metastasis
-0	Primary, right forearm	3	15	ZCCHC2	93	36	0.31	primary
-1	Lung metastasis	3	15	ZCCHC2	72	40	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	15	ZCCHC2	102	76	0.46	metastasis
-0	Primary, right forearm	3	16	SDAD1	66	36	0.31	primary
-1	Lung metastasis	3	16	SDAD1	71	35	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	16	SDAD1	86	77	0.46	metastasis
-0	Primary, right forearm	3	17	ZBTB7C	508	220	0.31	primary
-1	Lung metastasis	3	17	ZBTB7C	317	179	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	17	ZBTB7C	517	398	0.46	metastasis
-0	Primary, right forearm	3	18	CABS1	164	69	0.31	primary
-1	Lung metastasis	3	18	CABS1	83	39	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	18	CABS1	146	138	0.46	metastasis
-0	Primary, right forearm	3	19	WDR7	363	181	0.31	primary
-1	Lung metastasis	3	19	WDR7	281	120	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	19	WDR7	390	269	0.46	metastasis
-0	Primary, right forearm	3	20	GRIA2	168	63	0.31	primary
-1	Lung metastasis	3	20	GRIA2	134	68	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	20	GRIA2	143	140	0.46	metastasis
-0	Primary, right forearm	3	21	LOXHD1	671	280	0.31	primary
-1	Lung metastasis	3	21	LOXHD1	423	187	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	21	LOXHD1	457	516	0.46	metastasis
-0	Primary, right forearm	3	22	SLC34A2	150	79	0.31	primary
-1	Lung metastasis	3	22	SLC34A2	118	67	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	22	SLC34A2	160	169	0.46	metastasis
-0	Primary, right forearm	3	23	INTS12	359	151	0.31	primary
-1	Lung metastasis	3	23	INTS12	247	119	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	23	INTS12	319	282	0.46	metastasis
-0	Primary, right forearm	3	24	CELF4	57	18	0.31	primary
-1	Lung metastasis	3	24	CELF4	50	30	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	24	CELF4	67	47	0.46	metastasis
-0	Primary, right forearm	3	25	DGKQ	199	75	0.31	primary
-1	Lung metastasis	3	25	DGKQ	185	77	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	25	DGKQ	207	145	0.46	metastasis
-0	Primary, right forearm	3	26	FGG	130	63	0.31	primary
-1	Lung metastasis	3	26	FGG	111	38	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	26	FGG	143	128	0.46	metastasis
-0	Primary, right forearm	3	27	TACR3	348	165	0.31	primary
-1	Lung metastasis	3	27	TACR3	254	126	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	27	TACR3	355	288	0.46	metastasis
+0	Primary, right forearm	1	14	DCHS2	142	67	0.31	primary
+1	Lung metastasis	1	14	DCHS2	93	30	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	14	DCHS2	127	98	0.46	metastasis
+0	Primary, right forearm	1	15	ZCCHC2	93	36	0.31	primary
+1	Lung metastasis	1	15	ZCCHC2	72	40	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	15	ZCCHC2	102	76	0.46	metastasis
+0	Primary, right forearm	1	16	SDAD1	66	36	0.31	primary
+1	Lung metastasis	1	16	SDAD1	71	35	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	16	SDAD1	86	77	0.46	metastasis
+0	Primary, right forearm	1	17	ZBTB7C	508	220	0.31	primary
+1	Lung metastasis	1	17	ZBTB7C	317	179	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	17	ZBTB7C	517	398	0.46	metastasis
+0	Primary, right forearm	1	18	CABS1	164	69	0.31	primary
+1	Lung metastasis	1	18	CABS1	83	39	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	18	CABS1	146	138	0.46	metastasis
+0	Primary, right forearm	1	19	WDR7	363	181	0.31	primary
+1	Lung metastasis	1	19	WDR7	281	120	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	19	WDR7	390	269	0.46	metastasis
+0	Primary, right forearm	1	20	GRIA2	168	63	0.31	primary
+1	Lung metastasis	1	20	GRIA2	134	68	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	20	GRIA2	143	140	0.46	metastasis
+0	Primary, right forearm	1	21	LOXHD1	671	280	0.31	primary
+1	Lung metastasis	1	21	LOXHD1	423	187	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	21	LOXHD1	457	516	0.46	metastasis
+0	Primary, right forearm	1	22	SLC34A2	150	79	0.31	primary
+1	Lung metastasis	1	22	SLC34A2	118	67	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	22	SLC34A2	160	169	0.46	metastasis
+0	Primary, right forearm	1	23	INTS12	359	151	0.31	primary
+1	Lung metastasis	1	23	INTS12	247	119	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	23	INTS12	319	282	0.46	metastasis
+0	Primary, right forearm	1	24	CELF4	57	18	0.31	primary
+1	Lung metastasis	1	24	CELF4	50	30	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	24	CELF4	67	47	0.46	metastasis
+0	Primary, right forearm	1	25	DGKQ	199	75	0.31	primary
+1	Lung metastasis	1	25	DGKQ	185	77	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	25	DGKQ	207	145	0.46	metastasis
+0	Primary, right forearm	1	26	FGG	130	63	0.31	primary
+1	Lung metastasis	1	26	FGG	111	38	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	26	FGG	143	128	0.46	metastasis
+0	Primary, right forearm	1	27	TACR3	348	165	0.31	primary
+1	Lung metastasis	1	27	TACR3	254	126	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	27	TACR3	355	288	0.46	metastasis
 0	Primary, right forearm	0	28	ABLIM2	111	0	0.31	primary
 1	Lung metastasis	0	28	ABLIM2	68	29	0.315	metastasis
 2	Locoregional skin metastasis, axilla	0	28	ABLIM2	140	0	0.46	metastasis
-0	Primary, right forearm	3	29	SEL1L3	63	24	0.31	primary
-1	Lung metastasis	3	29	SEL1L3	42	27	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	29	SEL1L3	54	48	0.46	metastasis
-0	Primary, right forearm	3	30	PDCL2	223	105	0.31	primary
-1	Lung metastasis	3	30	PDCL2	179	75	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	30	PDCL2	228	209	0.46	metastasis
+0	Primary, right forearm	1	29	SEL1L3	63	24	0.31	primary
+1	Lung metastasis	1	29	SEL1L3	42	27	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	29	SEL1L3	54	48	0.46	metastasis
+0	Primary, right forearm	1	30	PDCL2	223	105	0.31	primary
+1	Lung metastasis	1	30	PDCL2	179	75	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	30	PDCL2	228	209	0.46	metastasis
 0	Primary, right forearm	1	31	FRAS1	28	9	0.31	primary
 1	Lung metastasis	1	31	FRAS1	24	6	0.315	metastasis
 2	Locoregional skin metastasis, axilla	1	31	FRAS1	25	13	0.46	metastasis
-0	Primary, right forearm	1	32	DRD5	308	122	0.31	primary
-1	Lung metastasis	1	32	DRD5	271	90	0.315	metastasis
-2	Locoregional skin metastasis, axilla	1	32	DRD5	304	196	0.46	metastasis
-0	Primary, right forearm	3	33	ADH7	58	33	0.31	primary
-1	Lung metastasis	3	33	ADH7	45	13	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	33	ADH7	46	33	0.46	metastasis
-0	Primary, right forearm	3	34	DSC3	61	11	0.31	primary
-1	Lung metastasis	3	34	DSC3	25	23	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	34	DSC3	57	36	0.46	metastasis
-0	Primary, right forearm	3	35	DSG1	55	28	0.31	primary
-1	Lung metastasis	3	35	DSG1	39	24	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	35	DSG1	62	59	0.46	metastasis
-0	Primary, right forearm	3	36	ATP10D	287	131	0.31	primary
-1	Lung metastasis	3	36	ATP10D	218	89	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	36	ATP10D	280	216	0.46	metastasis
-0	Primary, right forearm	1	37	SEL1L3	224	91	0.31	primary
-1	Lung metastasis	1	37	SEL1L3	165	41	0.315	metastasis
-2	Locoregional skin metastasis, axilla	1	37	SEL1L3	256	213	0.46	metastasis
-0	Primary, right forearm	3	38	FAM193A	17	7	0.31	primary
-1	Lung metastasis	3	38	FAM193A	8	5	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	38	FAM193A	16	9	0.46	metastasis
-0	Primary, right forearm	3	39	NETO1	45	18	0.31	primary
-1	Lung metastasis	3	39	NETO1	38	15	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	39	NETO1	48	36	0.46	metastasis
-0	Primary, right forearm	3	40	SERPINB7	157	71	0.31	primary
-1	Lung metastasis	3	40	SERPINB7	103	54	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	40	SERPINB7	147	112	0.46	metastasis
-0	Primary, right forearm	3	41	CWH43	58	20	0.31	primary
-1	Lung metastasis	3	41	CWH43	32	13	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	41	CWH43	38	35	0.46	metastasis
-0	Primary, right forearm	3	42	FAM53A	145	67	0.31	primary
-1	Lung metastasis	3	42	FAM53A	147	50	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	42	FAM53A	192	165	0.46	metastasis
-0	Primary, right forearm	3	43	LOXHD1	1703	709	0.31	primary
-1	Lung metastasis	3	43	LOXHD1	1195	550	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	43	LOXHD1	1539	1321	0.46	metastasis
-0	Primary, right forearm	2	44	SHISA3	419	0	0.31	primary
-1	Lung metastasis	2	44	SHISA3	278	0	0.315	metastasis
-2	Locoregional skin metastasis, axilla	2	44	SHISA3	215	199	0.46	metastasis
-0	Primary, right forearm	3	45	FREM3	334	156	0.31	primary
-1	Lung metastasis	3	45	FREM3	216	95	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	45	FREM3	313	292	0.46	metastasis
-0	Primary, right forearm	1	46	LPHN3	153	50	0.31	primary
-1	Lung metastasis	1	46	LPHN3	133	46	0.315	metastasis
-2	Locoregional skin metastasis, axilla	1	46	LPHN3	124	90	0.46	metastasis
-0	Primary, right forearm	3	47	SPATA18	173	89	0.31	primary
-1	Lung metastasis	3	47	SPATA18	145	55	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	47	SPATA18	166	139	0.46	metastasis
-0	Primary, right forearm	3	48	SLIT2	216	87	0.31	primary
-1	Lung metastasis	3	48	SLIT2	124	61	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	48	SLIT2	177	184	0.46	metastasis
-0	Primary, right forearm	3	49	LAMA3	111	52	0.31	primary
-1	Lung metastasis	3	49	LAMA3	77	26	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	49	LAMA3	94	89	0.46	metastasis
-0	Primary, right forearm	1	50	DCC	53	14	0.31	primary
-1	Lung metastasis	1	50	DCC	38	11	0.315	metastasis
-2	Locoregional skin metastasis, axilla	1	50	DCC	43	16	0.46	metastasis
-0	Primary, right forearm	3	51	FAT4	145	59	0.31	primary
-1	Lung metastasis	3	51	FAT4	72	42	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	51	FAT4	138	127	0.46	metastasis
-0	Primary, right forearm	3	52	TAF4B	117	55	0.31	primary
-1	Lung metastasis	3	52	TAF4B	86	54	0.315	metastasis
-2	Locoregional skin metastasis, axilla	3	52	TAF4B	121	80	0.46	metastasis
+0	Primary, right forearm	1	32	ADH7	58	33	0.31	primary
+1	Lung metastasis	1	32	ADH7	45	13	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	32	ADH7	46	33	0.46	metastasis
+0	Primary, right forearm	1	33	SERPINB7	157	71	0.31	primary
+1	Lung metastasis	1	33	SERPINB7	103	54	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	33	SERPINB7	147	112	0.46	metastasis
+0	Primary, right forearm	1	34	DRD5	308	122	0.31	primary
+1	Lung metastasis	1	34	DRD5	271	90	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	34	DRD5	304	196	0.46	metastasis
+0	Primary, right forearm	1	35	DSC3	61	11	0.31	primary
+1	Lung metastasis	1	35	DSC3	25	23	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	35	DSC3	57	36	0.46	metastasis
+0	Primary, right forearm	1	36	ATP10D	287	131	0.31	primary
+1	Lung metastasis	1	36	ATP10D	218	89	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	36	ATP10D	280	216	0.46	metastasis
+0	Primary, right forearm	1	37	DSG1	55	28	0.31	primary
+1	Lung metastasis	1	37	DSG1	39	24	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	37	DSG1	62	59	0.46	metastasis
+0	Primary, right forearm	1	38	FAM193A	17	7	0.31	primary
+1	Lung metastasis	1	38	FAM193A	8	5	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	38	FAM193A	16	9	0.46	metastasis
+0	Primary, right forearm	1	39	NETO1	45	18	0.31	primary
+1	Lung metastasis	1	39	NETO1	38	15	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	39	NETO1	48	36	0.46	metastasis
+0	Primary, right forearm	1	40	CWH43	58	20	0.31	primary
+1	Lung metastasis	1	40	CWH43	32	13	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	40	CWH43	38	35	0.46	metastasis
+0	Primary, right forearm	1	41	FAM53A	145	67	0.31	primary
+1	Lung metastasis	1	41	FAM53A	147	50	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	41	FAM53A	192	165	0.46	metastasis
+0	Primary, right forearm	1	42	LOXHD1	1703	709	0.31	primary
+1	Lung metastasis	1	42	LOXHD1	1195	550	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	42	LOXHD1	1539	1321	0.46	metastasis
+0	Primary, right forearm	1	43	FREM3	334	156	0.31	primary
+1	Lung metastasis	1	43	FREM3	216	95	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	43	FREM3	313	292	0.46	metastasis
+0	Primary, right forearm	1	44	SEL1L3	224	91	0.31	primary
+1	Lung metastasis	1	44	SEL1L3	165	41	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	44	SEL1L3	256	213	0.46	metastasis
+0	Primary, right forearm	1	45	SLIT2	216	87	0.31	primary
+1	Lung metastasis	1	45	SLIT2	124	61	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	45	SLIT2	177	184	0.46	metastasis
+0	Primary, right forearm	1	46	SPATA18	173	89	0.31	primary
+1	Lung metastasis	1	46	SPATA18	145	55	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	46	SPATA18	166	139	0.46	metastasis
+0	Primary, right forearm	1	47	LPHN3	153	50	0.31	primary
+1	Lung metastasis	1	47	LPHN3	133	46	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	47	LPHN3	124	90	0.46	metastasis
+0	Primary, right forearm	1	48	LAMA3	111	52	0.31	primary
+1	Lung metastasis	1	48	LAMA3	77	26	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	48	LAMA3	94	89	0.46	metastasis
+0	Primary, right forearm	3	49	SHISA3	419	0	0.31	primary
+1	Lung metastasis	3	49	SHISA3	278	0	0.315	metastasis
+2	Locoregional skin metastasis, axilla	3	49	SHISA3	215	199	0.46	metastasis
+0	Primary, right forearm	1	50	FAT4	145	59	0.31	primary
+1	Lung metastasis	1	50	FAT4	72	42	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	50	FAT4	138	127	0.46	metastasis
+0	Primary, right forearm	2	51	DCC	53	14	0.31	primary
+1	Lung metastasis	2	51	DCC	38	11	0.315	metastasis
+2	Locoregional skin metastasis, axilla	2	51	DCC	43	16	0.46	metastasis
+0	Primary, right forearm	1	52	TAF4B	117	55	0.31	primary
+1	Lung metastasis	1	52	TAF4B	86	54	0.315	metastasis
+2	Locoregional skin metastasis, axilla	1	52	TAF4B	121	80	0.46	metastasis
 0	Primary, right forearm	1	53	SORCS2	200	68	0.31	primary
 1	Lung metastasis	1	53	SORCS2	161	53	0.315	metastasis
 2	Locoregional skin metastasis, axilla	1	53	SORCS2	214	161	0.46	metastasis

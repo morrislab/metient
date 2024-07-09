@@ -220,7 +220,6 @@ def get_adj_matrix_from_pairtree_results(pairtee_results_fn):
     results = np.load(pairtee_results_fn)
     parent_vectors = results['struct']
     llhs = results['llh']
-    adj_matrices = []
 
     data = []
     for parents_vector, llh in zip(parent_vectors, llhs):
