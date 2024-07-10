@@ -258,7 +258,7 @@ def calc_entropy(V, soft_V):
         - entropy for the categorical variable representing each node's vertex label
     '''
     eps = 1e-7 # to avoid nans when values in soft_V get very close to 0
-    return -torch.sum(torch.mul(soft_V, torch.log2(soft_V+eps)), dim=(1, 2)) / V.shape[2]
+    return torch.sum(torch.mul(soft_V, torch.log2(soft_V+eps)), dim=(1, 2)) / V.shape[2]
 
 def get_repeating_weight_vector(bs, weight_list):
     # Calculate the number of times each weight should be repeated
