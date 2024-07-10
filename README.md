@@ -1,7 +1,7 @@
 # Metient
 <img src="metient/logo.png" width="150">
 
-**Metient** (**Met**astasis + gradi**ent**) is a tool for migration history inference.
+**Metient** (**MET**astasis + gradi**ENT**) is a tool for migration history inference.
 
 Metient is available as a python library, installable via pip. It has been tested on Linux. Installation and running one of the tutorials should take ~5 minutes.
 
