@@ -60,6 +60,15 @@ def is_cyclic(G):
 
     return False
 
+def site_clonality_with_G(G):
+    '''
+    Returns monoclonal if every site is seeded by one clone,
+    else returns polyclonal.
+    '''
+    if torch.all(G == 0):
+        return "n/a"
+    return "polyclonal" if ((G > 1).any()) else  "monoclonal"
+
 def site_clonality(V, A):
     '''
     Returns monoclonal if every site is seeded by one clone,
@@ -67,9 +76,7 @@ def site_clonality(V, A):
     '''
     V, A = prep_V_A_inputs(V, A)
     G = migration_graph(V, A)
-    if torch.all(G == 0):
-        return "n/a"
-    return "polyclonal" if ((G > 1).any()) else  "monoclonal"
+    return site_clonality_with_G(G)
 
 def genetic_clonality(V, A):
     '''
