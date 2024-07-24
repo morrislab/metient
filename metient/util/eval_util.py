@@ -220,6 +220,31 @@ def load_machina_results(machina_results_dir):
 
     return res_m5_MACHINA, res_m8_MACHINA
 
+def load_machina_results_new_split(machina_results_dir):
+    gt_df = pd.read_csv("/data/morrisq/divyak/projects/metient/metient/data/machina_sims/gt_pattern.csv")
+    gt_df['site'] = gt_df['site'].astype(str)
+    gt_df['mig_type'] = gt_df['mig_type'].astype(str)
+    gt_df['seed'] = gt_df['seed'].astype(str)
+    files_new_m5=['results_MACHINA_m5.txt',]
+    files_new_m8=['results_MACHINA_m8.txt', ]
+    res_m5 = pd.concat([pd.read_csv(os.path.join(machina_results_dir, filename)) for filename in files_new_m5]).reindex()
+    res_m8 = pd.concat([pd.read_csv(os.path.join(machina_results_dir, filename)) for filename in files_new_m8]).reindex()
+    res_m5 = res_m5[(res_m5['enforced']=='R') | (res_m5['enforced'].isnull())]
+    res_m8 = res_m8[(res_m8['enforced']=='R') | (res_m8['enforced'].isnull())]
+    res_m5 = res_m5.replace({'pattern': {'S': 'pS', 'M' : 'pM', 'R' : 'pR'}})
+    res_m8 = res_m8.replace({'pattern': {'S': 'pS', 'M' : 'pM', 'R' : 'pR'}})
+    
+    res_m8_MACHINA = res_m8[res_m8['method'] == 'MACHINA'].replace({'inferred': {'pPS': 'pS', 'mPS' : 'mS'}})
+    res_m5_MACHINA = res_m5[res_m5['method'] == 'MACHINA'].replace({'inferred': {'pPS': 'pS', 'mPS' : 'mS'}})
+    
+    res_m8_MACHINA = res_m8_MACHINA.replace({'pattern': {'pS': 'S', 'pM' : 'M', 'pR' : 'R'}})
+    res_m5_MACHINA = res_m5_MACHINA.replace({'pattern': {'pS': 'S', 'pM' : 'M', 'pR' : 'R'}})
+    print(res_m5_MACHINA['pattern'].unique())
+    res_m5_MACHINA['new_gt_pattern'] = res_m5_MACHINA.apply(lambda row: gt_df[(gt_df['site']=='m5')&(gt_df['mig_type']==row['pattern'])&(gt_df['seed']==str(row['seed']))]['gt_pattern'].item(), axis=1)
+    res_m8_MACHINA['new_gt_pattern'] = res_m8_MACHINA.apply(lambda row: gt_df[(gt_df['site']=='m8')&(gt_df['mig_type']==row['pattern'])&(gt_df['seed']==str(row['seed']))]['gt_pattern'].item(), axis=1)
+
+    return res_m5_MACHINA, res_m8_MACHINA
+
 # Taken from MACHINA 
 def get_mutations(edge_list, u):
     # find parent

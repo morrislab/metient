@@ -6,7 +6,7 @@ graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dp
 2 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=DCC];
 4 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
 5 [color="#be5742ff", fillcolor="#be5742ff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
-3 [color="#6fa8dcff", fillcolor="#6fa8dcff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=SHISA3];
+3 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=SHISA3];
 7 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
 8 [color="#6fa8dcff", fillcolor="#6fa8dcff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
 normal [label="", penwidth=3, style=invis, xlabel=FAT1];
@@ -15,8 +15,8 @@ normal [label="", penwidth=3, style=invis, xlabel=FAT1];
 1 -> 4  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.75", penwidth=5, style=dashed];
 1 -> 5  [arrowsize=0, color="#6aa84fff;0.5:#be5742ff", minlen="1.75", penwidth=5, style=dashed];
 2 -> 0  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="2.5", penwidth="5.5", style=solid];
-2 -> 3  [arrowsize=0, color="#6aa84fff;0.5:#6fa8dcff", minlen="2.5", penwidth="5.5", style=solid];
+2 -> 3  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="2.5", penwidth="5.5", style=solid];
 2 -> 7  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.75", penwidth=5, style=dashed];
-3 -> 8  [arrowsize=0, color="#6fa8dcff;0.5:#6fa8dcff", minlen="1.75", penwidth=5, style=dashed];
+3 -> 8  [arrowsize=0, color="#6aa84fff;0.5:#6fa8dcff", minlen="1.75", penwidth=5, style=dashed];
 normal -> 1  [arrowsize=0, color="#6aa84fff", label="", penwidth=4, style=solid];
 }

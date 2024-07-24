@@ -509,7 +509,7 @@ def calculate_batch_size(T, sites, solve_polytomies):
     '''
     num_nodes = T.shape[0]
     num_sites = len(sites)
-    min_size = 64
+    min_size = 256
     min_size += num_nodes*num_sites*4
 
     if solve_polytomies:

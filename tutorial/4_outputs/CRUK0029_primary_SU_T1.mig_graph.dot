@@ -6,8 +6,7 @@ primary_SU_T1 [color="#6aa84f", fillcolor=white, fontname=Arial, penwidth="3.0",
 LN_SU_FLN1 [color="#e69138", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
 metachronousMet_BR_T1 [color="#9e9e9e", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
 primary_SU_T1 -> LN_SU_LN5  [color="#6aa84f;0.5:#6fa8dc", key=0, penwidth=3];
-primary_SU_T1 -> LN_SU_LN7  [color="#6aa84f;0.5:#be5742e1", key=0, penwidth=3];
 primary_SU_T1 -> LN_SU_FLN1  [color="#6aa84f;0.5:#e69138", key=0, penwidth=3];
-primary_SU_T1 -> LN_SU_FLN1  [color="#6aa84f;0.5:#e69138", key=1, penwidth=3];
 primary_SU_T1 -> metachronousMet_BR_T1  [color="#6aa84f;0.5:#9e9e9e", key=0, penwidth=3];
+LN_SU_FLN1 -> LN_SU_LN7  [color="#e69138;0.5:#be5742e1", key=0, penwidth=3];
 }
