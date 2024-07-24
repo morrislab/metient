@@ -1,6 +1,6 @@
 strict digraph  {
 graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dpi=600; size=2.5;
-0 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="ZBTB20;ATM"];
+0 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="ZBTB20;ATR"];
 2 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=CEP57];
 4 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=KLHL6];
 1 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="FGF12;ROBO4"];
@@ -13,7 +13,7 @@ graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dp
 5 [color="#6fa8dcff", fillcolor="#6fa8dcff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel="4pol5"];
 11 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
 12 [color="#6fa8dcff", fillcolor="#6fa8dcff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
-normal [label="", penwidth=3, style=invis, xlabel="ZBTB20;ATM"];
+normal [label="", penwidth=3, style=invis, xlabel="ZBTB20;ATR"];
 0 -> 2  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.5", penwidth="5.5", style=solid];
 0 -> 4  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.5", penwidth="5.5", style=solid];
 2 -> 1  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="2.5", penwidth="5.5", style=solid];
