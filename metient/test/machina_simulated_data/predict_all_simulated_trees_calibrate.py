@@ -165,7 +165,6 @@ for site in sites:
         seeds = fnmatch.filter(os.listdir(site_mig_data_dir), 'reads_seed*.tsv')
         seeds = [s.replace(".tsv", "").replace("reads_seed", "") for s in seeds]
         for seed in seeds:
-            cluster_fn = os.path.join(machina_sims_data_dir, f"{site}_clustered_input", f"cluster_{mig_type}_seed{seed}.txt")
             all_mut_trees_fn = os.path.join(machina_sims_data_dir, f"{site}_mut_trees", f"mut_trees_{mig_type}_seed{seed}.txt")
             num_trees = get_num_mut_trees(os.path.join(machina_sims_data_dir, f"{site}_mut_trees", f"mut_trees_{mig_type}_seed{seed}.txt"))
             for tree_num in range(num_trees):

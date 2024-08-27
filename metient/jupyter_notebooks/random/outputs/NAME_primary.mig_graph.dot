@@ -1,0 +1,22 @@
+digraph  {
+dpi=600;size=3.5;
+primary [color="#6aa84f", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+met1 [color="#be5742e1", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+met2 [color="#6fa8dc", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+met3 [color="#e69138", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+primary -> met1  [color="#6aa84f;0.5:#be5742e1", key=0, penwidth=3];
+primary -> met2  [color="#6aa84f;0.5:#6fa8dc", key=0, penwidth=3];
+met2 -> met3  [color="#6fa8dc;0.5:#e69138", key=0, penwidth=3];
+met2 -> met3  [color="#6fa8dc;0.5:#e69138", key=1, penwidth=3];
+met2 -> met3  [color="#6fa8dc;0.5:#e69138", key=2, penwidth=3];
+met2 -> met3  [color="#6fa8dc;0.5:#e69138", key=3, penwidth=3];
+met2 -> met3  [color="#6fa8dc;0.5:#e69138", key=4, penwidth=3];
+met2 -> met3  [color="#6fa8dc;0.5:#e69138", key=5, penwidth=3];
+met2 -> met3  [color="#6fa8dc;0.5:#e69138", key=6, penwidth=3];
+met2 -> met3  [color="#6fa8dc;0.5:#e69138", key=7, penwidth=3];
+met2 -> met3  [color="#6fa8dc;0.5:#e69138", key=8, penwidth=3];
+met2 -> met3  [color="#6fa8dc;0.5:#e69138", key=9, penwidth=3];
+met2 -> met3  [color="#6fa8dc;0.5:#e69138", key=10, penwidth=3];
+met2 -> met3  [color="#6fa8dc;0.5:#e69138", key=11, penwidth=3];
+met3 -> met2  [color="#e69138;0.5:#6fa8dc", key=0, penwidth=3];
+}

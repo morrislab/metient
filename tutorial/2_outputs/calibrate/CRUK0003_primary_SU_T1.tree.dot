@@ -1,8 +1,8 @@
 strict digraph  {
 graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dpi=600; size=2.5;
-0 [color="#be5742ff", fillcolor="#be5742ff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=ATM];
-11 [color="#be5742ff", fillcolor="#be5742ff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=NUAK2];
-17 [color="#be5742ff", fillcolor="#be5742ff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
+0 [color="#6fa8dcff", fillcolor="#6fa8dcff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=ATM];
+11 [color="#6fa8dcff", fillcolor="#6fa8dcff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=NUAK2];
+17 [color="#6fa8dcff", fillcolor="#6fa8dcff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
 1 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=PIK3CA];
 6 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=CAD];
 16 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
@@ -26,17 +26,17 @@ graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dp
 25 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
 12 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=PDPN];
 26 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
-27 [color="#be5742ff", fillcolor="#be5742ff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
+27 [color="#6fa8dcff", fillcolor="#6fa8dcff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
 28 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
 15 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=PAX5];
 29 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
 30 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
 31 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
 normal [label="", penwidth=3, style=invis, xlabel=PIK3CA];
-0 -> 11  [arrowsize=0, color="#be5742ff;0.5:#be5742ff", minlen="1.1724138259887695", penwidth="5.5", style=solid];
-0 -> 17  [arrowsize=0, color="#be5742ff;0.5:#be5742ff", minlen="1.0603448152542114", penwidth=5, style=dashed];
-11 -> 27  [arrowsize=0, color="#be5742ff;0.5:#be5742ff", minlen="1.0603448152542114", penwidth=5, style=dashed];
-1 -> 0  [arrowsize=0, color="#6aa84fff;0.5:#be5742ff", minlen="2.5", penwidth="5.5", style=solid];
+0 -> 11  [arrowsize=0, color="#6fa8dcff;0.5:#6fa8dcff", minlen="1.1724138259887695", penwidth="5.5", style=solid];
+0 -> 17  [arrowsize=0, color="#6fa8dcff;0.5:#6fa8dcff", minlen="1.0603448152542114", penwidth=5, style=dashed];
+11 -> 27  [arrowsize=0, color="#6fa8dcff;0.5:#6fa8dcff", minlen="1.0603448152542114", penwidth=5, style=dashed];
+1 -> 0  [arrowsize=0, color="#6aa84fff;0.5:#6fa8dcff", minlen="2.5", penwidth="5.5", style=solid];
 1 -> 6  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.3103448152542114", penwidth="5.5", style=solid];
 1 -> 16  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.0603448152542114", penwidth=5, style=dashed];
 6 -> 4  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.344827651977539", penwidth="5.5", style=solid];

@@ -78,13 +78,13 @@ def site_clonality(V, A):
     G = migration_graph(V, A)
     return site_clonality_with_G(G)
 
-def genetic_clonality(V, A):
+def genetic_clonality(V, A, idx_to_label):
     '''
     Returns monoclonal if every site is seeded by the *same* clone,
     else returns polyclonal.
     '''
     V, A = prep_V_A_inputs(V, A)
-    all_seeding_clusters = seeding_clusters(V, A)
+    all_seeding_clusters = seeding_clusters(V, A, idx_to_label)
     if len(all_seeding_clusters) == 0:
         return "n/a"
     monoclonal = True if len(all_seeding_clusters) == 1 else False
@@ -148,19 +148,33 @@ def migration_edges(V, A, sites=None):
                 Y[i,j] = 0
     return Y
 
-def seeding_clusters(V, A, sites=None):
+def seeding_clusters(V, A, node_idx_to_label, sites=None):
     '''
-    returns: list of nodes whose child is a different color
+    returns: list of nodes whose parent is a different color
     '''
     V, A = prep_V_A_inputs(V, A)
     Y = migration_edges(V,A, sites)
-    seeding_clusters = torch.nonzero(Y.any(dim=1)).squeeze()
+    seeding_clusters = (Y == 1).nonzero(as_tuple=True)[1]
     # Check if it's a scalar (0D tensor)
     if seeding_clusters.dim() == 0:
         # Convert to a 1D tensor (vector)
         seeding_clusters = seeding_clusters.unsqueeze(0)
     seeding_clusters = [int(x) for x in seeding_clusters]
-    return seeding_clusters
+
+    # If the seeding cluster is a witness node or polytomy resolver node
+    if isinstance(node_idx_to_label, vutil.MigrationHistoryNodeCollection):
+        node_collection = node_idx_to_label
+    else:
+        node_collection = vutil.MigrationHistoryNodeCollection.from_dict(node_idx_to_label)
+
+    all_seeding_clusters = set()
+    for x in seeding_clusters:
+        node = node_collection.get_node(x)
+        if node.is_leaf or node.is_polytomy_resolver_node:
+            all_seeding_clusters.add(vutil.get_parent(A, node.idx))
+        else:
+            all_seeding_clusters.add(x)
+    return list(all_seeding_clusters)
 
 def mrca(adj_matrix, nodes_to_check):
     '''
@@ -239,7 +253,7 @@ def has_hamiltonian_path_with_set(adj_matrix, nodes_to_check):
     
     return False
                  
-def phyleticity(V, A, sites=None):
+def phyleticity(V, A, idx_to_label, sites=None):
     '''
     If all nodes can be reached from the top level node in the seeding clusters,
     returns monophyletic, else polyphyletic
@@ -254,8 +268,8 @@ def phyleticity(V, A, sites=None):
         return False
     
     V, A = prep_V_A_inputs(V, A)
-    clonality = genetic_clonality(V,A)
-    all_seeding_clusters = seeding_clusters(V, A, sites)
+    clonality = genetic_clonality(V, A, idx_to_label)
+    all_seeding_clusters = seeding_clusters(V, A, idx_to_label, sites)
     if "monoclonal" in clonality:
         return "monophyletic"
 
@@ -271,7 +285,7 @@ def phyleticity(V, A, sites=None):
             return "polyphyletic"
     return "monophyletic"
 
-def tracerx_phyleticity(V, A):
+def tracerx_phyleticity(V, A, idx_to_label):
     '''
     Looking at the seeding clones, is there a single path that connects all seeding clusters
     or multiple possible paths? If singular path, monophyletic, if not, polyphyletic
@@ -288,8 +302,8 @@ def tracerx_phyleticity(V, A):
     (https://www.nature.com/articles/s41586-023-05729-x#Sec7)
     '''
     V, A = prep_V_A_inputs(V, A)
-    clonality = genetic_clonality(V,A)
-    all_seeding_clusters = seeding_clusters(V, A)
+    clonality = genetic_clonality(V, A, idx_to_label)
+    all_seeding_clusters = seeding_clusters(V, A, idx_to_label)
 
     is_hamiltonian = has_hamiltonian_path_with_set(A, all_seeding_clusters)
     if "monoclonal" in clonality:
@@ -297,7 +311,7 @@ def tracerx_phyleticity(V, A):
     phyleticity = "monophyletic" if is_hamiltonian else "polyphyletic"
     return phyleticity
     
-def tracerx_seeding_pattern(V, A):
+def tracerx_seeding_pattern(V, A, idx_to_label):
     '''
     V: Vertex labeling matrix where columns are one-hot vectors representing the
     anatomical site that the node originated from (num_sites x num_nodes)
@@ -315,10 +329,10 @@ def tracerx_seeding_pattern(V, A):
         return "no seeding"
 
     # 1) determine if monoclonal (only one clone seeds met(s)), else polyclonal
-    clonality = genetic_clonality(V,A)
+    clonality = genetic_clonality(V,A,idx_to_label)
     
     # 2) determine if monophyletic or polyphyletic
-    phyleticity = tracerx_phyleticity(V, A)
+    phyleticity = tracerx_phyleticity(V, A,idx_to_label)
 
     return clonality + phyleticity
 
@@ -431,23 +445,38 @@ def pruned_mut_label(mut_names, shorten_label, to_string):
     else:
         return list(final_genes)
 
-def full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites, shorten_label=True, to_string=False):
+def full_tree_node_idx_to_label(V, T, node_collection, ordered_sites, shorten_label=True, to_string=False):
     '''
-    custom_node_idx_to_label only gives the internal node labels, so build a map of
-    node_idx to (label, is_leaf) 
-    e.g. ("0;9", False), ("0;9_P", True),  or ("5_liver", True) 
+    Build a map of node_idx to (label, is_leaf, is_polytomy_resovler_node) for plotting and saving
+    information to pickle file
+
     '''
+
     full_node_idx_to_label_map = dict()
+    orig_idx_to_label = node_collection.idx_to_label()
     for i, j in vutil.tree_iterator(T):
-        if i in custom_node_idx_to_label:
-            full_node_idx_to_label_map[i] = (pruned_mut_label(custom_node_idx_to_label[i], shorten_label, to_string), False)
-        if j in custom_node_idx_to_label:
-            full_node_idx_to_label_map[j] = (pruned_mut_label(custom_node_idx_to_label[j], shorten_label, to_string), False)
-        elif j not in custom_node_idx_to_label: # observed clone leaf node
-            site_idx = (V[:,j] == 1).nonzero()[0][0].item()
-            labels = copy.deepcopy(custom_node_idx_to_label[i])
-            labels.append(ordered_sites[site_idx])
-            full_node_idx_to_label_map[j] = (pruned_mut_label(labels, shorten_label, to_string), True)
+        node_i = node_collection.get_node(i)
+        label = pruned_mut_label(node_i.label, shorten_label, to_string)
+        full_node_idx_to_label_map[i] = (label, node_i.is_leaf, node_i.is_polytomy_resolver_node)
+        
+        node_j = node_collection.get_node(j)
+        label = pruned_mut_label(node_j.label, shorten_label, to_string)
+        full_node_idx_to_label_map[j] = (label, node_j.is_leaf, node_j.is_polytomy_resolver_node)
+        
+        # if i in orig_idx_to_label:
+        #     label = pruned_mut_label(orig_idx_to_label[i], shorten_label, to_string)
+        #     full_node_idx_to_label_map[i] = (label, False, node_collection.get_node(i).is_polytomy_resolver_node)
+        
+        # if j in orig_idx_to_label:
+        #     label = pruned_mut_label(orig_idx_to_label[j], shorten_label, to_string)
+        #     full_node_idx_to_label_map[j] = (label, False,  node_collection.get_node(i).is_polytomy_resolver_node)
+        # elif j not in orig_idx_to_label: # observed clone leaf node
+        #     site_idx = (V[:,j] == 1).nonzero()[0][0].item()
+        #     labels = copy.deepcopy(orig_idx_to_label[i])
+        #     labels.append(ordered_sites[site_idx])
+        #     leaf_label = pruned_mut_label(labels, shorten_label, to_string)
+        #     full_node_idx_to_label_map[j] = (leaf_label, True, False)
+
     return full_node_idx_to_label_map
 
 def idx_to_color(custom_colors, idx, alpha=1.0):
@@ -526,15 +555,15 @@ def plot_migration_graph(V, A, ordered_sites, custom_colors, show=True):
 
     return dot_str, edges
 
-def plot_tree(V, T, gen_dist, ordered_sites, custom_colors, custom_node_idx_to_label=None, show=True):
+def plot_tree(V, T, gen_dist, ordered_sites, custom_colors, node_collection=None, show=True):
 
     # (1) Create full directed graph 
     # these labels are used for display in plotting
-    display_node_idx_to_label_map = full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites,
-                                                                    shorten_label=True, to_string=True)
+    display_node_idx_to_label_map = full_tree_node_idx_to_label(V, T, node_collection, ordered_sites,
+                                                                shorten_label=True, to_string=True)
     # these labels are used for writing out full vertex names to file
-    full_node_idx_to_label_map = full_tree_node_idx_to_label(V, T, custom_node_idx_to_label, ordered_sites,
-                                                                 shorten_label=False, to_string=False)
+    full_node_idx_to_label_map = full_tree_node_idx_to_label(V, T, node_collection, ordered_sites,
+                                                             shorten_label=False, to_string=False)
     color_map = { i:idx_to_color(custom_colors, (V[:,i] == 1).nonzero()[0][0].item()) for i in range(V.shape[1])}
     G = nx.DiGraph()
     node_options = {"label":"", "shape": "circle", "penwidth":3, 
@@ -546,8 +575,8 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors, custom_node_idx_to_l
 
     edges = []
     for i, j in vutil.tree_iterator(T):
-        label_i, _ = display_node_idx_to_label_map[i]
-        label_j, is_leaf = display_node_idx_to_label_map[j]
+        label_i, _, _ = display_node_idx_to_label_map[i]
+        label_j, is_leaf, _ = display_node_idx_to_label_map[j]
         
         G.add_node(i, xlabel=label_i, fillcolor=color_map[i], 
                     color=color_map[i], style="filled", **node_options)
@@ -609,14 +638,14 @@ def convert_lists_to_np_arrays(pickle_outputs, keys):
 
     return pickle_outputs
 
-def figure_output_pattern(V, A):
+def figure_output_pattern(V, A, idx_to_label):
     '''
-    
+    Display clonality and phyleticity
     '''
-    gen_clonality = genetic_clonality(V, A).replace("clonal", "")
+    gen_clonality = genetic_clonality(V, A, idx_to_label).replace("clonal", "")
     st_clonality = site_clonality(V, A).replace("clonal", "")
     pattern = seeding_pattern(V, A)
-    phyletic = phyleticity(V, A)
+    phyletic = phyleticity(V, A, idx_to_label)
     output_str = f"{pattern}, {phyletic}\n"
     output_str += f"genetic clonality: {gen_clonality}, site clonality: {st_clonality}\n"
     return output_str
@@ -645,7 +674,7 @@ def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites,
 
     with torch.no_grad():
         if custom_colors == None:
-            custom_colors = DEFAULT_COLORS
+            custom_colors = copy.deepcopy(DEFAULT_COLORS) # don't keep changed order b/w multiple runs
             # Reorder so that green is always the primary
             green_idx = custom_colors.index(DEFAULT_GREEN)
             custom_colors[primary_idx], custom_colors[green_idx] = custom_colors[green_idx], custom_colors[primary_idx]
@@ -656,18 +685,19 @@ def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites,
             T = min_loss_solution.T
             G = min_loss_solution.G
             full_loss = min_loss_solution.loss
-            node_idx_to_label = min_loss_solution.idx_to_label
+            node_collection = min_loss_solution.node_collection
             loss_dict = construct_loss_dict(V, soft_V, T, G, O, p, full_loss)
             
             # Restructure adjacency matrices so that node indices match the cluster indices
             # that the user originally input (we restructure them s.t. root index is 0 during
             # inference to make indexing logic much simpler)
             if original_root_idx != -1:
-                T, _, _, node_idx_to_label, G, _, V, U = vutil.restructure_matrices(0, original_root_idx, T, None, None, node_idx_to_label, G, None, V, U)
-            tree_dot, edges, vertices_to_sites_map, full_tree_idx_to_label = plot_tree(V, T, G, ordered_sites, custom_colors, node_idx_to_label, show=False)
+                T, _, _, node_collection, G, _, V, U = vutil.restructure_matrices(0, original_root_idx, T, None, None, node_collection, G, None, V, U)
+            tree_dot, edges, vertices_to_sites_map, full_tree_idx_to_label = plot_tree(V, T, G, ordered_sites, custom_colors, node_collection, show=False)
+            
             mig_graph_dot, mig_graph_edges = plot_migration_graph(V, T, ordered_sites, custom_colors, show=False)
 
-            pattern = figure_output_pattern(V, T)
+            pattern = figure_output_pattern(V, T, full_tree_idx_to_label)
             figure_outputs.append((tree_dot, mig_graph_dot, loss_dict, pattern))
             pickle_outputs[OUT_LABElING_KEY].append(V.detach().numpy())
             pickle_outputs[OUT_LOSSES_KEY].append(full_loss.numpy())
@@ -759,7 +789,8 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
             # Render and display each graph
             ax1.imshow(tree)
             ax1.axis('off')
-            ax1.set_title(f'Solution {i+1}\n{seeding_pattern}', fontsize=7, loc="left", va="top", x=-0.1, y=1.0)
+            # x=-0.1, y=1.0
+            ax1.set_title(f'Solution {i+1}\n{seeding_pattern}', fontsize=7, loc="left", va="top", pad=5)
 
             ax2.imshow(mig_graph)
             ax2.axis('off')
