@@ -1,20 +1,20 @@
 digraph  {
 dpi=600;size=3.5;
 "Primary, left ear" [color="#6aa84f", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
-"Lymph node metastasis,\n left cervical node" [color="#be5742e1", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
-"Locoregional skin metastasis,\n left ear" [color="#6fa8dc", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
-"Distant skin metastasis,\n back" [color="#e69138", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
-"Primary, left ear" -> "Lymph node metastasis,\n left cervical node"  [color="#6aa84f;0.5:#be5742e1", key=0, penwidth=3];
-"Primary, left ear" -> "Lymph node metastasis,\n left cervical node"  [color="#6aa84f;0.5:#be5742e1", key=1, penwidth=3];
-"Primary, left ear" -> "Lymph node metastasis,\n left cervical node"  [color="#6aa84f;0.5:#be5742e1", key=2, penwidth=3];
-"Primary, left ear" -> "Lymph node metastasis,\n left cervical node"  [color="#6aa84f;0.5:#be5742e1", key=3, penwidth=3];
-"Primary, left ear" -> "Lymph node metastasis,\n left cervical node"  [color="#6aa84f;0.5:#be5742e1", key=4, penwidth=3];
-"Primary, left ear" -> "Locoregional skin metastasis,\n left ear"  [color="#6aa84f;0.5:#6fa8dc", key=0, penwidth=3];
-"Primary, left ear" -> "Locoregional skin metastasis,\n left ear"  [color="#6aa84f;0.5:#6fa8dc", key=1, penwidth=3];
-"Primary, left ear" -> "Locoregional skin metastasis,\n left ear"  [color="#6aa84f;0.5:#6fa8dc", key=2, penwidth=3];
-"Primary, left ear" -> "Distant skin metastasis,\n back"  [color="#6aa84f;0.5:#e69138", key=0, penwidth=3];
-"Primary, left ear" -> "Distant skin metastasis,\n back"  [color="#6aa84f;0.5:#e69138", key=1, penwidth=3];
-"Primary, left ear" -> "Distant skin metastasis,\n back"  [color="#6aa84f;0.5:#e69138", key=2, penwidth=3];
-"Primary, left ear" -> "Distant skin metastasis,\n back"  [color="#6aa84f;0.5:#e69138", key=3, penwidth=3];
-"Primary, left ear" -> "Distant skin metastasis,\n back"  [color="#6aa84f;0.5:#e69138", key=4, penwidth=3];
+"Lymph node metastasis,\n left cervical node" [color="#6fa8dc", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+"Locoregional skin metastasis,\n left ear" [color="#e69138", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+"Distant skin metastasis,\n back" [color="#c27ba0", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+"Primary, left ear" -> "Lymph node metastasis,\n left cervical node"  [color="#6aa84f;0.5:#6fa8dc", key=0, penwidth=3];
+"Primary, left ear" -> "Lymph node metastasis,\n left cervical node"  [color="#6aa84f;0.5:#6fa8dc", key=1, penwidth=3];
+"Primary, left ear" -> "Lymph node metastasis,\n left cervical node"  [color="#6aa84f;0.5:#6fa8dc", key=2, penwidth=3];
+"Primary, left ear" -> "Lymph node metastasis,\n left cervical node"  [color="#6aa84f;0.5:#6fa8dc", key=3, penwidth=3];
+"Primary, left ear" -> "Lymph node metastasis,\n left cervical node"  [color="#6aa84f;0.5:#6fa8dc", key=4, penwidth=3];
+"Primary, left ear" -> "Locoregional skin metastasis,\n left ear"  [color="#6aa84f;0.5:#e69138", key=0, penwidth=3];
+"Primary, left ear" -> "Locoregional skin metastasis,\n left ear"  [color="#6aa84f;0.5:#e69138", key=1, penwidth=3];
+"Primary, left ear" -> "Locoregional skin metastasis,\n left ear"  [color="#6aa84f;0.5:#e69138", key=2, penwidth=3];
+"Primary, left ear" -> "Distant skin metastasis,\n back"  [color="#6aa84f;0.5:#c27ba0", key=0, penwidth=3];
+"Primary, left ear" -> "Distant skin metastasis,\n back"  [color="#6aa84f;0.5:#c27ba0", key=1, penwidth=3];
+"Primary, left ear" -> "Distant skin metastasis,\n back"  [color="#6aa84f;0.5:#c27ba0", key=2, penwidth=3];
+"Primary, left ear" -> "Distant skin metastasis,\n back"  [color="#6aa84f;0.5:#c27ba0", key=3, penwidth=3];
+"Primary, left ear" -> "Distant skin metastasis,\n back"  [color="#6aa84f;0.5:#c27ba0", key=4, penwidth=3];
 }

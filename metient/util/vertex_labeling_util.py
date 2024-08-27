@@ -21,9 +21,91 @@ if torch.cuda.is_available():
 ##################### CLASSES ########################
 ######################################################
 
+class MigrationHistoryNode:
+    def __init__(self, idx, label, is_leaf=False, is_polytomy_resolver_node=False):
+        self.idx = idx
+        assert isinstance(label, list)
+        label = [str(x) for x in label]
+        self.label = label # list of mut names or ids
+        self.is_leaf = is_leaf
+        self.is_polytomy_resolver_node = is_polytomy_resolver_node
+
+# Collection of MigrationHistoryNodes which are used for a single migration history
+class MigrationHistoryNodeCollection:
+    def __init__(self, mig_hist_nodes):
+        idx_to_mig_hist_node = {}
+        for node in mig_hist_nodes:
+            idx_to_mig_hist_node[node.idx] = node
+        self.idx_to_mig_hist_node = idx_to_mig_hist_node
     
+    @classmethod
+    def from_dict(cls, dct):
+        nodes = []
+        for idx in dct:
+            item = dct[idx]
+            node = MigrationHistoryNode(idx, item[0], is_leaf=item[1], is_polytomy_resolver_node=item[2])
+            nodes.append(node)
+        instance = cls(nodes)  # Create an instance using the default constructor
+        return instance
+
+    def get_nodes(self):
+        return list(self.idx_to_mig_hist_node.values())
+        
+    def idx_to_label(self):
+        idx_to_label = {}
+        for idx in self.idx_to_mig_hist_node:
+            idx_to_label[idx] =  self.idx_to_mig_hist_node[idx].label
+        return idx_to_label
+
+    def update_index(self, old_idx, new_idx):
+
+        if old_idx in self.idx_to_mig_hist_node:
+            old_node = self.idx_to_mig_hist_node.pop(old_idx)
+            old_node.idx = new_idx
+            self.idx_to_mig_hist_node[new_idx] = old_node
+        else:
+            raise KeyError(f"Key '{old_idx}' not found in dictionary.")
+
+    def get_node(self, idx):
+        return self.idx_to_mig_hist_node[idx]
+    
+    def add_node(self, new_node):
+        assert new_node.idx not in self.idx_to_mig_hist_node
+        self.idx_to_mig_hist_node[new_node.idx] = new_node
+    
+    def swap_indices(self, key1, key2):
+        d = self.idx_to_mig_hist_node
+        assert key1 in d and key2 in d
+        # Both keys exist, swap their values
+        d[key1], d[key2] = d[key2], d[key1]
+        d[key1].idx = key1
+        d[key2].idx = key2
+    
+    def remove_indices_and_reindex(self, indices_to_remove):
+        # Create a new dictionary to hold the re-indexed entries
+        new_dict = {}
+        original_dict = self.idx_to_mig_hist_node
+        old_index_to_new_index = {}
+        # Initialize the new index
+        new_index = 0
+        # Iterate through the original dictionary in sorted index order
+        for old_index in sorted(original_dict.keys()):
+            # Skip the indices that need to be removed
+            if old_index in indices_to_remove:
+                continue
+            
+            # Assign the new index to the current node
+            new_dict[new_index] = original_dict[old_index]
+            new_dict[new_index].idx = new_index
+            old_index_to_new_index[old_index] = new_index
+            # Increment the new index
+            new_index += 1
+        
+        self.idx_to_mig_hist_node = new_dict
+        return old_index_to_new_index
+
 # Defines a unique adjacency matrix and vertex labeling
-class LabeledTree:
+class MigrationHistory:
     def __init__(self, tree, labeling):
         if (tree.shape[0] != tree.shape[1]):
             raise ValueError("Adjacency matrix should have shape (num_nodes x num_nodes)")
@@ -44,7 +126,7 @@ class LabeledTree:
 
     def __eq__(self, other):
         # Check for equality based on the positions of non-zero entries in both tensors
-        if not isinstance(other, LabeledTree):
+        if not isinstance(other, MigrationHistory):
             return False
         return (self._nonzero_tuple(self.labeling) == self._nonzero_tuple(other.labeling) and
                 self._nonzero_tuple(self.tree) == self._nonzero_tuple(other.tree))
@@ -63,7 +145,7 @@ def convert_pars_metric_to_int(x):
 
 # Convenience object to package information needed for a final solution
 class VertexLabelingSolution:
-    def __init__(self, loss, m, c, s, V, soft_V, T, G, idx_to_label):
+    def __init__(self, loss, m, c, s, V, soft_V, T, G, node_collection):
         self.loss = loss
         self.m = convert_pars_metric_to_int(m)
         self.c = convert_pars_metric_to_int(c)
@@ -71,7 +153,7 @@ class VertexLabelingSolution:
         self.V = V
         self.T = T
         self.G = G
-        self.idx_to_label = idx_to_label
+        self.node_collection = node_collection
         self.soft_V = soft_V
 
     # Override the comparison operator
@@ -94,8 +176,6 @@ class VertexLabelingSolution:
         return (self._nonzero_tuple(self.V) == self._nonzero_tuple(other.V) and
                 self._nonzero_tuple(self.T) == self._nonzero_tuple(other.T))
 
-
-
 # Convenience object to package information needed for known 
 # labelings/indices of vertex labeling matrix V
 class FixedVertexLabeling:
@@ -111,7 +191,7 @@ class FixedVertexLabeling:
 def migration_number(site_adj):
     '''
     Args:
-        - site_adj: batch_size x num_sites x num_sites matrix, where each num_sites x num_sites
+        - site_adj: sample_size x num_sites x num_sites matrix, where each num_sites x num_sites
         matrix has the number of migrations from site i to site j
     Returns:
         - migration number: number of total migrations between sites (no same site to same site migrations)
@@ -123,7 +203,7 @@ def migration_number(site_adj):
 def seeding_site_number(site_adj_no_diag):
     '''
     Args:
-        - site_adj_no_diag: batch_size x num_sites x num_sites matrix, where each num_sites x num_sites
+        - site_adj_no_diag: sample_size x num_sites x num_sites matrix, where each num_sites x num_sites
         matrix has the number of migrations from site i to site j, and no same site migrations are included
     Returns:
         - seeding site number: number of sites that have outgoing edges
@@ -137,9 +217,9 @@ def seeding_site_number(site_adj_no_diag):
 def comigration_number(site_adj, A, VA, VT, X, update_path_matrix):
     '''
     Args:
-        - site_adj: batch_size x num_sites x num_sites matrix, where each num_sites x num_sites
+        - site_adj: sample_size x num_sites x num_sites matrix, where each num_sites x num_sites
         matrix has the number of migrations from site i to site j
-        - A: Adjacency matrix (directed) of the full tree (batch_size x num_nodes x num_nodes)
+        - A: Adjacency matrix (directed) of the full tree (sample_size x num_nodes x num_nodes)
         - VA: V*A
         - VT: transpose of V 
         - X: VT*V (1 if node i and node j are the same color)
@@ -174,13 +254,13 @@ def comigration_number(site_adj, A, VA, VT, X, update_path_matrix):
 def genetic_distance_score(G, m, A, X):
     '''
     Args:
-        - G: Matrix of genetic distances between internal nodes (shape: batch_size x num_internal_nodes x num_internal_nodes).
+        - G: Matrix of genetic distances between internal nodes (shape: sample_size x num_internal_nodes x num_internal_nodes).
              Lower values indicate lower branch lengths, i.e. more genetically similar.
-        - m: vector of migration numbers (length = batch_size)
-        - A: Adjacency matrix (directed) of the full tree (batch_size x num_nodes x num_nodes)
+        - m: vector of migration numbers (length = sample_size)
+        - A: Adjacency matrix (directed) of the full tree (sample_size x num_nodes x num_nodes)
         - X: VT*V (1 if node i and node j are the same color)
     Returns:
-        - genetic distance score, summed over batch_size # of solutions
+        - genetic distance score, summed over sample_size # of solutions
     '''
     g = 0
     if G != None:
@@ -195,13 +275,13 @@ def organotropism_score(O, site_adj_no_diag, p, bs, num_sites):
     '''
     Args:
         - O: Array of frequencies with which the primary cancer type seeds site i (shape: num_anatomical_sites).
-        - site_adj_no_diag: batch_size x num_sites x num_sites matrix, where each num_sites x num_sites
+        - site_adj_no_diag: sample_size x num_sites x num_sites matrix, where each num_sites x num_sites
         matrix has the number of migrations from site i to site j, and no self loops
         - p: one-hot vector indicating site of the primary
-        - bs: batch_size (number of samples)
+        - bs: sample_size (number of samples)
         - num_sites: number of anatomical sites
     Returns:
-        - organotropism score, summed over batch_size # of solutions
+        - organotropism score, summed over sample_size # of solutions
     '''
     o = 0
     if O != None:
@@ -306,7 +386,7 @@ def clone_tree_labeling_loss_with_computed_metrics(m, c, s, g, o, e, weights, bs
 def clone_tree_labeling_objective(V, soft_V, A, G, O, p, weights, update_path_matrix):
     '''
     Args:
-        V: Vertex labeling of the full tree (batch_size x num_sites x num_nodes)
+        V: Vertex labeling of the full tree (sample_size x num_sites x num_nodes)
         A: Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
         G: Matrix of genetic distances between internal nodes (shape:  num_internal_nodes x num_internal_nodes).
         Lower values indicate lower branch lengths, i.e. more genetically similar.
@@ -347,7 +427,9 @@ def get_leaf_labels_from_U(U):
     return internal_node_idx_to_sites
 
 
-def full_adj_matrix_from_internal_node_idx_to_sites_present(input_T, input_G, idx_to_sites_present, num_sites, G_identical_clone_val):
+def full_adj_matrix_from_internal_node_idx_to_sites_present(input_T, input_G, idx_to_sites_present, 
+                                                            num_sites, G_identical_clone_val, 
+                                                            node_collection, ordered_sites):
     '''
     All non-zero values of U represent extant clones (leaf nodes of the full tree).
     For each of these non-zero values, we add an edge from parent clone to extant clone.
@@ -366,37 +448,39 @@ def full_adj_matrix_from_internal_node_idx_to_sites_present(input_T, input_G, id
         # Attach a leaf node for every site that this internal node is observed in
         for site in idx_to_sites_present[internal_node_idx]:
             full_adj[internal_node_idx, leaf_idx] = 1
+            label = node_collection.get_node(internal_node_idx).label + [ordered_sites[site]]
+            leaf_node = MigrationHistoryNode(leaf_idx, label, is_leaf=True, is_polytomy_resolver_node=False)
+            node_collection.add_node(leaf_node)
             if input_G is not None:
                 full_G[internal_node_idx, leaf_idx] = G_identical_clone_val
             leaf_idx += 1
             leaf_labels.append(site)
+
+    assert len(leaf_labels) !=0, f"No nodes present in any sites"
+
     # Anatomical site labels of the leaves
     L = torch.nn.functional.one_hot(torch.tensor(leaf_labels), num_classes=num_sites).T
-    return full_adj, full_G, L
+    return full_adj, full_G, L, node_collection
     
-def full_adj_matrix_using_inputted_observed_clones(input_T, input_G, idx_to_sites_present, num_sites, G_identical_clone_val):
-    '''
-    Use inputted observed clones to fill out T and G by adding leaf nodes
-    '''
-    full_adj, full_G, L = full_adj_matrix_from_internal_node_idx_to_sites_present(input_T, input_G, idx_to_sites_present, num_sites, G_identical_clone_val)
-    return L, full_adj, full_G
-
-def full_adj_matrix_using_inferred_observed_clones(U, input_T, input_G, num_sites, G_identical_clone_val):
+def full_adj_matrix_using_inferred_observed_clones(U, input_T, input_G, num_sites, G_identical_clone_val,
+                                                   node_collection, ordered_sites):
     '''
     Use inferred observed clones to fill out T and G by adding leaf nodes
     '''
     internal_node_idx_to_sites = get_leaf_labels_from_U(U)
-    full_adj, full_G, L = full_adj_matrix_from_internal_node_idx_to_sites_present(input_T, input_G, internal_node_idx_to_sites, num_sites, G_identical_clone_val)
+    full_adj, full_G, L, node_collection = full_adj_matrix_from_internal_node_idx_to_sites_present(input_T, input_G, internal_node_idx_to_sites, 
+                                                                                                   num_sites, G_identical_clone_val,
+                                                                                                   node_collection, ordered_sites)
     
-    return full_adj, full_G, L, internal_node_idx_to_sites
+    return full_adj, full_G, L, internal_node_idx_to_sites, node_collection
 
-def remove_leaf_indices_not_observed_sites(removal_indices, U, input_T, T, G, node_idx_to_label, idx_to_observed_sites):
+def remove_leaf_indices_not_observed_sites(removal_indices, U, input_T, T, G, node_collection, idx_to_observed_sites):
     '''
     Remove clone tree leaf nodes that are not detected in any sites. 
     These are not well estimated
     '''
     if len(removal_indices) == 0:
-        return U, input_T, T, G, node_idx_to_label, idx_to_observed_sites
+        return U, input_T, T, G, node_collection, idx_to_observed_sites
     
     for remove_idx in removal_indices:
         child_indices = get_child_indices(T, [remove_idx])
@@ -417,13 +501,13 @@ def remove_leaf_indices_not_observed_sites(removal_indices, U, input_T, T, G, no
         G = np.delete(G, removal_indices, 1)
 
     # Reindex the idx to label dict
-    new_node_idx_to_label, old_index_to_new_index = reindex_dict(node_idx_to_label, removal_indices)
+    old_index_to_new_index = node_collection.remove_indices_and_reindex(removal_indices)
     new_idx_to_observed_sites = {}
     for old_idx in idx_to_observed_sites:
         new_idx = old_index_to_new_index[old_idx]
         new_idx_to_observed_sites[new_idx] = idx_to_observed_sites[old_idx]
 
-    return U, input_T, T, G, new_node_idx_to_label, new_idx_to_observed_sites
+    return U, input_T, T, G, node_collection, new_idx_to_observed_sites
 
 ######################################################
 ################## RANDOM UTILITIES ##################
@@ -474,41 +558,22 @@ def to_tensor(t):
         return t
     return torch.stack(t)
 
-def remove_leaf_nodes_idx_to_label_dicts(dicts):
-    '''
-    After running migration history inference, the leaf nodes 
-    (U nodes) get added to the idx to label dicts when plotting 
-    and saving to pickle files, so we don't want to do that twice
-    when in calibrate mode
-    '''
-    new_dicts = []
-    for i,dct in enumerate(dicts):
-        new_dicts.append(copy.deepcopy(dct))
-        for key in dct:
-            if dct[key][1] == True:
-                del new_dicts[i][key]
-            else:
-                new_dicts[i][key] = new_dicts[i][key][0]
-    return new_dicts
-
 def create_reweighted_solution_set_from_pckl(pckl, O, p, weights):
     # Make a solution set from the pickled files
     Ts, Vs, soft_Vs, Gs = pckl[OUT_ADJ_KEY], pckl[OUT_LABElING_KEY], pckl[OUT_SOFTV_KEY], pckl[OUT_GEN_DIST_KEY]
-    idx_to_label_dicts = remove_leaf_nodes_idx_to_label_dicts(pckl[OUT_IDX_LABEL_KEY])
+    node_collections = [MigrationHistoryNodeCollection.from_dict(dct) for dct in pckl[OUT_IDX_LABEL_KEY]]
     solution_set = []
-    for T, V, soft_V, G, idx_to_label in zip(Ts, Vs, soft_Vs, Gs, idx_to_label_dicts):
+    for T, V, soft_V, G, node_collection in zip(Ts, Vs, soft_Vs, Gs, node_collections):
         loss, (m,c,s) = clone_tree_labeling_objective(torch.tensor(V), torch.tensor(soft_V), torch.tensor(T), torch.tensor(G), O, p, weights, True)
-        solution_set.append(VertexLabelingSolution(loss, m, c, s, torch.tensor(V), torch.tensor(soft_V), torch.tensor(T), torch.tensor(G), idx_to_label))
+        solution_set.append(VertexLabelingSolution(loss, m, c, s, torch.tensor(V), torch.tensor(soft_V), torch.tensor(T), torch.tensor(G), node_collection))
     return solution_set
 
-def calculate_batch_size(T, sites, solve_polytomies):
+def calculate_sample_size(num_nodes, num_sites, solve_polytomies):
     '''
     Calculate the number of samples to initialize for a run based on 
     the number of tree nodes, the number of anatomical sites, and if we're
     solving polytomies
     '''
-    num_nodes = T.shape[0]
-    num_sites = len(sites)
     min_size = 256
     min_size += num_nodes*num_sites*4
 
@@ -517,7 +582,6 @@ def calculate_batch_size(T, sites, solve_polytomies):
 
     # cap this to a reasonably high sample size
     min_size = min(min_size, 60000)
-    #print("calculate_batch_size", min_size)
     return min_size
 
 def tree_iterator(T):
@@ -628,16 +692,16 @@ def swap_keys(d, key1, key2):
     # If neither key exists, do nothing
     return d
 
-def restructure_matrices_root_index_zero(adj_matrix, ref_matrix, var_matrix, node_idx_to_label, gen_dist_matrix, idx_to_observed_sites):
+def restructure_matrices_root_index_zero(adj_matrix, ref_matrix, var_matrix, node_collection, gen_dist_matrix, idx_to_observed_sites):
     '''
     Restructure the inputs so that the node at index 0 becomes the root node.
     '''
     og_root_idx = get_root_index(adj_matrix)
     return restructure_matrices(og_root_idx, 0, adj_matrix, ref_matrix, var_matrix, 
-                                node_idx_to_label, gen_dist_matrix, idx_to_observed_sites, None, None)
+                                node_collection, gen_dist_matrix, idx_to_observed_sites, None, None)
 
 def restructure_matrices(source_root_idx, target_root_idx, adj_matrix, ref_matrix, var_matrix, 
-                         node_idx_to_label, gen_dist_matrix, idx_to_observed_sites, V, U):
+                         node_collection, gen_dist_matrix, idx_to_observed_sites, V, U):
     '''
     Restructure the inputs so that the order of nodes has source_root_idx and target_root_idx swapped
 
@@ -647,7 +711,7 @@ def restructure_matrices(source_root_idx, target_root_idx, adj_matrix, ref_matri
     '''
     if source_root_idx == target_root_idx:
         # Nothing to restructure here!
-        return adj_matrix, ref_matrix, var_matrix, node_idx_to_label, gen_dist_matrix, idx_to_observed_sites, V, U
+        return adj_matrix, ref_matrix, var_matrix, node_collection, gen_dist_matrix, idx_to_observed_sites, V, U
     
     new_order = [x for x in range(len(adj_matrix))]
     new_order[source_root_idx] = target_root_idx
@@ -678,9 +742,9 @@ def restructure_matrices(source_root_idx, target_root_idx, adj_matrix, ref_matri
     else:
         idx_to_observed_sites = swap_keys(idx_to_observed_sites, source_root_idx, target_root_idx)
 
-    node_idx_to_label = swap_keys(node_idx_to_label, source_root_idx, target_root_idx)
+    node_collection.swap_indices(source_root_idx, target_root_idx)
     
-    return swapped_adjacency_matrix, swapped_ref_matrix, swapped_var_matrix, node_idx_to_label, swapped_gen_dist_matrix, idx_to_observed_sites, swapped_V, swapped_U
+    return swapped_adjacency_matrix, swapped_ref_matrix, swapped_var_matrix, node_collection, swapped_gen_dist_matrix, idx_to_observed_sites, swapped_V, swapped_U
 
 def nodes_w_leaf_nodes(adj_matrices, num_internal_nodes):
     '''
@@ -712,14 +776,14 @@ def nodes_w_leaf_nodes(adj_matrices, num_internal_nodes):
 
     return mask
 
-def print_U(U, B, node_idx_to_label, ordered_sites, ref, var):
-    cols = ["GL"]+[";".join([str(i)]+node_idx_to_label[i][:2]) for i in range(len(node_idx_to_label))]
+def print_U(U, B, node_collection, ordered_sites, ref, var):
+    cols = ["GL"]+[";".join([str(i)]+node_collection.get_node(i).label[:2]) for i in range(len(node_collection.get_nodes())) if not node_collection.get_node(i).is_leaf]
     U_df = pd.DataFrame(U.detach().numpy(), index=ordered_sites, columns=cols)
 
     print("U\n", U_df)
     F_df = pd.DataFrame((var/(ref+var)).numpy(), index=ordered_sites, columns=cols[1:])
     print("F\n", F_df)
-    Fhat_df = pd.DataFrame((U @ B).detach().numpy()[:,1:], index=ordered_sites, columns=cols[1:])
+    Fhat_df = pd.DataFrame(0.5*(U @ B).detach().numpy()[:,1:], index=ordered_sites, columns=cols[1:])
     print("F hat\n", Fhat_df)
 
 def top_k_integers_by_count(lst, k, min_num_sites, cutoff):
@@ -897,6 +961,12 @@ def get_child_indices(T, indices):
                 all_child_indices.append(child_idx)
 
     return all_child_indices
+
+def get_parent(T, node):
+    num_nodes = len(T)
+    parents = [i for i in range(num_nodes) if T[i][node] != 0]
+    assert len(parents) == 1
+    return parents[0]
 
 def find_parents_children(T, node):
     num_nodes = len(T)

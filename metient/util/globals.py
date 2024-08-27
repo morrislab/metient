@@ -10,9 +10,12 @@ CLUSTER_SEP = "_"
 
 DEFAULT_CALIBRATE_MIG_WEIGHTS = [1.0,1000.0]
 DEFAULT_CALIBRATE_SEED_WEIGHTS = [1000.0,1.0]
-DEFAULT_CALIBRATE_COMIG_WEIGHTS = 500.0
+DEFAULT_CALIBRATE_COMIG_WEIGHTS = 100.0
 
-DEFAULT_COLORS = ["#6aa84f", "#be5742e1", "#6fa8dc", "#e69138", "#9e9e9e", "#c27ba0","brown", "black", "darkgreen", "purple", "blue"]*3
+import itertools
+ALL_PARSIMONY_MODELS = list(itertools.permutations([1000.0, 100.0, 1.0]))
+
+DEFAULT_COLORS = ["#6aa84f", "#6fa8dc", "#e69138", "#c27ba0", "#bf4040", "#9e9e9e","#993366", "brown", "black", "darkgreen", "blue"]*3
 DEFAULT_GREEN = "#6aa84f"
 
 import logging
@@ -31,11 +34,11 @@ REG_KEY = "regularizer"
 FULL_LOSS_KEY = "loss"
 
 # For pickle outputs
-OUT_LABElING_KEY = "clone_tree_labelings"
+OUT_LABElING_KEY = "clone_tree_labeling_matrices"
 OUT_ADJ_KEY = "full_adjacency_matrices"
-OUT_OBSERVED_CLONES_KEY = "observed_clone_matrix"
+OUT_OBSERVED_CLONES_KEY = "observed_clone_proportion_matrix"
 OUT_LOSSES_KEY = "losses"
-OUT_IDX_LABEL_KEY = "full_tree_node_idx_to_labels"
+OUT_IDX_LABEL_KEY = "node_info"
 OUT_SITES_KEY = "ordered_anatomical_sites"
 OUT_PRIMARY_KEY = "primary_site"
 OUT_LOSS_DICT_KEY = "loss_dict"

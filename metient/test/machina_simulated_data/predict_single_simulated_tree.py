@@ -30,10 +30,10 @@ def no_parsimony_weights(weights):
     if (weights.mig == 0.0 or weights.mig == [0.0]) and weights.comig == 0 and (weights.seed_site == 0.0 or weights.seed_site == [0.0]):
         return True
 
-def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir, weights, batch_size, weight_init_primary, perf_stats_fn, mode, solve_polytomies):
+def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir, weights, sample_size, weight_init_primary, perf_stats_fn, mode, solve_polytomies):
     print("solve_polytomies", solve_polytomies)
     print("wip", wip)
-    print("batch_size", batch_size)
+    print("sample_size", sample_size)
     print("mode", mode)
     cluster_fn = os.path.join(machina_sims_data_dir, f"{site}_clustered_input", f"cluster_{mig_type}_seed{seed}.txt")
     all_mut_trees_fn = os.path.join(machina_sims_data_dir, f"{site}_mut_trees", f"mut_trees_{mig_type}_seed{seed}.txt")
@@ -57,10 +57,10 @@ def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir
         T = torch.tensor(data[tree_num][0], dtype = torch.float32)
 
         pooled_tsv_fn = dutil.pool_input_tsv(ref_var_fn, out_dir, f"tmp_{site}_{mig_type}_{seed}_{tree_num}")
-        print_config = PrintConfig(visualize=VISUALIZE, verbose=False, k_best_trees=batch_size, save_outputs=True)
+        print_config = PrintConfig(visualize=VISUALIZE, verbose=False, k_best_trees=sample_size, save_outputs=True)
         
         T_edges, labeling, G_edges, loss_info, time = infer_migration_history(T, pooled_tsv_fn, 'P', weights, print_config, out_dir, f"tree{tree_num}_seed{seed}_{mode}", 
-                                                                              batch_size=batch_size, custom_colors=custom_colors, needs_pruning=needs_pruning,
+                                                                              sample_size=sample_size, custom_colors=custom_colors, needs_pruning=needs_pruning,
                                                                               bias_weights=weight_init_primary, mode=mode, solve_polytomies=solve_polytomies)
 
         time_with_plotting = (datetime.datetime.now() - start_time).total_seconds()
