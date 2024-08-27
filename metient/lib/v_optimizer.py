@@ -13,7 +13,7 @@ PROGRESS_BAR = 0 # Keeps track of optimization progress using tqdm
 
 class VertexLabelingSolver:
     def __init__(self, L, T, p, G, O, weights, config, num_sites, num_nodes_to_label,
-                 node_idx_to_label, input_T, idx_to_observed_sites):
+                 node_collection, input_T, idx_to_observed_sites):
         self.L = L
         self.T = T
         self.p = p
@@ -23,7 +23,7 @@ class VertexLabelingSolver:
         self.config = config
         self.num_sites = num_sites
         self.num_nodes_to_label = num_nodes_to_label
-        self.node_idx_to_label = node_idx_to_label
+        self.node_collection = node_collection
         self.input_T = input_T
         self.idx_to_observed_sites = idx_to_observed_sites
         # This gets set at first optimization time
@@ -143,15 +143,13 @@ def full_exploration_weights(weights):
                        seed_site=DEFAULT_CALIBRATE_SEED_WEIGHTS, data_fit=weights.data_fit, 
                        reg=weights.reg, entropy=weights.entropy, gen_dist=0.0, organotrop=0.0)
 
-
 def run_multiple_optimizations(v_solver):
     global PROGRESS_BAR
-    PROGRESS_BAR = tqdm(total=v_solver.config['first_max_iter'] + v_solver.config['second_max_iter']*v_solver.config['num_v_optimization_runs'], position=0)
+    PROGRESS_BAR = tqdm(total=v_solver.config['first_max_iter'] + v_solver.config['second_max_iter']*len(ALL_PARSIMONY_MODELS), position=0)
 
     results = []
     
     # Only run first optimization once (this finds optimal subtrees)
-
     first_opt_result = first_v_optimization(v_solver, full_exploration_weights(v_solver.weights))
     optimal_nodes, optimal_batch_nums, optimized_Ts, optimized_Vs = first_opt_result
 
@@ -163,14 +161,10 @@ def run_multiple_optimizations(v_solver):
         run_specific_x, v_solver = initialize_optimal_x_polyres(run_specific_x, run_specific_poly_solver, optimal_nodes, optimal_batch_nums, optimized_Ts, optimized_Vs, v_solver)
         ret = second_v_optimization(v_solver, run_specific_x, run_specific_poly_solver, exploration_weights)
         return ret
-    mig_weights = [1000.0,1.0,1.0]*100
-    comig_weights = [1.0,1000.0,1.0]*100
-    seed_weights = [1.0, 1.0,1000.0]*100
-    order = [0,1,2]*100
-    for r in range(v_solver.config['num_v_optimization_runs']):
-        weight_idx = order[r]
-        exploration_weights = met.Weights(mig=mig_weights[weight_idx], comig=comig_weights[weight_idx], 
-                                         seed_site=seed_weights[weight_idx], data_fit=v_solver.weights.data_fit, 
+
+    for pars_model in ALL_PARSIMONY_MODELS:
+        exploration_weights = met.Weights(mig=pars_model[0], comig=pars_model[1], 
+                                         seed_site=pars_model[2], data_fit=v_solver.weights.data_fit, 
                                          reg=v_solver.weights.reg, entropy=v_solver.weights.entropy, gen_dist=0.0, organotrop=0.0)
         
         # print(exploration_weights.mig,exploration_weights.comig, exploration_weights.seed_site)
@@ -196,17 +190,17 @@ def gumbel_softmax(logits, temperature, hard=True):
 
     Sample from the Gumbel-Softmax distribution and optionally discretize.
     Args:
-        logits: [batch_size, n_class] unnormalized log-probs
+        logits: [sample_size, n_class] unnormalized log-probs
         temperature: non-negative scalar
         hard: if True, take argmax, but differentiate w.r.t. soft sample y
     Returns:
-        [batch_size, n_class] sample from the Gumbel-Softmax distribution.
+        [sample_size, n_class] sample from the Gumbel-Softmax distribution.
         If hard=True, then the returned sample will be one-hot, otherwise it will
         be a probabilitiy distribution that sums to 1 across classes
 
     '''
     shape = logits.size()
-    assert len(shape) == 3 # [batch_size, num_sites, num_nodes]
+    assert len(shape) == 3 # [sample_size, num_sites, num_nodes]
     y_soft = gumbel_softmax_sample(logits, temperature)
     if hard:
         _, k = y_soft.max(1)
@@ -222,11 +216,11 @@ def gumbel_softmax(logits, temperature, hard=True):
 
 def stack_vertex_labeling(L, X, p, poly_res, fixed_labeling):
     '''
-    Use leaf labeling L and X (both of size batch_size x num_sites X num_internal_nodes)
+    Use leaf labeling L and X (both of size sample_size x num_sites X num_internal_nodes)
     to get the anatomical sites of the leaf nodes and the internal nodes (respectively). 
     Stack the root labeling to get the full vertex labeling V. 
     '''
-    # Expand leaf node labeling L to be repeated batch_size times
+    # Expand leaf node labeling L to be repeated sample_size times
     bs = X.shape[0]
     L = vutil.repeat_n(L, bs)
 
@@ -251,7 +245,7 @@ def stack_vertex_labeling(L, X, p, poly_res, fixed_labeling):
 def compute_v_loss(X, v_solver, poly_res, exploration_weights, update_path_matrix, v_temp, t_temp):
     '''
     Args:
-        X: latent variable of labelings we are solving for. (batch_size x num_unknown_nodes x num_sites)
+        X: latent variable of labelings we are solving for. (sample_size x num_unknown_nodes x num_sites)
             where num_unkown_nodes = len(T) - (len(known_indices)), or len(unknown_indices)
         L: leaf node labels derived from U
         T: Full adjacency matrix which includes clone tree nodes as well as leaf nodes which were
@@ -286,14 +280,14 @@ def compute_v_loss(X, v_solver, poly_res, exploration_weights, update_path_matri
 def x_weight_initialization(v_solver):
 
     nodes_w_children, biased_sites = vutil.get_k_or_more_children_nodes(v_solver.input_T, v_solver.T, v_solver.idx_to_observed_sites, 1, True, 1, cutoff=False)
-    batch_size = v_solver.config['batch_size']
+    sample_size = v_solver.config['sample_size']
     # We're learning X, which is the vertex labeling of the internal nodes
-    X = torch.rand(batch_size, v_solver.num_sites, v_solver.num_nodes_to_label)
+    X = torch.rand(sample_size, v_solver.num_sites, v_solver.num_nodes_to_label)
     if v_solver.config['bias_weights']:
         eta = 3
         # Make 4 partitions: (1) biased towards the primary, (2) biased towards the primary + sites of children/grandchildren
         # (3) biased towards sites of children/grandchildren, (4) no bias
-        quart = batch_size // 4
+        quart = sample_size // 4
         
         # Bias for partitions [1-2]
         prim_site_idx = torch.nonzero(v_solver.p)[0][0]

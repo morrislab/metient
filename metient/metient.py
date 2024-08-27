@@ -4,7 +4,7 @@ from metient.lib import migration_history_inference as mig_hist
 from metient.util import plotting_util as plutil
 
 def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
-             O=None, batch_size=-1, custom_colors=None, solve_polytomies=False):
+             O=None, sample_size=-1, custom_colors=None, solve_polytomies=False):
     '''
     Runs Metient-evaluate, and infers the observed clone percentages and the labels of the clone tree.
 
@@ -20,18 +20,18 @@ def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name,
 
         OPTIONAL:
         O: a 1 x n array (where n is number of anatomical sites) if using organotropism
-        batch_size: how many samples to have Metient solve in parallel
+        sample_size: how many samples to have Metient solve in parallel
         custom_colors: an array of hex strings (with length = number of anatomical sites) to be used as custom colors in output visualizations.
         solve_polytomies: bool, whether or not to resolve polytomies 
 
     Outputs migration history inferences for a single patient.
     '''
     return mig_hist.evaluate(tree_fn, tsv_fn,weights, print_config, output_dir, run_name, 
-                             O=O, batch_size=batch_size, custom_colors=custom_colors, 
+                             O=O, sample_size=sample_size, custom_colors=custom_colors, 
                              bias_weights=True, solve_polytomies=solve_polytomies)
 
 def evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
-                               O=None, batch_size=-1, custom_colors=None, solve_polytomies=False):
+                               O=None, sample_size=-1, custom_colors=None, solve_polytomies=False):
     '''
     Runs Metient-evaluate with observed clone percentages inputted, and only inferring the labels of the clone tree.
 
@@ -47,17 +47,17 @@ def evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir
 
         OPTIONAL:
         O: a 1 x n array (where n is number of anatomical sites) if using organotropism
-        batch_size: how many samples to have Metient solve in parallel
+        sample_size: how many samples to have Metient solve in parallel
         custom_colors: an array of hex strings (with length = number of anatomical sites) to be used as custom colors in output visualizations.
         solve_polytomies: bool, whether or not to resolve polytomies 
     
     Outputs migration history inferences for a single patient.
     '''
-    return mig_hist.evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, O=O, batch_size=batch_size, 
+    return mig_hist.evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, O=O, sample_size=sample_size, 
                                               custom_colors=custom_colors, bias_weights=True, solve_polytomies=solve_polytomies)
 
 def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, 
-              Os=None, batch_size=-1, custom_colors=None, solve_polytomies=False):
+              Os=None, sample_size=-1, custom_colors=None, solve_polytomies=False):
     '''
     Runs Metient-calibrate on a cohort of patients. For each patient, we infer the observed clone percentages and the labels of the clone tree.
 
@@ -74,17 +74,17 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
 
         OPTIONAL:
         O: a 1 x n array (where n is number of anatomical sites) if using organotropism
-        batch_size: how many samples to have Metient solve in parallel
+        sample_size: how many samples to have Metient solve in parallel
         custom_colors: an array of hex strings (with length = number of anatomical sites) to be used as custom colors in output visualizations.
         solve_polytomies: bool, whether or not to resolve polytomies 
 
     Outputs migration history inferences for a full cohort.
     '''
-    return mig_hist.calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, Os=Os, batch_size=batch_size, 
+    return mig_hist.calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, Os=Os, sample_size=sample_size, 
                               custom_colors=custom_colors, bias_weights=True, solve_polytomies=solve_polytomies)
 
 def calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names, 
-                               Os=None, batch_size=-1, custom_colors=None,  solve_polytomies=False):
+                               Os=None, sample_size=-1, custom_colors=None,  solve_polytomies=False):
     '''
     Runs Metient-calibrate on a cohort of patients. For each patient, we use the inputted observed clone percentages, and only infer the labels of the clone tree.
 
@@ -101,13 +101,13 @@ def calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_
 
         OPTIONAL:
         O: a 1 x n array (where n is number of anatomical sites) if using organotropism
-        batch_size: how many samples to have Metient solve in parallel
+        sample_size: how many samples to have Metient solve in parallel
         custom_colors: an array of hex strings (with length = number of anatomical sites) to be used as custom colors in output visualizations.
         solve_polytomies: bool, whether or not to resolve polytomies 
 
     Outputs migration history inferences for a full cohort.
     '''
-    return mig_hist.calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names, Os=Os, batch_size=batch_size, 
+    return mig_hist.calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names, Os=Os, sample_size=sample_size, 
                                                custom_colors=custom_colors, bias_weights=True, solve_polytomies=solve_polytomies)
 
 
@@ -168,27 +168,31 @@ def seeding_pattern(V, A):
     '''
     return plutil.seeding_pattern(V, A)
 
-def phyleticity(V, A):
+def phyleticity(V, A, node_info):
     '''
     V: Vertex labeling matrix where columns are one-hot vectors representing the
     anatomical site that the node originated from (num_sites x num_nodes)
     A:  Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
+    node_info: Dictionary mapping node indices to a tuple (label (str), is_witness_node (bool), is_polytomy_resolver_node (bool)). 
+               This is outputted in Metient's pkl.gz file
 
     After determining which nodes perform seeding (i.e., nodes which have a different
-    color from their child), if all nodes can be reached from the highest level node 
+    color from their parent), if all nodes can be reached from the highest level node 
     in the seeding clusters (closest to root), returns monophyletic, else polyphyletic
     '''
-    return plutil.phyleticity(V, A)
+    return plutil.phyleticity(V, A, node_info)
 
-def seeding_clusters(V, A):
+def seeding_clusters(V, A, node_info):
     '''
     V: Vertex labeling matrix where columns are one-hot vectors representing the
     anatomical site that the node originated from (num_sites x num_nodes)
     A:  Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
+    node_info: Dictionary mapping node indices to a tuple (label (str), is_witness_node (bool), is_polytomy_resolver_node (bool)). 
+               This is outputted in Metient's pkl.gz file
 
-    Returns: list of nodes whose child is a different color than itself
+    Returns: list of nodes whose parent is a different color than itself
     '''
-    return plutil.seeding_clusters(V, A)
+    return plutil.seeding_clusters(V, A, node_info)
 
 def site_clonality(V, A):
     '''
@@ -201,13 +205,15 @@ def site_clonality(V, A):
     '''
     return plutil.site_clonality(V, A)
 
-def genetic_clonality(V, A):
+def genetic_clonality(V, A, node_info):
     '''
     V: Vertex labeling matrix where columns are one-hot vectors representing the
     anatomical site that the node originated from (num_sites x num_nodes)
     A:  Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
+    node_info: Dictionary mapping node indices to a tuple (label (str), is_witness_node (bool), is_polytomy_resolver_node (bool)). 
+               This is outputted in Metient's pkl.gz file
 
     Returns monoclonal if every site is seeded by the *same* clone,
     else returns polyclonal.
     '''
-    return plutil.genetic_clonality(V, A)
+    return plutil.genetic_clonality(V, A, node_info)

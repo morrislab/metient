@@ -44,7 +44,7 @@ def stable_softmax(x):
     exp_x = torch.exp(x - x_max)
     return exp_x / torch.sum(exp_x, dim=0)
 
-def cross_ent(loss_dicts, idx_to_label, thetas, tau, use_tree_weighting):
+def cross_ent(loss_dicts, pt_weight, thetas, tau):
     '''
     Computes the cross entropy between the target distribution (genetic distance)
     and the predicted distribution (parsimony) using the input thetas (which we are
@@ -69,12 +69,8 @@ def cross_ent(loss_dicts, idx_to_label, thetas, tau, use_tree_weighting):
         return 0.0
     theta_X = stable_softmax(theta_X)
 
-    if use_tree_weighting:
-        wn = sum([1 for idx in idx_to_label if idx_to_label[idx][1]==False]) - 1
-        log_wn = np.log2(wn)
-    else:
-        log_wn = 1.0
-
+    log_wn = np.log2(pt_weight+1) # So that weight=1 doesn't go to 0
+    
     cross_ent_sum = 0.0
     if not torch.sum(gen_dist_scores == 0):
         gen_dist_scores = stable_softmax(gen_dist_scores)
@@ -83,7 +79,6 @@ def cross_ent(loss_dicts, idx_to_label, thetas, tau, use_tree_weighting):
         organotrop_scores = stable_softmax(organotrop_scores)
         cross_ent_sum += -log_wn*torch.sum(torch.mul(organotrop_scores, torch.log2(theta_X+0.1)))
 
-   
     return cross_ent_sum
 
 def get_pickle_filenames(pickle_files_dirs, suffix=None):
@@ -95,24 +90,19 @@ def get_pickle_filenames(pickle_files_dirs, suffix=None):
                 pickle_filenames.append(os.path.join(pickle_files_dir, file))
     return pickle_filenames
     
-def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3.0, 
-                             suffix=None, use_min_tau=False, use_tree_weighting=False):
+def get_max_cross_ent_thetas(pickle_file_list, patient_weights, tau=3.0, use_min_tau=False):
     '''
-    pickle_file_dirs: list of directories to search for Metient results
-    with .pkl.gz files
-
-    or, just pass the paths to the actual pickle files
+    pickle_file_list: list of paths to Metient results
+    patient_weights: the 
 
     Returns the parsimony weights which give the best cross entropy 
     between the target distribution (genetic distance) and predicted 
     distribution (parsimony) across all patients in pickle_files_dir
     '''
-    if pickle_file_list == None :
-        pickle_file_list = get_pickle_filenames(pickle_file_dirs, suffix)
     
     min_tau = float("inf")
     all_data = []
-    for pkl_file in pickle_file_list:
+    for pkl_file,pt_weight in zip(pickle_file_list, patient_weights):
         with gzip.open(pkl_file,'rb') as f:
             pckl = pickle.load(f)
         
@@ -125,8 +115,7 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3
         if len(pars_metrics) == 1:
             continue
 
-        idx_to_label = pckl[OUT_IDX_LABEL_KEY][0]
-        all_data.append((loss_dicts, idx_to_label))
+        all_data.append((loss_dicts, pt_weight))
 
         if use_min_tau:
             gen_dist_scores = torch.zeros((len(loss_dicts)))
@@ -138,8 +127,7 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3
                 min_tau = min(min_tau, (unique_gs[1]-unique_gs[0]))
     
     if len(all_data) == 0:
-        # TODO: 
-        print("WARNING: Unable to calibrate since no patients have multiple Pareto optimal trees. Using default weighting, wm > wc > ws")
+        print("WARNING: Unable to calibrate since no patients have multiple Pareto optimal trees with multiple unique Pareto metrics. Using default weighting, wm > wc > ws")
         return [0.46, 0.29, 0.25] # these are estimated from multiple cancer cohorts
     
     if use_min_tau:
@@ -161,8 +149,8 @@ def get_max_cross_ent_thetas(pickle_file_dirs=None, pickle_file_list=None, tau=3
     for step in range(max_iter):
         optimizer.zero_grad()
         total_cross_ent = 0.0
-        for patient_loss_dicts, idx_to_label in all_data:
-            patient_cross_ent = cross_ent(patient_loss_dicts, idx_to_label, thetas, tau, use_tree_weighting)
+        for i, (patient_loss_dicts, pt_weight) in enumerate(all_data):
+            patient_cross_ent = cross_ent(patient_loss_dicts, pt_weight, thetas, tau)
             total_cross_ent += patient_cross_ent
         total_cross_ent = total_cross_ent/float(len(all_data))
         total_cross_ent.backward()
@@ -231,15 +219,12 @@ def load_machina_results_new_split(machina_results_dir):
     res_m8 = pd.concat([pd.read_csv(os.path.join(machina_results_dir, filename)) for filename in files_new_m8]).reindex()
     res_m5 = res_m5[(res_m5['enforced']=='R') | (res_m5['enforced'].isnull())]
     res_m8 = res_m8[(res_m8['enforced']=='R') | (res_m8['enforced'].isnull())]
-    res_m5 = res_m5.replace({'pattern': {'S': 'pS', 'M' : 'pM', 'R' : 'pR'}})
-    res_m8 = res_m8.replace({'pattern': {'S': 'pS', 'M' : 'pM', 'R' : 'pR'}})
     
-    res_m8_MACHINA = res_m8[res_m8['method'] == 'MACHINA'].replace({'inferred': {'pPS': 'pS', 'mPS' : 'mS'}})
-    res_m5_MACHINA = res_m5[res_m5['method'] == 'MACHINA'].replace({'inferred': {'pPS': 'pS', 'mPS' : 'mS'}})
+    res_m8_MACHINA = res_m8[res_m8['method'] == 'MACHINA']
+    res_m5_MACHINA = res_m5[res_m5['method'] == 'MACHINA']
     
     res_m8_MACHINA = res_m8_MACHINA.replace({'pattern': {'pS': 'S', 'pM' : 'M', 'pR' : 'R'}})
     res_m5_MACHINA = res_m5_MACHINA.replace({'pattern': {'pS': 'S', 'pM' : 'M', 'pR' : 'R'}})
-    print(res_m5_MACHINA['pattern'].unique())
     res_m5_MACHINA['new_gt_pattern'] = res_m5_MACHINA.apply(lambda row: gt_df[(gt_df['site']=='m5')&(gt_df['mig_type']==row['pattern'])&(gt_df['seed']==str(row['seed']))]['gt_pattern'].item(), axis=1)
     res_m8_MACHINA['new_gt_pattern'] = res_m8_MACHINA.apply(lambda row: gt_df[(gt_df['site']=='m8')&(gt_df['mig_type']==row['pattern'])&(gt_df['seed']==str(row['seed']))]['gt_pattern'].item(), axis=1)
 
@@ -284,14 +269,21 @@ def parse_clone_tree(filename_T, filename_l):
 
     return edges, migration_edges,labeling
 
-# Taken from MACHINA 
-def identify_seeding_clones(edge_list, migration_edge_list):
+# Taken from MACHINA definition
+def identify_seeding_clones_mach(edge_list, migration_edge_list):
     res = set()
     for (u,v) in migration_edge_list:
         muts_u = get_mutations(edge_list, u)
         muts_v = get_mutations(edge_list, v)
         res.add(frozenset(muts_u))
+    return res
 
+# Metient definition of seeding clones
+def identify_seeding_clones_met(edge_list, migration_edge_list):
+    res = set()
+    for (u,v) in migration_edge_list:
+        muts_v = get_mutations(edge_list, v)
+        res.add(frozenset(muts_v))
     return res
 
 # Taken from MACHINA 
@@ -375,21 +367,25 @@ def get_metient_min_loss_trees(site_mig_type_dir, seed, k, loss_thres=1.0, suffi
         item = heapq.heappop(min_heap)
         # only add tree if it's ~= to the min loss
         if abs(min_loss-item.loss) <= loss_thres:
-            out.append((item.loss, item.results_dict, item.met_tree_num))
+            out.append((item.loss, item.results_dict, item.met_tree_num, item.tree_num))
     print("# min loss trees:", len(out))
+
     return out
 
 ######## Methods for comparing Metient outputs to ground truth ############
 
-def evaluate_seeding_clones(sim_clone_tree_fn, sim_vert_labeling_fn, met_results_dict, met_tree_num):
+def evaluate_seeding_clones(sim_clone_tree_fn, sim_vert_labeling_fn, met_results_dict, met_tree_num, met_definition):
     edges_simulated, mig_edges_simulated, _ = parse_clone_tree(sim_clone_tree_fn, sim_vert_labeling_fn)
-    seeding_clones_simulated = identify_seeding_clones(edges_simulated, mig_edges_simulated)
+    if met_definition:
+        seeding_clones_simulated = identify_seeding_clones_met(edges_simulated, mig_edges_simulated)
+    else: 
+        seeding_clones_simulated = identify_seeding_clones_mach(edges_simulated, mig_edges_simulated)
     edges_inferred, mig_edges_inferred = metient_parse_clone_tree(met_results_dict, met_tree_num)
-    seeding_clones_inferred = identify_seeding_clones(edges_inferred, mig_edges_inferred)
-    contains_resolved_polytomy = False
-    for edge in edges_simulated:
-        if is_resolved_polytomy_cluster(edge[0]) or is_resolved_polytomy_cluster(edge[1]):
-            contains_resolved_polytomy = True
+    if met_definition:
+        seeding_clones_inferred = identify_seeding_clones_met(edges_inferred, mig_edges_inferred)
+    else:
+        seeding_clones_inferred = identify_seeding_clones_mach(edges_inferred, mig_edges_inferred)
+
     # print("edges_inferred", edges_inferred, "seeding_clones_inferred", seeding_clones_inferred)
     # print("edges_simulated", edges_simulated, "seeding_clones_simulated", seeding_clones_simulated)
         
@@ -400,7 +396,13 @@ def evaluate_seeding_clones(sim_clone_tree_fn, sim_vert_labeling_fn, met_results
     else:
         F = 2.0 / ((1.0 / recall) + (1.0 / precision))
 
-    return recall, precision, F, contains_resolved_polytomy
+    return recall, precision, F
+
+def evaluate_seeding_clones_mach(sim_clone_tree_fn, sim_vert_labeling_fn, met_results_dict, met_tree_num):
+    return evaluate_seeding_clones(sim_clone_tree_fn, sim_vert_labeling_fn, met_results_dict, met_tree_num, False)
+
+def evaluate_seeding_clones_met(sim_clone_tree_fn, sim_vert_labeling_fn, met_results_dict, met_tree_num):
+    return evaluate_seeding_clones(sim_clone_tree_fn, sim_vert_labeling_fn, met_results_dict, met_tree_num, True)
 
 def evaluate_migration_graph(sim_mig_graph_fn, met_results_dict, met_tree_num):
     edge_set_G_simulated = set(parse_migration_graph(sim_mig_graph_fn))

@@ -2,10 +2,12 @@ import torch
 from metient.util import vertex_labeling_util as vutil
 from torch.distributions.binomial import Binomial
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 class ObservedClonesSolver:
     def __init__(self, num_sites, num_internal_nodes, ref, var, omega, idx_to_observed_sites,
-                 B, input_T, G, node_idx_to_label, weights, config, estimate_observed_clones):
+                 B, input_T, G, node_collection, weights, config, estimate_observed_clones, ordered_sites):
         self.ref = ref
         self.var = var
         self.omega = omega
@@ -16,45 +18,53 @@ class ObservedClonesSolver:
         self.config = config
         self.num_sites = num_sites
         self.num_internal_nodes = num_internal_nodes
-        self.node_idx_to_label = node_idx_to_label
+        self.node_collection = node_collection
         self.estimate_observed_clones = estimate_observed_clones
         self.idx_to_observed_sites = idx_to_observed_sites
+        self.ordered_sites = ordered_sites
     
     def run(self):
         if not self.estimate_observed_clones:
-            T, G, L = vutil.full_adj_matrix_from_internal_node_idx_to_sites_present(self.input_T, self.G, self.idx_to_observed_sites, 
-                                                                                    self.num_sites, self.config['identical_clone_gen_dist'])
-            return None, self.input_T, T, G, L, self.node_idx_to_label, self.num_internal_nodes, self.idx_to_observed_sites
+            T, G, L, node_collection = vutil.full_adj_matrix_from_internal_node_idx_to_sites_present(self.input_T, self.G, self.idx_to_observed_sites, 
+                                                                                                     self.num_sites, self.config['identical_clone_gen_dist'],
+                                                                                                     self.node_collection, self.ordered_sites)
+            return None, self.input_T, T, G, L, node_collection, self.num_internal_nodes, self.idx_to_observed_sites
 
         return find_umap(self)
 
 def find_umap(u_solver):
     
-    # We're learning psi, which is the mixture matrix U (U = softmax(psi)), and tells us the existence
+    # We're learning eta, which is the mixture matrix U (U = softmax(eta)), and tells us the existence
     # and anatomical locations of the extant clones (U > U_CUTOFF)
-    #psi = -1 * torch.rand(num_sites, num_internal_nodes + 1) # an extra column for normal cells
-    psi = torch.ones(u_solver.num_sites, u_solver.num_internal_nodes + 1) # an extra column for normal cells
-    psi.requires_grad = True 
-    u_optimizer = torch.optim.Adam([psi], lr=u_solver.config['lr'])
+    #eta = -1 * torch.rand(num_sites, num_internal_nodes + 1) # an extra column for normal cells
+    eta = torch.ones(u_solver.num_sites, u_solver.num_internal_nodes + 1) # an extra column for normal cells
+    eta.requires_grad = True 
+    u_optimizer = torch.optim.Adam([eta], lr=u_solver.config['lr'])
 
     i = 0
-    u_prev = psi
+    u_prev = eta
     u_diff = 1e9
     losses = []
-   
+    nlls, regs = [], []
     while u_diff > 1e-6 and i < 300:
         u_optimizer.zero_grad()
-        U, u_loss = compute_u_loss(psi, u_solver.ref, u_solver.var, u_solver.omega, u_solver.B, u_solver.weights)
+        U, u_loss, nll, reg = compute_u_loss(eta, u_solver.ref, u_solver.var, u_solver.omega, u_solver.B, u_solver.weights)
         u_loss.backward()
         u_optimizer.step()
         u_diff = torch.abs(torch.norm(u_prev - U))
         u_prev = U
         i += 1
         losses.append(u_loss.detach().numpy())
-    
-    with torch.no_grad():
-        full_T, full_G, L, idx_to_observed_sites = vutil.full_adj_matrix_using_inferred_observed_clones(U, u_solver.input_T, u_solver.G, u_solver.num_sites, u_solver.config['identical_clone_gen_dist'])
+        nlls.append(nll.detach().numpy())
+        regs.append(reg.detach().numpy())
 
+    # plt.plot([i for i in range(len(nlls))], nlls, marker='o'); plt.show(); plt.close()
+    # plt.plot([i for i in range(len(regs))], regs, marker='o'); plt.show(); plt.close()
+
+    with torch.no_grad():
+        full_T, full_G, L, idx_to_observed_sites, node_collection = vutil.full_adj_matrix_using_inferred_observed_clones(U, u_solver.input_T, u_solver.G, u_solver.num_sites, 
+                                                                                                                         u_solver.config['identical_clone_gen_dist'],
+                                                                                                                         u_solver.node_collection, u_solver.ordered_sites)
         # Remove any leaf nodes that aren't detected at > U_CUTOFF in any sites. These are not well estimated
         U_clones = U[:,1:]
         removal_indices = []
@@ -62,12 +72,14 @@ def find_umap(u_solver):
             children = vutil.get_child_indices(u_solver.input_T, [node_idx])
             if node_idx not in idx_to_observed_sites and len(children) == 0:
                 removal_indices.append(node_idx)
-        #print("node indices not well estimated", removal_indices)
-        U, input_T, T, G, node_idx_to_label, idx_to_observed_sites = vutil.remove_leaf_indices_not_observed_sites(removal_indices, U, u_solver.input_T, 
-                                                                                                                  full_T, full_G, u_solver.node_idx_to_label, idx_to_observed_sites)
-        num_internal_nodes = u_solver.num_internal_nodes - len(removal_indices)
+        print("node indices not well estimated", removal_indices)
+        #vutil.print_U(U, u_solver.B, node_collection, u_solver.ordered_sites, u_solver.ref, u_solver.var)
 
-    return U, input_T, T, G, L, node_idx_to_label, num_internal_nodes, idx_to_observed_sites
+        U, input_T, T, G, node_collection, idx_to_observed_sites = vutil.remove_leaf_indices_not_observed_sites(removal_indices, U, u_solver.input_T, 
+                                                                                                                full_T, full_G, node_collection, idx_to_observed_sites)
+        num_internal_nodes = u_solver.num_internal_nodes - len(removal_indices)
+        
+    return U, input_T, T, G, L, node_collection, num_internal_nodes, idx_to_observed_sites
 
 # Adapted from PairTree
 def calc_llh(F_hat, R, V, omega_v):
@@ -98,10 +110,10 @@ def calc_llh(F_hat, R, V, omega_v):
     nlglh = torch.sum(llh_per_sample) / (K-1)
     return nlglh
 
-def compute_u_loss(psi, ref, var, omega, B, weights):
+def compute_u_loss(eta, ref, var, omega, B, weights):
     '''
     Args:
-        psi: raw values we are estimating of matrix U (num_sites x num_internal_nodes)
+        eta: raw values we are estimating of matrix U (num_sites x num_internal_nodes)
         ref: Reference matrix (num_anatomical_sites x num_mutation_clusters). Num. reads that map to reference allele
         var: Variant matrix (num_anatomical_sites x num_mutation_clusters). Num. reads that map to variant allele
         omega: VAF to subclonal frequency correction 
@@ -114,24 +126,15 @@ def compute_u_loss(psi, ref, var, omega, B, weights):
     
     # Using the softmax enforces that the row sums are 1, since the proprtions of
     # clones in a given site should sum to 1
-    U = torch.softmax(psi, dim=1)
-    # print("psi", psi)
+    U = torch.softmax(eta, dim=1)
+    # print("eta", eta)
     #print("U", U)
 
     # 1. Data fit
     F_hat = (U @ B)
     nlglh = calc_llh(F_hat, ref, var, omega)
     # 2. Regularization to make some values of U -> 0
-    reg = torch.sum(psi) # l1 norm 
-    # print("weights.reg", weights.reg, "reg", reg)
-    # print("weights.data_fit", weights.data_fit, "nlglh", nlglh)
+    reg = torch.sum(eta) # l1 norm 
     clone_proportion_loss = (weights.data_fit*nlglh + weights.reg*reg)
     
-    return U, clone_proportion_loss
-
-def no_cna_omega(shape):
-    '''
-    Returns omega values assuming no copy number alterations (0.5)
-    Shape is (num_anatomical_sites x num_mutation_clusters)
-    '''
-    return torch.ones(shape) * 0.5
+    return U, clone_proportion_loss, weights.data_fit*nlglh, weights.reg*reg

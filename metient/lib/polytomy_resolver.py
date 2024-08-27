@@ -16,7 +16,6 @@ class PolytomyResolver():
         # nodes_w_polys are the nodes that have polytomies
         # (we place them in this order: given internal nodes, new resolver nodes, leaf nodes from U)
         T, G = v_optimizer.T, v_optimizer.G
-        bs = v_optimizer.config['batch_size']
 
         num_new_nodes = 0
         for r in resolver_sites:
@@ -33,55 +32,30 @@ class PolytomyResolver():
             G = torch.nn.functional.pad(G, pad=(0, num_new_nodes, 0, num_new_nodes), mode='constant', value=0)
             G = torch.cat((G[:,:idx1], G[:,idx2:], G[:,idx1:idx2]), dim=1)
 
+        # Shift the leaf node indices in node_collection too
+        # This has to be done in descending order otherwise the shifts just overwrite each other
+        node_collection = v_optimizer.node_collection
+        nodes = node_collection.get_nodes()
+        leaf_nodes = [node for node in nodes if node.is_leaf]
+        leaf_nodes_descending_order = sorted(leaf_nodes, key=lambda obj: obj.idx, reverse=True)
+        for node in leaf_nodes_descending_order:
+            node_collection.update_index(node.idx, node.idx+num_new_nodes)
+
         # 3. Get each polytomy's children (these are the positions we have to relearn)
         children_of_polys = vutil.get_child_indices(T, nodes_w_polys)
 
         # 4. Initialize a matrix to learn the polytomy structure
-        num_nodes_full_tree = T.shape[0]
-        poly_adj_matrix = vutil.repeat_n(torch.ones((num_nodes_full_tree, len(children_of_polys)), dtype=torch.float32), bs)
-        resolver_indices = [x for x in range(num_internal_nodes, num_internal_nodes+num_new_nodes)]
+        ret = initialize_polytomy_resolver_adj_matrix(T, children_of_polys, num_internal_nodes, 
+                                                      num_new_nodes, v_optimizer, nodes_w_polys, resolver_sites)
+        poly_adj_matrix, nodes_w_polys_to_resolver_indices, resolver_indices, resolver_labeling = ret
 
-        nodes_w_polys_to_resolver_indices = OrderedDict()
-        start_new_node_idx = resolver_indices[0]
-        for parent_idx, r in zip(nodes_w_polys, resolver_sites):
-            num_new_nodes_for_poly = len(r)
-            if parent_idx not in nodes_w_polys_to_resolver_indices:
-                nodes_w_polys_to_resolver_indices[parent_idx] = []
-
-            for i in range(start_new_node_idx, start_new_node_idx+num_new_nodes_for_poly):
-                nodes_w_polys_to_resolver_indices[parent_idx].append(i)
-            start_new_node_idx += num_new_nodes_for_poly
-
-        resolver_labeling = torch.zeros(v_optimizer.num_sites, len(resolver_indices))
-        t = 0
-        for sites in resolver_sites:
-            for site in sites:
-                resolver_labeling[site, t] = 1
-                t += 1
-
-        offset = 0
-        for parent_idx in nodes_w_polys:
-            child_indices = vutil.get_child_indices(T, [parent_idx])
-            # make the children of polytomies start out as children of their og parent
-            # with the option to "switch" to being the child of the new poly node
-            poly_adj_matrix[:,parent_idx,offset:(offset+len(child_indices))] = 1.0
-            # we only want to let these children choose between being the child
-            # of their original parent or the child of this new poly node, which
-            # we can do by setting all other indices to -inf
-            mask = torch.ones(num_nodes_full_tree, dtype=torch.bool)
-            new_nodes = nodes_w_polys_to_resolver_indices[parent_idx]
-            mask_indices = new_nodes + [parent_idx]
-            mask[[mask_indices]] = 0
-            poly_adj_matrix[:,mask,offset:(offset+len(child_indices))] = float("-inf")
-            offset += len(child_indices)
-
-        poly_adj_matrix.requires_grad = True
-        
         # 5. Initialize potential new nodes as children of the polytomy nodes
         for i in nodes_w_polys:
             for j in nodes_w_polys_to_resolver_indices[i]:
                 T[i,j] = 1.0
-                v_optimizer.node_idx_to_label[j] = [f"{i}pol{j}"]
+                parent_node = node_collection.get_node(i)
+                new_node = vutil.MigrationHistoryNode(j, [f"{i}pol{j}"]+parent_node.label, is_leaf=False, is_polytomy_resolver_node=True)
+                node_collection.add_node(new_node)
                 if G != None:
                     G[i,j] = v_optimizer.config['identical_clone_gen_dist']
 
@@ -100,7 +74,6 @@ class PolytomyResolver():
                 potential_child_indices = vutil.get_child_indices(T, [parent_idx])
                 for child_idx in potential_child_indices:
                     G[new_node_idx, child_idx] = G[parent_idx, child_idx]
-
         v_optimizer.T = T
         v_optimizer.G = G
         self.latent_var = poly_adj_matrix
@@ -110,6 +83,51 @@ class PolytomyResolver():
         self.resolver_index_to_parent_idx = resolver_index_to_parent_idx
         self.resolver_labeling = resolver_labeling
 
+def initialize_polytomy_resolver_adj_matrix(T, children_of_polys, num_internal_nodes, 
+                                            num_new_nodes, v_optimizer, nodes_w_polys, resolver_sites):
+    num_nodes_full_tree = T.shape[0]
+    bs = v_optimizer.config['sample_size']
+    poly_adj_matrix = vutil.repeat_n(torch.ones((num_nodes_full_tree, len(children_of_polys)), dtype=torch.float32), bs)
+    resolver_indices = [x for x in range(num_internal_nodes, num_internal_nodes+num_new_nodes)]
+
+    nodes_w_polys_to_resolver_indices = OrderedDict()
+    start_new_node_idx = resolver_indices[0]
+    for parent_idx, r in zip(nodes_w_polys, resolver_sites):
+        num_new_nodes_for_poly = len(r)
+        if parent_idx not in nodes_w_polys_to_resolver_indices:
+            nodes_w_polys_to_resolver_indices[parent_idx] = []
+
+        for i in range(start_new_node_idx, start_new_node_idx+num_new_nodes_for_poly):
+            nodes_w_polys_to_resolver_indices[parent_idx].append(i)
+        start_new_node_idx += num_new_nodes_for_poly
+
+    resolver_labeling = torch.zeros(v_optimizer.num_sites, len(resolver_indices))
+    t = 0
+    for sites in resolver_sites:
+        for site in sites:
+            resolver_labeling[site, t] = 1
+            t += 1
+
+    offset = 0
+    for parent_idx in nodes_w_polys:
+        child_indices = vutil.get_child_indices(T, [parent_idx])
+        # make the children of polytomies start out as children of their og parent
+        # with the option to "switch" to being the child of the new poly node
+        poly_adj_matrix[:,parent_idx,offset:(offset+len(child_indices))] = 1.0
+        # we only want to let these children choose between being the child
+        # of their original parent or the child of this new poly node, which
+        # we can do by setting all other indices to -inf
+        mask = torch.ones(num_nodes_full_tree, dtype=torch.bool)
+        new_nodes = nodes_w_polys_to_resolver_indices[parent_idx]
+        mask_indices = new_nodes + [parent_idx]
+        mask[[mask_indices]] = 0
+        poly_adj_matrix[:,mask,offset:(offset+len(child_indices))] = float("-inf")
+        offset += len(child_indices)
+
+    poly_adj_matrix.requires_grad = True
+
+    return poly_adj_matrix, nodes_w_polys_to_resolver_indices, resolver_indices, resolver_labeling
+    
 def is_same_mig_hist_with_node_removed(poly_res, T, num_internal_nodes, V, remove_idx, children_of_removal_node, p, prev_m, prev_c, prev_s):
     '''
     Returns True if migration graph is the same or better after 
@@ -170,7 +188,7 @@ def is_same_mig_hist_with_node_removed(poly_res, T, num_internal_nodes, V, remov
     # print(prev_m, prev_c, prev_s, new_m, new_c, new_s, ((prev_m >= int(new_m)) and (prev_c >= int(new_c)) and (prev_s >= int(new_s))))
     return ((prev_m >= int(new_m)) and (prev_c >= int(new_c)) and (prev_s >= int(new_s)))
 
-def remove_nodes(removal_indices, V, T, G, node_idx_to_label):
+def remove_nodes(removal_indices, V, T, G, node_collection):
     '''
     Remove polytomy resolver nodes from V, T, G and node_idx_to_label
     if they didn't actually help
@@ -195,9 +213,8 @@ def remove_nodes(removal_indices, V, T, G, node_idx_to_label):
         G = np.delete(G, removal_indices, 1)
 
     # Reindex the idx to label dict
-    new_node_idx_to_label, _= vutil.reindex_dict(node_idx_to_label, removal_indices)
-    
-    return V, T, G, new_node_idx_to_label
+    node_collection.remove_indices_and_reindex(removal_indices)
+    return V, T, G, node_collection
 
 def remove_extra_resolver_nodes(solution_set, num_internal_nodes, poly_res, weights, O, p):
     '''
@@ -221,9 +238,9 @@ def remove_extra_resolver_nodes(solution_set, num_internal_nodes, poly_res, weig
                 nodes_to_remove.append(new_node_idx)
 
         if len(nodes_to_remove) != 0:
-            new_V, new_T, new_G, new_node_idx_to_label = remove_nodes(nodes_to_remove, V, T, soln.G, soln.idx_to_label)
+            new_V, new_T, new_G, new_node_collection = remove_nodes(nodes_to_remove, V, T, soln.G, soln.node_collection)
             loss, (new_m,new_c,new_s) = vutil.clone_tree_labeling_objective(new_V, soln.soft_V, new_T, new_G, O, p, weights, True)
-            out_solution_set.append(vutil.VertexLabelingSolution(loss,new_m,new_c,new_s,new_V,soln.soft_V,new_T,new_G,new_node_idx_to_label))
+            out_solution_set.append(vutil.VertexLabelingSolution(loss,new_m,new_c,new_s,new_V,soln.soft_V,new_T,new_G,new_node_collection))
         else:
             out_solution_set.append(soln)
 

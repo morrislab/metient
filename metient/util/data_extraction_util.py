@@ -6,6 +6,7 @@ from collections import OrderedDict
 import pandas as pd
 import sys
 from metient.util.globals import *
+from metient.util import vertex_labeling_util as vutil
 
 # TODO: make more assertions on uniqueness and completeness of input csvs
 
@@ -51,7 +52,8 @@ def validate_unpooled_or_pooled_df(df, tsv_fn, index_cols):
     Validation needed for either unpooled or pooled tsv
     '''
 
-    assert(set(df['site_category'])==set(['primary', 'metastasis']))
+    # Some users would like to run on multiple tumors or multiple samples from the same primary tumor 
+    assert(set(df['site_category'])==set(['primary', 'metastasis']) or set(df['site_category'])==set(['primary']))
 
     # Check if all index columns are whole numbers, and convert to int if needed
     for index_col in index_cols:
@@ -192,7 +194,7 @@ def calc_var_read_prob(major_cn, minor_cn, purity, diploid=True):
     p = float(purity)
     factor = 2 if diploid else 1
     x = (p*(major_cn+minor_cn)+factor*(1-p))
-    var_read_prob = (p*major_cn)/x
+    var_read_prob = (major_cn)/x
     return var_read_prob
 
 def get_idx_to_cluster_label(cluster_filepath):
@@ -243,23 +245,23 @@ def get_ref_var_omega_matrices(tsv_filepaths):
 
     assert(len(tsv_filepaths) >= 1)
 
-    ref_matrices, var_matrices, omega_matrices, ordered_sites, idx_to_label_dicts = [], [], [], [], []
+    ref_matrices, var_matrices, omega_matrices, ordered_sites, node_collections = [], [], [], [], []
     idx_to_num_muts = None
 
     for tsv_filepath in tsv_filepaths:
-        ref, var, omega, sites, idx_to_label_dict, idx_to_num_mut_dict =  get_ref_var_omega_matrix(tsv_filepath)
+        ref, var, omega, sites, node_info, idx_to_num_mut_dict =  get_ref_var_omega_matrix(tsv_filepath)
         ref_matrices.append(ref)
         var_matrices.append(var)
         omega_matrices.append(omega)
         ordered_sites.append(sites)
-        idx_to_label_dicts.append(idx_to_label_dict)
+        node_collections.append(node_info)
         if idx_to_num_mut_dict != None:
             if idx_to_num_muts == None:
                 idx_to_num_muts = []
             idx_to_num_muts.append(idx_to_num_mut_dict)
 
 
-    return ref_matrices, var_matrices, omega_matrices, ordered_sites, idx_to_label_dicts, idx_to_num_muts
+    return ref_matrices, var_matrices, omega_matrices, ordered_sites, node_collections, idx_to_num_muts
 
 def get_primary_sites(tsv_filepath):
     # For tsvs with very large fields
@@ -298,7 +300,7 @@ def get_ref_var_omega_matrix(tsv_filepath):
     num_sites = df['anatomical_site_index'].max() + 1
     num_clusters = df['cluster_index'].max() + 1
     # Build R and V matrices
-    idx_to_mut_names = dict()
+    mig_hist_nodes = []
     R = np.zeros((num_sites, num_clusters))
     V = np.zeros((num_sites, num_clusters))
     omega = np.zeros((num_sites, num_clusters))
@@ -314,11 +316,14 @@ def get_ref_var_omega_matrix(tsv_filepath):
         unique_sites[x] = row['anatomical_site_label']
         # pandas won't let you save a list very easily, so it converts to string...this is a workaround
         # to turn it back into a string
-        idx_to_mut_names[y] = ast.literal_eval(row['character_label'])
+        mig_hist_node = vutil.MigrationHistoryNode(y, ast.literal_eval(row['character_label']), False, False)
+        mig_hist_nodes.append(mig_hist_node)
         if y not in idx_to_num_muts:
             idx_to_num_muts[y] = float(row['num_mutations'])
-        
-    return torch.tensor(R, dtype=torch.float32), torch.tensor(V, dtype=torch.float32), torch.tensor(omega, dtype=torch.float32), list(unique_sites), idx_to_mut_names, idx_to_num_muts
+    
+    mig_hist_collection = vutil.MigrationHistoryNodeCollection(mig_hist_nodes)
+
+    return torch.tensor(R, dtype=torch.float32), torch.tensor(V, dtype=torch.float32), torch.tensor(omega, dtype=torch.float32), list(unique_sites), mig_hist_collection, idx_to_num_muts
 
 def extract_info_from_observed_clone_tsv(tsv_filename):
     '''
@@ -327,7 +332,7 @@ def extract_info_from_observed_clone_tsv(tsv_filename):
     df = pd.read_csv(tsv_filename, delimiter="\t", index_col=False)  
 
     num_sites = df['anatomical_site_index'].max() + 1
-    idx_to_label = dict()
+    mig_hist_nodes = []
     idx_to_sites_present = dict()
     unique_sites = [""]*num_sites
     idx_to_num_muts = dict()
@@ -336,14 +341,16 @@ def extract_info_from_observed_clone_tsv(tsv_filename):
         y = int(row['cluster_index'])
         # collect additional metadata
         unique_sites[x] = row['anatomical_site_label']
-        idx_to_label[y] = [row['cluster_label']]
+        mig_hist_node = vutil.MigrationHistoryNode(y, [row['cluster_label']], is_leaf=False, is_polytomy_resolver_node=False)
+        mig_hist_nodes.append(mig_hist_node)
         if y not in idx_to_num_muts:
             idx_to_num_muts[y] = float(row['num_mutations'])
         if row['present'] == 1:
             if y not in idx_to_sites_present:
                 idx_to_sites_present[y] = []
             idx_to_sites_present[y].append(row['anatomical_site_index'])
-    return unique_sites, idx_to_label, idx_to_num_muts, idx_to_sites_present
+    mig_hist_collection = vutil.MigrationHistoryNodeCollection(mig_hist_nodes)
+    return unique_sites, mig_hist_collection, idx_to_num_muts, idx_to_sites_present
 
 def extract_ordered_sites(tsv_filepaths):
     def _extract_ordered_sites_from_single_tsv(tsv_filename):
@@ -364,7 +371,7 @@ def extract_ordered_sites(tsv_filepaths):
 
 def extract_matrices_from_tsv(tsv_fn, estimate_observed_clones, T):
     if estimate_observed_clones:    
-        ref, var, omega, ordered_sites, node_idx_to_label, idx_to_num_mutations = get_ref_var_omega_matrix(tsv_fn)
+        ref, var, omega, ordered_sites, node_info, idx_to_num_mutations = get_ref_var_omega_matrix(tsv_fn)
         if not torch.is_tensor(ref):
             ref = torch.tensor(ref, dtype=torch.float32)
         if not torch.is_tensor(var):
@@ -372,14 +379,14 @@ def extract_matrices_from_tsv(tsv_fn, estimate_observed_clones, T):
         idx_to_observed_sites = None # needs to be estimated later
     else:
         ref, var, omega = None, None, None
-        ordered_sites, node_idx_to_label, idx_to_num_mutations, idx_to_observed_sites = extract_info_from_observed_clone_tsv(tsv_fn)
+        ordered_sites, node_info, idx_to_num_mutations, idx_to_observed_sites = extract_info_from_observed_clone_tsv(tsv_fn)
 
     G = None
     # If genetic distance info is given, load into genetic distance matrix
     if idx_to_num_mutations != None:
         G = get_genetic_distance_matrix_from_adj_matrix(T, idx_to_num_mutations)
 
-    return ref, var, omega, ordered_sites, node_idx_to_label, idx_to_observed_sites, G
+    return ref, var, omega, ordered_sites, node_info, idx_to_observed_sites, G
 
 def _get_adj_matrix_from_spruce_tree(tree_edges, idx_to_character_label, remove_unseen_nodes=True):
     '''
