@@ -44,8 +44,8 @@ def find_umap(u_solver):
     i = 0
     u_prev = eta
     u_diff = 1e9
-    losses = []
-    nlls, regs = [], []
+    # losses = []
+    # nlls, regs = [], []
     while u_diff > 1e-6 and i < 300:
         u_optimizer.zero_grad()
         U, u_loss, nll, reg = compute_u_loss(eta, u_solver.ref, u_solver.var, u_solver.omega, u_solver.B, u_solver.weights)
@@ -54,9 +54,9 @@ def find_umap(u_solver):
         u_diff = torch.abs(torch.norm(u_prev - U))
         u_prev = U
         i += 1
-        losses.append(u_loss.detach().numpy())
-        nlls.append(nll.detach().numpy())
-        regs.append(reg.detach().numpy())
+        # losses.append(u_loss.detach().numpy())
+        # nlls.append(nll.detach().numpy())
+        # regs.append(reg.detach().numpy())
 
     # plt.plot([i for i in range(len(nlls))], nlls, marker='o'); plt.show(); plt.close()
     # plt.plot([i for i in range(len(regs))], regs, marker='o'); plt.show(); plt.close()

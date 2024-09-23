@@ -132,8 +132,8 @@ class MigrationHistory:
                 self._nonzero_tuple(self.tree) == self._nonzero_tuple(other.tree))
 
     def __str__(self):
-        A = str(np.where(self.tree == 1))
-        V = str(np.where(self.labeling == 1))
+        A = str(torch.where(self.tree == 1))
+        V = str(torch.where(self.labeling == 1))
         return f"Tree: {A}\nVertex Labeling: {V}"
 
 def convert_pars_metric_to_int(x):
@@ -590,7 +590,7 @@ def tree_iterator(T):
     '''
     # Enumerating through a torch tensor is pretty computationally expensive,
     # so convert to a sparse matrix to efficiently access non-zero values
-    T = T if isinstance(T, np.ndarray) else T.detach().numpy()
+    T = T if isinstance(T, np.ndarray) else T.detach().cpu().numpy()
     T = sp.coo_matrix(T)
     for i, j in zip(T.row, T.col):
         yield i,j
@@ -874,7 +874,7 @@ def get_k_or_more_children_nodes(input_T, T, internal_node_idx_to_sites, k, incl
     if include_children is False, we only look at node 0's U values and not its children's U values
     '''
     row_sums = torch.sum(T, axis=1)
-    node_indices = list(np.where(row_sums >= k)[0])
+    node_indices = list(torch.where(row_sums >= k)[0])
     filtered_node_indices = []
     all_resolver_sites = []
     for node_idx in node_indices:
@@ -884,7 +884,7 @@ def get_k_or_more_children_nodes(input_T, T, internal_node_idx_to_sites, k, incl
         # a resolver node wouldn't help for this polytomy
         if len(resolver_sites) == 0:
             continue
-        filtered_node_indices.append(node_idx)
+        filtered_node_indices.append(int(node_idx))
         all_resolver_sites.append(resolver_sites)
     return filtered_node_indices, all_resolver_sites
 
@@ -955,10 +955,10 @@ def get_child_indices(T, indices):
     all_child_indices = []
 
     for parent_idx in indices:
-        children = np.where(T[parent_idx,:] > 0)[0]
+        children = torch.where(T[parent_idx,:] > 0)[0]
         for child_idx in children:
             if child_idx not in all_child_indices:
-                all_child_indices.append(child_idx)
+                all_child_indices.append(int(child_idx))
 
     return all_child_indices
 
@@ -1028,7 +1028,7 @@ def get_adj_matrix_from_edge_list(edge_list):
     return torch.tensor(T, dtype = torch.float32)
 
 def is_tree(adj_matrix):
-    rows, cols = np.where(adj_matrix == 1)
+    rows, cols = torch.where(adj_matrix == 1)
     edges = zip(rows.tolist(), cols.tolist())
     g = nx.Graph()
     g.add_edges_from(edges)

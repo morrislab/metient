@@ -120,6 +120,8 @@ class PrintConfig:
             k_best_trees: int, number of best tree solutions to visualize (if 1, only show best tree)
             save_outputs: bool, whether to save pngs and pickle files 
         '''
+        if k_best_trees <= 0:
+            raise ValueError("k_best_trees must be >= 1")
         self.visualize = visualize
         self.verbose = verbose 
         self.k_best_trees = k_best_trees
