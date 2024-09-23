@@ -699,14 +699,14 @@ def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites,
 
             pattern = figure_output_pattern(V, T, full_tree_idx_to_label)
             figure_outputs.append((tree_dot, mig_graph_dot, loss_dict, pattern))
-            pickle_outputs[OUT_LABElING_KEY].append(V.detach().numpy())
-            pickle_outputs[OUT_LOSSES_KEY].append(full_loss.numpy())
-            pickle_outputs[OUT_ADJ_KEY].append(T.detach().numpy())
-            pickle_outputs[OUT_SOFTV_KEY].append(soft_V.numpy())
-            pickle_outputs[OUT_OBSERVED_CLONES_KEY] = U.numpy() if U != None else np.array([])
+            pickle_outputs[OUT_LABElING_KEY].append(V.detach().cpu().numpy())
+            pickle_outputs[OUT_LOSSES_KEY].append(full_loss.cpu().numpy())
+            pickle_outputs[OUT_ADJ_KEY].append(T.detach().cpu().numpy())
+            pickle_outputs[OUT_SOFTV_KEY].append(soft_V.detach().cpu().numpy())
+            pickle_outputs[OUT_OBSERVED_CLONES_KEY] = U.detach().cpu().numpy() if U != None else np.array([])
 
             if G != None:
-                pickle_outputs[OUT_GEN_DIST_KEY].append(G.numpy())                
+                pickle_outputs[OUT_GEN_DIST_KEY].append(G.detach().cpu().numpy())                
             pickle_outputs[OUT_LOSS_DICT_KEY].append(loss_dict)
             pickle_outputs[OUT_IDX_LABEL_KEY].append(full_tree_idx_to_label)
             if i == 0: # Best tree
@@ -774,29 +774,37 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
             mig_graph = pgv.AGraph(string=mig_graph_dot).draw(format="png", prog="dot")
             mig_graph = PILImage.open(io.BytesIO(mig_graph))
 
-            gs1 = gridspec.GridSpec(3, 3)
+            gs = gridspec.GridSpec(3, 1, height_ratios=[0.05, 0.7, 0.25])
 
             row = math.floor(i/2)
             pad = 0.02 if k < 20 else 0.001
 
             # left = 0.0 if i is odd, 0.55 if even
             # right = 0.45 if i is odd, 1.0 if even
-            gs1.update(left=0.0+((i%2)*0.53), right=0.47+0.55*(i%2), top=1-(row*vspace)-pad, bottom=1-((row+1)*vspace)+pad, wspace=0.05)
-            ax1 = plt.subplot(gs1[:-1, :])
-            ax2 = plt.subplot(gs1[-1, :-1])
-            ax3 = plt.subplot(gs1[-1, -1])
+            gs.update(left=0.0+((i%2)*0.53), right=0.47+0.55*(i%2), top=1-(row*vspace)-pad, bottom=1-((row+1)*vspace)+pad, wspace=0.05)
 
-            # Render and display each graph
-            ax1.imshow(tree)
-            ax1.axis('off')
-            # x=-0.1, y=1.0
-            ax1.set_title(f'Solution {i+1}\n{seeding_pattern}', fontsize=7, loc="left", va="top", pad=5)
+            # Top row: Title
+            ax1 = plt.subplot(gs[0])
+            ax1.text(0.5, 0.5, f'Solution {i+1}\n{seeding_pattern}', ha='center', va='center', fontsize=8)
+            ax1.axis('off')  # Hide the axis
 
-            ax2.imshow(mig_graph)
+            # Second row: Plot for the tree
+            ax2 = plt.subplot(gs[1])
+            ax2.imshow(tree)
             ax2.axis('off')
 
-            ax3.text(0.5, 0.5, formatted_loss_string(loss_info, weights), ha='center', va='center', fontsize=7)
+            # Third row: Create a subgrid for the migration graph and loss information
+            gs_bottom = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[2], wspace=0.05)
+
+            # Left column for the migration graph
+            ax3 = plt.subplot(gs_bottom[0])
+            ax3.imshow(mig_graph)
             ax3.axis('off')
+
+            # Right column for loss information
+            ax4 = plt.subplot(gs_bottom[1])
+            ax4.text(0.5, 0.5, formatted_loss_string(loss_info, weights), ha='center', va='center', fontsize=7)
+            ax4.axis('off')
 
         fig1 = plt.gcf()
         plt.show()

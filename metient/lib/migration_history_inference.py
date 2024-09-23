@@ -104,7 +104,7 @@ def get_best_final_solutions(results, G, O, p, weights, print_config,
             multiresult_has_pss_solution = True
         
         #  Remove any extra resolver nodes that don't actually help
-        unique_solution_set = prutil.remove_extra_resolver_nodes(unique_solution_set, num_internal_nodes, poly_res, weights, O, p)
+        unique_solution_set = prutil.remove_extra_resolver_nodes(unique_solution_set, poly_res, weights, O, p)
         full_solution_set.extend(unique_solution_set)
 
     return rank_solutions(full_solution_set, print_config, needs_pruning=needs_pruning)
@@ -155,6 +155,18 @@ def prep_inputs(tree_fns, tsv_fns, run_names, estimate_observed_clones, output_d
         pooled_tsv_fns = tsv_fns
     
     return Ts, pooled_tsv_fns
+
+def one_hot_labeling_for_primary(primary_site, ordered_sites):
+    '''
+    Args:
+        - primary_site: name of the primary_site (must be a member of ordered_sites)
+        - ordered_sites: list of sites (in the order that they appear in all matrix representations)
+    Returns:
+        one-hot column vector for a node labeled as belonging to the primary site
+    '''
+    primary_idx = ordered_sites.index(primary_site)
+    return torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(ordered_sites)).T
+
 
 def evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
              O, sample_size, custom_colors, bias_weights, solve_polytomies):
@@ -273,9 +285,7 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
 
             saved_U = torch.tensor(pckl[OUT_OBSERVED_CLONES_KEY])
             primary_sites = dutil.get_primary_sites(pooled_tsv_fns[i])
-            primary_idx = ordered_sites[i].index(primary_site)
-            p = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(ordered_sites[i])).T
-
+            p = one_hot_labeling_for_primary(primary_site, ordered_sites[i])
             reranked_solutions = rank_solutions(vutil.create_reweighted_solution_set_from_pckl(pckl, O, p, cal_weights),
                                                 print_config, needs_pruning=False)
             
@@ -379,8 +389,7 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
     T, ref, var, node_collection, G, idx_to_observed_sites, _, _ = vutil.restructure_matrices_root_index_zero(T, ref, var, node_collection, G, idx_to_observed_sites)
     assert(vutil.get_root_index(T) == 0)
 
-    primary_idx = ordered_sites.index(primary_site)
-    p = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(ordered_sites)).T
+    p = one_hot_labeling_for_primary(primary_site, ordered_sites)
     num_sites = len(ordered_sites)
     num_internal_nodes = T.shape[0]
     
