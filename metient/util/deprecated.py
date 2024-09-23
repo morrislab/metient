@@ -947,3 +947,63 @@ def expand_solutions(solutions, all_pars_metrics, O, p, weights):
                 expanded_pars_metrics.append(new_pars_metrics)
     
     return expanded_solutions, expanded_pars_metrics
+
+# WAS IN POLYTOMY_RESOLVER.PY is_same_mig_hist_with_node_removed
+def is_same_mig_hist_with_node_removed(poly_res, T, num_internal_nodes, V, remove_idx, children_of_removal_node, p, prev_m, prev_c, prev_s):
+    '''
+    Returns True if migration graph is the same or better after 
+    removing node at index remove_idx
+    '''
+
+    '''
+    If any of the following are true:
+        (1) the polytomy resolver node is the same color as its parent,
+        (2) the polytomy resolver node only has one child that is the same color as it,
+
+        # (1) the polytomy resolver node is the same color as its parent and only has one child,
+        # (2) the polytomy resolver node only has one child that is the same color as it,
+        # (3) the polytomy resolver node is the same color as its parent and all of its children (that are internal nodes) are the same color
+        # (4) the polytomy resolver node is the same color as its parent and only one of its children is a different color
+    the migration history won't change by removing the polytomy resolver node. 
+    
+    If that is not true, check to see if the migration history changes by removing the node
+    '''
+    parent_idx = poly_res.resolver_index_to_parent_idx[remove_idx]
+    # print(remove_idx, parent_idx, torch.argmax(V[:,parent_idx]).item(),torch.argmax(V[:,remove_idx]).item(), torch.argmax(V[:,parent_idx]).item()==torch.argmax(V[:,remove_idx]).item())
+    remove_idx_color = torch.argmax(V[:,remove_idx]).item()
+    is_same_color_as_parent = torch.argmax(V[:,parent_idx]).item() == remove_idx_color
+    is_same_color_as_child = torch.argmax(V[:,children_of_removal_node[0]]).item() == remove_idx_color
+    # Case 1
+    if is_same_color_as_parent:
+        return True
+    
+    # Case 2
+    if len(children_of_removal_node)==1 and (is_same_color_as_child):
+        return True
+    
+    return False
+    # is_same_color_as_all_children = True
+    # num_children_diff_color = 0
+    # for child in children_of_removal_node:
+    #     is_same_color_as_child = torch.argmax(V[:,child]).item() == remove_idx_color
+    #     # Is an internal node child and is not same color
+    #     if not is_same_color_as_child and child < num_internal_nodes:
+    #         is_same_color_as_all_children = False
+    #     if not is_same_color_as_child:
+    #         num_children_diff_color += 1
+    # # Case 3
+    # if is_same_color_as_parent and is_same_color_as_all_children:
+    #     return True
+    # # Case 4
+    # if is_same_color_as_parent and num_children_diff_color == 1:
+    #     return True
+    candidate_T, candidate_V = T.detach().clone(), V.detach().clone()
+    # Attach children of the node to remove back to their original parent
+    for child_idx in children_of_removal_node:
+        candidate_T[parent_idx,child_idx] = 1.0
+    candidate_T = np.delete(candidate_T, remove_idx, 0)
+    candidate_T = np.delete(candidate_T, remove_idx, 1)
+    candidate_V = np.delete(candidate_V, remove_idx, 1)
+    new_m, new_c, new_s, _, _ = vutil.ancestral_labeling_metrics(vutil.add_batch_dim(candidate_V), candidate_T, None, None, p, True)
+    # print(prev_m, prev_c, prev_s, new_m, new_c, new_s, ((prev_m >= int(new_m)) and (prev_c >= int(new_c)) and (prev_s >= int(new_s))))
+    return ((prev_m >= int(new_m)) and (prev_c >= int(new_c)) and (prev_s >= int(new_s)))

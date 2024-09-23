@@ -11,6 +11,9 @@ from tqdm import tqdm
 
 PROGRESS_BAR = 0 # Keeps track of optimization progress using tqdm
 
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using {DEVICE}")
+
 class VertexLabelingSolver:
     def __init__(self, L, T, p, G, O, weights, config, num_sites, num_nodes_to_label,
                  node_collection, input_T, idx_to_observed_sites):
@@ -304,7 +307,7 @@ def x_weight_initialization(v_solver):
             for site_idx in sites:
                 X[quart:quart*3,site_idx,idx] = eta
 
-    return X
+    return X.to(DEVICE)
 
 def update_path_matrix(itr, max_iter, solve_polytomies, second_optimization):
     if itr == -1:

@@ -4,6 +4,8 @@ from metient.util import vertex_labeling_util as vutil
 #from metient.lib.v_optimzer import VertexLabelingSolver
 
 import numpy as np
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using {DEVICE}")
 
 class PolytomyResolver():
 
@@ -76,7 +78,7 @@ class PolytomyResolver():
                     G[new_node_idx, child_idx] = G[parent_idx, child_idx]
         v_optimizer.T = T
         v_optimizer.G = G
-        self.latent_var = poly_adj_matrix
+        self.latent_var = poly_adj_matrix.to(DEVICE)
         self.nodes_w_polys = nodes_w_polys
         self.children_of_polys = children_of_polys
         self.resolver_indices = resolver_indices
@@ -128,7 +130,7 @@ def initialize_polytomy_resolver_adj_matrix(T, children_of_polys, num_internal_n
 
     return poly_adj_matrix, nodes_w_polys_to_resolver_indices, resolver_indices, resolver_labeling
     
-def is_same_mig_hist_with_node_removed(poly_res, T, num_internal_nodes, V, remove_idx, children_of_removal_node, p, prev_m, prev_c, prev_s):
+def is_same_mig_hist_with_node_removed(poly_res, V, remove_idx, children_of_removal_node):
     '''
     Returns True if migration graph is the same or better after 
     removing node at index remove_idx
@@ -160,33 +162,7 @@ def is_same_mig_hist_with_node_removed(poly_res, T, num_internal_nodes, V, remov
     if len(children_of_removal_node)==1 and (is_same_color_as_child):
         return True
     
-    # is_same_color_as_all_children = True
-    # num_children_diff_color = 0
-    # for child in children_of_removal_node:
-    #     is_same_color_as_child = torch.argmax(V[:,child]).item() == remove_idx_color
-    #     # Is an internal node child and is not same color
-    #     if not is_same_color_as_child and child < num_internal_nodes:
-    #         is_same_color_as_all_children = False
-    #     if not is_same_color_as_child:
-    #         num_children_diff_color += 1
-    # # Case 3
-    # if is_same_color_as_parent and is_same_color_as_all_children:
-    #     return True
-    # # Case 4
-    # if is_same_color_as_parent and num_children_diff_color == 1:
-    #     return True
     return False
-
-    candidate_T, candidate_V = T.detach().clone(), V.detach().clone()
-    # Attach children of the node to remove back to their original parent
-    for child_idx in children_of_removal_node:
-        candidate_T[parent_idx,child_idx] = 1.0
-    candidate_T = np.delete(candidate_T, remove_idx, 0)
-    candidate_T = np.delete(candidate_T, remove_idx, 1)
-    candidate_V = np.delete(candidate_V, remove_idx, 1)
-    new_m, new_c, new_s, _, _ = vutil.ancestral_labeling_metrics(vutil.add_batch_dim(candidate_V), candidate_T, None, None, p, True)
-    # print(prev_m, prev_c, prev_s, new_m, new_c, new_s, ((prev_m >= int(new_m)) and (prev_c >= int(new_c)) and (prev_s >= int(new_s))))
-    return ((prev_m >= int(new_m)) and (prev_c >= int(new_c)) and (prev_s >= int(new_s)))
 
 def remove_nodes(removal_indices, V, T, G, node_collection):
     '''
@@ -198,25 +174,28 @@ def remove_nodes(removal_indices, V, T, G, node_collection):
     
     # Attach children of the node to remove to their original parent
     for remove_idx in removal_indices:
-        parent_idx = np.where(T[:,remove_idx] > 0)[0][0]
+        parent_idx = torch.where(T[:,remove_idx] > 0)[0][0]
         child_indices = vutil.get_child_indices(T, [remove_idx])
         for child_idx in child_indices:
             T[parent_idx,child_idx] = 1.0
     # Remove indices from T, V and G
-    T = np.delete(T, removal_indices, 0)
-    T = np.delete(T, removal_indices, 1)
-    V = np.delete(V, removal_indices, 1)
+    # Remove rows of T
+    T = T[torch.tensor([i for i in range(T.size(0)) if i not in removal_indices])]
+    # Remove columns of T
+    T = T[:, torch.tensor([i for i in range(T.size(1)) if i not in removal_indices])]
+    # Remove columns from V
+    V = V[:, torch.tensor([i for i in range(V.size(1)) if i not in removal_indices])]
 
     if G != None: 
         G = G.clone().detach()
-        G = np.delete(G, removal_indices, 0)
-        G = np.delete(G, removal_indices, 1)
-
+        G = G[torch.tensor([i for i in range(G.size(0)) if i not in removal_indices])]
+        G = G[:, torch.tensor([i for i in range(G.size(1)) if i not in removal_indices])]
+        
     # Reindex the idx to label dict
     node_collection.remove_indices_and_reindex(removal_indices)
     return V, T, G, node_collection
 
-def remove_extra_resolver_nodes(solution_set, num_internal_nodes, poly_res, weights, O, p):
+def remove_extra_resolver_nodes(solution_set, poly_res, weights, O, p):
     '''
     If there are any resolver nodes that were added to resolve polytomies but they 
     weren't used (i.e. 1. they have no children or 2. they don't change the 
@@ -228,13 +207,13 @@ def remove_extra_resolver_nodes(solution_set, num_internal_nodes, poly_res, weig
     # prev_ms, prev_cs, prev_ss, _, _ = vutil.ancestral_labeling_metrics(vutil.to_tensor(best_Vs), vutil.to_tensor(best_Ts), None, None, p, True)
     out_solution_set = []
     for soln in solution_set:
-        V, T, prev_m, prev_c, prev_s = soln.V, soln.T, soln.m, soln.c, soln.s
+        V, T = soln.V, soln.T
         nodes_to_remove = []
         for new_node_idx in poly_res.resolver_indices:
             children_of_new_node = vutil.get_child_indices(T, [new_node_idx])
             if len(children_of_new_node) == 0:
                 nodes_to_remove.append(new_node_idx)
-            elif is_same_mig_hist_with_node_removed(poly_res, T, num_internal_nodes,  V, new_node_idx, children_of_new_node, p, prev_m, prev_c, prev_s):
+            elif is_same_mig_hist_with_node_removed(poly_res, V, new_node_idx, children_of_new_node):
                 nodes_to_remove.append(new_node_idx)
 
         if len(nodes_to_remove) != 0:
