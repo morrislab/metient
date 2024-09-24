@@ -214,6 +214,20 @@ def seeding_site_number(site_adj_no_diag):
     s = torch.sum(binarized_row_sums_site_adj, dim=(1))
     return s
 
+def comigration_number_approximation(site_adj):
+    '''
+    Args:
+        - site_adj: sample_size x num_sites x num_sites matrix, where each num_sites x num_sites
+        matrix has the number of migrations from site i to site j
+    Returns:
+        - comigration number: an approximation of the comigration number that doesn't include a penalty for
+        repeated temporal migrations which is expensive to compute
+    '''
+    binarized_site_adj = torch.sigmoid(BINARY_ALPHA * (2 * site_adj - 1))
+    bin_site_trace = torch.diagonal(binarized_site_adj, offset=0, dim1=1, dim2=2).sum(dim=1)
+    c = torch.sum(binarized_site_adj, dim=(1,2)) - bin_site_trace
+    return c
+
 def comigration_number(site_adj, A, VA, VT, X, update_path_matrix):
     '''
     Args:
@@ -297,7 +311,7 @@ def organotropism_score(O, site_adj_no_diag, p, bs, num_sites):
         o = torch.sum(organ_penalty, dim=(1))/torch.sum(num_mig_from_prim, dim=(1))
     return o
 
-def ancestral_labeling_metrics(V, A, G, O, p, update_path_matrix):
+def ancestral_labeling_metrics(V, A, G, O, p, update_path_matrix, compute_full_c):
 
     single_A = A
     bs = V.shape[0]
@@ -319,7 +333,10 @@ def ancestral_labeling_metrics(V, A, G, O, p, update_path_matrix):
     s = seeding_site_number(site_adj_no_diag)
 
     # 3. Comigration number
-    c = comigration_number(site_adj, A, VA, VT, X, update_path_matrix)
+    if compute_full_c:
+        c = comigration_number(site_adj, A, VA, VT, X, update_path_matrix)
+    else:
+        c = comigration_number_approximation(site_adj)
 
     # 4. Genetic distance
     g = genetic_distance_score(G, m, A, X)
@@ -383,7 +400,7 @@ def clone_tree_labeling_loss_with_computed_metrics(m, c, s, g, o, e, weights, bs
         labeling_loss = (mig_loss + weights.comig*c + seeding_loss + weights.gen_dist*g + weights.organotrop*o+ weights.entropy*e)
     return labeling_loss
 
-def clone_tree_labeling_objective(V, soft_V, A, G, O, p, weights, update_path_matrix):
+def clone_tree_labeling_objective(V, soft_V, A, G, O, p, weights, update_path_matrix, compute_full_c=True):
     '''
     Args:
         V: Vertex labeling of the full tree (sample_size x num_sites x num_nodes)
@@ -393,6 +410,10 @@ def clone_tree_labeling_objective(V, soft_V, A, G, O, p, weights, update_path_ma
         O: Array of frequencies with which the primary cancer type seeds site i (shape: num_anatomical_sites).
         p: one-hot vector indicating site of the primary
         weights: Weights object
+        update_path_matrix: bool, whether we need to update the path matrix (1:1 with T) or we can use the last
+            cached version (this is expensive to compute)
+        compute_full_c: bool, whether we need to compute the full comigration number or we can calculate an approzimation
+            (this is expensive to compute)
 
     Returns:
         Loss to score the ancestral vertex labeling of the given tree. This combines (1) migration number, (2) seeding site
@@ -400,7 +421,7 @@ def clone_tree_labeling_objective(V, soft_V, A, G, O, p, weights, update_path_ma
     '''
     V = add_batch_dim(V)
     soft_V = add_batch_dim(soft_V)
-    m, c, s, g, o = ancestral_labeling_metrics(V, A, G, O, p, update_path_matrix)
+    m, c, s, g, o = ancestral_labeling_metrics(V, A, G, O, p, update_path_matrix, compute_full_c)
     # Entropy
     e = calc_entropy(V, soft_V)
 
