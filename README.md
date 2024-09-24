@@ -5,16 +5,25 @@
 
 **Metient** (**MET**astasis + gradi**ENT**) is a tool for migration history inference. You can find our preprint on [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.07.09.602790).
 
-Metient is available as a python library, installable via pip. It has been tested on Linux. Installation and running one of the tutorials should take ~5 minutes.
-
 ## Installation
 
+Metient is available as a python library, installable via pip. It has been tested on Linux and Apple M1 Pro. 
 ```bash
 # mamba used for speed, can use conda instead if mamba is not installed
 mamba create -n "met" python=3.8.8 ipython
 mamba activate met
-pip install metient
+pip install metient 
 ```
+
+> [!TIP]
+> If `pip install metient` fails due to `fatal error: graphviz/cgraph.h: No such file or directory`, you need to set environment variables to point to your graphviz header files.
+> Locate the path to your mamba environment (for e.g. using `mamba env list`), and run the following:
+> ```bash
+> export CFLAGS="-I/path/to/mamba/env/include"
+> export LDFLAGS="-L/path/to/mamba/env/lib"
+> pip install pygraphviz --user
+> ```
+> Retry `pip install metient`
 
 ## Tutorial
 To run the tutorial notebooks, clone this repo:
@@ -30,13 +39,13 @@ There are different Jupyter Notebook tutorials based on your use case:
 3. I have a small number of patients, or I want to enforce my own parsimony metric weights. (Metient-evaluate)
    - I want Metient to estimate which mutations/mutation clusters are present in which anatomical sites. [Tutorial 3](tutorial/3_metient_evaluate_infer_observed_clones_label_clone_tree_tutorial.ipynb)
    - I know which mutations/mutation clusters are present in which anatomical sites. [Tutorial 4](tutorial/4_metient_evaluate_label_clone_tree_tutorial.ipynb)
-  
-If your jupyter notebook does not automatically recognize your conda environment, run the following:
-```bash
-pip install ipykernel
-python -m ipykernel install --user --name myenv --display-name "met"
-```
-Then in the jupyter notebook, select Kernel > Change kernel > met.
+> [!TIP]
+> If your jupyter notebook does not automatically recognize your conda environment, run the following:
+> ```bash
+> pip install ipykernel
+> python -m ipykernel install --user --name myenv --display-name "met"
+> ```
+> Then in the jupyter notebook, select Kernel > Change kernel > met.
 
 ## Inputs
 There are two required inputs, a tsv file with information for each sample and mutation/mutation cluster, and a txt file specifying the edges of the clone tree.
@@ -89,8 +98,12 @@ A .txt file where each line is an edge from the first index to the second index.
 Metient will output a pickle file in the specificed output directory for each patient that is inputted. 
 
 In the pickle file you'll find the following keys:
-* `ordered_anatomical_sites`: a list of anatomical sites in the order used for the matrices detailed below.
-* `node_info`: list of dictionaries, in order from best to worst solution. This is solution specific because reolving polytomies can change the tree. Each dictionary maps node index (as used for the matrices detailed below) to a tuple: (label, is_leaf, is_polytomy_resolver_node) used on the tree. The reason labels can be different from what is inputted into Metient is that Metient adds leaf nodes which correspond to the inferred presence of each node in anatomical sites. Each leaf node is labeled as <parent_node_name>_<anatomical_site>.
-* `clone_tree_labeling_matrices`: list of numpy ndarrays, in order from best to worst solution. Each numpy array is a matrix (shape: `len(ordered_anatomical_sites)`, `len(node_info[x])`), where `x` is the `x` best solution. Row i corresponds to the site at index i in `ordered_anatomical_sites`, and column j corresponds to the node with label `node_info[x][j][0]`. Each column is a one-hot vector representing the location inferred by Metient for that node.
-* `full_adjacency_matrices`: list of numpy ndarrays, in order from best to worst tree. Each tensor is a matrix (shape: `len(node_info[x])`, `len(node_info[x])`), where `x` is the `x` best solution. A 1 at index i,j indicates an edge from i to j.
-* `observed_clone_proportion_matrix`: numpy ndarray (shape: `len(ordered_anatomical_sites)`, `num_clusters`). Row i corresponds to the site at index i in `ordered_anatomical_sites`, and column j corresponds to the node with label `node_info[x][j][0]`. A value at i,j greater than 0.05 indicates that that node is present in that antomical site. These are the nodes that get added as leaf nodes.
+| Pkl key name | Description |
+|----------|----------|
+| **ordered_anatomical_sites** | a list of anatomical sites in the order used for the matrices detailed below.| 
+| **node_info** | list of dictionaries, in order from best to worst solution. This is solution specific because reolving polytomies can change the tree. Each dictionary maps node index (as used for the matrices detailed below) to a tuple: (label, is_leaf, is_polytomy_resolver_node) used on the tree. The reason labels can be different from what is inputted into Metient is that Metient adds leaf nodes which correspond to the inferred presence of each node in anatomical sites. Each leaf node is labeled as <parent_node_name>_<anatomical_site>. |
+| **clone_tree_labeling_matrices** | list of numpy ndarrays, in order from best to worst solution. Each numpy array is a matrix (shape: `len(ordered_anatomical_sites)`, `len(node_info[x])`), where `x` is the `x` best solution. Row i corresponds to the site at index i in `ordered_anatomical_sites`, and column j corresponds to the node with label `node_info[x][j][0]`. Each column is a one-hot vector representing the location inferred by Metient for that node. |
+| **full_adjacency_matrices** | list of numpy ndarrays, in order from best to worst tree. Each tensor is a matrix (shape: `len(node_info[x])`, `len(node_info[x])`), where `x` is the `x` best solution. A 1 at index i,j indicates an edge from i to j. | 
+| **observed_clone_proportion_matrix** | numpy ndarray (shape: `len(ordered_anatomical_sites)`, `num_clusters`). Row i corresponds to the site at index i in `ordered_anatomical_sites`, and column j corresponds to the node with label `node_info[x][j][0]`. A value at i,j greater than 0.05 indicates that that node is present in that antomical site. These are the nodes that get added as leaf nodes. |
+|**losses** | a list of the losses, from best to worst solution.|
+|**primary_site**|str, the name of the anatomical site used as the primary site.|
