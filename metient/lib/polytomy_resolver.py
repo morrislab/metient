@@ -204,7 +204,6 @@ def remove_extra_resolver_nodes(solution_set, poly_res, weights, O, p):
 
     if poly_res == None:
         return solution_set
-    # prev_ms, prev_cs, prev_ss, _, _ = vutil.ancestral_labeling_metrics(vutil.to_tensor(best_Vs), vutil.to_tensor(best_Ts), None, None, p, True)
     out_solution_set = []
     for soln in solution_set:
         V, T = soln.V, soln.T

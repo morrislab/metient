@@ -148,6 +148,20 @@ def migration_edges(V, A, sites=None):
                 Y[i,j] = 0
     return Y
 
+def seeding_cluster_parents(V, A, sites=None):
+    '''
+    returns: list of nodes whose child is a different color
+    '''
+    V, A = prep_V_A_inputs(V, A)
+    Y = migration_edges(V,A, sites)
+    seeding_clusters = torch.nonzero(Y.any(dim=1)).squeeze()
+    # Check if it's a scalar (0D tensor)
+    if seeding_clusters.dim() == 0:
+        # Convert to a 1D tensor (vector)
+        seeding_clusters = seeding_clusters.unsqueeze(0)
+    seeding_clusters = [int(x) for x in seeding_clusters]
+    return seeding_clusters
+
 def seeding_clusters(V, A, node_idx_to_label, sites=None):
     '''
     returns: list of nodes whose parent is a different color
@@ -161,12 +175,13 @@ def seeding_clusters(V, A, node_idx_to_label, sites=None):
         seeding_clusters = seeding_clusters.unsqueeze(0)
     seeding_clusters = [int(x) for x in seeding_clusters]
 
-    # If the seeding cluster is a witness node or polytomy resolver node
     if isinstance(node_idx_to_label, vutil.MigrationHistoryNodeCollection):
         node_collection = node_idx_to_label
     else:
         node_collection = vutil.MigrationHistoryNodeCollection.from_dict(node_idx_to_label)
 
+    # Special case for if the node w/ diff color parent is a witness node or polytomy resolver node,
+    # the seeding cluster is the parent node (since no new mutations)
     all_seeding_clusters = set()
     for x in seeding_clusters:
         node = node_collection.get_node(x)
@@ -567,7 +582,7 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors, node_collection=None
     color_map = { i:idx_to_color(custom_colors, (V[:,i] == 1).nonzero()[0][0].item()) for i in range(V.shape[1])}
     G = nx.DiGraph()
     node_options = {"label":"", "shape": "circle", "penwidth":3, 
-                    "fontname":FONT, "fontsize":"12pt",
+                    "fontname":FONT, "fontsize":12,
                     "fixedsize":"true", "height":0.25}
 
     if gen_dist != None:
@@ -622,7 +637,7 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors, node_collection=None
 def construct_loss_dict(V, soft_V, T, G, O, p, full_loss):
     V = V.reshape(1, V.shape[0], V.shape[1]) # add batch dimension
     soft_V = soft_V.reshape(1, soft_V.shape[0], soft_V.shape[1]) # add batch dimension
-    m, c, s, g, o = vutil.ancestral_labeling_metrics(V, T, G, O, p, True)
+    m, c, s, g, o = vutil.ancestral_labeling_metrics(V, T, G, O, p, True, True)
     e = vutil.calc_entropy(V, soft_V) # this entropy is saved only based on second round of optimization
     loss_dict = {MIG_KEY: m, COMIG_KEY:c, SEEDING_KEY: s, ORGANOTROP_KEY: o, GEN_DIST_KEY: g, ENTROPY_KEY: e}
     loss_dict = {**loss_dict, **{FULL_LOSS_KEY: round(torch.mean(full_loss).item(), 3)}}
@@ -774,7 +789,7 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
             mig_graph = pgv.AGraph(string=mig_graph_dot).draw(format="png", prog="dot")
             mig_graph = PILImage.open(io.BytesIO(mig_graph))
 
-            gs = gridspec.GridSpec(3, 1, height_ratios=[0.05, 0.7, 0.25])
+            gs = gridspec.GridSpec(3, 1, height_ratios=[0.02, 0.73, 0.25])
 
             row = math.floor(i/2)
             pad = 0.02 if k < 20 else 0.001
@@ -785,7 +800,7 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
 
             # Top row: Title
             ax1 = plt.subplot(gs[0])
-            ax1.text(0.5, 0.5, f'Solution {i+1}\n{seeding_pattern}', ha='center', va='center', fontsize=8)
+            ax1.text(0.5, 0.5, f'Solution {i+1}\n{seeding_pattern}', ha='center', va='center', fontsize=7)
             ax1.axis('off')  # Hide the axis
 
             # Second row: Plot for the tree

@@ -75,8 +75,7 @@ def create_solution_set(best_Vs, best_soft_Vs, best_Ts, G, O, p, node_collection
         solution_set.append(soln)
     return solution_set, has_pss_solution
 
-def get_best_final_solutions(results, G, O, p, weights, print_config, 
-                             node_collection, num_internal_nodes, needs_pruning):
+def get_best_final_solutions(results, G, O, p, weights, print_config, node_collection, needs_pruning):
     '''
     Prune unecessary poly nodes (if they weren't used) and return the top k solutions
     '''
@@ -120,7 +119,7 @@ def recover_prim_ss_solutions(solution_set, unique_labelings, weights, O, p, nod
     expanded_solution_set = []
     for solution in solution_set:
         expanded_solution_set.append(solution)
-        clusters = putil.seeding_clusters(solution.V,solution.T,node_collection)
+        clusters = putil.seeding_cluster_parents(solution.V,solution.T)
         new_V = copy.deepcopy(solution.V)
         for s in clusters:
             new_V[:,s] = p.T 
@@ -410,7 +409,7 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
         "v_anneal_rate": 0.01,
         "t_anneal_rate": 0.01,
         "lr": lr,
-        "first_max_iter": 50,
+        "first_max_iter": 100,
         "second_max_iter": 100,
         "first_v_interval": 15,
         "second_v_interval": 20,
@@ -445,13 +444,15 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
     ############ Step 3, visualize and save outputs ############
     with torch.no_grad():
         final_solutions = get_best_final_solutions(results, v_optimizer.G, O, p, weights,
-                                                   print_config, node_collection, num_internal_nodes, needs_pruning)
+                                                   print_config, node_collection, needs_pruning)
 
         print("# final solutions:", len(final_solutions))
 
         edges, vert_to_site_map, mig_graph_edges, loss_info = putil.save_best_trees(final_solutions, U, O, weights,
                                                                                     ordered_sites,print_config, custom_colors, 
                                                                                     primary_site_label, output_dir, run_name,
-                                                                                    original_root_idx=original_root_idx)   
+                                                                                    original_root_idx=original_root_idx) 
+
+    torch.cuda.empty_cache()  
 
     return edges, vert_to_site_map, mig_graph_edges, loss_info, time_elapsed
