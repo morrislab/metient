@@ -6,8 +6,8 @@ import copy
 from metient.lib import polytomy_resolver as prutil
 from metient import metient as met
 from metient.util.globals import *
-import matplotlib.pyplot as plt
 from tqdm import tqdm
+from torch.cuda.amp import autocast, GradScaler
 
 PROGRESS_BAR = 0 # Keeps track of optimization progress using tqdm
 
@@ -38,6 +38,7 @@ class VertexLabelingSolver:
 
 def optimize_v(v_solver, X, poly_res, exploration_weights, max_iter, v_interval, is_second_optimization):
     
+    
     # Unpack config
     lr = v_solver.config['lr']
     init_temp, final_temp = v_solver.config['init_temp'], v_solver.config['final_temp']
@@ -48,8 +49,9 @@ def optimize_v(v_solver, X, poly_res, exploration_weights, max_iter, v_interval,
     
     solve_polytomies = v_solver.config['solve_polytomies']
     if solve_polytomies:
-        poly_optimizer = torch.optim.Adam([poly_res.latent_var], lr=lr)
-        poly_scheduler = lr_scheduler.LinearLR(poly_optimizer, start_factor=1.0, end_factor=0.5, total_iters=max_iter)
+        #poly_optimizer = torch.optim.Adam([poly_res.latent_var], lr=lr)
+        v_optimizer = torch.optim.Adam([X,poly_res.latent_var], lr=lr)
+        #poly_scheduler = lr_scheduler.LinearLR(poly_optimizer, start_factor=1.0, end_factor=0.5, total_iters=max_iter)
     v_temps, t_temps = [], []
 
     v_temp = init_temp
@@ -57,31 +59,38 @@ def optimize_v(v_solver, X, poly_res, exploration_weights, max_iter, v_interval,
     j = 0
     k = 0
 
+    scaler = GradScaler()
+
     global PROGRESS_BAR
     for i in range(max_iter):
         update_path = update_path_matrix(i, max_iter, solve_polytomies, is_second_optimization)
-        if solve_polytomies and update_path:
-            poly_optimizer.zero_grad()
+        # if solve_polytomies and update_path:
+        #     poly_optimizer.zero_grad()
 
         v_optimizer.zero_grad()
-        V, v_losses, soft_V, T = compute_v_loss(X, v_solver, poly_res, exploration_weights, update_path, v_temp, t_temp)
-        mean_loss = torch.mean(v_losses)
-        mean_loss.backward()
+        with autocast():
+            V, v_losses, soft_V, T = compute_v_loss(X, v_solver, poly_res, exploration_weights, update_path, v_temp, t_temp)
+            mean_loss = torch.mean(v_losses)
+        #mean_loss.backward()
+        scaler.scale(mean_loss).backward()
 
         if solve_polytomies and update_path:
-            poly_optimizer.step()
-            poly_scheduler.step()
+        #     poly_optimizer.step()
+        #     poly_scheduler.step()
             if i % 5 == 0:
                 t_temp = np.maximum(t_temp * np.exp(-t_anneal_rate * j), final_temp)
             j += 1
 
-        else:
-            v_optimizer.step()
-            v_scheduler.step()
+        # else:
+        # Step the optimizer, unscale gradients, and update scaler
+        scaler.step(v_optimizer)
+        scaler.update()
+        #v_optimizer.step()
+        v_scheduler.step()
 
-            if i % v_interval == 0:
-                v_temp = np.maximum(v_temp * np.exp(-v_anneal_rate * k), final_temp)
-            k += 1
+        if i % v_interval == 0:
+            v_temp = np.maximum(v_temp * np.exp(-v_anneal_rate * k), final_temp)
+        k += 1
 
         v_temps.append(v_temp)
         t_temps.append(t_temp)
@@ -277,7 +286,8 @@ def compute_v_loss(X, v_solver, poly_res, exploration_weights, update_path_matri
     if G != None:
         G = vutil.repeat_n(G, T.shape[0])
     loss, _ = vutil.clone_tree_labeling_objective(V, softmax_X_soft, T, v_solver.G, 
-                                                  v_solver.O, v_solver.p, exploration_weights, update_path_matrix)
+                                                  v_solver.O, v_solver.p, exploration_weights, 
+                                                  update_path_matrix, compute_full_c=False)
     return V, loss, softmax_X_soft, T
 
 def x_weight_initialization(v_solver):
