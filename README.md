@@ -3,7 +3,7 @@
 <img src="metient/logo.png" width="150">
 </p>
 
-**Metient** (**MET**astasis + gradi**ENT**) is a tool for migration history inference. You can find our preprint on [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.07.09.602790).
+**Metient** (**MET**astasis + gradi**ENT**) is a tool for inferring the metastatic migrations of a patient's cancer. You can find our preprint on [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.07.09.602790).
 
 ## Installation
 
