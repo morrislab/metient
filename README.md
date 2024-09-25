@@ -22,8 +22,8 @@ pip install metient
 > export CFLAGS="-I/path/to/mamba/env/include"
 > export LDFLAGS="-L/path/to/mamba/env/lib"
 > pip install pygraphviz --user
+> pip install metient
 > ```
-> Retry `pip install metient`
 
 ## Tutorial
 To run the tutorial notebooks, clone this repo:
