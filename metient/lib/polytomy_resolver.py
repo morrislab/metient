@@ -1,11 +1,6 @@
 import torch
 from collections import OrderedDict
 from metient.util import vertex_labeling_util as vutil
-#from metient.lib.v_optimzer import VertexLabelingSolver
-
-import numpy as np
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using {DEVICE}")
 
 class PolytomyResolver():
 
@@ -78,7 +73,7 @@ class PolytomyResolver():
                     G[new_node_idx, child_idx] = G[parent_idx, child_idx]
         v_optimizer.T = T
         v_optimizer.G = G
-        self.latent_var = poly_adj_matrix.to(DEVICE)
+        self.latent_var = poly_adj_matrix
         self.nodes_w_polys = nodes_w_polys
         self.children_of_polys = children_of_polys
         self.resolver_indices = resolver_indices

@@ -4,7 +4,6 @@ from torch.distributions.binomial import Binomial
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 class ObservedClonesSolver:
     def __init__(self, num_sites, num_internal_nodes, ref, var, omega, idx_to_observed_sites,
                  B, input_T, G, node_collection, weights, config, estimate_observed_clones, ordered_sites):

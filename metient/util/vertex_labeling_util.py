@@ -5,17 +5,13 @@ import math
 from queue import Queue
 from metient.util.globals import *
 from collections import deque
-import copy
-
+import gc
 import scipy.sparse as sp
 import pandas as pd
 pd.options.display.float_format = '{:,.3f}'.format
 pd.set_option('display.max_columns', None)
 
 LAST_P = None
-
-if torch.cuda.is_available():
-    torch.set_default_tensor_type(torch.cuda.FloatTensor)
 
 ######################################################
 ##################### CLASSES ########################
@@ -317,7 +313,7 @@ def ancestral_labeling_metrics(V, A, G, O, p, update_path_matrix, compute_full_c
     bs = V.shape[0]
     num_sites = V.shape[1]
     A = A if len(A.shape) == 3 else repeat_n(single_A, bs) 
-
+    
     # Compute matrices used for all parsimony metrics
     VA = V @ A
     VT = torch.transpose(V, 2, 1)
@@ -533,6 +529,33 @@ def remove_leaf_indices_not_observed_sites(removal_indices, U, input_T, T, G, no
 ######################################################
 ################## RANDOM UTILITIES ##################
 ######################################################
+def print_gpu_memory():
+    if torch.cuda.is_available():
+        # Get current device index
+        device = torch.cuda.current_device()
+
+        # Print the name of the GPU
+        print(f"Using device: {torch.cuda.get_device_name(device)}")
+        
+        # Total memory
+        total_memory = torch.cuda.get_device_properties(device).total_memory / 1e9  # in GB
+        
+        # Reserved memory by tensors
+        reserved_memory = torch.cuda.memory_reserved(device) / 1e9  # in GB
+        
+        # Memory actually being used by tensors
+        allocated_memory = torch.cuda.memory_allocated(device) / 1e9  # in GB
+        
+        # Available free memory
+        free_memory = reserved_memory - allocated_memory
+        
+        print(f"Total memory: {total_memory:.2f} GB")
+        print(f"Reserved memory: {reserved_memory:.2f} GB")
+        print(f"Allocated memory: {allocated_memory:.2f} GB")
+        print(f"Free memory: {free_memory:.2f} GB\n")
+    else:
+        print("CUDA is not available")
+
 
 def mutation_matrix_with_normal_cells(T):
     B = mutation_matrix(T)
@@ -611,10 +634,25 @@ def tree_iterator(T):
     '''
     # Enumerating through a torch tensor is pretty computationally expensive,
     # so convert to a sparse matrix to efficiently access non-zero values
-    T = T if isinstance(T, np.ndarray) else T.detach().cpu().numpy()
-    T = sp.coo_matrix(T)
-    for i, j in zip(T.row, T.col):
-        yield i,j
+    #T = T if isinstance(T, np.ndarray) else T.detach().cpu().numpy()
+    #T = sp.coo_matrix(T)
+    # for i, j in zip(T.row, T.col):
+    #     yield i,j
+    non_zero_indices = T.indices()
+
+    # Print the i, j positions
+    for i in range(non_zero_indices.size(1)):
+        row, col = non_zero_indices[:, i]
+        yield row, col
+
+def list_gpu_tensors():
+    for obj in gc.get_objects():
+        try:
+            if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
+                if obj.is_cuda:  # Check if the tensor is on the GPU
+                    print(f"Tensor on GPU - shape: {obj.shape}, dtype: {obj.dtype}")
+        except Exception as e:
+            pass
 
 def bfs_iterator(tree, start_node):
     '''
