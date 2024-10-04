@@ -10,10 +10,6 @@ from metient.util import vertex_labeling_util as vutil
 
 # TODO: make more assertions on uniqueness and completeness of input csvs
 
-print("CUDA GPU:",torch.cuda.is_available())
-if torch.cuda.is_available():
-    torch.set_default_tensor_type(torch.cuda.FloatTensor)
-
 def get_adjacency_matrix_from_txt_edge_list(txt_file):
     edges = []
     max_idx = -1
@@ -29,7 +25,7 @@ def get_adjacency_matrix_from_txt_edge_list(txt_file):
     for edge in edges:
         T[edge[0], edge[1]] = 1
 
-    return T
+    return T.to_sparse()
 
 def get_mut_to_cluster_map_from_pyclone_output(pyclone_cluster_fn, min_mut_thres=0):
     clstr_id_to_muts, mutation_names = load_pyclone_clusters(pyclone_cluster_fn, min_mut_thres=min_mut_thres)
@@ -47,10 +43,21 @@ def _validate_combo(df, tsv_fn, col1, col2, message):
     if not valid_mapping:
         raise ValueError(f"{message}. Issue in: {tsv_fn}")
 
+def is_tsv(file_path):
+    with open(file_path, 'r') as file:
+        # Read the first few lines (use csv.Sniffer to auto-detect)
+        sniffer = csv.Sniffer()
+        dialect = sniffer.sniff(file.read(1024))  # Sample 1024 bytes to detect the delimiter
+        file.seek(0)  # Reset file pointer to the beginning
+        # Check if the detected delimiter is a tab '\t'
+        return dialect.delimiter == '\t'
+    
 def validate_unpooled_or_pooled_df(df, tsv_fn, index_cols):
     '''
     Validation needed for either unpooled or pooled tsv
     '''
+
+    assert is_tsv(tsv_fn), "Must input a tab-delimited tsv file (not comma- or space-delimited)"
 
     # Some users would like to run on multiple tumors or multiple samples from the same primary tumor 
     assert(set(df['site_category'])==set(['primary', 'metastasis']) or set(df['site_category'])==set(['primary']))
@@ -531,12 +538,10 @@ def get_genetic_distance_matrix_from_adj_matrix(adj_matrix, idx_to_num_muts, nor
     '''
     G = np.zeros(adj_matrix.shape)
 
-    for i, adj_row in enumerate(adj_matrix):
-        for j, val in enumerate(adj_row):
-            if val == 1:
-                # This is the number of mutations the child node has accumulated compared to its parent
-                num_mutations = idx_to_num_muts[j]
-                G[i][j] = num_mutations
+    for i, j in vutil.tree_iterator(adj_matrix):
+        # This is the number of mutations the child node has accumulated compared to its parent
+        num_mutations = idx_to_num_muts[j]
+        G[i][j] = num_mutations
 
     if normalize:
         G = G / np.sum(G)

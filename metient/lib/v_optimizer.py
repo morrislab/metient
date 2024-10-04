@@ -11,9 +11,6 @@ from torch.cuda.amp import autocast, GradScaler
 
 PROGRESS_BAR = 0 # Keeps track of optimization progress using tqdm
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using {DEVICE}")
-
 class VertexLabelingSolver:
     def __init__(self, L, T, p, G, O, weights, config, num_sites, num_nodes_to_label,
                  node_collection, input_T, idx_to_observed_sites):
@@ -133,10 +130,12 @@ def first_v_optimization(v_solver, exploration_weights):
     # First optimization
     optimized_Vs, _, optimized_Ts, _ = optimize_v(v_solver, X, v_solver.poly_res, exploration_weights, v_solver.config['first_max_iter'],
                                                   v_solver.config['first_v_interval'], False)
-    
     # Identify optimal subtrees, keep them fixed, and solve for the rest of the tree
     optimal_nodes, optimal_batch_nums = find_optimal_subtrees(optimized_Ts, optimized_Vs, v_solver)
-
+    
+    optimized_Ts = optimized_Ts.cpu().detach()
+    optimized_Vs = optimized_Vs.cpu().detach()
+    torch.cuda.empty_cache()
     return optimal_nodes, optimal_batch_nums, optimized_Ts, optimized_Vs
 
     
@@ -147,6 +146,14 @@ def second_v_optimization(v_solver, run_specific_x, run_specific_poly_res, explo
     optimzed_Vs, optimzed_soft_Vs, optimzed_Ts, run_specific_poly_res = optimize_v(v_solver, run_specific_x, run_specific_poly_res, exploration_weights,
                                                             v_solver.config['second_max_iter'], v_solver.config['second_v_interval'], True)
 
+    optimzed_Vs = optimzed_Vs.cpu().detach()
+    optimzed_soft_Vs = optimzed_soft_Vs.cpu().detach()
+    optimzed_Ts = optimzed_Ts.cpu().detach()
+
+    # Free up GPU memory after inference
+    if v_solver.config['solve_polytomies']:
+        run_specific_poly_res.latent_var = run_specific_poly_res.latent_var.cpu().detach()
+    torch.cuda.empty_cache()
 
     return optimzed_Vs, optimzed_soft_Vs, optimzed_Ts, run_specific_poly_res
 
@@ -155,9 +162,11 @@ def full_exploration_weights(weights):
                        seed_site=DEFAULT_CALIBRATE_SEED_WEIGHTS, data_fit=weights.data_fit, 
                        reg=weights.reg, entropy=weights.entropy, gen_dist=0.0, organotrop=0.0)
 
+
+
 def run_multiple_optimizations(v_solver):
     global PROGRESS_BAR
-    PROGRESS_BAR = tqdm(total=v_solver.config['first_max_iter'] + v_solver.config['second_max_iter']*len(ALL_PARSIMONY_MODELS), position=0)
+    PROGRESS_BAR = tqdm(total=v_solver.config['first_max_iter'] + v_solver.config['second_max_iter']*len(ALL_PARSIMONY_MODELS)*v_solver.config['num_runs'], position=0)
 
     results = []
     
@@ -174,13 +183,14 @@ def run_multiple_optimizations(v_solver):
         ret = second_v_optimization(v_solver, run_specific_x, run_specific_poly_solver, exploration_weights)
         return ret
 
-    for pars_model in ALL_PARSIMONY_MODELS:
-        exploration_weights = met.Weights(mig=pars_model[0], comig=pars_model[1], 
-                                         seed_site=pars_model[2], data_fit=v_solver.weights.data_fit, 
-                                         reg=v_solver.weights.reg, entropy=v_solver.weights.entropy, gen_dist=0.0, organotrop=0.0)
-        
-        # print(exploration_weights.mig,exploration_weights.comig, exploration_weights.seed_site)
-        results.append(second_optimization_task(v_solver, exploration_weights))
+    for _ in range(v_solver.config['num_runs']):
+        for pars_model in ALL_PARSIMONY_MODELS:
+            exploration_weights = met.Weights(mig=pars_model[0], comig=pars_model[1], 
+                                            seed_site=pars_model[2], data_fit=v_solver.weights.data_fit, 
+                                            reg=v_solver.weights.reg, entropy=v_solver.weights.entropy, gen_dist=0.0, organotrop=0.0)
+            
+            results.append(second_optimization_task(v_solver, exploration_weights))
+
     return results
 
 def sample_gumbel(shape, eps=1e-8):
@@ -317,7 +327,7 @@ def x_weight_initialization(v_solver):
             for site_idx in sites:
                 X[quart:quart*3,site_idx,idx] = eta
 
-    return X.to(DEVICE)
+    return X
 
 def update_path_matrix(itr, max_iter, solve_polytomies, second_optimization):
     if itr == -1:
@@ -443,7 +453,6 @@ def initialize_optimal_x_polyres(X, poly_res, optimal_subtree_nodes,optimal_batc
     if poly_res != None:
         # Fix all other polytomy children s.t. they cannot move to be a child of the fixed node_idx
         # for parent_idx in poly_resolver_to_optimal_children:
-            
         #     optimal_children = poly_resolver_to_optimal_children[parent_idx]
         #     optimal_children_poly_indices = [poly_res.children_of_polys.index(i) for i in optimal_children]
         #     other_children = [i for i in range(poly_res.latent_var.shape[2]) if i not in optimal_children_poly_indices]
@@ -481,15 +490,8 @@ def find_optimal_subtrees(optimized_Ts, optimized_Vs, v_solver):
     if poly_res != None:
         poly_res.latent_var.requires_grad = False
         num_internal_nodes += len(poly_res.resolver_indices)
-        # print("poly_res.children_of_polys", poly_res.children_of_polys)
-        # print("poly_res.resolver_indices", poly_res.resolver_indices)
-        # print("poly_res.resolver_index_to_parent_idx",poly_res.resolver_index_to_parent_idx)
-    
+        
     # 1. Find samples with optimal subtrees
     optimal_subtree_nodes, optimal_batch_nums = find_optimal_subtree_nodes(optimized_Ts, optimized_Vs, num_internal_nodes)
 
-    # # 3. Re-initialize X and polytomy resolver with optimal subtrees (labelings and structure) fixed. 
-    # X = x_weight_initialization(v_solver)
-    # X, v_solver = initalize_optimal_x_polyres(X, optimal_subtree_nodes, optimal_batch_nums, optimized_Ts, optimized_Vs, v_solver)
-            
     return optimal_subtree_nodes, optimal_batch_nums

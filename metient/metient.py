@@ -4,7 +4,7 @@ from metient.lib import migration_history_inference as mig_hist
 from metient.util import plotting_util as plutil
 
 def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
-             O=None, sample_size=-1, custom_colors=None, solve_polytomies=False):
+             O=None, sample_size=-1, custom_colors=None, solve_polytomies=False, num_runs=1):
     '''
     Runs Metient-evaluate, and infers the observed clone percentages and the labels of the clone tree.
 
@@ -28,10 +28,10 @@ def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name,
     '''
     return mig_hist.evaluate(tree_fn, tsv_fn,weights, print_config, output_dir, run_name, 
                              O=O, sample_size=sample_size, custom_colors=custom_colors, 
-                             bias_weights=True, solve_polytomies=solve_polytomies)
+                             bias_weights=True, solve_polytomies=solve_polytomies, num_runs=num_runs)
 
 def evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
-                               O=None, sample_size=-1, custom_colors=None, solve_polytomies=False):
+                               O=None, sample_size=-1, custom_colors=None, solve_polytomies=False, num_runs=1):
     '''
     Runs Metient-evaluate with observed clone percentages inputted, and only inferring the labels of the clone tree.
 
@@ -54,7 +54,7 @@ def evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir
     Outputs migration history inferences for a single patient.
     '''
     return mig_hist.evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, O=O, sample_size=sample_size, 
-                                              custom_colors=custom_colors, bias_weights=True, solve_polytomies=solve_polytomies)
+                                              custom_colors=custom_colors, bias_weights=True, solve_polytomies=solve_polytomies, num_runs=num_runs)
 
 def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, 
               Os=None, sample_size=-1, custom_colors=None, solve_polytomies=False):
@@ -112,7 +112,7 @@ def calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_
 
 
 class PrintConfig:
-    def __init__(self, visualize=True, verbose=False, k_best_trees=1000, save_outputs=True):
+    def __init__(self, visualize=True, verbose=False, k_best_trees=float("inf"), save_outputs=True):
         '''
         Args:
             visualize: bool, whether to visualize loss, best tree, and migration graph

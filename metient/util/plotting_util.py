@@ -285,6 +285,10 @@ def phyleticity(V, A, idx_to_label, sites=None):
     V, A = prep_V_A_inputs(V, A)
     clonality = genetic_clonality(V, A, idx_to_label)
     all_seeding_clusters = seeding_clusters(V, A, idx_to_label, sites)
+    
+    if len(all_seeding_clusters) == 0: # no seeding
+        return "n/a"
+    
     if "monoclonal" in clonality:
         return "monophyletic"
 

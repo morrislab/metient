@@ -20,9 +20,6 @@ from metient.util.globals import *
 
 torch.set_printoptions(precision=2)
 
-if torch.cuda.is_available():
-    torch.set_default_tensor_type(torch.cuda.FloatTensor)
-
 def prune_histories(solutions):
     '''
     Only keep the unique, Pareto front of trees
@@ -106,6 +103,7 @@ def get_best_final_solutions(results, G, O, p, weights, print_config, node_colle
         unique_solution_set = prutil.remove_extra_resolver_nodes(unique_solution_set, poly_res, weights, O, p)
         full_solution_set.extend(unique_solution_set)
 
+    print("Number of full solutions", len(full_solution_set))
     return rank_solutions(full_solution_set, print_config, needs_pruning=needs_pruning)
 
 def recover_prim_ss_solutions(solution_set, unique_labelings, weights, O, p, node_collection):
@@ -168,15 +166,15 @@ def one_hot_labeling_for_primary(primary_site, ordered_sites):
 
 
 def evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
-             O, sample_size, custom_colors, bias_weights, solve_polytomies):
+             O, sample_size, custom_colors, bias_weights, solve_polytomies, num_runs):
     '''
     Observed clone proportions are inputted (in tsv_fns), only labeling of clone tree is needed
     '''
     return evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name,
-                    O, sample_size, custom_colors, bias_weights, solve_polytomies, estimate_observed_clones=False)
+                    O, sample_size, custom_colors, bias_weights, solve_polytomies, num_runs, estimate_observed_clones=False)
 
 def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
-             O, sample_size, custom_colors, bias_weights, solve_polytomies, estimate_observed_clones=True):
+             O, sample_size, custom_colors, bias_weights, solve_polytomies, num_runs, estimate_observed_clones=True):
     
     Ts, pooled_tsv_fns = prep_inputs([tree_fn], [tsv_fn], [run_name], estimate_observed_clones, output_dir)
     assert isinstance(weights.mig, (float, int)), "Weights must be either a float or an int in evaluate mode"
@@ -191,7 +189,8 @@ def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name,
     for primary_site in primary_sites:
         infer_migration_history(T, pooled_tsv_fn, primary_site, weights, print_config, output_dir, f"{run_name}_{primary_site}", 
                               O=O, sample_size=sample_size, custom_colors=custom_colors, bias_weights=bias_weights, 
-                              mode="evaluate", solve_polytomies=solve_polytomies, estimate_observed_clones=estimate_observed_clones)
+                              mode="evaluate", solve_polytomies=solve_polytomies, estimate_observed_clones=estimate_observed_clones,
+                              num_runs=num_runs)
     if estimate_observed_clones:
         os.remove(pooled_tsv_fn) # cleanup pooled tsv
 
@@ -328,7 +327,7 @@ def validate_inputs(T, node_collection, ref, var, primary_site, ordered_sites, w
 
 def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, output_dir, run_name, estimate_observed_clones=True,
                             O=None, lr=0.05, init_temp=20, final_temp=0.01,sample_size=-1, custom_colors=None, bias_weights=True,
-                            mode="evaluate",solve_polytomies=False, needs_pruning=True):
+                            mode="evaluate",solve_polytomies=False, needs_pruning=True, num_runs=1):
     '''
     Args:
         T: numpy ndarray or torch tensor (shape: num_internal_nodes x num_internal_nodes). Adjacency matrix (directed) of the internal nodes.
@@ -363,6 +362,11 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
         (4) dictionary w/ loss values for each component of the loss
         (5) how long (in seconds) the algorithm took to run
     '''
+
+    if torch.cuda.is_available():
+        torch.set_default_tensor_type(torch.cuda.FloatTensor)
+        print("Using GPU")
+        vutil.print_gpu_memory()
 
     start_time = datetime.datetime.now()
 
@@ -418,6 +422,7 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
         "solve_polytomies": solve_polytomies,
         # the genetic distance between two identical clones is a close to 0 but non-zero value
         "identical_clone_gen_dist": identical_clone_gen_dist,
+        "num_runs":num_runs,
     }
 
     ############ Step 1, optimize U ############
@@ -443,8 +448,11 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
         
     ############ Step 3, visualize and save outputs ############
     with torch.no_grad():
-        final_solutions = get_best_final_solutions(results, v_optimizer.G, O, p, weights,
+        # Send tensors to CPU after inference to free up GPU memory
+        torch.set_default_tensor_type(torch.FloatTensor)
+        final_solutions = get_best_final_solutions(results, v_optimizer.G.cpu(), O.cpu() if O != None else O, p.cpu(), weights,
                                                    print_config, node_collection, needs_pruning)
+        
 
         print("# final solutions:", len(final_solutions))
 
@@ -453,6 +461,7 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
                                                                                     primary_site_label, output_dir, run_name,
                                                                                     original_root_idx=original_root_idx) 
 
-    torch.cuda.empty_cache()  
+    torch.cuda.empty_cache()
+    del final_solutions
 
     return edges, vert_to_site_map, mig_graph_edges, loss_info, time_elapsed
