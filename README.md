@@ -5,7 +5,16 @@
 
 **Metient** (**MET**astasis + gradi**ENT**) is a tool for inferring the metastatic migrations of a patient's cancer. You can find our preprint on [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.07.09.602790).
 
+## System requirements
+### Hardware requirements
+Metient compute requirements depend on the input size of the data. Inputs with less than ~50 tree nodes and 6 tumor sites can be run on any computer with sufficient RAM. Inputs with larger tree sizes or tumor sites should use a GPU along with a larger amount of CPU RAM. No extra configuration is needed to run Metient on GPU.
+
+### Software requirements
+Metient has been tested on macOS Sonoma (14.4) and CentOS Linux 7 (Core).
+
 ## Installation
+
+Installing and running a tutorial for Metient should take ~5 minutes.
 
 Metient is available as a python library, installable via pip. It has been tested on Linux and Apple M1 Pro. 
 ```bash
