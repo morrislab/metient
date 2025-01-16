@@ -1,0 +1,61 @@
+anatomical_site_index	anatomical_site_label	cluster_index	character_index	character_label	ref	var	var_read_prob	site_category
+0	Primary, right ankle	0	0	ZNF516	159	30	0.26	primary
+1	Lymph node metastasis, right groin	0	0	ZNF516	129	46	0.29	metastasis
+2	Locoregional skin metastasis 1, right ankle	0	0	ZNF516	90	67	0.385	metastasis
+3	Locoregional skin metastasis 2, right leg	0	0	ZNF516	80	52	0.43	metastasis
+0	Primary, right ankle	0	1	ASXL3	221	75	0.26	primary
+1	Lymph node metastasis, right groin	0	1	ASXL3	164	86	0.29	metastasis
+2	Locoregional skin metastasis 1, right ankle	0	1	ASXL3	145	85	0.385	metastasis
+3	Locoregional skin metastasis 2, right leg	0	1	ASXL3	138	100	0.43	metastasis
+0	Primary, right ankle	0	2	DSEL	188	61	0.26	primary
+1	Lymph node metastasis, right groin	0	2	DSEL	183	71	0.29	metastasis
+2	Locoregional skin metastasis 1, right ankle	0	2	DSEL	118	87	0.385	metastasis
+3	Locoregional skin metastasis 2, right leg	0	2	DSEL	136	89	0.43	metastasis
+0	Primary, right ankle	0	3	LOXHD1	176	38	0.26	primary
+1	Lymph node metastasis, right groin	0	3	LOXHD1	182	67	0.29	metastasis
+2	Locoregional skin metastasis 1, right ankle	0	3	LOXHD1	132	65	0.385	metastasis
+3	Locoregional skin metastasis 2, right leg	0	3	LOXHD1	137	94	0.43	metastasis
+0	Primary, right ankle	0	4	ST8SIA5	61	22	0.26	primary
+1	Lymph node metastasis, right groin	0	4	ST8SIA5	65	17	0.29	metastasis
+2	Locoregional skin metastasis 1, right ankle	0	4	ST8SIA5	37	26	0.385	metastasis
+3	Locoregional skin metastasis 2, right leg	0	4	ST8SIA5	46	39	0.43	metastasis
+0	Primary, right ankle	1	5	ONECUT2	18	4	0.26	primary
+1	Lymph node metastasis, right groin	1	5	ONECUT2	16	0	0.29	metastasis
+2	Locoregional skin metastasis 1, right ankle	1	5	ONECUT2	17	0	0.385	metastasis
+3	Locoregional skin metastasis 2, right leg	1	5	ONECUT2	19	0	0.43	metastasis
+0	Primary, right ankle	0	6	MAPK4	53	38	0.26	primary
+1	Lymph node metastasis, right groin	0	6	MAPK4	51	25	0.29	metastasis
+2	Locoregional skin metastasis 1, right ankle	0	6	MAPK4	44	22	0.385	metastasis
+3	Locoregional skin metastasis 2, right leg	0	6	MAPK4	39	32	0.43	metastasis
+0	Primary, right ankle	0	7	PIK3C3	142	48	0.26	primary
+1	Lymph node metastasis, right groin	0	7	PIK3C3	215	75	0.29	metastasis
+2	Locoregional skin metastasis 1, right ankle	0	7	PIK3C3	93	67	0.385	metastasis
+3	Locoregional skin metastasis 2, right leg	0	7	PIK3C3	92	91	0.43	metastasis
+0	Primary, right ankle	2	8	ZNF407	93	0	0.26	primary
+1	Lymph node metastasis, right groin	2	8	ZNF407	72	44	0.29	metastasis
+2	Locoregional skin metastasis 1, right ankle	2	8	ZNF407	59	27	0.385	metastasis
+3	Locoregional skin metastasis 2, right leg	2	8	ZNF407	45	33	0.43	metastasis
+0	Primary, right ankle	0	9	DSEL	335	125	0.26	primary
+1	Lymph node metastasis, right groin	0	9	DSEL	346	146	0.29	metastasis
+2	Locoregional skin metastasis 1, right ankle	0	9	DSEL	204	143	0.385	metastasis
+3	Locoregional skin metastasis 2, right leg	0	9	DSEL	247	174	0.43	metastasis
+0	Primary, right ankle	0	10	DCC	105	33	0.26	primary
+1	Lymph node metastasis, right groin	0	10	DCC	84	38	0.29	metastasis
+2	Locoregional skin metastasis 1, right ankle	0	10	DCC	51	49	0.385	metastasis
+3	Locoregional skin metastasis 2, right leg	0	10	DCC	73	48	0.43	metastasis
+0	Primary, right ankle	0	11	MAPK4	39	14	0.26	primary
+1	Lymph node metastasis, right groin	0	11	MAPK4	50	16	0.29	metastasis
+2	Locoregional skin metastasis 1, right ankle	0	11	MAPK4	30	18	0.385	metastasis
+3	Locoregional skin metastasis 2, right leg	0	11	MAPK4	27	15	0.43	metastasis
+0	Primary, right ankle	0	12	LOXHD1	905	268	0.26	primary
+1	Lymph node metastasis, right groin	0	12	LOXHD1	893	364	0.29	metastasis
+2	Locoregional skin metastasis 1, right ankle	0	12	LOXHD1	617	374	0.385	metastasis
+3	Locoregional skin metastasis 2, right leg	0	12	LOXHD1	613	481	0.43	metastasis
+0	Primary, right ankle	0	13	SIGLEC15	110	44	0.26	primary
+1	Lymph node metastasis, right groin	0	13	SIGLEC15	86	39	0.29	metastasis
+2	Locoregional skin metastasis 1, right ankle	0	13	SIGLEC15	65	37	0.385	metastasis
+3	Locoregional skin metastasis 2, right leg	0	13	SIGLEC15	67	60	0.43	metastasis
+0	Primary, right ankle	0	14	CNDP1	45	10	0.26	primary
+1	Lymph node metastasis, right groin	0	14	CNDP1	48	19	0.29	metastasis
+2	Locoregional skin metastasis 1, right ankle	0	14	CNDP1	37	18	0.385	metastasis
+3	Locoregional skin metastasis 2, right leg	0	14	CNDP1	31	20	0.43	metastasis
