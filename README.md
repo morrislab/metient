@@ -7,7 +7,7 @@
 
 ## System requirements
 ### Hardware requirements
-Metient compute requirements depend on the input size of the data. Inputs with less than ~50 tree nodes and 6 tumor sites can be run on any computer with sufficient RAM. Inputs with larger tree sizes or tumor sites should use a GPU along with a larger amount of CPU RAM. No extra configuration is needed to run Metient on GPU.
+Compute requirements depend on the input size of the data. Inputs with less than ~50 tree nodes and 6 tumor sites can be run on any computer with sufficient RAM. Inputs with larger tree sizes or tumor sites should use a GPU along with a larger amount of CPU RAM. No extra configuration is needed to run Metient on GPU.
 
 ### Software requirements
 Metient has been tested on macOS Sonoma (14.4) and CentOS Linux 7 (Core).
