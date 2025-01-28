@@ -18,6 +18,7 @@ from collections import deque
 import gzip
 import re
 import copy
+import tracemalloc
 
 import metient.util.vertex_labeling_util as vutil 
 from metient.util.globals import *
@@ -134,18 +135,29 @@ def migration_edges(V, A, sites=None):
     V: Vertex labeling matrix where columns are one-hot vectors representing the
     anatomical site that the node originated from (num_sites x num_nodes)
     A:  Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
-    sites: optional, set of indices in range [0,num_sites) that you restrict migration edges to
+    sites: optional, set of indices in range [0,num_sites) that you restrict migration edges *to*
     Returns:
         Returns a matrix where Yij = 1 if there is a migration edge from node i to node j
     '''
     X = V.T @ V 
     Y = torch.mul(A, (1-X))
+    
     # Remove migration edges to sites that we're not interested in 
     if sites != None:
-        for i,j in vutil.tree_iterator(Y):
-            k = (V[:,j] == 1).nonzero()[0][0].item()
+        Y = Y.coalesce()
+        indices = Y.indices()
+        values = Y.values()
+
+        # Iterate over the sparse tensor's nonzero elements using tree_iterator
+        for idx in range(indices.size(1)):
+            i, j = indices[:, idx]  # Get the row (i) and column (j) indices
+            k = (V[:, j] == 1).nonzero(as_tuple=True)[0][0].item()
             if k not in sites:
-                Y[i,j] = 0
+                values[idx] = 0  # Set the value to zero
+
+        # Remove zeroed-out entries efficiently
+        mask = values != 0  # Keep only non-zero values
+        Y = torch.sparse_coo_tensor(indices[:, mask], values[mask], Y.size())
     return Y
 
 def seeding_cluster_parents(V, A, sites=None):
@@ -154,6 +166,8 @@ def seeding_cluster_parents(V, A, sites=None):
     '''
     V, A = prep_V_A_inputs(V, A)
     Y = migration_edges(V,A, sites)
+    if Y.is_sparse:
+        Y = Y.to_dense()
     seeding_clusters = torch.nonzero(Y.any(dim=1)).squeeze()
     # Check if it's a scalar (0D tensor)
     if seeding_clusters.dim() == 0:
@@ -168,7 +182,13 @@ def seeding_clusters(V, A, node_idx_to_label, sites=None):
     '''
     V, A = prep_V_A_inputs(V, A)
     Y = migration_edges(V,A, sites)
-    seeding_clusters = (Y == 1).nonzero(as_tuple=True)[1]
+
+    Y = Y.coalesce()
+    nonzero_indices = Y.indices()
+
+    # Select the indices where Y is not 0
+    seeding_clusters = nonzero_indices[1][Y.values() != 0]
+    # seeding_clusters = (Y == 1).nonzero(as_tuple=True)[1]
     # Check if it's a scalar (0D tensor)
     if seeding_clusters.dim() == 0:
         # Convert to a 1D tensor (vector)
@@ -185,33 +205,11 @@ def seeding_clusters(V, A, node_idx_to_label, sites=None):
     all_seeding_clusters = set()
     for x in seeding_clusters:
         node = node_collection.get_node(x)
-        if node.is_leaf or node.is_polytomy_resolver_node:
+        if node.is_witness or node.is_polytomy_resolver_node:
             all_seeding_clusters.add(vutil.get_parent(A, node.idx))
         else:
             all_seeding_clusters.add(x)
     return list(all_seeding_clusters)
-
-def mrca(adj_matrix, nodes_to_check):
-    '''
-    Gets the most recent common ancestor of nodes in nodes_to_check
-    '''
-    start_node = vutil.get_root_index(adj_matrix)
-    num_nodes = len(adj_matrix)
-    visited = [False] * num_nodes
-
-    queue = deque()
-    queue.append(start_node)
-    visited[start_node] = True
-
-    while queue:
-        current_node = queue.popleft()
-        if current_node in nodes_to_check:
-            return current_node
-
-        for neighbor, connected in enumerate(adj_matrix[current_node]):
-            if connected and not visited[neighbor]:
-                queue.append(neighbor)
-                visited[neighbor] = True
 
 def find_tree_trunk(adj_matrix):
     n = len(adj_matrix)  # Number of nodes in the matrix
@@ -238,6 +236,28 @@ def find_tree_trunk(adj_matrix):
 def is_valid_path(path, S):
     return all(node in path for node in S)
 
+def mrca(adj_matrix, nodes_to_check):
+    '''
+    Gets the most recent common ancestor of nodes in nodes_to_check
+    '''
+    start_node = vutil.get_root_index(adj_matrix)
+    num_nodes = len(adj_matrix)
+    visited = [False] * num_nodes
+
+    queue = deque()
+    queue.append(start_node)
+    visited[start_node] = True
+
+    while queue:
+        current_node = queue.popleft()
+        if current_node in nodes_to_check:
+            return current_node
+
+        for neighbor, connected in enumerate(adj_matrix[current_node]):
+            if connected and not visited[neighbor]:
+                queue.append(neighbor)
+                visited[neighbor] = True
+                
 def hamiltonian_paths(adj_matrix, path, visited, n, S):
     if is_valid_path(path, S):
         return True
@@ -464,38 +484,21 @@ def pruned_mut_label(mut_names, shorten_label, to_string):
     else:
         return list(final_genes)
 
-def full_tree_node_idx_to_label(V, T, node_collection, ordered_sites, shorten_label=True, to_string=False):
+def full_tree_node_idx_to_label(T, node_collection, shorten_label=True, to_string=False):
     '''
-    Build a map of node_idx to (label, is_leaf, is_polytomy_resovler_node) for plotting and saving
+    Build a map of node_idx to (label, is_witness, is_polytomy_resovler_node) for plotting and saving
     information to pickle file
-
     '''
 
     full_node_idx_to_label_map = dict()
-    orig_idx_to_label = node_collection.idx_to_label()
     for i, j in vutil.tree_iterator(T):
         node_i = node_collection.get_node(i)
         label = pruned_mut_label(node_i.label, shorten_label, to_string)
-        full_node_idx_to_label_map[i] = (label, node_i.is_leaf, node_i.is_polytomy_resolver_node)
+        full_node_idx_to_label_map[i] = (label, node_i.is_witness, node_i.is_polytomy_resolver_node)
         
         node_j = node_collection.get_node(j)
         label = pruned_mut_label(node_j.label, shorten_label, to_string)
-        full_node_idx_to_label_map[j] = (label, node_j.is_leaf, node_j.is_polytomy_resolver_node)
-        
-        # if i in orig_idx_to_label:
-        #     label = pruned_mut_label(orig_idx_to_label[i], shorten_label, to_string)
-        #     full_node_idx_to_label_map[i] = (label, False, node_collection.get_node(i).is_polytomy_resolver_node)
-        
-        # if j in orig_idx_to_label:
-        #     label = pruned_mut_label(orig_idx_to_label[j], shorten_label, to_string)
-        #     full_node_idx_to_label_map[j] = (label, False,  node_collection.get_node(i).is_polytomy_resolver_node)
-        # elif j not in orig_idx_to_label: # observed clone leaf node
-        #     site_idx = (V[:,j] == 1).nonzero()[0][0].item()
-        #     labels = copy.deepcopy(orig_idx_to_label[i])
-        #     labels.append(ordered_sites[site_idx])
-        #     leaf_label = pruned_mut_label(labels, shorten_label, to_string)
-        #     full_node_idx_to_label_map[j] = (leaf_label, True, False)
-
+        full_node_idx_to_label_map[j] = (label, node_j.is_witness, node_j.is_polytomy_resolver_node)
     return full_node_idx_to_label_map
 
 def idx_to_color(custom_colors, idx, alpha=1.0):
@@ -518,7 +521,7 @@ def migration_graph(V, A):
     '''
     V, A = prep_V_A_inputs(V, A)
     migration_graph = (V @ A) @ V.T
-    migration_graph_no_diag = torch.mul(migration_graph, 1-torch.eye(migration_graph.shape[0], migration_graph.shape[1]))
+    migration_graph_no_diag = torch.mul(migration_graph, 1-torch.eye(migration_graph.shape[0], migration_graph.shape[1], device=migration_graph.device))
     
     return migration_graph_no_diag
 
@@ -530,7 +533,7 @@ def find_abbreviation_mark(input_string):
             return mark
     return None
 
-def plot_migration_graph(V, A, ordered_sites, custom_colors, show=True):
+def migration_graph_dot(V, A, ordered_sites, custom_colors, show=True):
     '''
     Plots migration graph G which represents the migrations/comigrations between
     all anatomical sites.
@@ -556,13 +559,11 @@ def plot_migration_graph(V, A, ordered_sites, custom_colors, show=True):
     for node, color in zip(fmted_ordered_sites, custom_colors):
         G.add_node(node, shape="box", color=color, fillcolor='white', fontname=FONT, penwidth=3.0)
 
-    edges = []
     for i, adj_row in enumerate(mig_graph_no_diag):
         for j, num_edges in enumerate(adj_row):
             if num_edges > 0:
                 for _ in range(int(num_edges.item())):
                     G.add_edge(fmted_ordered_sites[i], fmted_ordered_sites[j], color=f'"{custom_colors[i]};0.5:{custom_colors[j]}"', penwidth=3)
-                    edges.append((fmted_ordered_sites[i], fmted_ordered_sites[j]))
 
     dot = nx.nx_pydot.to_pydot(G)
     if show:
@@ -572,17 +573,14 @@ def plot_migration_graph(V, A, ordered_sites, custom_colors, show=True):
     dot_lines.insert(1, 'dpi=600;size=3.5;')
     dot_str = ("\n").join(dot_lines)
 
-    return dot_str, edges
+    return dot_str
 
-def plot_tree(V, T, gen_dist, ordered_sites, custom_colors, node_collection=None, show=True):
+def migration_history_tree_dot(V, T, gen_dist, custom_colors, node_collection=None, show=True):
 
     # (1) Create full directed graph 
     # these labels are used for display in plotting
-    display_node_idx_to_label_map = full_tree_node_idx_to_label(V, T, node_collection, ordered_sites,
-                                                                shorten_label=True, to_string=True)
-    # these labels are used for writing out full vertex names to file
-    full_node_idx_to_label_map = full_tree_node_idx_to_label(V, T, node_collection, ordered_sites,
-                                                             shorten_label=False, to_string=False)
+    display_node_idx_to_label_map = full_tree_node_idx_to_label(T, node_collection, shorten_label=True, to_string=True)            
+
     color_map = { i:idx_to_color(custom_colors, (V[:,i] == 1).nonzero()[0][0].item()) for i in range(V.shape[1])}
     G = nx.DiGraph()
     node_options = {"label":"", "shape": "circle", "penwidth":3, 
@@ -592,18 +590,18 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors, node_collection=None
     if gen_dist != None:
         gen_dist = ((gen_dist / torch.max(gen_dist[gen_dist>0]))*1.5) + 1
 
-    edges = []
     for i, j in vutil.tree_iterator(T):
         label_i, _, _ = display_node_idx_to_label_map[i]
-        label_j, is_leaf, _ = display_node_idx_to_label_map[j]
+        label_j, is_witness, _ = display_node_idx_to_label_map[j]
         
+        # label_i, label_j = "",""
         G.add_node(i, xlabel=label_i, fillcolor=color_map[i], 
                     color=color_map[i], style="filled", **node_options)
-        G.add_node(j, xlabel="" if is_leaf else label_j, fillcolor=color_map[j], 
-                    color=color_map[j], style="solid" if is_leaf else "filled", **node_options)
+        G.add_node(j, xlabel="" if is_witness else label_j, fillcolor=color_map[j], fontcolor="white" if is_witness else "black",
+                    color=color_map[j], style="solid" if is_witness else "filled", **node_options)
 
-        style = "dashed" if is_leaf else "solid"
-        penwidth = 5 if is_leaf else 5.5
+        style = "dashed" if is_witness else "solid"
+        penwidth = 5 if is_witness else 5.5
 
         # We're iterating through i,j of the full tree (including leaf nodes),
         # while G only has genetic distances between internal nodes
@@ -612,10 +610,7 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors, node_collection=None
         G.add_edge(i, j,color=f'"{color_map[i]};0.5:{color_map[j]}"', 
                    penwidth=penwidth, arrowsize=0, style=style, minlen=minlen)
 
-        edges.append((full_node_idx_to_label_map[i][0], full_node_idx_to_label_map[j][0]))
-
     # Add edge from normal to root 
-    # print("T", vutil.adjacency_matrix_to_edge_list(T))
     root_idx = vutil.get_root_index(T)
     root_label = display_node_idx_to_label_map[root_idx][0]
     G.add_node("normal", label="", xlabel=root_label, penwidth=3, style="invis")
@@ -626,24 +621,44 @@ def plot_tree(V, T, gen_dist, ordered_sites, custom_colors, node_collection=None
     assert(nx.is_tree(G))
 
     # we have to use graphviz in order to get multi-color edges :/
-    dot = to_pydot(G).to_string().split("\n")
+    dot = to_pydot(G)
+    dot.set_graph_defaults(layout='dot', seed=42) 
+    dot = dot.to_string().split("\n")
     # hack since there doesn't seem to be API to modify graph attributes...
-    dot.insert(1, 'graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dpi=600; size=2.5;')
+    # dot.insert(1, 'graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dpi=800; size=2.5;')
+    dot.insert(1, 'graph[splines=false]; nodesep=0.4; rankdir=TB; ranksep=0.4; forcelabels=true; dpi=800; size=2.5; seed=42')
     dot_str = ("\n").join(dot)
 
     if show:
         dot = nx.nx_pydot.to_pydot(dot_str)
         view_pydot(dot)
 
-    vertex_name_to_site_map = { ";".join(full_node_idx_to_label_map[i][0]):ordered_sites[(V[:,i] == 1).nonzero()[0][0].item()] for i in range(V.shape[1])}
-    return dot_str, edges, vertex_name_to_site_map, full_node_idx_to_label_map
+    return dot_str
 
-def construct_loss_dict(V, soft_V, T, G, O, p, full_loss):
-    V = V.reshape(1, V.shape[0], V.shape[1]) # add batch dimension
-    soft_V = soft_V.reshape(1, soft_V.shape[0], soft_V.shape[1]) # add batch dimension
-    m, c, s, g, o = vutil.ancestral_labeling_metrics(V, T, G, O, p, True, True)
-    e = vutil.calc_entropy(V, soft_V) # this entropy is saved only based on second round of optimization
-    loss_dict = {MIG_KEY: m, COMIG_KEY:c, SEEDING_KEY: s, ORGANOTROP_KEY: o, GEN_DIST_KEY: g, ENTROPY_KEY: e}
+def collect_top_tree_info(V, T, node_collection, ordered_sites):
+    '''
+    Get info about the best migration history to return to the user
+    '''
+    # these labels are used for writing out full vertex names to file
+    full_node_idx_to_label_map = full_tree_node_idx_to_label(T, node_collection, shorten_label=False, to_string=False)
+    tree_edges = []
+    for i, j in vutil.tree_iterator(T):
+        tree_edges.append((full_node_idx_to_label_map[i][0], full_node_idx_to_label_map[j][0]))
+    vertex_name_to_site_map = { ";".join(full_node_idx_to_label_map[i][0]):ordered_sites[(V[:,i] == 1).nonzero()[0][0].item()] for i in range(V.shape[1])}
+
+    mig_graph_no_diag = migration_graph(V, T)
+
+    mig_edges = []
+    for i, adj_row in enumerate(mig_graph_no_diag):
+        for j, num_edges in enumerate(adj_row):
+            if num_edges > 0:
+                for _ in range(int(num_edges.item())):
+                    mig_edges.append((ordered_sites[i], ordered_sites[j]))
+
+    return tree_edges, full_node_idx_to_label_map, vertex_name_to_site_map, mig_edges
+
+def construct_loss_dict(soln, full_loss):
+    loss_dict = {MIG_KEY: soln.m, COMIG_KEY:soln.c, SEEDING_KEY: soln.s, ORGANOTROP_KEY: soln.o, GEN_DIST_KEY: soln.g, ENTROPY_KEY: soln.e}
     loss_dict = {**loss_dict, **{FULL_LOSS_KEY: round(torch.mean(full_loss).item(), 3)}}
     return loss_dict
 
@@ -669,6 +684,38 @@ def figure_output_pattern(V, A, idx_to_label):
     output_str += f"genetic clonality: {gen_clonality}, site clonality: {st_clonality}\n"
     return output_str
 
+def get_components(tensor):
+    """Get components to pickle a sparse COO tensor."""
+    if not tensor.is_sparse:
+        return tensor.detach().cpu().numpy()
+
+    # Extract components
+    indices = tensor._indices()
+    values = tensor._values()
+    size = tensor.size()
+
+    # Pack components into a tuple
+    return (indices, values, size)
+
+def dense_to_sparse(dense_tensor):
+    """Convert a dense tensor to a sparse COO tensor and delete the dense tensor."""
+    # Ensure the input is a 2D tensor (you can modify for N-D tensors if needed)
+    if dense_tensor.dim() != 2:
+        raise ValueError("Input tensor must be 2-dimensional.")
+    
+    # Get the indices of non-zero elements
+    indices = torch.nonzero(dense_tensor, as_tuple=False).t()
+    
+    # Get the values of the non-zero elements
+    values = dense_tensor[indices[0], indices[1]]
+
+    # Create a sparse COO tensor
+    sparse_tensor = torch.sparse_coo_tensor(indices, values, size=dense_tensor.size())
+    
+    # Delete the dense tensor to free memory
+    del dense_tensor
+
+    return sparse_tensor
 
 def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites,
                     print_config, custom_colors, primary, output_dir, 
@@ -682,7 +729,6 @@ def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites,
     '''
     
     primary_idx = ordered_sites.index(primary)
-    p = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(ordered_sites)).T
 
     ret = None
     figure_outputs = []
@@ -705,25 +751,40 @@ def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites,
             G = min_loss_solution.G
             full_loss = min_loss_solution.loss
             node_collection = min_loss_solution.node_collection
-            loss_dict = construct_loss_dict(V, soft_V, T, G, O, p, full_loss)
+            loss_dict = construct_loss_dict(min_loss_solution, full_loss)
             
             # Restructure adjacency matrices so that node indices match the cluster indices
             # that the user originally input (we restructure them s.t. root index is 0 during
             # inference to make indexing logic much simpler)
+            # TODO: this is unideal, restructure matrices should take in sparse matrix
+            # from here on, return a parents matrix?
+            needs_sparse_conversion = False
             if original_root_idx != -1:
+                if T.is_sparse:
+                    T = T.to_dense()
+                    needs_sparse_conversion = True
+                node_collection = copy.deepcopy(node_collection)
                 T, _, _, node_collection, G, _, V, U = vutil.restructure_matrices(0, original_root_idx, T, None, None, node_collection, G, None, V, U)
-            tree_dot, edges, vertices_to_sites_map, full_tree_idx_to_label = plot_tree(V, T, G, ordered_sites, custom_colors, node_collection, show=False)
-            
-            mig_graph_dot, mig_graph_edges = plot_migration_graph(V, T, ordered_sites, custom_colors, show=False)
+            if needs_sparse_conversion:
+                T = dense_to_sparse(T)
 
-            pattern = figure_output_pattern(V, T, full_tree_idx_to_label)
+            edges, full_tree_idx_to_label, vertices_to_sites_map, mig_graph_edges = collect_top_tree_info(V, T, node_collection, ordered_sites)
+            tree_dot = migration_history_tree_dot(V, T, G, custom_colors, node_collection, show=False)
+            mig_graph_dot = migration_graph_dot(V, T, ordered_sites, custom_colors, show=False)
+
+            if print_config.visualize:
+                pattern = figure_output_pattern(V, T, full_tree_idx_to_label)
+            else:
+                pattern = ""
+
             figure_outputs.append((tree_dot, mig_graph_dot, loss_dict, pattern))
             pickle_outputs[OUT_LABElING_KEY].append(V.detach().cpu().numpy())
             pickle_outputs[OUT_LOSSES_KEY].append(full_loss.cpu().numpy())
-            pickle_outputs[OUT_ADJ_KEY].append(T.detach().cpu().numpy())
+            
+            pickle_outputs[OUT_ADJ_KEY].append(get_components(T))
             pickle_outputs[OUT_SOFTV_KEY].append(soft_V.detach().cpu().numpy())
             pickle_outputs[OUT_OBSERVED_CLONES_KEY] = U.detach().cpu().numpy() if U != None else np.array([])
-
+        
             if G != None:
                 pickle_outputs[OUT_GEN_DIST_KEY].append(G.detach().cpu().numpy())                
             pickle_outputs[OUT_LOSS_DICT_KEY].append(loss_dict)
@@ -763,15 +824,13 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
 
         n = len(figure_outputs)
         print(run_name)
-        if n < k:
-            was = "was" if n==1 else "were"
-            print(f"{k} unique trees were not found ({n} {was} found). Retry with a higher sample size if you want to get more trees.")
-            k = n
+        tense = "were" if n > 1 else "was"
+        print(f"{n} unique solutions {tense} found.")
 
         max_trees = 20
         if n > max_trees:
-            print("More than 20 solutions detected, only plotting top 20 trees.")
-            k = max_trees
+            print(f"More than {max_trees} solutions detected, only plotting top {max_trees} trees.")
+            n = max_trees
         # Create a figure and subplots
         #fig, axs = plt.subplots(3, k*2, figsize=(10, 8))
 
@@ -779,7 +838,7 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
 
         z = 2 # number of trees displayed per row
 
-        nrows = math.ceil(k/z)
+        nrows = math.ceil(n/z)
         h = nrows*4
         fig = plt.figure(figsize=(8,h))
         
@@ -796,7 +855,7 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
             gs = gridspec.GridSpec(3, 1, height_ratios=[0.02, 0.73, 0.25])
 
             row = math.floor(i/2)
-            pad = 0.02 if k < 20 else 0.001
+            pad = 0.02
 
             # left = 0.0 if i is odd, 0.55 if even
             # right = 0.45 if i is odd, 1.0 if even
@@ -839,6 +898,7 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
         # with open(os.path.join(output_dir, f"{run_name}.pickle"), 'wb') as handle:
         with gzip.open(os.path.join(output_dir,f"{run_name}.pkl.gz"), 'wb') as gzip_file:
             pickle.dump(pickle_outputs, gzip_file, protocol=pickle.HIGHEST_PROTOCOL)
+            
         # Save best dot to file
         tree_dot, mig_graph_dot, _, _ = figure_outputs[0]
         with open(os.path.join(output_dir, f"{run_name}.tree.dot"), 'w') as file:

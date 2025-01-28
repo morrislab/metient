@@ -2,15 +2,13 @@ import torch
 from metient.util import vertex_labeling_util as vutil
 from torch.distributions.binomial import Binomial
 import numpy as np
-import matplotlib.pyplot as plt
 
 class ObservedClonesSolver:
     def __init__(self, num_sites, num_internal_nodes, ref, var, omega, idx_to_observed_sites,
-                 B, input_T, G, node_collection, weights, config, estimate_observed_clones, ordered_sites):
+                 input_T, G, node_collection, weights, config, estimate_observed_clones, ordered_sites):
         self.ref = ref
         self.var = var
         self.omega = omega
-        self.B = B
         self.input_T = input_T
         self.G = G
         self.weights = weights
@@ -40,6 +38,7 @@ def find_umap(u_solver):
     eta.requires_grad = True 
     u_optimizer = torch.optim.Adam([eta], lr=u_solver.config['lr'])
 
+    B = vutil.mutation_matrix_with_normal_cells(u_solver.input_T)
     i = 0
     u_prev = eta
     u_diff = 1e9
@@ -47,7 +46,7 @@ def find_umap(u_solver):
     # nlls, regs = [], []
     while u_diff > 1e-6 and i < 300:
         u_optimizer.zero_grad()
-        U, u_loss, nll, reg = compute_u_loss(eta, u_solver.ref, u_solver.var, u_solver.omega, u_solver.B, u_solver.weights)
+        U, u_loss, nll, reg = compute_u_loss(eta, u_solver.ref, u_solver.var, u_solver.omega, B, u_solver.weights)
         u_loss.backward()
         u_optimizer.step()
         u_diff = torch.abs(torch.norm(u_prev - U))
@@ -72,7 +71,6 @@ def find_umap(u_solver):
             if node_idx not in idx_to_observed_sites and len(children) == 0:
                 removal_indices.append(node_idx)
         print("node indices not well estimated", removal_indices)
-        #vutil.print_U(U, u_solver.B, node_collection, u_solver.ordered_sites, u_solver.ref, u_solver.var)
 
         U, input_T, T, G, node_collection, idx_to_observed_sites = vutil.remove_leaf_indices_not_observed_sites(removal_indices, U, u_solver.input_T, 
                                                                                                                 full_T, full_G, node_collection, idx_to_observed_sites)

@@ -1007,3 +1007,482 @@ def is_same_mig_hist_with_node_removed(poly_res, T, num_internal_nodes, V, remov
     new_m, new_c, new_s, _, _ = vutil.ancestral_labeling_metrics(vutil.add_batch_dim(candidate_V), candidate_T, None, None, p, True)
     # print(prev_m, prev_c, prev_s, new_m, new_c, new_s, ((prev_m >= int(new_m)) and (prev_c >= int(new_c)) and (prev_s >= int(new_s))))
     return ((prev_m >= int(new_m)) and (prev_c >= int(new_c)) and (prev_s >= int(new_s)))
+
+# Used to be in remove_nodes in polytomy_resolver
+    # # Attach children of the node to remove to their original parent
+    # for remove_idx in removal_indices:
+    #     parent_idx = torch.where(T[:,remove_idx] > 0)[0][0]
+    #     child_indices = vutil.get_child_indices(T, [remove_idx])
+    #     for child_idx in child_indices:
+    #         T[parent_idx,child_idx] = 1.0
+
+    # # Remove indices from T, V and G
+    # # Remove rows of T
+    # T = T[torch.tensor([i for i in range(T.size(0)) if i not in removal_indices])]
+    # # Remove columns of T
+    # T = T[:, torch.tensor([i for i in range(T.size(1)) if i not in removal_indices])]
+
+
+# This used to be used in genetic_distance_score in vertex_labeling_util
+def sparse_sum_along_dim_1_2(sparse_tensor):
+    sparse_tensor = sparse_tensor.coalesce()
+    # Extract indices and values from the sparse tensor
+    indices = sparse_tensor.indices()  # Tensor of shape [ndims, nnz]
+    values = sparse_tensor.values()    # Tensor of shape [nnz]
+
+    # We want to sum along dimension 1 and 2, so we group by dimension 0
+    dim0_indices = indices[0]  # Get the indices corresponding to dimension 0
+
+    # Perform the summation for each unique index in dimension 0
+    unique_dim0_indices = torch.unique(dim0_indices)
+
+    sum_result = torch.zeros(len(unique_dim0_indices))
+
+    for i, idx in enumerate(unique_dim0_indices):
+        # Select values where dimension 0 equals idx
+        mask = (dim0_indices == idx)
+        
+        # Sum values corresponding to that index
+        sum_result[i] = torch.sum(values[mask])
+
+    # The result will be the sum over dimensions 1 and 2 for each unique index in dimension 0
+    return sum_result
+
+
+def old_sparse_path_matrix(sparse_matrix, remove_self_loops, identical_T):
+    '''
+    Compute the transitive closure of the sparse adjacency matrix
+    '''
+    # Get dimensions of the 3D sparse tensor
+    og_batch_size, n, _ = sparse_matrix.size()
+
+    batch_size = og_batch_size
+    # We only need to compute P once if all Ts along the batch dimension are identical
+    if identical_T:
+        batch_size = 1
+
+    for i in range(batch_size):
+        T = sparse_matrix[i].coalesce()
+        path_matrix(T, remove_self_loops=remove_self_loops, identical_T=identical_T)
+
+    # List to hold the transitive closures for each graph
+    closures = []
+
+    # TODO: Any way to do this without a for loop?
+    for i in range(batch_size):
+        # Get the sparse matrix for the batch, coalesce to handle duplicates
+        closure = sparse_matrix[i].coalesce()
+        closure_indices = closure.indices()
+        
+        # Create a boolean mask for known edges
+        known_edges_mask = torch.zeros((n, n), dtype=torch.bool)
+        known_edges_mask[closure_indices[0], closure_indices[1]] = True
+
+        # Perform n iterations of transitive closure (if necessary)
+        for _ in range(n):
+            # Perform sparse matrix multiplication
+            product = torch.sparse.mm(closure, closure).coalesce()
+            product_indices = product.indices()
+
+            # Create a mask for the product edges
+            product_edges_mask = known_edges_mask[product_indices[0], product_indices[1]]
+
+            # Identify new edges that are not in the known edges
+            new_edges_mask = ~product_edges_mask
+            
+            if new_edges_mask.any():
+                new_indices = product_indices[:, new_edges_mask]
+                combined_indices = torch.cat([closure.indices(), new_indices], dim=1)
+                combined_values = torch.ones(combined_indices.shape[1], dtype=torch.float32)
+                closure = torch.sparse_coo_tensor(combined_indices, combined_values, (n, n)).coalesce()
+
+                # Update known edges
+                known_edges_mask[new_indices[0], new_indices[1]] = True
+
+        closures.append(closure)
+    
+    if remove_self_loops:
+        for i in range(batch_size):
+            closure = closures[i]
+            indices = closure.indices()
+            values = closure.values()
+
+            # Identify self-loops (where row index == column index)
+            mask = indices[0] != indices[1]
+            closures[i] = torch.sparse_coo_tensor(
+                indices[:, mask],
+                values[mask],
+                closure.size()
+            ).coalesce()
+
+    if identical_T:
+        stacked_closure = repeat_n(closures[0], og_batch_size)
+    else:
+        stacked_closure = torch.stack(closures)
+
+    return stacked_closure 
+
+
+def path_matrix_matmul(T, remove_self_loops=False, identical_T=False):
+    '''
+    T is a numpy ndarray or tensor adjacency matrix (where Tij = 1 if there is a path from i to j)
+    remove_self_loops: bool, whether to retain 1s on the diagonal
+    identical_T: every T along the batch_size dimension is identical (allows us to optimize)
+
+    Returns path matrix that tells us if path exists from node i to node j    
+    '''
+
+    bs = 1 if len(T.shape) == 2 else T.shape[0]
+    if T.is_sparse:
+        return sparse_path_matrix(T, remove_self_loops, identical_T)
+
+    I = torch.eye(T.shape[1]).repeat(bs, 1, 1)  # Repeat identity matrix along batch dimension
+
+    B = torch.logical_or(T, I).int()  # Convert to int for more efficient matrix multiplication
+    # Initialize path matrix with direct connections
+    P = B.clone()
+    
+    # Floyd-Warshall algorithm
+    for k in range(T.shape[1]):
+        # Compute shortest paths including node k
+        B = torch.logical_or(B, B[:, :, k].unsqueeze(2) & B[:, k, :].unsqueeze(1))
+        P_old = torch.nonzero(P)
+        # Update path matrix
+        P |= B
+        # Early stopping if there have been no changes
+        if torch.equal(P_old, torch.nonzero(P)) and k != 0:
+            break
+        
+    if remove_self_loops:
+        P = torch.logical_xor(P, I.int())
+    return P.squeeze(0) if len(T.shape) == 2 else P
+
+
+# Old get best final solutions
+
+tracemalloc.start()
+solution_set, has_pss_solution = create_solution_set(best_Vs[soln_idx], best_soft_Vs[soln_idx], best_Ts[soln_idx], 
+                                                        G, O, p, node_collection, weights, solve_polytomies)
+current, peak = tracemalloc.get_traced_memory()
+print(f"[After creating soln set] Current memory usage: {current / 10**6:.2f} MB; Peak was {peak / 10**6:.2f} MB")
+tracemalloc.stop()
+multiresult_has_pss_solution = multiresult_has_pss_solution or has_pss_solution
+
+# 1. Make solutions unique before we do all this additional post-processing work which is time intensive
+results_unique_solution_set = []
+for soln in solution_set:
+    tree = vutil.MigrationHistory(soln.T, soln.V)
+    if tree not in unique_labelings:
+        results_unique_solution_set.append(soln)
+        unique_labelings.add(tree)
+del solution_set
+
+# Don't need to recover a primary-only single source solution if we have already found one
+if not multiresult_has_pss_solution:
+    recover_prim_ss_solutions(results_unique_solution_set, unique_labelings, 
+                                weights, O, p, solve_polytomies, 
+                                fixed_indices, num_internal_nodes)
+    multiresult_has_pss_solution = True
+
+#  Remove any extra resolver nodes that don't actually help
+results_unique_solution_set = prutil.remove_extra_resolver_nodes(results_unique_solution_set, poly_res, weights, O, p)
+full_solution_set.extend(results_unique_solution_set)
+
+#del results[i]
+
+
+# This was in find_optimal_subtree_nodes
+# Don't fix when it's just a node and its witness node (the labeling of the node could be
+# multiple possibilities and still be optimal)
+# Caveat in the case of lineage tracing, where every node with just a witness node is truly
+# originated from the site of the witness node
+if len(descendants) == 1 and not is_lineage_tracing:
+    continue
+
+
+
+def reindex_dense_matrix(matrix, removal_indices):
+    # Attach children of the node to remove to their original parent
+    for remove_idx in removal_indices:
+        parent_idx = torch.where(matrix[:,remove_idx] > 0)[0][0]
+        child_indices = vutil.get_child_indices(matrix, [remove_idx])
+        for child_idx in child_indices:
+            matrix[parent_idx,child_idx] = 1.0
+
+    # Remove rows
+    adj_matrix = adj_matrix[torch.tensor([i for i in range(adj_matrix.size(0)) if i not in removal_indices])]
+    # Remove columns of T
+    T = T[:, torch.tensor([i for i in range(T.size(1)) if i not in removal_indices])]
+
+def shrink_tensor(tensor, index_to_remove):
+    """
+    Shrinks a 3D tensor by removing the slice at the specified index.
+    Handles both dense and sparse tensors.
+    """
+    if tensor.is_sparse:
+        # Handle the case for sparse tensors (3D)
+        indices = tensor._indices()
+        values = tensor._values()
+
+        # Filter out the indices where the first dimension equals index_to_remove
+        mask = indices[0] != 0
+        new_indices = indices[:, mask]
+        new_indices[0] = new_indices[0]-1
+        new_values = values[mask]
+        
+        # The new shape of the tensor is one less in the first dimension (batch dimension)
+        new_shape = list(tensor.shape)
+        new_shape[0] -= 1
+
+        # Create a new sparse tensor with the filtered indices and values
+        new_tensor = torch.sparse_coo_tensor(new_indices, new_values, new_shape, dtype=tensor.dtype, device=tensor.device)
+    else:
+        # For a 2D dense tensor, we just slice off the 2D tensor at index 0 each time 
+        index_to_remove = 0
+        # Handle the case for dense tensors (same as before)
+        new_size = list(tensor.shape)
+        new_size[0] -= 1  # Remove one slice along the batch dimension
+
+        new_tensor = torch.empty(new_size, dtype=tensor.dtype, device=tensor.device)
+        new_tensor[:index_to_remove] = tensor[:index_to_remove]
+        new_tensor[index_to_remove:] = tensor[index_to_remove + 1:]
+    del tensor
+    return new_tensor
+
+# @profile
+def create_solution_set(best_Vs, best_soft_Vs, best_Ts, 
+                        G, O, p, node_collection, weights, solve_polytomies):
+    # Make a solution set
+    losses, new_values = vutil.clone_tree_labeling_objective(
+        vutil.to_tensor(best_Vs),
+        vutil.to_tensor(best_soft_Vs),
+        vutil.to_tensor(best_Ts),
+        torch.stack([G for _ in range(len(best_Vs))]) if G != None else None,
+        O, p, weights, update_path_matrix=solve_polytomies
+    )
+
+    solution_set = []
+    _, _, ss, _, _, _ = new_values
+    has_pss_solution = any(s == 1 for s in ss)
+    print("before", best_Vs.shape, best_soft_Vs.shape, best_Ts.shape)
+    for i, (loss, m, c, s, g, o, e) in enumerate(zip(losses, *new_values)):
+        # Node info (node index to label) is the same for every solution if we're not resolving for
+        # polytomies, but can be different solution to solution if not
+        # TODO: this deepcopy can cause memory issues when tree inputs are large
+        soln_node_collection = node_collection if not solve_polytomies else copy.deepcopy(node_collection)
+        
+        V = best_Vs[0].clone()
+        soft_V = best_soft_Vs[0].clone()
+        T = best_Ts[0].clone()
+        print(loss, m, c, s, g, o, e)
+        soln = vutil.VertexLabelingSolution(loss, m, c, s, g, o, e, V, soft_V, T, G, soln_node_collection)
+        solution_set.append(soln)
+        
+        # Shrink best_Vs, best_soft_Vs, and best_Ts tensors after processing
+        best_Vs = shrink_tensor(best_Vs, i)
+        best_soft_Vs = shrink_tensor(best_soft_Vs, i)
+        best_Ts = shrink_tensor(best_Ts, i)
+        print("during", best_Vs.shape, best_soft_Vs.shape, best_Ts.shape)
+        
+        # Optionally, free memory from the processed tensors
+        del V, soft_V, T  # Remove references to the processed tensors
+
+    print("after", best_Vs.shape, best_soft_Vs.shape, best_Ts.shape)
+    return solution_set, has_pss_solution
+
+
+
+def compute_weighted_gradients(v_optimizer, losses, prev_losses, scaler, alpha=0.9):
+    """
+    Computes gradients with a weighted scheme, giving more emphasis to samples with improved loss.
+
+    Args:
+    - v_optimizer: Optimizer object.
+    - losses: Current loss values for each sample.
+    - prev_losses: Previous loss values for each sample.
+    - scaler: GradScaler object to handle gradient scaling.
+    - alpha: Weight factor for improved samples (0 < alpha <= 1). Higher values give more weight to improved samples.
+
+    Returns:
+    - updated_prev_losses: Updated previous losses for the next iteration.
+    """
+    # Identify which samples have an improved loss
+    improved_loss_mask = losses < prev_losses  # Mask where loss has improved
+
+    # Compute weights for the loss
+    weights = torch.where(improved_loss_mask, alpha, 1 - alpha)
+    weighted_losses = weights * losses
+
+    # Reset the gradients
+    v_optimizer.zero_grad()
+
+    # Compute the weighted loss and perform the backward pass
+    scaled_loss = scaler.scale(weighted_losses.mean())
+    scaled_loss.backward()
+
+    # Update the previous losses for the next iteration
+    updated_prev_losses = losses.clone()
+
+    return updated_prev_losses
+
+def compute_weighted_loss(losses, weighting_factor=2.0):
+    """
+    Computes a weighted mean loss, emphasizing low-loss samples.
+    
+    Args:
+    - losses: Tensor of individual sample losses. Should be non-negative.
+    - weighting_factor: Exponential weight to emphasize low-loss samples.
+    
+    Returns:
+    - weighted_loss: Scalar weighted loss.
+    """
+    if losses.numel() == 0:
+        raise ValueError("Losses tensor is empty. Cannot compute weighted loss.")
+
+    # Safeguard against NaNs or negative values in losses
+    if torch.any(losses < 0):
+        raise ValueError("Losses tensor contains negative values, which are not supported.")
+
+    # Apply power-based scaling to make the weighting more aggressive
+    scaled_losses = weighting_factor * losses
+
+    # Use a power function to emphasize lower losses more strongly
+    weights = 1 / (1 + scaled_losses ** 2)  # Squared loss scaling
+    # print(losses)
+    # print(weights)
+    # Weighted mean loss, without normalizing the weights
+    weighted_loss = torch.sum(weights * losses)
+
+    return weighted_loss
+
+def update_t_with_polytomy_resolver(poly_res: prutil.PolytomyResolver, 
+                                    t_temp: float, 
+                                    v_solver: VertexLabelingSolver) -> torch.Tensor:
+    """
+    Updates a sparse adjacency matrix T based on children-to-parent assignments 
+    resolved using the polytomy resolver (poly_res) and Gumbel-softmax sampling.
+
+    Removes old connections between child nodes and their previous parents, 
+    replacing them with the new connections resolved by the polytomy resolver.
+    Additionally, removes connections to nodes in `resolver_indices` if they have no children.
+
+    Args:
+        poly_res (Any): The polytomy resolver containing:
+            - latent_var: A batch_size x n x m matrix, where n is the number of nodes 
+              and m is the number of children of polytomies.
+            - children_of_polys: The order of child nodes of polytomies in latent_var's 2nd dim.
+        t_temp (float): Temperature parameter for Gumbel-softmax sampling.
+        v_solver (Any): A solver object with an adjacency matrix T (a sparse tensor).
+
+    Returns:
+        torch.Tensor: Updated sparse adjacency matrix T for the batch, 
+        with old parent-child connections replaced as per the resolved decisions.
+    """
+    # Perform Gumbel-softmax to resolve parent assignments for children of polytomies
+    # softmax_pol_res is sample_size x number of nodes x children of polytomies
+    softmax_pol_res, _ = gumbel_softmax(poly_res.latent_var, t_temp)
+    non_zero_indices = torch.nonzero(softmax_pol_res, as_tuple=False).T
+
+    # Extract relevant indices from the non-zero entries
+    batch_indices = non_zero_indices[0]
+    parent_indices = non_zero_indices[1] 
+    child_indices = non_zero_indices[2]
+    global_child_indices = torch.tensor(poly_res.children_of_polys, device=softmax_pol_res.device)[child_indices]
+
+    # Find rows that are all zeros in softmax_pol_res
+    all_zeros_mask = torch.all(softmax_pol_res == 0, dim=2)  # Shape: (sample_size, num_nodes)
+    zero_rows_per_batch = torch.nonzero(all_zeros_mask, as_tuple=False)  # Shape: (num_zero_rows, 2)
+    # Filter the row indices to only include those in resolver_indices
+    resolver_indices = torch.tensor(poly_res.resolver_indices, device=zero_rows_per_batch.device)
+    valid_rows_mask = torch.isin(zero_rows_per_batch[:, 1], resolver_indices)
+    resolver_indices_no_children = zero_rows_per_batch[valid_rows_mask]
+    #print("resolver_indices_no_children", resolver_indices_no_children)
+
+    # Create new connections
+    new_indices = torch.stack([batch_indices, parent_indices, global_child_indices])
+    new_values = torch.ones(new_indices.size(1), dtype=torch.float32, device=softmax_pol_res.device)
+
+    # Repeat and coalesce the adjacency matrix for the batch
+    bs = poly_res.latent_var.shape[0]
+    T = vutil.repeat_n(v_solver.T, bs).coalesce()
+
+    # Step 1: Find the parent-child connections in T where the child is one of resolver_indices_no_children
+    resolver_children_indices = resolver_indices_no_children[:, 1]  # Extract child indices
+    # Find all parent-child connections in T
+    parent_child_mask = torch.isin(T.indices()[2], resolver_children_indices)
+
+    # Filter out old connections for the updated children
+    existing_indices = T.indices()
+    existing_values = T.values()
+    
+    # Perform comparison using broadcasting
+    batch_child_pairs = (
+    existing_indices[0] * T.shape[2] + existing_indices[2]
+        )  # Hash batch-child pairs
+    new_batch_child_pairs = (
+        batch_indices * T.shape[2] + global_child_indices
+    )  # Hash new batch-child pairs
+
+    mask = ~torch.isin(batch_child_pairs, new_batch_child_pairs)
+
+    # Mask out connections from parent to children in resolver_indices_no_children
+    resolver_batch_mask = torch.isin(existing_indices[0], resolver_indices_no_children[:, 0])
+    masked_parent_child_mask = parent_child_mask & resolver_batch_mask
+
+    # Mask out connections from parent to children in resolver_indices_no_children
+    # filtered_indices = existing_indices[:, mask & ~masked_parent_child_mask]  # Mask out parent-child relations
+    # filtered_values = existing_values[mask & ~masked_parent_child_mask]  # Apply the same mask to values
+    filtered_indices = existing_indices[:, mask]  # Mask out parent-child relations
+    filtered_values = existing_values[mask]  # Apply the same mask to values
+    # Concatenate filtered existing data with new connections
+    updated_indices = torch.cat([filtered_indices, new_indices], dim=1)
+    updated_values = torch.cat([filtered_values, new_values])
+
+    # Create updated sparse tensor
+    updated_T = torch.sparse_coo_tensor(updated_indices, updated_values, T.shape).coalesce()
+
+    return updated_T
+
+def stack_vertex_labeling(L, X, p, poly_res, fixed_labeling):
+    '''
+    Use leaf labeling L and X (both of size sample_size x num_sites X num_internal_nodes)
+    to get the anatomical sites of the leaf nodes and the internal nodes (respectively). 
+    Stack the root labeling to get the full vertex labeling V. 
+    '''
+    # Expand leaf node labeling L to be repeated sample_size times
+    bs = X.shape[0]
+    L = vutil.repeat_n(L, bs)
+
+    if fixed_labeling != None:
+        full_X = torch.zeros((bs, X.shape[1], len(fixed_labeling.known_indices)+len(fixed_labeling.unknown_indices)))
+        known_labelings = vutil.repeat_n(fixed_labeling.known_labelings, bs)
+        full_X[:,:,fixed_labeling.unknown_indices] = X
+        full_X[:,:,fixed_labeling.known_indices] = known_labelings
+    else:
+        full_X = X
+
+    # if poly_res != None:
+    #     # Order is: internal nodes, new poly nodes, leaf nodes from U
+    #     full_vert_labeling = torch.cat((full_X, vutil.repeat_n(poly_res.resolver_labeling, bs), L), dim=2)
+    # else:
+    #     full_vert_labeling = torch.cat((full_X, L), dim=2)
+
+    full_vert_labeling = torch.cat((full_X, L), dim=2)
+    p = vutil.repeat_n(p, bs)
+    # Concatenate the left part, new column, and right part along the second dimension
+    full_vert_labeling = torch.cat((p, full_vert_labeling), dim=2)
+
+    # Set to store unique labels where labels in columns 2 and 7 are equal across nodes and batches
+    # unique_labels = set()
+
+    # # Iterate over batches and nodes to check for equality in columns 2 and 7
+    # for batch_idx in range(full_vert_labeling.shape[0]):  # Iterate over batches
+    #     if torch.equal(full_vert_labeling[batch_idx, :, 9], full_vert_labeling[batch_idx, :, 1]):
+    #         unique_labels.add((int(torch.nonzero(full_vert_labeling[batch_idx, :, 9]).squeeze()))) 
+    #     if torch.equal(full_vert_labeling[batch_idx, :, 10], full_vert_labeling[batch_idx, :, 1]):
+    #         unique_labels.add((int(torch.nonzero(full_vert_labeling[batch_idx, :, 10]).squeeze()))) 
+
+    #Print unique labels where columns 2 and 7 have the same label
+    # print(f"Unique labels where columns 9/10 and 1 have the same label: {sorted(unique_labels)}")
+
+    return full_vert_labeling

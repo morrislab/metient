@@ -25,7 +25,7 @@ def get_adjacency_matrix_from_txt_edge_list(txt_file):
     for edge in edges:
         T[edge[0], edge[1]] = 1
 
-    return T.to_sparse()
+    return T
 
 def get_mut_to_cluster_map_from_pyclone_output(pyclone_cluster_fn, min_mut_thres=0):
     clstr_id_to_muts, mutation_names = load_pyclone_clusters(pyclone_cluster_fn, min_mut_thres=min_mut_thres)
@@ -42,22 +42,11 @@ def _validate_combo(df, tsv_fn, col1, col2, message):
     valid_mapping = grouped.apply(lambda x: len(x) == 1).all()
     if not valid_mapping:
         raise ValueError(f"{message}. Issue in: {tsv_fn}")
-
-def is_tsv(file_path):
-    with open(file_path, 'r') as file:
-        # Read the first few lines (use csv.Sniffer to auto-detect)
-        sniffer = csv.Sniffer()
-        dialect = sniffer.sniff(file.read(1024))  # Sample 1024 bytes to detect the delimiter
-        file.seek(0)  # Reset file pointer to the beginning
-        # Check if the detected delimiter is a tab '\t'
-        return dialect.delimiter == '\t'
     
 def validate_unpooled_or_pooled_df(df, tsv_fn, index_cols):
     '''
     Validation needed for either unpooled or pooled tsv
     '''
-
-    assert is_tsv(tsv_fn), "Must input a tab-delimited tsv file (not comma- or space-delimited)"
 
     # Some users would like to run on multiple tumors or multiple samples from the same primary tumor 
     assert(set(df['site_category'])==set(['primary', 'metastasis']) or set(df['site_category'])==set(['primary']))
@@ -348,7 +337,7 @@ def extract_info_from_observed_clone_tsv(tsv_filename):
         y = int(row['cluster_index'])
         # collect additional metadata
         unique_sites[x] = row['anatomical_site_label']
-        mig_hist_node = vutil.MigrationHistoryNode(y, [row['cluster_label']], is_leaf=False, is_polytomy_resolver_node=False)
+        mig_hist_node = vutil.MigrationHistoryNode(y, [row['cluster_label']], is_witness=False, is_polytomy_resolver_node=False)
         mig_hist_nodes.append(mig_hist_node)
         if y not in idx_to_num_muts:
             idx_to_num_muts[y] = float(row['num_mutations'])
@@ -376,7 +365,39 @@ def extract_ordered_sites(tsv_filepaths):
         ordered_sites.append(_extract_ordered_sites_from_single_tsv(fn))
     return ordered_sites
 
-def extract_matrices_from_tsv(tsv_fn, estimate_observed_clones, T):
+def initialize_organotropism_vector(O, ordered_sites, primary_site):
+    '''
+    O: a dictionary mapping anatomical site name (as used in tsv_fn) -> frequency of metastasis (these values should be normalized)
+    primary_site: str that represents the primary site
+    
+    Returns:
+    A 1 x num_sites tensor where each value represents the frequency of metastasis to that site
+    '''
+
+    # Check for sites in ordered_sites that are not in the dictionary
+    for site in ordered_sites:
+        if site != primary_site and site not in O:
+            raise ValueError(f"Error: '{site}' is not found in the inputted organotropism frequency dictionary.")
+
+    frequency_tensor = torch.zeros(len(ordered_sites), dtype = torch.float32)
+
+    # Fill the tensor with frequencies from the dictionary
+    for i, site in enumerate(ordered_sites):
+        if site == primary_site:
+            frequency_tensor[i] = 0.0  # Set frequency of metastasis to primary site to 0
+        else:
+            frequency_tensor[i] = O.get(site, 0)  # Get frequency or 0 if site not in dict
+    return frequency_tensor
+
+def extract_matrices_from_tsv(tsv_fn, estimate_observed_clones, T, initialize_G, O, primary_site):
+    '''
+    tsv_fn: path to input tsv
+    estimate_observed_clones: whether we need to estimate witness nodes or not
+    T: adjacency matrix of clone tree
+    initialize_G: whether or not to initialize a genetic distance matrix 
+    O: a dictionary mapping anatomical site name (as used in tsv_fn) -> frequency of metastasis (these values should be normalized)
+    primary_site: str that represents the primary site
+    '''
     if estimate_observed_clones:    
         ref, var, omega, ordered_sites, node_info, idx_to_num_mutations = get_ref_var_omega_matrix(tsv_fn)
         if not torch.is_tensor(ref):
@@ -390,10 +411,15 @@ def extract_matrices_from_tsv(tsv_fn, estimate_observed_clones, T):
 
     G = None
     # If genetic distance info is given, load into genetic distance matrix
-    if idx_to_num_mutations != None:
+    if idx_to_num_mutations != None and initialize_G:
         G = get_genetic_distance_matrix_from_adj_matrix(T, idx_to_num_mutations)
 
-    return ref, var, omega, ordered_sites, node_info, idx_to_observed_sites, G
+    organo_vector = None
+    if O != None:
+        print("Using organotropism frequencies", O)
+        organo_vector = initialize_organotropism_vector(O, ordered_sites, primary_site)
+
+    return ref, var, omega, ordered_sites, node_info, idx_to_observed_sites, G, organo_vector
 
 def _get_adj_matrix_from_spruce_tree(tree_edges, idx_to_character_label, remove_unseen_nodes=True):
     '''
