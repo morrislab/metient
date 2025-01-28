@@ -18,12 +18,13 @@ LAST_P = None
 ######################################################
 
 class MigrationHistoryNode:
-    def __init__(self, idx, label, is_leaf=False, is_polytomy_resolver_node=False):
+    __slots__ = ['idx', 'label', 'is_witness', 'is_polytomy_resolver_node']
+    def __init__(self, idx, label, is_witness=False, is_polytomy_resolver_node=False):
         self.idx = idx
         assert isinstance(label, list)
         label = [str(x) for x in label]
         self.label = label # list of mut names or ids
-        self.is_leaf = is_leaf
+        self.is_witness = is_witness
         self.is_polytomy_resolver_node = is_polytomy_resolver_node
 
 # Collection of MigrationHistoryNodes which are used for a single migration history
@@ -39,7 +40,7 @@ class MigrationHistoryNodeCollection:
         nodes = []
         for idx in dct:
             item = dct[idx]
-            node = MigrationHistoryNode(idx, item[0], is_leaf=item[1], is_polytomy_resolver_node=item[2])
+            node = MigrationHistoryNode(idx, item[0], is_witness=item[1], is_polytomy_resolver_node=item[2])
             nodes.append(node)
         instance = cls(nodes)  # Create an instance using the default constructor
         return instance
@@ -113,7 +114,11 @@ class MigrationHistory:
 
     def _nonzero_tuple(self, tensor):
         # Get the indices of non-zero elements and convert to a hashable form
-        indices = torch.nonzero(tensor, as_tuple=False)
+        if tensor.is_sparse:
+            tensor = tensor.coalesce()
+            indices = tensor.indices()
+        else:
+            indices = torch.nonzero(tensor, as_tuple=False)
         return tuple(map(tuple, indices.tolist()))
 
     def __hash__(self):
@@ -128,24 +133,34 @@ class MigrationHistory:
                 self._nonzero_tuple(self.tree) == self._nonzero_tuple(other.tree))
 
     def __str__(self):
-        A = str(torch.where(self.tree == 1))
+        A = str(torch.where(self.tree != 0))
         V = str(torch.where(self.labeling == 1))
         return f"Tree: {A}\nVertex Labeling: {V}"
 
-def convert_pars_metric_to_int(x):
+def convert_metric_to_int(x):
     if isinstance(x, int):
         return x
     elif isinstance(x, torch.Tensor) and x.numel() == 1:
         return int(x.item())  
-    raise ValueError(f"Got unexpected value for parsimony metric {x}")
+    raise ValueError(f"Got unexpected value for metric {x}")
+
+def convert_metric_to_float(x):
+    if isinstance(x, float):
+        return x
+    elif isinstance(x, torch.Tensor) and x.numel() == 1:
+        return float(x.item())  
+    raise ValueError(f"Got unexpected value for metric {x}")
 
 # Convenience object to package information needed for a final solution
 class VertexLabelingSolution:
-    def __init__(self, loss, m, c, s, V, soft_V, T, G, node_collection):
+    def __init__(self, loss, m, c, s, g, o, e, V, soft_V, T, G, node_collection):
         self.loss = loss
-        self.m = convert_pars_metric_to_int(m)
-        self.c = convert_pars_metric_to_int(c)
-        self.s = convert_pars_metric_to_int(s)
+        self.m = convert_metric_to_int(m)
+        self.c = convert_metric_to_int(c)
+        self.s = convert_metric_to_int(s)
+        self.g = convert_metric_to_float(g)
+        self.o = convert_metric_to_float(o)
+        self.e = convert_metric_to_float(e)
         self.V = V
         self.T = T
         self.G = G
@@ -224,17 +239,18 @@ def comigration_number_approximation(site_adj):
     c = torch.sum(binarized_site_adj, dim=(1,2)) - bin_site_trace
     return c
 
-def comigration_number(site_adj, A, VA, VT, X, update_path_matrix):
+def comigration_number(site_adj, A, VA, V, VT, update_path_matrix, identical_T):
     '''
     Args:
         - site_adj: sample_size x num_sites x num_sites matrix, where each num_sites x num_sites
         matrix has the number of migrations from site i to site j
         - A: Adjacency matrix (directed) of the full tree (sample_size x num_nodes x num_nodes)
         - VA: V*A
+        - V: Vertex labeling one-hot matrix (sample_size x num_sites x num_nodes)
         - VT: transpose of V 
-        - X: VT*V (1 if node i and node j are the same color)
         - update_path_matrix: whether we need to update the path matrix or we can use a cached version
         (need to update when we're actively resolving polytomies)
+        - identical_T: bool, whether all adjacency matrices in T along the sample size dimension are identical
     Returns:
         - comigration number: a subset of the migration edges between two anatomical sites, such that 
         the migration edges occur on distinct branches of the clone tree. It is the number of multi-edges in 
@@ -244,16 +260,23 @@ def comigration_number(site_adj, A, VA, VT, X, update_path_matrix):
     VAT = torch.transpose(VA, 2, 1)
     W = VAT @ VA # 1 if two nodes' parents are the same color
     Y = torch.sum(torch.mul(VAT, 1-VT), axis=2) # Y has a 1 for every node where its parent has a diff color
+    X = VT @ V # 1 if two nodes are the same color
     shared_par_and_self_color = torch.mul(W, X) # 1 if two nodes' parents are same color AND nodes are same color
     # tells us if two nodes are (1) in the same site and (2) have parents in the same site
     # and (3) there's a path from node i to node j
     global LAST_P # this is expensive to compute, so hash it if we don't need to update it
     if LAST_P != None and not update_path_matrix:
-        P = LAST_P
+        P = LAST_P.to(A.device)
+        # Make sure if we're using a cached version (only applicable in cases where 
+        # we're not resolving polytomies), we provide the correct shape on the first 
+        # batch dimension. This is only when we're post-processing individual solutions,
+        # so just grab the first 2-D path matrix
+        if P.shape != A.shape:
+            assert(A.shape[0]==1)
+            P = P[0]
     else:
-        P = path_matrix(A, remove_self_loops=True)
+        P = path_matrix(A, remove_self_loops=True, identical_T=identical_T)
         LAST_P = P
-
     shared_path_and_par_and_self_color = torch.sum(torch.mul(P, shared_par_and_self_color), axis=2)
     repeated_temporal_migrations = torch.sum(torch.mul(shared_path_and_par_and_self_color, Y), axis=1)
     binarized_site_adj = torch.sigmoid(BINARY_ALPHA * (2 * site_adj - 1))
@@ -261,27 +284,31 @@ def comigration_number(site_adj, A, VA, VT, X, update_path_matrix):
     c = torch.sum(binarized_site_adj, dim=(1,2)) - bin_site_trace + repeated_temporal_migrations
     return c
 
-def genetic_distance_score(G, m, A, X):
+def genetic_distance_score(G, m, A, V, VT):
     '''
     Args:
         - G: Matrix of genetic distances between internal nodes (shape: sample_size x num_internal_nodes x num_internal_nodes).
              Lower values indicate lower branch lengths, i.e. more genetically similar.
         - m: vector of migration numbers (length = sample_size)
         - A: Adjacency matrix (directed) of the full tree (sample_size x num_nodes x num_nodes)
-        - X: VT*V (1 if node i and node j are the same color)
+        - V: Vertex labeling one-hot matrix (sample_size x num_sites x num_nodes)
+        - VT: transpose of V 
     Returns:
-        - genetic distance score, summed over sample_size # of solutions
+        - genetic distance score, for each sample in the first dimension
     '''
-    g = 0
+    g = torch.zeros(m.shape, device=A.device)
     if G != None:
-        # Calculate if 2 nodes are in diff sites and there's an edge between them (i.e there is a migration edge)
+        X = VT @ V # 1 if two nodes are the same color
+        # TODO: is there a way to do this without converting A to a dense matrix?
+        A = A.to_dense()
+        # Calculate if 2 nodes are in diff sites and there's an edge between them (i.e. there is a migration edge)
         R = torch.mul(A, (1-X))
         adjusted_G = -torch.log(G+0.01)
         R = torch.mul(R, adjusted_G)
-        g = torch.sum(R, dim=(1,2))/(m)
+        g = torch.sum(R, dim=(1,2))/(m + 1) # to prevent division by 0
     return g
 
-def organotropism_score(O, site_adj_no_diag, p, bs, num_sites):
+def organotropism_score(O, site_adj_no_diag, p, bs):
     '''
     Args:
         - O: Array of frequencies with which the primary cancer type seeds site i (shape: num_anatomical_sites).
@@ -289,11 +316,10 @@ def organotropism_score(O, site_adj_no_diag, p, bs, num_sites):
         matrix has the number of migrations from site i to site j, and no self loops
         - p: one-hot vector indicating site of the primary
         - bs: sample_size (number of samples)
-        - num_sites: number of anatomical sites
     Returns:
-        - organotropism score, summed over sample_size # of solutions
+        - organotropism score, for each sample in the first dimension
     '''
-    o = 0
+    o = torch.zeros(bs, device=site_adj_no_diag.device)
     if O != None:
         # the organotropism frequencies can only be used on the first 
         # row, which is for the migrations from primary cancer site to
@@ -304,23 +330,22 @@ def organotropism_score(O, site_adj_no_diag, p, bs, num_sites):
         adjusted_freqs = -torch.log(O+0.01)
         num_mig_from_prim = site_adj_no_diag[:,prim_site_idx,:]
         organ_penalty = torch.mul(num_mig_from_prim, adjusted_freqs)
-        o = torch.sum(organ_penalty, dim=(1))/torch.sum(num_mig_from_prim, dim=(1))
+        o = torch.sum(organ_penalty, dim=(1))/(torch.sum(num_mig_from_prim, dim=(1)) + 1) # to prevent division by 0
     return o
 
-def ancestral_labeling_metrics(V, A, G, O, p, update_path_matrix, compute_full_c):
-
+def ancestral_labeling_metrics(V, A, G, O, p, update_path_matrix, compute_full_c, identical_T):
+    
     single_A = A
     bs = V.shape[0]
     num_sites = V.shape[1]
     A = A if len(A.shape) == 3 else repeat_n(single_A, bs) 
     
     # Compute matrices used for all parsimony metrics
-    VA = V @ A
+    VA = torch.bmm(A.permute(0,2,1), V.permute(0,2,1)).permute(0,2,1)
     VT = torch.transpose(V, 2, 1)
     site_adj = VA @ VT
     # Remove the same site transitions from the site adjacency matrix
-    site_adj_no_diag = torch.mul(site_adj, repeat_n(1-torch.eye(num_sites, num_sites), bs))
-    X = VT @ V # 1 if two nodes are the same color
+    site_adj_no_diag = torch.mul(site_adj, repeat_n(1-torch.eye(num_sites, num_sites, device=site_adj.device), bs))
 
     # 1. Migration number
     m = migration_number(site_adj)
@@ -330,15 +355,15 @@ def ancestral_labeling_metrics(V, A, G, O, p, update_path_matrix, compute_full_c
 
     # 3. Comigration number
     if compute_full_c:
-        c = comigration_number(site_adj, A, VA, VT, X, update_path_matrix)
+        c = comigration_number(site_adj, A, VA, V, VT, update_path_matrix, identical_T)
     else:
         c = comigration_number_approximation(site_adj)
 
     # 4. Genetic distance
-    g = genetic_distance_score(G, m, A, X)
+    g = genetic_distance_score(G, m, A, V, VT)
 
     # 5. Organotropism
-    o = organotropism_score(O, site_adj_no_diag, p, bs, num_sites)
+    o = organotropism_score(O, site_adj_no_diag, p, bs)
 
     return m, c, s, g, o
 
@@ -353,7 +378,7 @@ def calc_entropy(V, soft_V):
     eps = 1e-7 # to avoid nans when values in soft_V get very close to 0
     return torch.sum(torch.mul(soft_V, torch.log2(soft_V+eps)), dim=(1, 2)) / V.shape[2]
 
-def get_repeating_weight_vector(bs, weight_list):
+def get_repeating_weight_vector(bs, weight_list, device):
     # Calculate the number of times each weight should be repeated
     total_weights = len(weight_list)
     repeats = bs // total_weights
@@ -369,39 +394,39 @@ def get_repeating_weight_vector(bs, weight_list):
         repeated_list += additional_repeated
 
     # Convert the list to a tensor
-    weights_vec = torch.tensor(repeated_list)
+    weights_vec = torch.tensor(repeated_list, device=device)
 
     return weights_vec
 
-def get_mig_weight_vector(bs, weights):
-    return get_repeating_weight_vector(bs, weights.mig)
+def get_mig_weight_vector(bs, weights, device):
+    return get_repeating_weight_vector(bs, weights.mig, device)
 
-def get_seed_site_weight_vector(bs, weights):
-    return get_repeating_weight_vector(bs, weights.seed_site)
+def get_seed_site_weight_vector(bs, weights, device):
+    return get_repeating_weight_vector(bs, weights.seed_site, device)
 
 def clone_tree_labeling_loss_with_computed_metrics(m, c, s, g, o, e, weights, bs=1):
 
     # Combine all 5 components with their weights
     # Explore different weightings
     if isinstance(weights.mig, list) and isinstance(weights.seed_site, list):
-        mig_weights_vec = get_mig_weight_vector(bs, weights)
-        seeding_sites_weights_vec = get_seed_site_weight_vector(bs, weights)
+        mig_weights_vec = get_mig_weight_vector(bs, weights, m.device)
+        seeding_sites_weights_vec = get_seed_site_weight_vector(bs, weights, s.device)
         mig_loss = torch.mul(mig_weights_vec, m)
         seeding_loss = torch.mul(seeding_sites_weights_vec, s)
         labeling_loss = (mig_loss + weights.comig*c + seeding_loss + weights.gen_dist*g + weights.organotrop*o+ weights.entropy*e)
-        
     else:
         mig_loss = weights.mig*m
         seeding_loss = weights.seed_site*s
         labeling_loss = (mig_loss + weights.comig*c + seeding_loss + weights.gen_dist*g + weights.organotrop*o+ weights.entropy*e)
     return labeling_loss
 
-def clone_tree_labeling_objective(V, soft_V, A, G, O, p, weights, update_path_matrix, compute_full_c=True):
+def clone_tree_labeling_objective(V, soft_V, T, G, O, p, weights, 
+                                  update_path_matrix=True, compute_full_c=True, identical_T=False):
     '''
     Args:
         V: Vertex labeling of the full tree (sample_size x num_sites x num_nodes)
-        A: Adjacency matrix (directed) of the full tree (num_nodes x num_nodes)
-        G: Matrix of genetic distances between internal nodes (shape:  num_internal_nodes x num_internal_nodes).
+        T: Adjacency matrix (directed) of the full tree (sample_size x num_nodes x num_nodes)
+        G: Matrix of genetic distances between internal nodes (shape: sample_size x num_internal_nodes x num_internal_nodes).
         Lower values indicate lower branch lengths, i.e. more genetically similar.
         O: Array of frequencies with which the primary cancer type seeds site i (shape: num_anatomical_sites).
         p: one-hot vector indicating site of the primary
@@ -410,6 +435,7 @@ def clone_tree_labeling_objective(V, soft_V, A, G, O, p, weights, update_path_ma
             cached version (this is expensive to compute)
         compute_full_c: bool, whether we need to compute the full comigration number or we can calculate an approzimation
             (this is expensive to compute)
+        identical_T: bool, whether all adjacency matrices in T along the sample size dimension are identical
 
     Returns:
         Loss to score the ancestral vertex labeling of the given tree. This combines (1) migration number, (2) seeding site
@@ -417,13 +443,13 @@ def clone_tree_labeling_objective(V, soft_V, A, G, O, p, weights, update_path_ma
     '''
     V = add_batch_dim(V)
     soft_V = add_batch_dim(soft_V)
-    m, c, s, g, o = ancestral_labeling_metrics(V, A, G, O, p, update_path_matrix, compute_full_c)
+    m, c, s, g, o = ancestral_labeling_metrics(V, T, G, O, p, update_path_matrix, compute_full_c, identical_T)
     # Entropy
     e = calc_entropy(V, soft_V)
 
     labeling_loss = clone_tree_labeling_loss_with_computed_metrics(m, c, s, g, o, e, weights, bs=V.shape[0])
+    return labeling_loss, (m, c, s, g, o, e)
 
-    return labeling_loss, (m, c, s)
 
 ######################################################
 ######### POST U MATRIX ESTIMATION UTILITIES #########
@@ -448,29 +474,29 @@ def full_adj_matrix_from_internal_node_idx_to_sites_present(input_T, input_G, id
                                                             num_sites, G_identical_clone_val, 
                                                             node_collection, ordered_sites):
     '''
-    All non-zero values of U represent extant clones (leaf nodes of the full tree).
+    All non-zero values of U represent extant clones (witness nodes of the full tree).
     For each of these non-zero values, we add an edge from parent clone to extant clone.
     '''
     num_leaves = sum(len(lst) for lst in idx_to_sites_present.values())
     full_adj = torch.nn.functional.pad(input=input_T, pad=(0, num_leaves, 0, num_leaves), mode='constant', value=0)
-    leaf_idx = input_T.shape[0]
+    witness_idx = input_T.shape[0]
     # Also add branch lengths (genetic distances) for the edges we're adding.
     # Since all of these edges we're adding represent genetically identical clones,
     # we are going to add a very small but non-zero value.
     full_G = torch.nn.functional.pad(input=input_G, pad=(0, num_leaves, 0, num_leaves), mode='constant', value=0) if input_G is not None else None
 
     leaf_labels = []
-    # Iterate through the internal nodes that we want to attach leaf nodes to
+    # Iterate through the internal nodes that we want to attach witness nodes to
     for internal_node_idx in idx_to_sites_present:
         # Attach a leaf node for every site that this internal node is observed in
         for site in idx_to_sites_present[internal_node_idx]:
-            full_adj[internal_node_idx, leaf_idx] = 1
+            full_adj[internal_node_idx, witness_idx] = 1
             label = node_collection.get_node(internal_node_idx).label + [ordered_sites[site]]
-            leaf_node = MigrationHistoryNode(leaf_idx, label, is_leaf=True, is_polytomy_resolver_node=False)
+            leaf_node = MigrationHistoryNode(witness_idx, label, is_witness=True, is_polytomy_resolver_node=False)
             node_collection.add_node(leaf_node)
             if input_G is not None:
-                full_G[internal_node_idx, leaf_idx] = G_identical_clone_val
-            leaf_idx += 1
+                full_G[internal_node_idx, witness_idx] = G_identical_clone_val
+            witness_idx += 1
             leaf_labels.append(site)
 
     assert len(leaf_labels) !=0, f"No nodes present in any sites"
@@ -529,6 +555,21 @@ def remove_leaf_indices_not_observed_sites(removal_indices, U, input_T, T, G, no
 ######################################################
 ################## RANDOM UTILITIES ##################
 ######################################################
+
+def multiply_with_sparse_check(m1, m2):
+    """
+    Multiplies a dense matrix m1 with a sparse matrix m2
+    
+    If m2 is a sparse tensor, it uses sparse-dense multiplication.
+    If m2 is a dense tensor, it uses standard dense multiplication.
+    """
+    if isinstance(m2, torch.sparse.SparseTensor):
+        # If m2 is sparse, multiply using sparse-dense multiplication
+        return torch.sparse.mm(m2.transpose(0, 1), V.T).T
+    else:
+        # If m2 is dense, multiply using standard multiplication
+        return m1 @ m2
+    
 def print_gpu_memory():
     if torch.cuda.is_available():
         # Get current device index
@@ -608,8 +649,10 @@ def create_reweighted_solution_set_from_pckl(pckl, O, p, weights):
     node_collections = [MigrationHistoryNodeCollection.from_dict(dct) for dct in pckl[OUT_IDX_LABEL_KEY]]
     solution_set = []
     for T, V, soft_V, G, node_collection in zip(Ts, Vs, soft_Vs, Gs, node_collections):
-        loss, (m,c,s) = clone_tree_labeling_objective(torch.tensor(V), torch.tensor(soft_V), torch.tensor(T), torch.tensor(G), O, p, weights, True)
-        solution_set.append(VertexLabelingSolution(loss, m, c, s, torch.tensor(V), torch.tensor(soft_V), torch.tensor(T), torch.tensor(G), node_collection))
+        T = torch.sparse_coo_tensor(T[0], T[1], size=T[2])
+        V,soft_V,G = torch.tensor(V),torch.tensor(soft_V),torch.tensor(G)
+        loss, new_metrics = clone_tree_labeling_objective(V,soft_V, T, G, O, p, weights, True)
+        solution_set.append(VertexLabelingSolution(loss, *new_metrics,V,soft_V, T, G,node_collection))
     return solution_set
 
 def calculate_sample_size(num_nodes, num_sites, solve_polytomies):
@@ -630,20 +673,39 @@ def calculate_sample_size(num_nodes, num_sites, solve_polytomies):
 
 def tree_iterator(T):
     ''' 
-    Iterate an adjacency matrix, yielding i and j for all values = 1
+    Iterate an adjacency matrix, yielding i and j for all values = 1.
+    Handles dense NumPy arrays, dense PyTorch tensors, and sparse PyTorch tensors.
     '''
-    # Enumerating through a torch tensor is pretty computationally expensive,
-    # so convert to a sparse matrix to efficiently access non-zero values
-    #T = T if isinstance(T, np.ndarray) else T.detach().cpu().numpy()
-    #T = sp.coo_matrix(T)
-    # for i, j in zip(T.row, T.col):
-    #     yield i,j
-    non_zero_indices = T.indices()
+    # Case 1: If input is a sparse PyTorch tensor
+    if isinstance(T, torch.Tensor) and T.is_sparse:
+        non_zero_indices = T.coalesce().indices()  # Get non-zero indices from sparse tensor
+        
+        # Yield i, j for all non-zero values (equal to 1 in adjacency matrix)
+        for i in range(non_zero_indices.size(1)):
+            row, col = non_zero_indices[:, i]
+            yield int(row), int(col)
 
-    # Print the i, j positions
-    for i in range(non_zero_indices.size(1)):
-        row, col = non_zero_indices[:, i]
-        yield row, col
+    # Case 2: If input is a dense PyTorch tensor
+    elif isinstance(T, torch.Tensor):
+        T = T.detach().cpu()  # Ensure it's on the CPU
+        non_zero_indices = torch.nonzero(T != 0, as_tuple=False)  # Get indices where value == 1
+
+        # Yield i, j for all non-zero values
+        for row, col in non_zero_indices:
+            yield int(row), int(col)
+
+    # Case 3: If input is a NumPy array
+    elif isinstance(T, np.ndarray):
+        # Convert NumPy array to a SciPy sparse matrix for efficiency
+        T_sparse = sp.coo_matrix(T)  # Convert to sparse COO format
+
+        # Yield i, j for all non-zero values
+        for row, col in zip(T_sparse.row, T_sparse.col):
+            yield int(row), int(col)
+
+    else:
+        raise TypeError("Input must be a sparse PyTorch tensor, dense PyTorch tensor, or NumPy array.")
+
 
 def list_gpu_tensors():
     for obj in gc.get_objects():
@@ -751,6 +813,27 @@ def swap_keys(d, key1, key2):
     # If neither key exists, do nothing
     return d
 
+def find_leaf_nodes(sparse_tensor):
+    """
+    Given a sparse COO tensor representing an adjacency matrix, find the leaf nodes.
+    
+    Parameters:
+    - sparse_tensor: Sparse COO tensor representing the adjacency matrix (n x n).
+    
+    Returns:
+    - leaf_nodes: A list of indices of leaf nodes (nodes with no outgoing edges).
+    """
+    # Get the "from" nodes (row indices) of the sparse matrix
+    from_nodes = sparse_tensor.coalesce().indices()[0]
+
+    # Identify all nodes in the graph (based on the number of rows/columns in the matrix)
+    all_nodes = torch.arange(sparse_tensor.shape[0])
+
+    # Leaf nodes are those that are not present in the "from" node list
+    leaf_nodes = all_nodes[~torch.isin(all_nodes, from_nodes)].tolist()
+
+    return leaf_nodes
+
 def restructure_matrices_root_index_zero(adj_matrix, ref_matrix, var_matrix, node_collection, gen_dist_matrix, idx_to_observed_sites):
     '''
     Restructure the inputs so that the node at index 0 becomes the root node.
@@ -766,7 +849,7 @@ def restructure_matrices(source_root_idx, target_root_idx, adj_matrix, ref_matri
 
     Returns:
         - Restructured adjacency matrix, reference matrix, variant matrix, node_idt_to_label dcitionary,
-        and genetic distance matricx
+        and genetic distance matrix
     '''
     if source_root_idx == target_root_idx:
         # Nothing to restructure here!
@@ -836,7 +919,7 @@ def nodes_w_leaf_nodes(adj_matrices, num_internal_nodes):
     return mask
 
 def print_U(U, B, node_collection, ordered_sites, ref, var):
-    cols = ["GL"]+[";".join([str(i)]+node_collection.get_node(i).label[:2]) for i in range(len(node_collection.get_nodes())) if not node_collection.get_node(i).is_leaf]
+    cols = ["GL"]+[";".join([str(i)]+node_collection.get_node(i).label[:2]) for i in range(len(node_collection.get_nodes())) if not node_collection.get_node(i).is_witness]
     U_df = pd.DataFrame(U.detach().numpy(), index=ordered_sites, columns=cols)
 
     print("U\n", U_df)
@@ -932,8 +1015,11 @@ def get_k_or_more_children_nodes(input_T, T, internal_node_idx_to_sites, k, incl
 
     if include_children is False, we only look at node 0's U values and not its children's U values
     '''
-    row_sums = torch.sum(T, axis=1)
+    
+    T_dense = T.to_dense() if T.is_sparse else T
+    row_sums = torch.sum(T_dense, axis=1)
     node_indices = list(torch.where(row_sums >= k)[0])
+    del T_dense
     filtered_node_indices = []
     all_resolver_sites = []
     for node_idx in node_indices:
@@ -1021,6 +1107,16 @@ def get_child_indices(T, indices):
 
     return all_child_indices
 
+def get_child_indices_sparse_t(T, optimal_batch_num, parent_idx):
+    T = T.coalesce()
+    indices = T.indices()
+    bss,iss,jss = indices[0], indices[1], indices[2]
+    child_indices = []
+    for b,i,j in zip(bss,iss,jss):
+        if b == optimal_batch_num and i == parent_idx:
+            child_indices.append(int(j))
+    return child_indices
+
 def get_parent(T, node):
     num_nodes = len(T)
     parents = [i for i in range(num_nodes) if T[i][node] != 0]
@@ -1045,29 +1141,132 @@ def repeat_n(x, n):
     '''
     if n == 0:
         return x
+    if x.is_sparse:
+        return repeat_sparse(x, n)
     return x.repeat(n,1).reshape(n, x.shape[0], x.shape[1])
 
-def path_matrix(T, remove_self_loops=False):
-    '''
-    T is a numpy ndarray or tensor adjacency matrix (where Tij = 1 if there is a path from i to j)
-    '''
-    bs = 1 if len(T.shape) == 2 else T.shape[0]
-    # Path matrix that tells us if path exists from node i to node j
-    I = torch.eye(T.shape[1]).repeat(bs, 1, 1)  # Repeat identity matrix along batch dimension
-    B = torch.logical_or(T, I).int()  # Convert to int for more efficient matrix multiplication
-    # Initialize path matrix with direct connections
-    P = B.clone()
-    
-    # Floyd-Warshall algorithm
-    for k in range(T.shape[1]):
-        # Compute shortest paths including node k
-        B = torch.logical_or(B, B[:, :, k].unsqueeze(2) & B[:, k, :].unsqueeze(1))
-        # Update path matrix
-        P |= B
+def repeat_sparse(x, n):
+    if not x.is_coalesced():
+        x = x.coalesce()
         
-    if remove_self_loops:
-        P = torch.logical_xor(P, I.int())
-    return P.squeeze(0) if len(T.shape) == 2 else P
+    # x: the input sparse tensor
+    indices = x.indices()  # Get the indices of the sparse tensor
+    values = x.values()    # Get the values of the sparse tensor
+    size = x.size()        # Get the size of the sparse tensor
+
+    # Create batch indices for all repetitions (n)
+    batch_indices = torch.arange(n).repeat_interleave(indices.shape[1]).to(x.device)
+    
+    # Expand original indices to match the batch size (adding a new dimension)
+    expanded_indices = indices.unsqueeze(0).repeat(n, 1, 1)  # Shape: (n, num_dims, num_non_zero)
+    expanded_indices = expanded_indices.permute(1, 0, 2).reshape(expanded_indices.shape[1], expanded_indices.shape[0] * expanded_indices.shape[2])
+
+    # Concatenate batch indices to expanded original indices
+    final_indices = torch.cat([batch_indices.unsqueeze(0),expanded_indices], dim=0)
+    # Repeat the values across the batch dimension
+    repeated_values = values.repeat(n)
+
+    # Define the new size, which includes the batch dimension
+    new_size = torch.Size([n, *size])
+    
+    # Create a new sparse tensor with batch-wise repeated indices and values
+    return torch.sparse_coo_tensor(final_indices, repeated_values, new_size)
+
+
+def stack_closures(closures, batch_size, n):
+    # Stack the closures into a single sparse tensor
+    stacked_indices = []
+    stacked_values = []
+
+    for i in range(batch_size):
+        closure = closures[i]
+        indices = closure.indices().clone()
+        values = closure.values()
+
+        # Adjust row indices for stacking
+        indices[0] += i * n
+
+        stacked_indices.append(indices)
+        stacked_values.append(values)
+
+    # Concatenate indices and values
+    final_indices = torch.cat(stacked_indices, dim=1)
+    final_values = torch.cat(stacked_values)
+
+    # Create the final stacked sparse tensor
+    stacked_closure = torch.sparse_coo_tensor(final_indices, final_values, (batch_size, n, n))
+
+    return stacked_closure
+
+def topological_sort_dag(T):
+    """
+    Perform topological sorting on the DAG using NetworkX.
+    """
+    # Convert adjacency matrix to NetworkX DiGraph
+    G = nx.DiGraph(T.cpu().numpy())
+    
+    # Return the nodes in topological sorted order
+    topo_sort = list(nx.topological_sort(G))
+    topo_sort.reverse()
+    return topo_sort
+
+def purdom_transitive_closure(T, remove_self_loops):
+    """
+    Optimized version of Purdom's algorithm to compute transitive closure 
+    focusing only on outgoing edges.
+    
+    T: Sparse adjacency matrix of the DAG.
+    Returns: Sparse binary reachability matrix
+    """
+    T = T.to_dense()
+    # Ensure T is a binary adjacency matrix
+    T = (T > 0).int()  # Force binary matrix
+
+    # Initialize the reachability matrix (start with the adjacency matrix)
+    reachability_matrix = T.clone()
+
+    # Perform topological sort of the DAG
+    topo_sort = topological_sort_dag(T)
+    # Traverse the nodes in topological order
+    for u in topo_sort:
+        # Get the outgoing neighbors of node u
+        neighbors_u = (T[u] != 0).nonzero(as_tuple=False)
+        neighbors_u = [idx.item() for idx in neighbors_u]
+
+        if neighbors_u:
+            for v in neighbors_u:
+                # Propagate reachability for the outgoing edges from u
+                reachability_matrix[u] |= reachability_matrix[v]
+    
+    if not remove_self_loops:
+        diag_ones = torch.eye(T.shape[0])
+        # Add the diagonal ones to the original matrix
+        reachability_matrix = reachability_matrix + diag_ones
+
+    return reachability_matrix
+
+def path_matrix(T, remove_self_loops=False, identical_T=False):
+    '''
+    Compute the transitive closure of adjacency matrix T using Purdom's algorithm
+    '''
+    
+    # If there's a single 2D matrix, compute its closure directly
+    if len(T.shape) == 2:
+        return purdom_transitive_closure(T, remove_self_loops)
+    
+    # For batched matrices
+    closures = []
+    og_bs = T.shape[0]
+    bs = 1 if identical_T else og_bs
+    for i in range(bs):
+        P = purdom_transitive_closure(T[i], remove_self_loops)
+        closures.append(P)
+
+    if identical_T:
+        stacked_closure = repeat_n(closures[0], og_bs)
+    else:
+        stacked_closure = torch.stack(closures)
+    return stacked_closure
 
 def mutation_matrix(A):
     '''
@@ -1087,8 +1286,9 @@ def get_adj_matrix_from_edge_list(edge_list):
     return torch.tensor(T, dtype = torch.float32)
 
 def is_tree(adj_matrix):
-    rows, cols = torch.where(adj_matrix == 1)
-    edges = zip(rows.tolist(), cols.tolist())
+    # rows, cols = torch.where(adj_matrix == 1)
+    # edges = zip(rows.tolist(), cols.tolist())
+    edges = adjacency_matrix_to_edge_list(adj_matrix)
     g = nx.Graph()
     g.add_edges_from(edges)
     return (not nx.is_empty(g) and nx.is_tree(g))

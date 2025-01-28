@@ -1,30 +1,34 @@
 import torch
 import torch.optim.lr_scheduler as lr_scheduler
-from metient.util import vertex_labeling_util as vutil
 import numpy as np
 import copy
-from metient.lib import polytomy_resolver as prutil
-from metient import metient as met
-from metient.util.globals import *
 from tqdm import tqdm
 from torch.cuda.amp import autocast, GradScaler
+
+import matplotlib.pyplot as plt
+
+from metient.lib import polytomy_resolver as prutil
+from metient.util import vertex_labeling_util as vutil
+from metient import metient as met
+from metient.util.globals import *
+from metient.util import optimal_subtrees as opt_sub
 
 PROGRESS_BAR = 0 # Keeps track of optimization progress using tqdm
 
 class VertexLabelingSolver:
     def __init__(self, L, T, p, G, O, weights, config, num_sites, num_nodes_to_label,
                  node_collection, input_T, idx_to_observed_sites):
-        self.L = L
-        self.T = T
-        self.p = p
-        self.G = G
-        self.O = O
+        self.L = L # witness node labels
+        self.input_T = input_T # adjacency matrix of internal nodes
+        self.T = T # adjacency matrix of internal nodes + witness nodes
+        self.p = p # primary tumor labeling
+        self.G = G # genetic distance matrix
+        self.O = O # organotropism vector
         self.weights = weights
         self.config = config
         self.num_sites = num_sites
         self.num_nodes_to_label = num_nodes_to_label
         self.node_collection = node_collection
-        self.input_T = input_T
         self.idx_to_observed_sites = idx_to_observed_sites
         # This gets set at first optimization time
         self.poly_res = None
@@ -33,9 +37,13 @@ class VertexLabelingSolver:
     def run(self):
         return run_multiple_optimizations(self)
 
-def optimize_v(v_solver, X, poly_res, exploration_weights, max_iter, v_interval, is_second_optimization):
-    
-    
+def optimize_v_t(v_solver, X, poly_res, exploration_weights, max_iter, v_interval, is_second_optimization):
+    '''
+    Perform gradient-based Gumbel-softmax optimization on V and T (if resolving polytomies)
+    '''
+
+    v_solver.T = v_solver.T.to_sparse()
+
     # Unpack config
     lr = v_solver.config['lr']
     init_temp, final_temp = v_solver.config['init_temp'], v_solver.config['final_temp']
@@ -46,9 +54,7 @@ def optimize_v(v_solver, X, poly_res, exploration_weights, max_iter, v_interval,
     
     solve_polytomies = v_solver.config['solve_polytomies']
     if solve_polytomies:
-        #poly_optimizer = torch.optim.Adam([poly_res.latent_var], lr=lr)
-        v_optimizer = torch.optim.Adam([X,poly_res.latent_var], lr=lr)
-        #poly_scheduler = lr_scheduler.LinearLR(poly_optimizer, start_factor=1.0, end_factor=0.5, total_iters=max_iter)
+        v_optimizer = torch.optim.Adam([X, poly_res.latent_var], lr=lr)
     v_temps, t_temps = [], []
 
     v_temp = init_temp
@@ -59,35 +65,30 @@ def optimize_v(v_solver, X, poly_res, exploration_weights, max_iter, v_interval,
     scaler = GradScaler()
 
     global PROGRESS_BAR
+
     for i in range(max_iter):
         update_path = update_path_matrix(i, max_iter, solve_polytomies, is_second_optimization)
-        # if solve_polytomies and update_path:
-        #     poly_optimizer.zero_grad()
 
         v_optimizer.zero_grad()
-        with autocast():
-            V, v_losses, soft_V, T = compute_v_loss(X, v_solver, poly_res, exploration_weights, update_path, v_temp, t_temp)
-            mean_loss = torch.mean(v_losses)
-        #mean_loss.backward()
+        # On the last iteration (before we return results), compute the full comigration number and not an approximation
+        compute_full_c = i == (max_iter-1)
+        V, losses, soft_V, T, metrics = compute_v_t_loss(X, v_solver, poly_res, exploration_weights, update_path, v_temp, t_temp, compute_full_c)
+        mean_loss = torch.mean(losses)
         scaler.scale(mean_loss).backward()
 
-        if solve_polytomies and update_path:
-        #     poly_optimizer.step()
-        #     poly_scheduler.step()
-            if i % 5 == 0:
-                t_temp = np.maximum(t_temp * np.exp(-t_anneal_rate * j), final_temp)
-            j += 1
-
-        # else:
         # Step the optimizer, unscale gradients, and update scaler
         scaler.step(v_optimizer)
         scaler.update()
-        #v_optimizer.step()
         v_scheduler.step()
 
         if i % v_interval == 0:
             v_temp = np.maximum(v_temp * np.exp(-v_anneal_rate * k), final_temp)
         k += 1
+
+        if solve_polytomies and update_path:
+            if i % v_interval == 0:
+                t_temp = np.maximum(t_temp * np.exp(-t_anneal_rate * j), final_temp)
+            j += 1
 
         v_temps.append(v_temp)
         t_temps.append(t_temp)
@@ -99,12 +100,9 @@ def optimize_v(v_solver, X, poly_res, exploration_weights, max_iter, v_interval,
     # plt.figure(figsize=(1,1),dpi=100)
     # plt.plot([x for x in range(len(t_temps))], t_temps, marker='.'); plt.show(); plt.close()
 
-    return V, soft_V, T, poly_res
+    return V, soft_V, T, poly_res, metrics
 
 def first_v_optimization(v_solver, exploration_weights):
-    # We're learning X, which is the vertex labeling of the internal nodes
-    X = x_weight_initialization(v_solver)
-    X.requires_grad = True
     
     vutil.LAST_P = None
     
@@ -114,12 +112,13 @@ def first_v_optimization(v_solver, exploration_weights):
     if solve_polytomies:
         nodes_w_polys, resolver_sites = vutil.get_k_or_more_children_nodes(v_solver.input_T, v_solver.T, 
                                                                            v_solver.idx_to_observed_sites, 3, True, 2)
-        # print("nodes_w_polys",nodes_w_polys, "resolver_sites", resolver_sites)
         if len(nodes_w_polys) == 0:
             print("No potential polytomies to solve, not resolving polytomies.")
             poly_res, solve_polytomies = None, False
         else:
             poly_res = prutil.PolytomyResolver(v_solver, nodes_w_polys, resolver_sites)
+            #num_resolver_nodes = poly_res.resolver_indices
+            v_solver.num_nodes_to_label += len(poly_res.resolver_indices)
             #T, G, node_idx_to_label = poly_res.T, poly_res.G, poly_res.node_idx_to_label
     else:
         poly_res = None
@@ -127,35 +126,41 @@ def first_v_optimization(v_solver, exploration_weights):
     v_solver.poly_res = poly_res
     v_solver.config['solve_polytomies'] = solve_polytomies
 
+    # We're learning X, which is the vertex labeling of the internal nodes
+    X = x_weight_initialization(v_solver)
+    X.requires_grad = True
+
     # First optimization
-    optimized_Vs, _, optimized_Ts, _ = optimize_v(v_solver, X, v_solver.poly_res, exploration_weights, v_solver.config['first_max_iter'],
-                                                  v_solver.config['first_v_interval'], False)
+    V, _, T, _, _ = optimize_v_t(v_solver, X, v_solver.poly_res, exploration_weights, v_solver.config['first_max_iter'],
+                              v_solver.config['first_v_interval'], False)
     # Identify optimal subtrees, keep them fixed, and solve for the rest of the tree
-    optimal_nodes, optimal_batch_nums = find_optimal_subtrees(optimized_Ts, optimized_Vs, v_solver)
+    optimal_nodes, optimal_batch_nums = opt_sub.find_optimal_subtrees(T, V, v_solver)
     
-    optimized_Ts = optimized_Ts.cpu().detach()
-    optimized_Vs = optimized_Vs.cpu().detach()
+    T = T.cpu().detach()
+    V = V.cpu().detach()
     torch.cuda.empty_cache()
-    return optimal_nodes, optimal_batch_nums, optimized_Ts, optimized_Vs
+    return optimal_nodes, optimal_batch_nums, T, V
 
     
 def second_v_optimization(v_solver, run_specific_x, run_specific_poly_res, exploration_weights):
     vutil.LAST_P = None
 
     # Second optimization
-    optimzed_Vs, optimzed_soft_Vs, optimzed_Ts, run_specific_poly_res = optimize_v(v_solver, run_specific_x, run_specific_poly_res, exploration_weights,
-                                                            v_solver.config['second_max_iter'], v_solver.config['second_v_interval'], True)
+    V, soft_V, T, run_specific_poly_res, metrics = optimize_v_t(v_solver, run_specific_x, run_specific_poly_res, exploration_weights,
+                                                                        v_solver.config['second_max_iter'], v_solver.config['second_v_interval'], True)
 
-    optimzed_Vs = optimzed_Vs.cpu().detach()
-    optimzed_soft_Vs = optimzed_soft_Vs.cpu().detach()
-    optimzed_Ts = optimzed_Ts.cpu().detach()
+    V = V.cpu().detach()
+    soft_V = soft_V.cpu().detach()
+    T = T.cpu().detach()
+    metrics = tuple(metric.cpu().detach() for metric in metrics)
 
     # Free up GPU memory after inference
     if v_solver.config['solve_polytomies']:
         run_specific_poly_res.latent_var = run_specific_poly_res.latent_var.cpu().detach()
     torch.cuda.empty_cache()
 
-    return optimzed_Vs, optimzed_soft_Vs, optimzed_Ts, run_specific_poly_res
+
+    return V, soft_V, T, run_specific_poly_res, metrics
 
 def full_exploration_weights(weights):
     return met.Weights(mig=DEFAULT_CALIBRATE_MIG_WEIGHTS, comig=DEFAULT_CALIBRATE_COMIG_WEIGHTS, 
@@ -163,8 +168,144 @@ def full_exploration_weights(weights):
                        reg=weights.reg, entropy=weights.entropy, gen_dist=0.0, organotrop=0.0)
 
 
+def run_fitch_hartigan(v_solver, results):
+    """
+    Recover possible ancestral states using Fitch's algorithm and select one optimal solution
+
+    Parameters:
+    - adj_matrix: Sparse COO adjacency matrix representing the tree structure (n x n).
+    - node_idx_to_observed_sites: Dictionary mapping leaf node indices to their labels.
+    - root_label: The known label of the root node.
+
+    Returns:
+    - ancestral_matrix: A k x n matrix, where k is the number of labels, and n is the internal node indices.
+    """
+    adj_matrix = v_solver.input_T
+    node_idx_to_observed_sites = v_solver.idx_to_observed_sites
+    root_label = torch.argmax(v_solver.p, dim=0).item()
+    
+    n = adj_matrix.shape[0]
+    k = v_solver.num_sites
+
+    # Step 1: Initialize a k x n matrix to store possible labels for each node (True/False for each label)
+    ancestral_matrix = torch.zeros((k, n), dtype=torch.float32)
+
+    # Step 2: Fill in the matrix for leaf nodes and root node based on the node_idx_to_observed_sites dictionary
+    for node, leaf_labels in node_idx_to_observed_sites.items():
+        ancestral_matrix[:, node] = 0
+        for leaf_label in leaf_labels:
+            ancestral_matrix[leaf_label, node] = 1  # Set the corresponding label to True
+
+    # For leaf nodes without any observed sites, initialize as possibly belonging to all sites
+    leaf_nodes = torch.nonzero(adj_matrix.sum(dim=1) == 0).squeeze(dim=1).tolist()
+
+    for leaf in leaf_nodes:
+        if leaf not in node_idx_to_observed_sites:
+            ancestral_matrix[:, leaf] = 1
+
+    root = vutil.get_root_index(adj_matrix)
+    ancestral_matrix[:, root] = 0
+    ancestral_matrix[root_label, root] = 1
+
+    # Step 3: Perform the downward pass (Fitch algorithm) for internal nodes
+    def fitch_down(node):
+        node = int(node)
+
+        # Check if the node has observed sites
+        has_observed_sites = node in node_idx_to_observed_sites
+
+        # Find children of the node using the adjacency matrix
+        children = torch.nonzero(adj_matrix[node]).squeeze(dim=1)
+
+        # If the node is a leaf, return its known label set
+        if len(children) == 0 and has_observed_sites:
+            return ancestral_matrix[:, node]
+
+        # Collect label sets from all children
+        child_label_sets = [fitch_down(child) for child in children]
+
+        # Perform set intersection or union based on children's labels
+        intersection = torch.stack(child_label_sets).all(dim=0)
+        if torch.any(intersection):  # If intersection is non-empty, use it as the set
+            ancestral_matrix[:, node] = intersection
+        else:  # Otherwise, use the union of the children's sets
+            union = torch.stack(child_label_sets).any(dim=0)
+            ancestral_matrix[:, node] = union
+
+        # If the node has observed sites, enforce them on the computed labels
+        if has_observed_sites:
+            observed_sites = ancestral_matrix[:, node]
+            ancestral_matrix[:, node] = ancestral_matrix[:, node] * observed_sites
+
+        return ancestral_matrix[:, node]
+    
+    # Step 4: Perform Fitch's downward pass starting from the root
+    fitch_down(root)
+    # Reinforce root label
+    ancestral_matrix[:, root] = 0
+    ancestral_matrix[root_label, root] = 1
+    single_soln_matrix = ancestral_matrix.clone()
+
+    # Step 5: Perform the upward pass to choose specific states for internal nodes,
+    # starting with the root label.
+    def fitch_up(node, parent_label):
+        children = torch.nonzero(adj_matrix[node]).squeeze(dim=1)
+
+        # If there are multiple possible labels, choose one (use the parent's label if possible)
+        possible_labels = torch.where(single_soln_matrix[:, node])[0]
+        if parent_label in possible_labels:
+            chosen_label = parent_label
+        else:
+            chosen_label = possible_labels[0]
+
+        # Set the chosen label to True and others to False for the node
+        single_soln_matrix[:, node] = 0
+        single_soln_matrix[chosen_label, node] = 1
+
+        # Pass the chosen label to the children
+        for child in children:
+            fitch_up(child, chosen_label)
+
+    # Perform the upward pass starting from the root with the enforced root label
+    fitch_up(root, root_label)
+
+
+    # We needed to include the root labeling for Fitch-Hartigan, but we restack 
+    # it using stack_vertex_labeling, so remove it momentarily
+    single_soln_matrix = torch.cat((single_soln_matrix[:, :root], single_soln_matrix[:, root+1:]), dim=1)
+    V = stack_vertex_labeling(v_solver.L, vutil.add_batch_dim(single_soln_matrix), v_solver.p, None, None)
+    T = vutil.repeat_n(v_solver.T,1)
+    metrics = vutil.ancestral_labeling_metrics(V, T, v_solver.G, v_solver.O, v_solver.p, 
+                                                 update_path_matrix=False, compute_full_c=True, identical_T=True)
+    V = V.cpu().detach()
+    T = T.cpu().detach()
+    metrics = tuple(metric.cpu().detach() for metric in metrics)
+    print("Fitch-hartigan result:", metrics)
+    results.append((V, torch.zeros(V.shape, device=V.device), T, None, (*metrics,torch.zeros(size=(1,),device=V.device))))
+
+
+def no_metastasis_solution(v_solver):
+    '''
+    In the case where there are no metastases (the only site is the primary), we don't
+    need to do any optimization
+    '''
+    vertex_labeling = vutil.add_batch_dim(torch.ones(1, v_solver.num_nodes_to_label))
+    V = stack_vertex_labeling(v_solver.L, vertex_labeling, v_solver.p, None, None)
+    metrics = tuple(torch.zeros(size=(1,), device=V.device) for _ in range(6))
+    v_solver.T = v_solver.T.to_sparse()
+    ret = [(V, torch.zeros(V.shape, device=V.device), vutil.repeat_n(v_solver.T,1), None, metrics)]
+    return ret
 
 def run_multiple_optimizations(v_solver):
+    '''
+    Run optimization on V/T on a first pass to find optimal subtrees, fix those subtrees,
+    then run second optimization to infer Pareto optimal solutions, using multiple parsimony models
+    to promote exploration
+    '''
+
+    if v_solver.num_sites == 1:
+        return no_metastasis_solution(v_solver)
+
     global PROGRESS_BAR
     PROGRESS_BAR = tqdm(total=v_solver.config['first_max_iter'] + v_solver.config['second_max_iter']*len(ALL_PARSIMONY_MODELS)*v_solver.config['num_runs'], position=0)
 
@@ -172,24 +313,28 @@ def run_multiple_optimizations(v_solver):
     
     # Only run first optimization once (this finds optimal subtrees)
     first_opt_result = first_v_optimization(v_solver, full_exploration_weights(v_solver.weights))
-    optimal_nodes, optimal_batch_nums, optimized_Ts, optimized_Vs = first_opt_result
+    optimal_nodes, optimal_batch_nums, T, V = first_opt_result
 
     # Function to wrap the second optimization 
     def second_optimization_task(v_solver, exploration_weights):
         # Each run needs its own polytomy resolver and X
         run_specific_poly_solver = copy.deepcopy(v_solver.poly_res)
         run_specific_x = x_weight_initialization(v_solver)
-        run_specific_x, v_solver = initialize_optimal_x_polyres(run_specific_x, run_specific_poly_solver, optimal_nodes, optimal_batch_nums, optimized_Ts, optimized_Vs, v_solver)
+        run_specific_x, v_solver = opt_sub.init_optimal_x_polyres(run_specific_x, run_specific_poly_solver, optimal_nodes, 
+                                                                  optimal_batch_nums, T, V, v_solver)
         ret = second_v_optimization(v_solver, run_specific_x, run_specific_poly_solver, exploration_weights)
         return ret
 
     for _ in range(v_solver.config['num_runs']):
         for pars_model in ALL_PARSIMONY_MODELS:
             exploration_weights = met.Weights(mig=pars_model[0], comig=pars_model[1], 
-                                            seed_site=pars_model[2], data_fit=v_solver.weights.data_fit, 
-                                            reg=v_solver.weights.reg, entropy=v_solver.weights.entropy, gen_dist=0.0, organotrop=0.0)
-            
-            results.append(second_optimization_task(v_solver, exploration_weights))
+                                              seed_site=pars_model[2], data_fit=v_solver.weights.data_fit, 
+                                              reg=v_solver.weights.reg, entropy=v_solver.weights.entropy, gen_dist=0.0, organotrop=0.0)
+            ret = second_optimization_task(v_solver, exploration_weights)
+            results.append(ret)
+
+    if not v_solver.config['solve_polytomies']:
+        run_fitch_hartigan(v_solver, results)
 
     return results
 
@@ -254,23 +399,94 @@ def stack_vertex_labeling(L, X, p, poly_res, fixed_labeling):
     else:
         full_X = X
 
-    if poly_res != None:
-        # Order is: internal nodes, new poly nodes, leaf nodes from U
-        full_vert_labeling = torch.cat((full_X, vutil.repeat_n(poly_res.resolver_labeling, bs), L), dim=2)
-    else:
-        full_vert_labeling = torch.cat((full_X, L), dim=2)
-
+    full_vert_labeling = torch.cat((full_X, L), dim=2)
     p = vutil.repeat_n(p, bs)
     # Concatenate the left part, new column, and right part along the second dimension
-    return torch.cat((p, full_vert_labeling), dim=2)
+    full_vert_labeling = torch.cat((p, full_vert_labeling), dim=2)
 
-def compute_v_loss(X, v_solver, poly_res, exploration_weights, update_path_matrix, v_temp, t_temp):
+    # print(full_vert_labeling[0,:,14])
+    # print(full_vert_labeling[-1,:,14])
+
+    return full_vert_labeling
+
+def update_t_with_polytomy_resolver(poly_res: prutil.PolytomyResolver, 
+                                    t_temp: float, 
+                                    v_solver: VertexLabelingSolver) -> torch.Tensor:
+    """
+    Updates a sparse adjacency matrix T based on children-to-parent assignments 
+    resolved using the polytomy resolver (poly_res) and Gumbel-softmax sampling.
+
+    Removes old connections between child nodes and their previous parents, 
+    replacing them with the new connections resolved by the polytomy resolver.
+    Additionally, removes connections to nodes in `resolver_indices` if they have no children.
+
+    Args:
+        poly_res (Any): The polytomy resolver containing:
+            - latent_var: A batch_size x n x m matrix, where n is the number of nodes 
+              and m is the number of children of polytomies.
+            - children_of_polys: The order of child nodes of polytomies in latent_var's 2nd dim.
+        t_temp (float): Temperature parameter for Gumbel-softmax sampling.
+        v_solver (Any): A solver object with an adjacency matrix T (a sparse tensor).
+
+    Returns:
+        torch.Tensor: Updated sparse adjacency matrix T for the batch, 
+        with old parent-child connections replaced as per the resolved decisions.
+    """
+    # Perform Gumbel-softmax to resolve parent assignments for children of polytomies
+    # softmax_pol_res is sample_size x number of nodes x children of polytomies
+    softmax_pol_res, ss = gumbel_softmax(poly_res.latent_var, t_temp)
+    # print("ss\n", ss)
+    non_zero_indices = torch.nonzero(softmax_pol_res, as_tuple=False).T
+    # print("non_zero_indices\n", non_zero_indices)
+
+    # Extract relevant indices from the non-zero entries
+    batch_indices = non_zero_indices[0]
+    parent_indices = non_zero_indices[1] 
+    child_indices = non_zero_indices[2]
+    global_child_indices = torch.tensor(poly_res.children_of_polys, device=softmax_pol_res.device)[child_indices]
+    # print("poly_res.children_of_polys", poly_res.children_of_polys)
+    # print('parent_indices\n', parent_indices )
+    # print('parent_indices\n', parent_indices )
+    # print('global_child_indices\n', global_child_indices)
+    # Create new connections
+    new_indices = torch.stack([batch_indices, parent_indices, global_child_indices])
+    new_values = torch.ones(new_indices.size(1), dtype=torch.float32, device=softmax_pol_res.device)
+
+    # Repeat and coalesce the adjacency matrix for the batch
+    bs = poly_res.latent_var.shape[0]
+    T = vutil.repeat_n(v_solver.T, bs).coalesce()
+
+    # Filter out old connections for the updated children
+    existing_indices = T.indices()
+    existing_values = T.values()
+    
+    # Perform comparison using broadcasting
+    batch_child_pairs = (
+    existing_indices[0] * T.shape[2] + existing_indices[2]
+        )  # Hash batch-child pairs
+    new_batch_child_pairs = (
+        batch_indices * T.shape[2] + global_child_indices
+    )  # Hash new batch-child pairs
+
+    mask = ~torch.isin(batch_child_pairs, new_batch_child_pairs)
+    filtered_indices = existing_indices[:, mask]  # Mask out parent-child relations
+    filtered_values = existing_values[mask]  # Apply the same mask to values
+    # Concatenate filtered existing data with new connections
+    updated_indices = torch.cat([filtered_indices, new_indices], dim=1)
+    updated_values = torch.cat([filtered_values, new_values])
+
+    # Create updated sparse tensor
+    updated_T = torch.sparse_coo_tensor(updated_indices, updated_values, T.shape).coalesce()
+
+    return updated_T
+
+def compute_v_t_loss(X, v_solver, poly_res, exploration_weights, update_path_matrix, v_temp, t_temp, compute_full_c):
     '''
     Args:
         X: latent variable of labelings we are solving for. (sample_size x num_unknown_nodes x num_sites)
             where num_unkown_nodes = len(T) - (len(known_indices)), or len(unknown_indices)
-        L: leaf node labels derived from U
-        T: Full adjacency matrix which includes clone tree nodes as well as leaf nodes which were
+        L: witness node labels derived from U
+        T: Full adjacency matrix which includes clone tree nodes as well as witness nodes which were
             added from U > U_CUTOFF (observed in a site)
         p: one-hot vector indicating site of the primary
         G: Matrix of genetic distances between internal nodes (shape:  num_internal_nodes x num_internal_nodes).
@@ -286,19 +502,17 @@ def compute_v_loss(X, v_solver, poly_res, exploration_weights, update_path_matri
 
     bs = X.shape[0]
     if poly_res != None:
-        softmax_pol_res, _ = gumbel_softmax(poly_res.latent_var, t_temp)
-        T = vutil.repeat_n(v_solver.T, bs)
-        T[:,:,poly_res.children_of_polys] = softmax_pol_res
+        T = update_t_with_polytomy_resolver(poly_res, t_temp, v_solver)
     else:
         T = vutil.repeat_n(v_solver.T, bs)
-
+    
     G = v_solver.G
     if G != None:
         G = vutil.repeat_n(G, T.shape[0])
-    loss, _ = vutil.clone_tree_labeling_objective(V, softmax_X_soft, T, v_solver.G, 
-                                                  v_solver.O, v_solver.p, exploration_weights, 
-                                                  update_path_matrix, compute_full_c=False)
-    return V, loss, softmax_X_soft, T
+    loss, metrics = vutil.clone_tree_labeling_objective(V, softmax_X_soft, T, v_solver.G, 
+                                                        v_solver.O, v_solver.p, exploration_weights, 
+                                                        update_path_matrix, compute_full_c=compute_full_c)
+    return V, loss, softmax_X_soft, T, metrics
 
 def x_weight_initialization(v_solver):
 
@@ -334,164 +548,7 @@ def update_path_matrix(itr, max_iter, solve_polytomies, second_optimization):
         return True
     if not solve_polytomies:
         return False
-    if second_optimization:
-        return itr > max_iter*1/3 and itr < max_iter*2/3
-    return itr > max_iter*1/3 and itr < max_iter*2/3
-
-#################################################################
-################### FIX OPTIMAL SUBTREES ########################
-#################################################################
-
-def find_optimal_subtree_nodes(optimized_Ts, optimized_Vs, num_internal_nodes):
-    '''
-    Args:
-        - optimized_Ts: all possible solutions for possible adjacency matrices
-        - optimized_Vs: all possible solutions for possible vertex labeling
-    Returns:
-        A list of node indices and their descendatns which belong to optimal subtrees (i.e.)
-        all nodes in the subtree have the same color/label, and a list of the batch numbers
-        that these optimal subtrees were found 
-    '''
-
-    P = vutil.path_matrix(optimized_Ts, remove_self_loops=False)
-    VT = torch.transpose(optimized_Vs, 2, 1)
-    # i,j = 1 if node i and node j have the same label 
-    X = VT @ optimized_Vs
-    same_color_subtrees = torch.logical_not(torch.logical_and(1 - X, P))
-    # Get the indices of rows where all elements are True (all nodes have the same label)
-    cand_optimal_subtree_indices = torch.nonzero(torch.all(same_color_subtrees, dim=2))
-    # Tells us how many descendants each node has
-    row_sums = torch.sum(P, dim=2)
-    indexed_row_sums = torch.tensor([row_sums[idx[0]][idx[1]] for idx in cand_optimal_subtree_indices]).unsqueeze(1)
-    cand_optimal_subtree_indices = torch.cat((cand_optimal_subtree_indices, indexed_row_sums), dim=1)
-    # 2. Sort the optimal_subtrees by the number of children they have,
-    # so that when we are solving for polytomies, we get the largest optimal subtrees possible
-    cand_optimal_subtree_indices = cand_optimal_subtree_indices[cand_optimal_subtree_indices[:, 2].argsort(descending=True)]
-    
-    ## 3. Only keep optimal subtree roots that have a leaf node
-    # nodes_w_leaves = vutil.nodes_w_leaf_nodes(optimized_Ts, num_internal_nodes)
-    # cand_optimal_subtree_indices = [x for x in cand_optimal_subtree_indices if nodes_w_leaves[x[0], x[1]]]
-    seen_nodes = set()
-    optimal_batch_nums, optimal_subtree_nodes = [],[]
-    for cand in cand_optimal_subtree_indices:
-        batch_num = int(cand[0])
-        optimal_subtree_root = int(cand[1])
-        if optimal_subtree_root not in optimal_subtree_nodes:
-            # Add the optimal_subtree_root and all its descendants
-            descendants = [t.item() for t in torch.nonzero(P[batch_num,optimal_subtree_root])]
-            
-            # Don't fix clone's leaf nodes (num. descendants == 1), since we already know their labeling, 
-            # and if they are under an optimal polytomy branch, they would be getting added by an optimal
-            # subtree rooted by an ancestor
-            if len(descendants) == 1: 
-                continue
-            # Don't fix a subtree where there are no leaf nodes 
-            leaf_node_in_optimal_subtree = False
-            for descendant in descendants:
-                if descendant >= num_internal_nodes:
-                    leaf_node_in_optimal_subtree = True
-            
-            if not leaf_node_in_optimal_subtree:
-                continue
-            # Don't fix when it's just a node and its leaf (the labeling of the node could be
-            # multiple possibilities and still be optimal)
-            if len(descendants) == 2:
-                continue
-            #print(optimal_subtree_root, descendants, leaf_node_in_optimal_subtree, batch_num)
-            current_node_set = []
-            for descendant in descendants:
-                if descendant not in seen_nodes:
-                    current_node_set.append(descendant)
-                    seen_nodes.add(descendant)
-            if len(current_node_set) > 0:
-                optimal_batch_nums.append(batch_num)
-                optimal_subtree_nodes.append(current_node_set)
-    return optimal_subtree_nodes, optimal_batch_nums
-
-def initialize_optimal_x_polyres(X, poly_res, optimal_subtree_nodes,optimal_batch_nums, optimized_Ts, optimized_Vs, v_solver):
-    
-    poly_resolver_to_optimal_children = {}
-    known_indices = []
-    known_labelings = []
-    # TODO: re-initialize after first optimization?
-    # if poly_res != None:
-    #     # Anywhere the resolver is not -inf, reset the starting values to 1s
-    #     poly_res.latent_var[poly_res.latent_var != float('-inf')] = 1
-
-    # Fix node labels and node edges
-    for optimal_subtree_set,optimal_batch_num in zip(optimal_subtree_nodes,optimal_batch_nums):
-        for node_idx in optimal_subtree_set:
-            # If this is a witness node from U or the root index, we already know its vertex labeling
-            if node_idx <= X.shape[2] and node_idx != 0:
-                optimal_site = int(optimized_Vs[optimal_batch_num,:,node_idx].nonzero(as_tuple=False))
-                idx = node_idx - 1 # X doesn't include root node
-                known_indices.append(idx)
-                known_labelings.append(torch.eye(v_solver.num_sites)[optimal_site].T)
-                X[:,optimal_site,idx] = 1
-                non_optimal_sites = [i for i in range(v_solver.num_sites) if i != optimal_site]
-                X[:,non_optimal_sites,idx] = float("-inf")
-
-            # If this node is the child of a polytomy resolver node, fix its location
-            # if the parent (the polytomy resolver node) belongs to the same optimal subtree
-            if poly_res != None and node_idx in poly_res.children_of_polys:
-                poly_idx = poly_res.children_of_polys.index(node_idx)
-                parent_idx = int(optimized_Ts[optimal_batch_num,:,node_idx].nonzero(as_tuple=False))
-                if parent_idx not in optimal_subtree_set:
-                    continue
-                poly_res.latent_var[:,parent_idx, poly_idx] = 1
-                non_parents = [i for i in range(optimized_Ts.shape[1]) if i != parent_idx]
-                poly_res.latent_var[:,non_parents,poly_idx] = float("-inf")
-                poly_res.latent_var[:,non_parents,poly_idx] = float("-inf")
-
-                # Don't let any other non-optimal children of this polytomy resolver move around
-                if parent_idx in poly_res.resolver_indices:
-                    if parent_idx not in poly_resolver_to_optimal_children:
-                        optimal_children = vutil.get_child_indices(optimized_Ts[optimal_batch_num,:,:], [parent_idx])
-                        poly_resolver_to_optimal_children[parent_idx] = optimal_children
-
-    
-    if poly_res != None:
-        # Fix all other polytomy children s.t. they cannot move to be a child of the fixed node_idx
-        # for parent_idx in poly_resolver_to_optimal_children:
-        #     optimal_children = poly_resolver_to_optimal_children[parent_idx]
-        #     optimal_children_poly_indices = [poly_res.children_of_polys.index(i) for i in optimal_children]
-        #     other_children = [i for i in range(poly_res.latent_var.shape[2]) if i not in optimal_children_poly_indices]
-        #     poly_res.latent_var[:,parent_idx,other_children] = float("-inf")
-        poly_res.latent_var.requires_grad = True
-    
-    fixed_labeling = None
-    if len(known_indices) != 0:
-        unknown_indices = [x for x in range(v_solver.num_nodes_to_label) if x not in known_indices]
-        known_labelings = torch.stack(known_labelings, dim=1)
-        X = X[:,:,unknown_indices] # only include the unknown indices for inference
-        fixed_labeling = vutil.FixedVertexLabeling(known_indices, unknown_indices, known_labelings)
-
-    v_solver.fixed_labeling = fixed_labeling
-    X.requires_grad = True
-
-    return X, v_solver
-
-def find_optimal_subtrees(optimized_Ts, optimized_Vs, v_solver):
-    '''
-    After the first round of optimization, there are optimal subtrees (subtrees where
-    the labelings of *all* nodes is the same), which we can keep fixed, since there
-    are no other more optimal labelings rooted at this branch.
-
-    Two things we can fix: the labeling of the nodes in optimal subtrees,
-    and the edges of the subtrees if polytomy resolution is being used. Search all
-    samples to find optimal subtrees, since there might not be one solution with all 
-    optimal subtrees.
-    '''
-    
-    num_internal_nodes = v_solver.num_nodes_to_label + 1 # root node
-    
-    # Re-initialize optimized_Ts with the tree with the best subtree structure
-    poly_res = v_solver.poly_res
-    if poly_res != None:
-        poly_res.latent_var.requires_grad = False
-        num_internal_nodes += len(poly_res.resolver_indices)
-        
-    # 1. Find samples with optimal subtrees
-    optimal_subtree_nodes, optimal_batch_nums = find_optimal_subtree_nodes(optimized_Ts, optimized_Vs, num_internal_nodes)
-
-    return optimal_subtree_nodes, optimal_batch_nums
+    return True
+    # if second_optimization:
+    #     return itr > max_iter*1/4 and itr < max_iter*3/4
+    return itr > max_iter*1/4 and itr < max_iter*3/4

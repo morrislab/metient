@@ -109,7 +109,7 @@ def get_max_cross_ent_thetas(pickle_file_list, patient_weights, tau=3.0, use_min
         loss_dicts = pckl[OUT_LOSS_DICT_KEY]
         pars_metrics = set()
         for loss_dict in loss_dicts:
-            pars_metrics.add((loss_dict[MIG_KEY].item(),loss_dict[COMIG_KEY].item(),loss_dict[SEEDING_KEY].item()))
+            pars_metrics.add((loss_dict[MIG_KEY],loss_dict[COMIG_KEY],loss_dict[SEEDING_KEY]))
         
         # This patient won't change the cross entropy loss
         if len(pars_metrics) == 1:
@@ -309,9 +309,26 @@ def multi_graph_to_set(edge_list):
     return res
 
 ########### Methods for evaluating Metient ouputs #############
+
+def create_sparse_tensor(sparse_info):
+    """
+    Creates a sparse tensor from a tuple containing indices, values, and size.
+
+    Args:
+        sparse_info (tuple): A tuple of the form (indices, values, size) where:
+            - indices: A 2D tensor of shape (2, N) representing the indices of the non-zero values.
+            - values: A 1D tensor of shape (N,) representing the non-zero values.
+            - size: A torch.Size object representing the size of the sparse tensor.
+
+    Returns:
+        torch.sparse.FloatTensor: A sparse tensor created from the input information.
+    """
+    indices, values, size = sparse_info
+    return torch.sparse.FloatTensor(indices, values, size)
+
 def metient_parse_clone_tree(results_dict, met_tree_num):
     V = torch.tensor(results_dict[OUT_LABElING_KEY][met_tree_num])
-    A = torch.tensor(results_dict[OUT_ADJ_KEY][met_tree_num])
+    A = create_sparse_tensor(results_dict[OUT_ADJ_KEY][met_tree_num])
     idx_to_lbl = results_dict[OUT_IDX_LABEL_KEY][met_tree_num]
     idx_to_string_label = {i:";".join(idx_to_lbl[i][0]) for i in idx_to_lbl}
 
@@ -327,7 +344,7 @@ def metient_parse_clone_tree(results_dict, met_tree_num):
 
 def metient_parse_mig_graph(results_dict, met_tree_num):
     V = torch.tensor(results_dict[OUT_LABElING_KEY][met_tree_num])
-    A = torch.tensor(results_dict[OUT_ADJ_KEY][met_tree_num])
+    A = create_sparse_tensor(results_dict[OUT_ADJ_KEY][met_tree_num])
     sites = results_dict[OUT_SITES_KEY]
     G = plot_util.migration_graph(V, A)
     migration_edges = []
