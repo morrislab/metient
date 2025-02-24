@@ -3,25 +3,37 @@
 <img src="metient/logo.png" width="150">
 </p>
 
-**Metient** (**MET**astasis + gradi**ENT**) is a tool for inferring the metastatic migrations of a cancer. You can find our preprint on [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.07.09.602790).
+**Metient** (**MET**astasis + gradi**ENT**) is a tool for inferring the metastatic migrations of a patient's cancer. You can find our preprint on [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.07.09.602790).
 
-## System requirements
+<details>
+
+<summary> System requirements</summary>
+
 ### Hardware requirements
-Compute requirements depend on the input size of the data. Inputs with less than ~50 tree nodes and 6 tumor sites can be run on any computer with sufficient RAM. Inputs with a larger number of tree nodes or tumor sites should use a GPU along with a larger amount of CPU RAM. No extra configuration is needed to run Metient on GPU.
+Metient compute requirements depend on the input size of the data. Inputs with less than ~50 tree nodes and 6 tumor sites can be run on any computer with sufficient RAM. Inputs with larger tree sizes or tumor sites should use a GPU along with a larger amount of CPU RAM. No extra configuration is needed to run Metient on GPU (Metient will automatically detect and use a GPU if one is available).
 
 ### Software requirements
 Metient has been tested on macOS Sonoma (14.4) and CentOS Linux 7 (Core).
 
-## Installation
+</details>
+
+<details>
+<summary>Installation</summary>
 
 Installing and running a tutorial for Metient should take ~5 minutes.
 
 Metient is available as a python library, installable via pip. It has been tested on Linux and Apple M1 Pro. 
 ```bash
-# mamba used for speed, can use conda instead if mamba is not installed
-mamba create -n "met" python=3.8.8 ipython
+# Mamba or conda can be used
+# Create and activate environment
+mamba create -n met -c conda-forge python=3.9
 mamba activate met
-pip install metient 
+
+# Install graphviz dependencies first via mamba
+mamba install -c conda-forge graphviz pygraphviz ipython
+
+# Install metient 
+pip install metient
 ```
 
 > [!TIP]
@@ -33,8 +45,12 @@ pip install metient
 > pip install pygraphviz --user
 > pip install metient
 > ```
+</details>
 
-## Tutorial
+<details>
+
+<summary>Tutorial</summary>
+
 To run the tutorial notebooks, clone this repo:
 ```bash
 git clone git@github.com:morrislab/metient.git
@@ -51,12 +67,16 @@ There are different Jupyter Notebook tutorials based on your use case:
 > [!TIP]
 > If your jupyter notebook does not automatically recognize your conda environment, run the following:
 > ```bash
-> pip install ipykernel
+> pip install notebook ipykernel
 > python -m ipykernel install --user --name myenv --display-name "met"
 > ```
 > Then in the jupyter notebook, select Kernel > Change kernel > met.
 
-## Inputs
+</details>
+
+<details>
+
+<summary>Inputs</summary>
 There are two required inputs, a tsv file with information for each sample and mutation/mutation cluster, and a txt file specifying the edges of the clone tree.
 
 ### 1. **Tsv file**
@@ -102,7 +122,11 @@ A .txt file where each line is an edge from the first index to the second index.
 
 [Example tree .txt file](tutorial/inputs/A_tree.txt)
 
-## Outputs
+</details>
+
+<details>
+
+<summary>Outputs</summary>
 
 Metient will output a pickle file in the specificed output directory for each patient that is inputted. 
 
@@ -116,3 +140,99 @@ In the pickle file you'll find the following keys:
 | **observed_clone_proportion_matrix** | numpy ndarray (shape: `len(ordered_anatomical_sites)`, `num_clusters`). Row i corresponds to the site at index i in `ordered_anatomical_sites`, and column j corresponds to the node with label `node_info[x][j][0]`. A value at i,j greater than 0.05 indicates that that node is present in that antomical site. These are the nodes that get added as leaf nodes. |
 |**losses** | a list of the losses, from best to worst solution.|
 |**primary_site**|str, the name of the anatomical site used as the primary site.|
+
+</details>
+
+<details>
+
+<summary>Usage</summary>
+
+When using either Metient-calibrate or Metient-evaluate functions, several key parameters affect the quality and performance of the results:
+
+### solve_polytomies
+```python
+solve_polytomies=True  # Default: False
+```
+- **What it does**: Attempts to resolve polytomies (nodes with more than two children) in the tree.
+- **When to use**: Enable this if you want to explore potential binary tree resolutions of polytomies in your data.
+- **Impact**: Can provide more parsimonious migration histories but increases computation time.
+- **Note**: Not tested on trees > 100 nodes.
+
+### sample_size
+```python
+sample_size=1024  # Default: -1 (automatic)
+```
+- **What it does**: Controls how many parallel solutions to explore.
+- **Best practices**:
+  - Use `-1` for automatic selection based on problem size
+  - For small trees (<20 nodes), 1024-4096 samples is usually sufficient
+  - For larger trees or many tumor samples, consider 10,000+ samples
+  - Increase if solutions seem inconsistent between runs
+  - Set to the maximum value that fits in available memory
+
+### num_runs
+```python
+num_runs=1  # Default: 1
+```
+- **What it does**: Number of times to run the entire algorithm.
+- **Best practices**:
+  - Use 1 for quick exploratory analysis
+  - Use 5-10 runs for more robust results
+  - If results vary significantly between runs, increase sample_size
+  - For large problems where memory limits sample_size, increase num_runs to explore more total solutions across sequential runs
+
+### Os (Organotropism Dictionaries)
+```python
+Os = {
+    "Liver": 0.5,
+    "Lung": 0.4,
+    "Brain": 0.1,
+}, # Organotropism dictionary for patient 1
+{
+    "Lymph": 0.7,
+    "Bone": 0.3,
+},  # Organotropism dictionary for patient 2
+```
+- **What it does**: Specifies known frequencies of metastasis to different sites
+- **When to use**: When you have prior knowledge about metastatic preferences for your cancer type
+- **Note**: Values should be normalized (sum to 1)
+
+#### output_dir and run_names
+```python
+output_dir = "path/to/outputs"
+run_names = ["patient1", "patient2"]  # For calibrate
+run_name = "patient1"    # For evaluate
+```
+- **Best practices**:
+  - Use descriptive, unique names for each patient
+  - Avoid special characters in names
+  - Create a new output directory for each analysis run
+  - For calibrate, ensure run_names list matches order of input files
+
+### PrintConfig 
+```python
+print_config = met.PrintConfig(
+    visualize=True,      
+    verbose=True,        # Enable for debugging
+    k_best_trees=10,     # The number of solutions to output
+    save_outputs=True,
+    custom_colors=None,  # Array of hex strings (with length = number of anatomical sites) to be used as custom colors in visualization
+)
+```
+
+### Weights
+```python
+weights = met.Weights(
+    mig=0.48,        # Default calibrated weights (to real data) work well for most cases
+    comig=0.30,      
+    seed_site=0.22,  
+)
+```
+- Use default weights for initial analysis
+- Higher weights mean higher penalty on that metric
+- Adjust weights if you want to:
+  - Prioritize fewer migrations (increase `mig`)
+  - Encourage shared migration paths (decrease `comig`)
+  - Reduce number of seeding sites (increase `seed_site`)
+
+</details>
