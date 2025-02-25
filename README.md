@@ -5,9 +5,15 @@
 
 **Metient** (**MET**astasis + gradi**ENT**) is a tool for inferring the metastatic migrations of a patient's cancer. You can find our preprint on [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.07.09.602790).
 
-<details>
+## Table of contents
+1. [System requirements](#system-requirements)
+2. [Installation](#installation)
+3. [Tutorial](#tutorial)
+4. [Inputs](#inputs)
+5. [Outputs](#outputs)
+6. [Usage](#usage)
 
-<summary> System requirements</summary>
+## System requirements
 
 ### Hardware requirements
 Metient compute requirements depend on the input size of the data. Inputs with less than ~50 tree nodes and 6 tumor sites can be run on any computer with sufficient RAM. Inputs with larger tree sizes or tumor sites should use a GPU along with a larger amount of CPU RAM. No extra configuration is needed to run Metient on GPU (Metient will automatically detect and use a GPU if one is available).
@@ -15,10 +21,7 @@ Metient compute requirements depend on the input size of the data. Inputs with l
 ### Software requirements
 Metient has been tested on macOS Sonoma (14.4) and CentOS Linux 7 (Core).
 
-</details>
-
-<details>
-<summary>Installation</summary>
+## Installation
 
 Installing and running a tutorial for Metient should take ~5 minutes.
 
@@ -45,11 +48,8 @@ pip install metient
 > pip install pygraphviz --user
 > pip install metient
 > ```
-</details>
 
-<details>
-
-<summary>Tutorial</summary>
+## Tutorial
 
 To run the tutorial notebooks, clone this repo:
 ```bash
@@ -72,11 +72,7 @@ There are different Jupyter Notebook tutorials based on your use case:
 > ```
 > Then in the jupyter notebook, select Kernel > Change kernel > met.
 
-</details>
-
-<details>
-
-<summary>Inputs</summary>
+## Inputs
 There are two required inputs, a tsv file with information for each sample and mutation/mutation cluster, and a txt file specifying the edges of the clone tree.
 
 ### 1. **Tsv file**
@@ -122,11 +118,7 @@ A .txt file where each line is an edge from the first index to the second index.
 
 [Example tree .txt file](tutorial/inputs/A_tree.txt)
 
-</details>
-
-<details>
-
-<summary>Outputs</summary>
+## Outputs
 
 Metient will output a pickle file in the specificed output directory for each patient that is inputted. 
 
@@ -141,11 +133,7 @@ In the pickle file you'll find the following keys:
 |**losses** | a list of the losses, from best to worst solution.|
 |**primary_site**|str, the name of the anatomical site used as the primary site.|
 
-</details>
-
-<details>
-
-<summary>Usage</summary>
+## Usage
 
 When using either Metient-calibrate or Metient-evaluate functions, several key parameters affect the quality and performance of the results:
 
@@ -235,4 +223,4 @@ weights = met.Weights(
   - Encourage shared migration paths (decrease `comig`)
   - Reduce number of seeding sites (increase `seed_site`)
 
-</details>
+
