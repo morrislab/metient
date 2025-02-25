@@ -67,7 +67,6 @@ There are different Jupyter Notebook tutorials based on your use case:
 > [!TIP]
 > If your jupyter notebook does not automatically recognize your conda environment, run the following:
 > ```bash
-> pip install notebook ipykernel
 > python -m ipykernel install --user --name myenv --display-name "met"
 > ```
 > Then in the jupyter notebook, select Kernel > Change kernel > met.
