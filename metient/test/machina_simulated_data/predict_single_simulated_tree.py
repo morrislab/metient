@@ -44,8 +44,9 @@ def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir
     custom_colors = [matplotlib.colors.to_hex(c) for c in ['limegreen', 'royalblue', 'hotpink', 'grey', 'saddlebrown', 'darkorange', 'purple', 'red', 'black', 'black', 'black', 'black']]
     perf_stats = []
     # This is for experiment when solving for migration histories using genetic distance only
-    needs_pruning = False if no_parsimony_weights(weights) else True
-    print("needs_pruning", needs_pruning)
+    # When only using genetic distance, we shouldn't filter down to the Pareto front
+    keep_pareto_only = False if no_parsimony_weights(weights) else True
+    print("keep_pareto_only", keep_pareto_only)
     for tree_num in range(len(trees)):
         start_time = datetime.datetime.now()
 
@@ -60,7 +61,7 @@ def predict_vertex_labeling(machina_sims_data_dir, site, mig_type, seed, out_dir
         print_config = PrintConfig(visualize=VISUALIZE, verbose=False, k_best_trees=sample_size, save_outputs=True)
         
         T_edges, labeling, G_edges, loss_info, time = infer_migration_history(T, pooled_tsv_fn, 'P', weights, print_config, out_dir, f"tree{tree_num}_seed{seed}_{mode}", 
-                                                                              sample_size=sample_size, custom_colors=custom_colors, needs_pruning=needs_pruning,
+                                                                              sample_size=sample_size, custom_colors=custom_colors, keep_pareto_only=keep_pareto_only,
                                                                               bias_weights=weight_init_primary, mode=mode, solve_polytomies=solve_polytomies)
 
         time_with_plotting = (datetime.datetime.now() - start_time).total_seconds()

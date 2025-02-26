@@ -58,7 +58,7 @@ def get_optimal_subtree_indices(T, V, P):
 def get_descendants(P, batch_num, parent_idx):
     """    
     Parameters:
-        P (torch.sparse.Tensor): A dense or sparse path matrix tensor (batch_size, num_nodes, num_nodes).
+        P: Path matrix (batch_size, num_nodes, num_nodes).
         batch_num: The batch number to retrieve from
         parent_idx: The index of the parent node whose descendants will be returned 
         
@@ -67,18 +67,13 @@ def get_descendants(P, batch_num, parent_idx):
     """
     if not P.is_sparse:
         return [t.item() for t in torch.nonzero(P[batch_num,parent_idx])]
-    P = P.coalesce()
-    sparse_indices = P.indices()
-
-    # Filter by batch and row
-    batch_mask = sparse_indices[0] == batch_num
-    row_mask = sparse_indices[1] == parent_idx
-    final_mask = batch_mask & row_mask
-
-    # Extract the non-zero column indices for the specified batch and row
-    non_zero_columns = sparse_indices[2][final_mask]
-    non_zero_columns = [t.item() for t in non_zero_columns]
-    return non_zero_columns
+        
+    P_indices = P.coalesce().indices()
+    # Get coalesced indices and create combined mask
+    mask = (P_indices[0] == batch_num) & (P_indices[1] == parent_idx)
+    
+    # Return filtered column indices directly as list
+    return P_indices[2][mask].tolist()
 
 def find_optimal_subtree_nodes(T, V, v_solver, num_internal_nodes):
     '''
@@ -96,6 +91,7 @@ def find_optimal_subtree_nodes(T, V, v_solver, num_internal_nodes):
     cand_optimal_subtree_indices = get_optimal_subtree_indices(T, V, P)
     seen_nodes = set()
     optimal_batch_nums, optimal_subtree_nodes = [],[]
+
     for cand in cand_optimal_subtree_indices:
         batch_num = int(cand[0])
         optimal_subtree_root = int(cand[1])
@@ -129,118 +125,229 @@ def find_optimal_subtree_nodes(T, V, v_solver, num_internal_nodes):
                 optimal_subtree_nodes.append(current_node_set)
     return optimal_subtree_nodes, optimal_batch_nums
 
-def get_parent_idx_sparse_t(T, optimal_batch_num, child_idx):
-    T = T.coalesce()
-    indices = T.indices()
-    bss,iss,jss = indices[0], indices[1], indices[2]
-    for b,i,j in zip(bss,iss,jss):
-        if b == optimal_batch_num and j == child_idx:
-            return int(i)
-    assert(False, "Parent index not found")
 
-def get_child_indices_sparse_t(T, optimal_batch_num, parent_idx):
-    T = T.coalesce()
-    indices = T.indices()
+def _collect_node_fixes(node_idx, optimal_batch_num, X, V, T, poly_res):
+    """Determine if and how a node's labeling should be fixed.
     
-    # Extract indices for batches, rows, and columns
-    bss, iss, jss = indices[0], indices[1], indices[2]
+    Args:
+        node_idx (int): Index of the node to check
+        optimal_batch_num (int): Batch number for this optimal solution
+        X (torch.Tensor): Vertex labeling tensor to be modified
+        V (torch.Tensor): Current vertex labeling solutions
+        T (torch.Tensor): Tree adjacency matrix
+        poly_res: Polytomy resolver object or None
     
-    # Apply boolean masks to filter for the conditions
-    mask = (bss == optimal_batch_num) & (iss == parent_idx)
+    Returns:
+        tuple: (should_fix, node_idx, optimal_site) or None if node should not be fixed
+    """
+    node_children = vutil.get_child_indices(T[optimal_batch_num,:,:],[node_idx])
+    is_unused_poly_resolver = (poly_res is not None and 
+                             node_idx in poly_res.resolver_indices and 
+                             len(node_children) < 2)
     
-    # Extract the corresponding child indices using the mask
-    child_indices = jss[mask].tolist()  # Convert the result to a list
-    
-    return child_indices
+    if (node_idx <= X.shape[2] and node_idx != 0) and not is_unused_poly_resolver:
+        optimal_site = int(V[optimal_batch_num,:,node_idx].nonzero(as_tuple=False))
+        return (node_idx, optimal_site, optimal_batch_num)
+    return None
 
-def init_optimal_x_polyres(X, poly_res, optimal_subtree_nodes, optimal_batch_nums, T, V, v_solver):
+def _collect_poly_fixes(node_idx, optimal_batch_num, optimal_subtree_set, T, poly_res):
+    """Determine if and how a polytomy resolver should be fixed.
     
-    poly_resolver_to_optimal_children = {}
+    Args:
+        node_idx (int): Index of the node to check
+        optimal_batch_num (int): Batch number for this optimal solution
+        optimal_subtree_set (list): Set of nodes in the current optimal subtree
+        T (torch.Tensor): Tree adjacency matrix
+        poly_res: Polytomy resolver object
+        
+    Returns:
+        tuple: (parent_idx, node_idx, poly_idx, optimal_children) or None if no fixes needed
+    """
+    if poly_res is None or node_idx not in poly_res.children_of_polys:
+        return None
+        
+    poly_idx = poly_res.children_of_polys.index(node_idx)
+    parent_idx = vutil.get_parent(T[optimal_batch_num,:,:], node_idx)
+    optimal_children = vutil.get_child_indices(T[optimal_batch_num,:,:], [parent_idx])
+    
+    if (parent_idx not in optimal_subtree_set or 
+        parent_idx not in poly_res.resolver_indices or 
+        len(optimal_children) < 2):
+        return None
+        
+    return (parent_idx, node_idx, poly_idx, optimal_children)
+
+def _apply_node_fixes(nodes_to_fix, X, v_solver):
+    """Apply collected node labeling fixes to X tensor.
+    
+    Args:
+        nodes_to_fix (list): List of (node_idx, optimal_site, batch_num) tuples
+        X (torch.Tensor): Vertex labeling tensor to modify
+        v_solver: Vertex labeling solver instance
+        
+    Returns:
+        tuple: (known_indices, known_labelings)
+    """
     known_indices = []
     known_labelings = []
-    # TODO: re-initialize after first optimization?
-    if poly_res != None:
-        # Anywhere the resolver is not -inf, reset the starting values to 1s
-        poly_res.latent_var[poly_res.latent_var != float('-inf')] = 1
+    
+    for node_idx, optimal_site, _ in nodes_to_fix:
+        known_indices.append(node_idx)
+        known_labelings.append(torch.eye(v_solver.num_sites)[optimal_site])
+        idx = node_idx - 1  # X doesn't include root node
+        X[:, optimal_site, idx] = 1
+        non_optimal_sites = [i for i in range(v_solver.num_sites) if i != optimal_site]
+        X[:, non_optimal_sites, idx] = float("-inf")
+        
+    return known_indices, known_labelings
+
+def _apply_poly_fixes(poly_fixes, poly_res, T):
+    """Apply collected polytomy resolver fixes.
+    
+    Args:
+        poly_fixes (list): List of (parent_idx, node_idx, poly_idx, optimal_children) tuples
+        poly_res: Polytomy resolver object
+        T (torch.Tensor): Tree adjacency matrix
+    """
+    poly_resolver_to_optimal_children = {}
+    
+    for parent_idx, _, poly_idx, optimal_children in poly_fixes:
+        # Fix the current child's position
+        poly_res.latent_var[:, parent_idx, poly_idx] = 1
+        non_parents = [i for i in range(T.shape[1]) if i != parent_idx]
+        poly_res.latent_var[:, non_parents, poly_idx] = float("-inf")
+        
+        # Track optimal children for each resolver
+        if parent_idx in poly_res.resolver_indices:
+            poly_resolver_to_optimal_children[parent_idx] = optimal_children
             
-    # Fix node labels and node edges
-    for optimal_subtree_set,optimal_batch_num in zip(optimal_subtree_nodes,optimal_batch_nums):
-        print("optimal_subtree_set", optimal_subtree_set)
+    return poly_resolver_to_optimal_children
+
+def _remove_nodes_from_T(T, nodes_to_remove):
+    T = T.coalesce()
+    indices = T.indices()
+    values = T.values()
+    
+    # Create batch-aware mask for nodes to remove
+    batch_indices = indices[0]  # (num_edges,)
+    source_nodes = indices[1]  # (num_edges,)
+    target_nodes = indices[2]  # (num_edges,)
+    nodes_to_remove_tensor = torch.tensor(list(nodes_to_remove), device=source_nodes.device)
+    # Keep edges where neither source nor target is in nodes_to_remove
+    keep_mask = ~((source_nodes.unsqueeze(1) == nodes_to_remove_tensor.unsqueeze(0)).any(dim=1) | 
+                    (target_nodes.unsqueeze(1) == nodes_to_remove_tensor.unsqueeze(0)).any(dim=1))
+    
+    new_indices = indices[:, keep_mask]
+    new_values = values[keep_mask]
+    # Create mapping for remaining nodes
+    remaining_nodes = sorted(set(range(T.shape[1])) - nodes_to_remove)
+    old_to_new = {old: new for new, old in enumerate(remaining_nodes)}
+    
+    # Remap indices
+    new_indices[1:] = torch.tensor([
+        [old_to_new[idx.item()] for idx in new_indices[1]],
+        [old_to_new[idx.item()] for idx in new_indices[2]]
+    ])
+    
+    # Create new T with reduced dimensions
+    new_size = (T.shape[0], len(remaining_nodes), len(remaining_nodes))
+
+    return torch.sparse_coo_tensor(new_indices, new_values, new_size).coalesce(), old_to_new
+
+def init_optimal_x_polyres(X, poly_res, optimal_subtree_nodes, optimal_batch_nums, T, V, v_solver):
+    """Initialize X and polytomy resolver with optimal subtrees fixed.
+    
+    This function fixes the labeling of nodes in optimal subtrees and their positions
+    in polytomy resolutions. An optimal subtree is one where all nodes have the same label.
+    
+    Args:
+        X (torch.Tensor): Vertex labeling tensor to be modified
+        poly_res: Polytomy resolver object or None
+        optimal_subtree_nodes (list): Lists of nodes in each optimal subtree
+        optimal_batch_nums (list): Batch numbers corresponding to each optimal subtree
+        T (torch.Tensor): Tree adjacency matrix
+        V (torch.Tensor): Current vertex labeling solutions
+        v_solver: Vertex labeling solver instance
+        
+    Returns:
+        tuple: (modified X tensor, modified v_solver)
+    """
+    # Reset polytomy resolver if it exists
+    if poly_res is not None:
+        poly_res.latent_var = poly_res.latent_var.detach()
+        poly_res.latent_var[poly_res.latent_var != float('-inf')] = 1
+
+    # First pass: collect all modifications needed
+    nodes_to_fix = []
+    poly_fixes = []
+    optimal_root_nodes = []
+    
+    for optimal_subtree_set, optimal_batch_num in zip(optimal_subtree_nodes, optimal_batch_nums):
+        #print("optimal_subtree_set", optimal_subtree_set)
         for i, node_idx in enumerate(optimal_subtree_set):
-            # print("node_idx", node_idx)
-            # If this is a witness node or the root index, we already know its vertex labeling
-            node_children = get_child_indices_sparse_t(T, optimal_batch_num, node_idx)
-            # Don't lock in the labeling of an unused polytomy node
-            is_unused_poly_resolver = poly_res != None and node_idx in poly_res.resolver_indices and len(node_children) < 2
-            # print("node_children", node_children, "is_unused_poly_resolver", is_unused_poly_resolver)
-            if (node_idx <= X.shape[2] and node_idx != 0) and not is_unused_poly_resolver:
-                optimal_site = int(V[optimal_batch_num,:,node_idx].nonzero(as_tuple=False))
-                idx = node_idx - 1 # X doesn't include root node
-                known_indices.append(idx)
-                known_labelings.append(torch.eye(v_solver.num_sites)[optimal_site].T)
-                X[:,optimal_site,idx] = 1
-                non_optimal_sites = [i for i in range(v_solver.num_sites) if i != optimal_site]
-                X[:,non_optimal_sites,idx] = float("-inf")
-                # print("optimal_site", optimal_site)
+            # Collect node labeling fixes
+            node_fix = _collect_node_fixes(node_idx, optimal_batch_num, X, V, T, poly_res)
+            if node_fix:
+                nodes_to_fix.append(node_fix)
+                if i == 0:
+                    optimal_root_nodes.append(node_idx)
+                
+            # Collect polytomy resolver fixes
+            poly_fix = _collect_poly_fixes(node_idx, optimal_batch_num, optimal_subtree_set, T, poly_res)
+            if poly_fix:
+                poly_fixes.append(poly_fix)
 
-            # If this node is the child of a polytomy resolver node, fix its location
-            # if the parent (the polytomy resolver node) belongs to the same optimal subtree
-            if poly_res != None and node_idx in poly_res.children_of_polys:
-                poly_idx = poly_res.children_of_polys.index(node_idx)
-                parent_idx = get_parent_idx_sparse_t(T,optimal_batch_num,node_idx)
-                optimal_children = get_child_indices_sparse_t(T, optimal_batch_num, parent_idx)
-                if parent_idx not in optimal_subtree_set or parent_idx not in poly_res.resolver_indices or len(optimal_children) < 2:
-                    continue
-                poly_res.latent_var[:,parent_idx, poly_idx] = 1
-                non_parents = [i for i in range(T.shape[1]) if i != parent_idx]
-                poly_res.latent_var[:,non_parents,poly_idx] = float("-inf")
-                poly_res.latent_var[:,non_parents,poly_idx] = float("-inf")
-                # print("fixing", parent_idx, node_idx)
-
-                # Don't let any other non-optimal children of this polytomy resolver move around
-                if parent_idx in poly_res.resolver_indices:
-                    if parent_idx not in poly_resolver_to_optimal_children:
-                        poly_resolver_to_optimal_children[parent_idx] = optimal_children
-
-    print("poly_resolver_to_optimal_children", poly_resolver_to_optimal_children)
-    if poly_res != None:
-        # Fix all other polytomy children s.t. they cannot move to be a child of the fixed node_idx
-        for parent_idx in poly_resolver_to_optimal_children:
-            optimal_children = poly_resolver_to_optimal_children[parent_idx]
+    # Second pass: apply modifications
+    known_indices, known_labelings = _apply_node_fixes(nodes_to_fix, X, v_solver)
+    #print("known_indices", known_indices)
+    if poly_res is not None:
+        
+        poly_resolver_to_optimal_children = _apply_poly_fixes(poly_fixes, poly_res, T)
+        
+        # Once a polytomy resolver has found its optimal children, fix its other children so that they cannt move
+        for parent_idx, optimal_children in poly_resolver_to_optimal_children.items():
             if len(optimal_children) < 2:
                 continue
             optimal_children_poly_indices = [poly_res.children_of_polys.index(i) for i in optimal_children]
             other_children = [i for i in range(poly_res.latent_var.shape[2]) if i not in optimal_children_poly_indices]
-            poly_res.latent_var[:,parent_idx,other_children] = float("-inf")
-            # print("fixing children of", parent_idx)
-        
+            poly_res.latent_var[:, parent_idx, other_children] = float("-inf")
+
+        # Handle resolver indices
         half_bs = X.shape[0]//2
-        # x-1 because X doesn't include root node
-        result = [(x-1, i) for i, x in enumerate(poly_res.resolver_indices) if x-1 not in known_indices]
-        if result:  # Ensure the result is not empty
+        result = [(x, i) for i, x in enumerate(poly_res.resolver_indices) if x not in known_indices]
+        if result:
             unknown_resolver_indices, mask = zip(*result)
             resolved_indices = vutil.repeat_n(poly_res.resolver_labeling[:,mask], half_bs)
             resolved_indices[resolved_indices == 0] = float('-inf')
-            X[:half_bs,:,unknown_resolver_indices] = resolved_indices
-            # print(X.shape)
-            # print("poly_res.resolver_labeling.shape", poly_res.resolver_labeling.shape)
-            # print(poly_res.resolver_labeling)
-            # print("unknown_resolver_indices", unknown_resolver_indices)
-            # print("with mask", poly_res.resolver_labeling[:,mask])
-            # print("vutil.repeat_n(poly_res.resolver_labeling[:,mask], half_bs)",vutil.repeat_n(poly_res.resolver_labeling[:,mask], half_bs).shape, )
-            # print("X[:half_bs,:,unknown_resolver_indices]",X[:half_bs,:,unknown_resolver_indices].shape)
-            # print(X[0], "\n",X[-1])
-
+            X[:half_bs,:,[x-1 for x in unknown_resolver_indices]] = resolved_indices
+            
         poly_res.latent_var.requires_grad = True
 
-    fixed_labeling = None
-    if len(known_indices) != 0:
-        unknown_indices = [x for x in range(v_solver.num_nodes_to_label) if x not in known_indices]
+    # Handle fixed labeling and matrix reduction
+    fixed_labeling, old_to_new = None, None
+    if known_indices:
+        if v_solver.config['collapse_nodes']:
+            # Identify which nodes to keep vs remove
+            nodes_to_remove = set([x for x in known_indices if x not in optimal_root_nodes])
+            # Create new T with reduced dimensions
+            _T, old_to_new = _remove_nodes_from_T(T, nodes_to_remove)
+            # Don't reformat G if we've already done it in a previous instantiation
+            if v_solver.G != None and v_solver.G.shape[0] != _T.shape[1]: 
+                G = v_solver.G
+                G = G[torch.tensor([i for i in range(G.size(0)) if i not in nodes_to_remove], device=G.device)]
+                G = G[:, torch.tensor([i for i in range(G.size(1)) if i not in nodes_to_remove], device=G.device)]
+                v_solver.G = G
+            v_solver.T = _T[0]
+        
+        # Update X tensor
+        unknown_indices = [x for x in range(v_solver.num_nodes_to_label+1) if x not in known_indices and x != 0]
         known_labelings = torch.stack(known_labelings, dim=1)
-        X = X[:,:,unknown_indices] # only include the unknown indices for inference
-        fixed_labeling = vutil.FixedVertexLabeling(known_indices, unknown_indices, known_labelings)
-        print("unknown_indices", len(unknown_indices), len(known_indices), [x+1 for x in unknown_indices], "known_indices", [x+1 for x in known_indices])
-    
+        X = X[:,:,[x-1 for x in unknown_indices]]
+        #print("num known indices", len(known_indices), "num unknown indices", len(unknown_indices))
+        
+        fixed_labeling = vutil.FixedVertexLabeling(known_indices, unknown_indices, known_labelings, 
+                                                   optimal_root_nodes, old_to_new)
+
     v_solver.fixed_labeling = fixed_labeling
     X.requires_grad = True
 
@@ -269,35 +376,3 @@ def find_optimal_subtrees(T, V, v_solver):
     optimal_subtree_nodes, optimal_batch_nums = find_optimal_subtree_nodes(T, V, v_solver, num_internal_nodes)
 
     return optimal_subtree_nodes, optimal_batch_nums
-
-def collapse_optimal_subtrees_with_expansion_fn(v_solver, V, T, optimal_nodes, optimal_batch_nums):
-    """
-    Collapses optimal subtrees in V and T for efficiency during optimization,
-    and returns a function to expand them later.
-    
-    Args:
-        v_solver: The vertex labeling solver instance
-        V: Vertex labeling matrix
-        T: Tree adjacency matrix
-        optimal_nodes: List of nodes that are roots of optimal subtrees
-        optimal_batch_nums: Batch numbers corresponding to optimal solutions
-        
-    Returns:
-        tuple: (collapsed_V, collapsed_T, expand_fn, original_V, original_T)
-    """
-    # Collapse the trees
-    collapsed_V, collapsed_T = opt_sub.collapse_optimal_subtrees(V, T, optimal_nodes)
-    
-    # Create expansion function that will be called later
-    def expand_fn(V_to_expand, T_to_expand, original_V, original_T):
-        expanded_V, expanded_T = opt_sub.expand_optimal_subtrees(
-            V_to_expand, 
-            T_to_expand,
-            original_V,  # original V with optimal subtrees
-            original_T,  # original T with optimal subtrees
-            optimal_nodes,
-            optimal_batch_nums
-        )
-        return expanded_V, expanded_T
-    
-    return collapsed_V, collapsed_T, expand_fn, V, T

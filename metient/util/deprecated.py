@@ -661,6 +661,35 @@ def get_adj_matrices_from_spruce_mutation_trees(mut_trees_filename, idx_to_chara
         out.append((adj_matrix, pruned_idx_to_label))
     return out
 
+
+# old comigration number
+    # VAT = torch.transpose(VA, 2, 1)
+    # W = VAT @ VA # 1 if two nodes' parents are the same color
+    # Y = torch.sum(torch.mul(VAT, 1-VT), axis=2) # Y has a 1 for every node where its parent has a diff color
+    # X = VT @ V # 1 if two nodes are the same color
+    # shared_par_and_self_color = torch.mul(W, X) # 1 if two nodes' parents are same color AND nodes are same color
+    # # tells us if two nodes are (1) in the same site and (2) have parents in the same site
+    # # and (3) there's a path from node i to node j
+    # global LAST_P # this is expensive to compute, so hash it if we don't need to update it
+    # if LAST_P != None and not update_path_matrix:
+    #     P = LAST_P.to(A.device)
+    #     # Make sure if we're using a cached version (only applicable in cases where 
+    #     # we're not resolving polytomies), we provide the correct shape on the first 
+    #     # batch dimension. This is only when we're post-processing individual solutions,
+    #     # so just grab the first 2-D path matrix
+    #     if P.shape != A.shape:
+    #         assert(A.shape[0]==1)
+    #         P = P[0]
+    # else:
+    #     P = path_matrix(A, remove_self_loops=True, identical_T=identical_T)
+    #     LAST_P = P
+    # shared_path_and_par_and_self_color = torch.sum(torch.mul(P, shared_par_and_self_color), axis=2)
+    # repeated_temporal_migrations = torch.sum(torch.mul(shared_path_and_par_and_self_color, Y), axis=1)
+    # binarized_site_adj = torch.sigmoid(BINARY_ALPHA * (2 * site_adj - 1))
+    # bin_site_trace = torch.diagonal(binarized_site_adj, offset=0, dim1=1, dim2=2).sum(dim=1)
+    # c = torch.sum(binarized_site_adj, dim=(1,2)) - bin_site_trace + repeated_temporal_migrations
+    # return c
+
 # # TODO: remove polytomy stuff?
 # def get_ref_var_matrices_from_machina_sim_data(tsv_filepath, pruned_idx_to_cluster_label, T):
 #     '''
@@ -1486,3 +1515,386 @@ def stack_vertex_labeling(L, X, p, poly_res, fixed_labeling):
     # print(f"Unique labels where columns 9/10 and 1 have the same label: {sorted(unique_labels)}")
 
     return full_vert_labeling
+
+class SolutionTracker:
+    """Tracks and manages diverse solutions using soft assignments"""
+    def __init__(self, temperature=0.1, diversity_threshold=0.1, max_solutions=100):
+        self.temperature = temperature
+        self.diversity_threshold = diversity_threshold
+        self.max_solutions = max_solutions
+        self.solutions = []  # List of (V, soft_V, T, metrics, signature)
+        
+    def compute_signature(self, soft_V):
+        """Convert soft assignments to a comparable signature"""
+        # Use softmax to get probabilities
+        probs = torch.nn.functional.softmax(soft_V / self.temperature, dim=1)
+        # Get most likely assignments and their probabilities
+        top_probs, top_indices = torch.topk(probs, k=2, dim=1)
+        # Create signature combining top assignments and their probabilities
+        return torch.cat([top_indices.float(), top_probs], dim=1)
+        
+    def is_diverse(self, signature):
+        """Check if solution is sufficiently different from existing ones"""
+        if not self.solutions:
+            return True
+            
+        existing_signatures = torch.stack([s[4] for s in self.solutions])
+        distances = torch.cdist(signature.unsqueeze(0), existing_signatures)
+        return distances.min() > self.diversity_threshold
+        
+    def add_solution(self, V, soft_V, T, metrics):
+        """Add new solution if it's diverse or dominates existing solutions"""
+        signature = self.compute_signature(soft_V)
+        
+        # Check if solution is diverse
+        if self.is_diverse(signature):
+            self.solutions.append((V, soft_V, T, metrics, signature))
+            return True
+            
+        # Even if not diverse, check if it dominates any existing solutions
+        new_metrics = torch.tensor(metrics)
+        dominated_indices = []
+        
+        for i, (_, _, _, existing_metrics, _) in enumerate(self.solutions):
+            existing_metrics = torch.tensor(existing_metrics)
+            if torch.all(new_metrics <= existing_metrics) and torch.any(new_metrics < existing_metrics):
+                dominated_indices.append(i)
+                
+        if dominated_indices:
+            # Remove dominated solutions
+            self.solutions = [s for i, s in enumerate(self.solutions) if i not in dominated_indices]
+            self.solutions.append((V, soft_V, T, metrics, signature))
+            return True
+            
+        return False
+        
+    def prune_solutions(self):
+        """Maintain only non-dominated solutions"""
+        non_dominated = []
+        metrics_list = torch.stack([torch.tensor(s[3]) for s in self.solutions])
+        
+        for i, metrics in enumerate(metrics_list):
+            if not torch.any(torch.all(metrics_list < metrics, dim=1)):
+                non_dominated.append(self.solutions[i])
+                
+        self.solutions = non_dominated[:self.max_solutions]
+
+def batch_solutions(solutions):
+    """Helper function to batch solutions into tensors for efficient processing.
+    
+    Args:
+        solutions: List of (V, soft_V, T, metrics) tuples
+        
+    Returns:
+        Tuple of (batched_V, batched_soft_V, batched_T, batched_metrics)
+    """
+    if not solutions:
+        return tuple()
+        
+    # Stack all solutions along batch dimension
+    batched_V = torch.stack([s[0] for s in solutions])
+    batched_soft_V = torch.stack([s[1] for s in solutions]) 
+    batched_T = torch.stack([s[2] for s in solutions])
+    batched_metrics = tuple(torch.stack([s[3][i] for s in solutions]) 
+                          for i in range(len(solutions[0][3])))
+                          
+    return batched_V, batched_soft_V, batched_T, batched_metrics
+
+def fit_u_map(u_solver):
+    
+    # We're learning eta, which is the mixture matrix U (U = softmax(eta)), and tells us the existence
+    # and anatomical locations of the extant clones (U > U_CUTOFF)
+    #eta = -1 * torch.rand(num_sites, num_internal_nodes + 1) # an extra column for normal cells
+    eta = torch.ones(u_solver.num_sites, u_solver.num_internal_nodes + 1) # an extra column for normal cells
+    eta.requires_grad = True 
+    u_optimizer = torch.optim.Adam([eta], lr=u_solver.config['lr'])
+
+    B = vutil.mutation_matrix_with_normal_cells(u_solver.input_T)
+    print("B\n", B)
+    i = 0
+    u_prev = eta
+    u_diff = 1e9
+    while u_diff > 1e-6 and i < 300:
+        u_optimizer.zero_grad()
+        U, u_loss, nll, reg = compute_u_loss(eta, u_solver.ref, u_solver.var, u_solver.omega, B, u_solver.weights)
+        u_loss.backward()
+        u_optimizer.step()
+        u_diff = torch.abs(torch.norm(u_prev - U))
+        u_prev = U
+        i += 1
+
+    print_U(U, B, u_solver.node_collection, u_solver.ordered_sites, u_solver.ref, u_solver.var)
+
+    return build_tree_with_witness_nodes(U, u_solver)
+
+# Adapted from PairTree
+def calc_llh(F_hat, R, V, omega_v):
+    '''
+    Args:
+        F_hat: estimated subclonal frequency matrix (num_nodes x num_mutation_clusters)
+        R: Reference allele count matrix (num_samples x num_mutation_clusters)
+        V: Variant allele count matrix (num_samples x num_mutation_clusters)
+    Returns:
+        Data fit using the Binomial likelihood (p(x|F_hat)). See PairTree (Wintersinger et. al.)
+        supplement section 2.2 for details.
+    '''
+
+    N = R + V
+    S, K = F_hat.shape
+
+    for matrix in V, N, omega_v:
+        assert(matrix.shape == (S, K-1))
+
+    P = torch.mul(omega_v, F_hat[:,1:])
+
+    bin_dist = Binomial(N, P)
+    F_llh = bin_dist.log_prob(V) / np.log(2)
+    assert(not torch.any(F_llh.isnan()))
+    assert(not torch.any(F_llh.isinf()))
+
+    llh_per_sample = -torch.sum(F_llh, axis=1) / S
+    nlglh = torch.sum(llh_per_sample) / (K-1)
+    return nlglh
+
+def compute_u_loss(eta, ref, var, omega, B, weights):
+    '''
+    Args:
+        eta: raw values we are estimating of matrix U (num_sites x num_internal_nodes)
+        ref: Reference matrix (num_anatomical_sites x num_mutation_clusters). Num. reads that map to reference allele
+        var: Variant matrix (num_anatomical_sites x num_mutation_clusters). Num. reads that map to variant allele
+        omega: VAF to subclonal frequency correction 
+        B: Mutation matrix (shape: num_internal_nodes x num_mutation_clusters)
+        weights: Weights object
+
+    Returns:
+        Loss to score the estimated proportions of each clone in each site
+    '''
+    
+    # Using the softmax enforces that the row sums are 1, since the proprtions of
+    # clones in a given site should sum to 1
+    U = torch.softmax(eta, dim=1)
+    # print("eta", eta)
+    #print("U", U)
+
+    # 1. Data fit
+    F_hat = (U @ B)
+    nlglh = calc_llh(F_hat, ref, var, omega)
+    # 2. Regularization to make some values of U -> 0
+    reg = torch.sum(eta) # l1 norm 
+    clone_proportion_loss = (weights.data_fit*nlglh + weights.reg*reg)
+    
+    return U, clone_proportion_loss, weights.data_fit*nlglh, weights.reg*reg
+
+def print_U(U, B, node_collection, ordered_sites, ref, var):
+    cols = ["GL"]+[";".join([str(i)]+node_collection.get_node(i).label[:2]) for i in range(len(node_collection.get_nodes())) if not node_collection.get_node(i).is_witness]
+    U_df = pd.DataFrame(U.detach().numpy(), index=ordered_sites, columns=cols)
+
+    print("U\n", U_df)
+    F_df = pd.DataFrame((var/(ref+var)).numpy(), index=ordered_sites, columns=cols[1:])
+    print("F\n", F_df)
+    Fhat_df = pd.DataFrame(0.5*(U @ B).detach().numpy()[:,1:], index=ordered_sites, columns=cols[1:])
+    print("F hat\n", Fhat_df)
+
+# def get_best_final_solutions(results, G, O, p, weights, print_config, 
+#                            node_collection, solve_polytomies, 
+#                            v_solver, num_internal_nodes, keep_pareto_only=True):
+#     """Modified to use solution diversity tracking"""
+#     solution_tracker = SolutionTracker(
+#         temperature=0.1,
+#         diversity_threshold=0.1 * len(node_collection.idx_to_label()),
+#         max_solutions=print_config.k_best_trees
+#     )
+    
+#     # Process results and add to tracker
+#     for result_idx, result in enumerate(results):
+#         best_Vs, soft_Vs, best_Ts, _, metrics = result
+#         for soln_idx, (m,c,s,g,o,e) in enumerate(zip(*metrics)):
+#             V = best_Vs[soln_idx].clone().cpu()
+#             soft_V = soft_Vs[soln_idx].clone().cpu()
+#             T = best_Ts[soln_idx].clone().cpu()
+            
+#             # Add back removed nodes if necessary
+#             if v_solver.fixed_labeling is not None and v_solver.poly_res is None:
+#                 V = add_back_removed_nodes(V, v_solver, p)
+#                 T = add_back_removed_nodes_to_tree(T, v_solver)
+                
+#             solution_tracker.add_solution(V, soft_V, T, (m,c,s,g,o,e))
+    
+#     # Get final solutions
+#     solution_tracker.prune_solutions()
+#     final_solutions = []
+#     for V, soft_V, T, metrics in solution_tracker.solutions:
+#         loss = vutil.clone_tree_labeling_loss_with_computed_metrics(*metrics, weights, bs=1)
+#         soln = vutil.VertexLabelingSolution(loss, *metrics, V, soft_V, T, G, node_collection)
+#         final_solutions.append(soln)
+    
+#     return rank_solutions(final_solutions, print_config)
+
+    def _calculate_valid_sites(self):
+        """Calculate valid sites for each node based on its rooted subtree's leaves using BFS."""
+        from collections import deque
+        
+        n_nodes = self.input_T.shape[0]
+        valid_sites = {}  # Changed from list to dict
+        primary_site = torch.nonzero(self.p)[0,0].item()
+
+        # Initialize leaf nodes
+        for idx, sites in self.idx_to_observed_sites.items():
+            valid_sites[idx] = set(sites)
+        
+        # Build children dictionary
+        children = {}
+        for i in range(n_nodes):
+            children[i] = [j for j in range(n_nodes) if self.input_T[i, j] == 1]
+
+        leaf_nodes = list(self.idx_to_observed_sites.keys())
+        # BFS from leaves up to root
+        queue = deque(leaf_nodes)
+        processed = set(leaf_nodes)
+        bottom_up_order = []
+        
+        while queue:
+            node = queue.popleft()
+            bottom_up_order.append(node)
+            
+            # Find parent (there should be exactly one, except for root)
+            for potential_parent in range(n_nodes):
+                if self.input_T[potential_parent, node] == 1:
+                    # Check if all children of the parent have been processed
+                    if potential_parent not in processed and all(child in processed for child in children[potential_parent]):
+                        queue.append(potential_parent)
+                        processed.add(potential_parent)
+                    break
+        
+        # Process nodes in bottom-up order
+        for node in bottom_up_order:
+            if node not in valid_sites:  # if not already initialized
+                valid_sites[node] = {primary_site}  # Add primary site
+                for child in children[node]:
+                    valid_sites[node].update(valid_sites[child])
+        
+        return valid_sites
+
+# Add these diagnostic functions
+def analyze_solution_diversity(X):
+    """Analyze how diverse the current solutions are"""
+    # Get the most likely assignment for each node
+    max_assignments = torch.argmax(X, dim=1)  # shape: [sample_size, num_nodes_to_label]
+    
+    # Count unique solutions
+    unique_solutions = torch.unique(max_assignments, dim=0).shape[0]
+    
+    # Calculate entropy of assignments for each node
+    probs = torch.softmax(X, dim=1)  # shape: [sample_size, num_sites, num_nodes_to_label]
+    entropy = -(probs * torch.log(probs + 1e-10)).sum(dim=1).mean(dim=0)
+    
+    print(f"Number of unique solutions: {unique_solutions}")
+    print(f"Average entropy per node: {entropy.tolist()}")
+
+def analyze_loss_landscape(v_solver, X, v_temp, t_temp, poly_res, exploration_weights):
+    """Analyze loss landscape to detect optimization issues like local minima or plateaus.
+    
+    Returns:
+        dict: Diagnostic metrics about the loss landscape
+    """
+    with torch.no_grad():
+        # Get current loss
+        _, current_losses, _, _, _ = compute_v_t_loss(
+            X, v_solver, poly_res, exploration_weights,
+            update_path_matrix=False, v_temp=v_temp,
+            t_temp=t_temp, compute_full_c=False, identical_T=True
+        )
+        current_loss = torch.mean(current_losses).item()
+        
+        # Sample multiple perturbations at each noise level
+        noise_levels = [0.01, 0.1, 0.5, 1.0]
+        samples_per_noise = 5
+        diagnostics = {
+            'current_loss': current_loss,
+            'noise_stats': {},
+            'warnings': []
+        }
+        
+        print(f"\nLoss Landscape Analysis (current loss: {current_loss:.4f}):")
+        
+        for noise in noise_levels:
+            losses = []
+            for _ in range(samples_per_noise):
+                perturbed = X + torch.randn_like(X) * noise
+                _, perturbed_losses, _, _, _ = compute_v_t_loss(
+                    perturbed, v_solver, poly_res, exploration_weights,
+                    update_path_matrix=False, v_temp=v_temp,
+                    t_temp=t_temp, compute_full_c=False, identical_T=True
+                )
+                losses.append(torch.mean(perturbed_losses).item())
+            
+            # Compute statistics for this noise level
+            losses = np.array(losses)
+            mean_loss = np.mean(losses)
+            std_loss = np.std(losses)
+            min_loss = np.min(losses)
+            
+            diagnostics['noise_stats'][noise] = {
+                'mean_loss': mean_loss,
+                'std_loss': std_loss,
+                'min_loss': min_loss,
+                'mean_delta': mean_loss - current_loss,
+                'min_delta': min_loss - current_loss
+            }
+            
+            print(f"\nNoise level {noise:.3f}:")
+            print(f"  Mean loss: {mean_loss:.4f} (Δ={mean_loss-current_loss:+.4f})")
+            print(f"  Std dev:   {std_loss:.4f}")
+            print(f"  Min loss:  {min_loss:.4f} (Δ={min_loss-current_loss:+.4f})")
+        
+        # Analyze landscape characteristics
+        small_noise = diagnostics['noise_stats'][0.01]
+        large_noise = diagnostics['noise_stats'][1.0]
+        
+        # Check for local minimum
+        if small_noise['min_loss'] > current_loss:
+            diagnostics['warnings'].append("Likely in local minimum - all nearby points have higher loss")
+        
+        # Check for plateau
+        if small_noise['std_loss'] < 1e-4:
+            diagnostics['warnings'].append("Possible plateau detected - very small loss variation in local neighborhood")
+        
+        # Check for optimization potential
+        if large_noise['min_loss'] < current_loss:
+            delta_percent = ((current_loss - large_noise['min_loss']) / current_loss) * 100
+        
+            diagnostics['warnings'].append(
+                f"Better solutions may exist - found {delta_percent:.1f}% improvement with large perturbation"
+            )
+        
+        # Print interpretation
+        print("\nInterpretation:")
+        if not diagnostics['warnings']:
+            print("✓ Loss landscape appears well-behaved")
+        else:
+            for warning in diagnostics['warnings']:
+                print(f"! {warning}")
+        
+        return diagnostics
+
+# In init_optimal_x_polyres
+# fixed_labeling = None
+    # if known_indices:
+    #     print("T", T[0])
+    #     unknown_indices = [x for x in range(v_solver.num_nodes_to_label+1) if x not in known_indices and x != 0]
+    #     known_labelings = torch.stack(known_labelings, dim=1)
+    #     X = X[:,:,[x-1 for x in unknown_indices]]
+    #     fixed_labeling = vutil.FixedVertexLabeling(known_indices, unknown_indices, known_labelings, optimal_root_nodes)
+
+    #     print("known_indices", known_indices, "unknown_indices", unknown_indices)
+    #     print("optimal_root_nodes", optimal_root_nodes)
+
+    #     # Identify nodes to remove: descendants that are in optimal subtrees
+    #     nodes_to_remove = set()
+    #     for known_idx in known_indices:
+    #         if known_idx not in optimal_root_nodes:
+    #             nodes_to_remove.add(known_idx)
+    #     print("nodes_to_remove", nodes_to_remove)
+    #     _T = _remove_nodes_from_T(T, nodes_to_remove)
+    #     print("_T", _T[0])
+    

@@ -156,7 +156,7 @@ def write_pooled_tsv_from_clusters(df, aggregation_rules, output_dir, patient_id
     # 2. Pool reference and variant allele counts from all mutations within a cluster
     pooled_df = df.drop(['character_label','character_index'], axis=1) # we're going to add this back in later
 
-    ref_var_rules = {'ref': np.sum, 'var': np.sum,'total_reads_corrected': np.sum, "var_read_prob": 'first', 
+    ref_var_rules = {'ref': 'sum', 'var': 'sum','total_reads_corrected': 'sum', "var_read_prob": 'first', 
                      'site_category':'first', 'anatomical_site_label':lambda x: ';'.join(set(x)),}
 
     pooled_df = pooled_df.groupby(['cluster_index', 'anatomical_site_index'], as_index=False).agg({**ref_var_rules, **aggregation_rules})

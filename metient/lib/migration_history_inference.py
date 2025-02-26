@@ -18,16 +18,19 @@ from metient.lib import u_optimizer as uoptim
 
 from metient.util.globals import *
 
-import tracemalloc
-from memory_profiler import profile
-
 torch.set_printoptions(precision=2)
 
 def prune_histories(solutions):
-    '''
-    Only keep the unique, Pareto front of trees
-    '''
-
+    """
+    Filter solutions to keep only unique migration histories that lie on the Pareto front with respect to parsimony metrics.
+    
+    Args:
+        solutions (list): List of VertexLabelingSolution objects representing different migration histories
+        
+    Returns:
+        list: Subset of solutions that are unique and Pareto-optimal with respect to migration (m), 
+              co-migration (c), and seeding (s) parsimony metrics
+    """
     # Collect each unique solution's parsimony metrics
     all_pars_metrics = []
     unique_labelings = set()
@@ -40,15 +43,22 @@ def prune_histories(solutions):
             all_pars_metrics.append((soln.m, soln.c, soln.s))
     # Keep the pareto front of trees
     pareto_metrics, pruned_solutions = vutil.pareto_front(final_solutions, all_pars_metrics)
-    print("pareto_metrics", set(pareto_metrics))
+    # print("Pareto_metrics:", set(pareto_metrics))
 
     return pruned_solutions
 
 def rank_solutions(solution_set, print_config):
-    '''
-    Return the sorted, top k solutions
-    '''        
-
+    """
+    Sort solutions by total loss and return the top k solutions.
+    
+    Args:
+        solution_set (list): List of VertexLabelingSolution objects to rank
+        print_config (PrintConfig): Configuration object containing k_best_trees parameter
+        
+    Returns:
+        list: Top k solutions sorted by ascending total loss, where k is specified in print_config.
+              If fewer solutions exist than k, returns all solutions.
+    """
     # 1. Sort the solutions from lowest to highest loss
     final_solutions = sorted(list(solution_set))
 
@@ -57,17 +67,42 @@ def rank_solutions(solution_set, print_config):
     final_solutions = final_solutions[:k]
     return final_solutions
 
-
 def get_best_final_solutions(results, G, O, p, weights, print_config, 
                              node_collection, solve_polytomies, 
-                             fixed_indices, num_internal_nodes, keep_pareto_only=True):
-    '''
-    Prune unecessary poly nodes (if they weren't used) and return the top k solutions
-    '''
+                             v_solver, num_internal_nodes, keep_pareto_only=True):
+    """
+    Process optimization results to get the final set of best migration history solutions.
+    
+    Args:
+        results (list): List of optimization results, each containing:
+            - best_Vs: Vertex labeling matrices
+            - soft_Vs: Soft vertex labeling matrices (probabilities)
+            - best_Ts: Tree adjacency matrices
+            - poly_res (PolytomyResolver): Object containing polytomy resolver info
+            - metrics: Tuple of (m,c,s,g,o,e) parsimony metrics
+        G (torch.Tensor): Genetic distance matrix between sites
+        O (dict): Organotropism dictionary mapping sites to frequencies
+        p (torch.Tensor): One-hot encoding of primary site
+        weights (Weights): Object containing weights for different loss components
+        print_config (PrintConfig): Configuration for output formatting
+        node_collection (NodeCollection): Object tracking tree node information
+        solve_polytomies (bool): Whether polytomy resolution was performed
+        v_solver (VertexLabelingSolver): Solver object containing optimization state
+        num_internal_nodes (int): Number of internal nodes in tree
+        keep_pareto_only (bool, optional): If True, only keep Pareto-optimal solutions. Defaults to True.
+        
+    Returns:
+        list: Ranked list of best VertexLabelingSolution objects after:
+            1. Collecting unique solutions
+            2. Adding back any removed nodes
+            3. Attempting to recover primary-only single-source solutions if none exist
+            4. Removing unnecessary polytomy resolver nodes
+            5. Computing Pareto front (if keep_pareto_only=True)
+            6. Ranking by total loss
+    """
 
     has_pss_solution = False
     full_solution_set = []
-    print("weights being used", weights.mig, weights.comig, weights.seed_site)
     all_pars_metrics, all_result_soln_indices = [],[]
     unique_labelings = set()
         
@@ -83,9 +118,8 @@ def get_best_final_solutions(results, G, O, p, weights, print_config,
                 all_pars_metrics.append((int(m), int(c), int(s)))
                 all_result_soln_indices.append((result_idx, soln_idx, (m,c,s,g,o,e)))
             unique_labelings.add(tree)
-    print("all_pars_metrics", all_pars_metrics)
-    print("num. unique solutions", len(all_result_soln_indices))
 
+    fixed_labeling = v_solver.fixed_labeling
     # Create a list of unique VertexLabelingSolutions
     for idx in all_result_soln_indices:
         result_idx, soln_idx, metrics = idx[0], idx[1], idx[2]
@@ -99,10 +133,17 @@ def get_best_final_solutions(results, G, O, p, weights, print_config,
         V = results[result_idx][0][soln_idx].clone().cpu()
         soft_V = results[result_idx][1][soln_idx].clone().cpu()
         T = results[result_idx][2][soln_idx].clone().cpu()
+        # Add back any removed nodes into V and T using FixedVertexLabeling info
+        if fixed_labeling is not None and v_solver.config['collapse_nodes']:
+            V = add_back_removed_nodes(V, v_solver, p)
+            T = add_back_removed_nodes_to_tree(T, v_solver)
+            if G is not None:
+                G = v_solver.full_G
         soln = vutil.VertexLabelingSolution(loss, m,c,s,g,o,e, V, soft_V, T, G, node_collection)
         full_solution_set.append(soln)
   
     if not has_pss_solution:
+        fixed_indices = [x for x in fixed_labeling.known_indices] if fixed_labeling!=None else []
         recover_prim_ss_solutions(full_solution_set, unique_labelings, 
                                   weights, O, p, solve_polytomies, 
                                   fixed_indices, num_internal_nodes)
@@ -118,23 +159,116 @@ def get_best_final_solutions(results, G, O, p, weights, print_config,
     else:
         pruned_histories = full_solution_set
 
-    
     return rank_solutions(pruned_histories, print_config)
+
+def add_back_removed_nodes(V, v_solver, p):
+    """Reconstruct full vertex labeling matrix by adding back removed nodes.
+    
+    Args:
+        V (torch.Tensor): Current vertex labeling tensor (num_sites, num_remaining_nodes)
+        fixed_labeling (FixedVertexLabeling): Object containing mapping info for removed nodes
+        
+    Returns:
+        torch.Tensor: Expanded vertex labeling tensor including all original nodes
+    """
+    fixed_labeling = v_solver.fixed_labeling
+    if fixed_labeling is None or V.shape[1] == v_solver.full_T.shape[0]:
+        return V
+
+    # Get the optimized indices
+    optimized_indices_old = [x for x in range(1,v_solver.full_T.shape[0]) if x not in fixed_labeling.known_indices]
+    optimized_indices_new = [fixed_labeling.old_to_new[x] for x in optimized_indices_old]
+
+    # Create the full X matrix
+    full_V = torch.zeros((V.shape[0], v_solver.full_T.shape[0]), device=V.device)
+    full_V[:,0] = p.squeeze()
+    # Fill in the full X tensor using the mapped indices
+    full_V[:, optimized_indices_old] = V[:, optimized_indices_new]
+    # Add in the known labelings (parts of optimal subtrees)
+    full_V[:, fixed_labeling.known_indices] = fixed_labeling.known_labelings.to(V.device)
+
+    for x in range(full_V.shape[1]):
+        col_sum = int(torch.sum(full_V[:,x]))
+        if col_sum != 1:
+            print(x, col_sum)
+
+    return full_V
+
+def add_back_removed_nodes_to_tree(T, v_solver):
+    """Reconstruct full tree adjacency matrix by adding back removed nodes and their connections.
+    
+    Args:
+        T (torch.sparse.Tensor): Current tree adjacency matrix
+        v_solver (VertexLabelingSolver): Object containing info on v optimization
+        
+    Returns:
+        torch.sparse.Tensor: Expanded tree adjacency matrix including all original nodes and connections
+    """
+    if v_solver.fixed_labeling is None or T.shape[0] == v_solver.full_T.shape[0]:
+        return T
+        
+    # Get dimensions
+    num_total_nodes =  v_solver.full_T.shape[0]
+    
+    # Create mapping from new indices to old indices
+    new_to_old = {v: k for k, v in v_solver.fixed_labeling.old_to_new.items()}
+    
+    # Convert mappings to tensors for vectorized operations
+    new_indices = torch.tensor(list(new_to_old.keys()), device=T.device)
+    old_indices = torch.tensor(list(new_to_old.values()), device=T.device)
+    mapping = torch.zeros(num_total_nodes, dtype=torch.long, device=T.device)
+    mapping[new_indices] = old_indices
+    
+    # Process current T edges
+    T = T.coalesce()
+    indices = T.indices()
+    
+    # Map indices using vectorized operations
+    mapped_indices = torch.stack([
+        mapping[indices[0]],
+        mapping[indices[1]]
+    ])
+    
+    # Process full_T edges for removed nodes
+    full_T = v_solver.full_T.to_sparse().coalesce().to(T.device)
+    full_indices = full_T.indices()
+    
+    # Create mask for edges involving known nodes
+    known_indices = torch.tensor(list(v_solver.fixed_labeling.known_indices), device=T.device)
+    known_mask = torch.isin(full_indices[0], known_indices) | torch.isin(full_indices[1], known_indices)
+    
+    # Combine all indices and values
+    all_indices = torch.cat([mapped_indices, full_indices[:, known_mask]], dim=1)
+    # Set all values to 1
+    all_values = torch.ones(all_indices.shape[1], device=T.device)
+    
+    # Remove duplicates
+    unique_edges, unique_idx = torch.unique(all_indices.T, dim=0, return_inverse=True)
+    unique_values = torch.ones_like(unique_edges[:, 0], dtype=torch.float, device=T.device)
+    
+    # Create final sparse tensor
+    new_T = torch.sparse_coo_tensor(
+        unique_edges.T, 
+        unique_values,
+        (num_total_nodes, num_total_nodes)
+    ).coalesce()
+    
+    return new_T
 
 def recover_prim_ss_solutions(solution_set, unique_labelings, 
                               weights, O, p, solve_polytomies, 
                               fixed_indices, num_internal_nodes):
-    '''
+    """
     fixed_indices: indices of nodes that are in optimal subtrees 
 
     In hard (i.e. usually large input) cases where we are unable to find a 
     primary-only seeding solution, see if we can recover one by post-processing
     final solutions and removing any met-to-met migration edges, and add these
     to our final solution set
-    '''
+    """
     
     new_solutions = []
-    for solution in solution_set:
+    for i, solution in enumerate(solution_set):
 
         #seeding_nodes = putil.seeding_cluster_parents(solution.V,solution.T)
         all_node_indices = [x for x in range(num_internal_nodes)]
@@ -149,8 +283,9 @@ def recover_prim_ss_solutions(solution_set, unique_labelings,
         unique_labeled_tree = vutil.MigrationHistory(solution.T, new_V)
         if unique_labeled_tree in unique_labelings:
             continue
+        print("calling clone_tree_labeling_objective, updating path matrix", solve_polytomies or i==0)
         loss, new_values = vutil.clone_tree_labeling_objective(new_V, solution.soft_V, solution.T, 
-                                                               solution.G, O, p, weights, update_path_matrix=solve_polytomies, 
+                                                               solution.G, O, p, weights, update_path_matrix=solve_polytomies or i==0, 
                                                                compute_full_c=True)
         new_solution = vutil.VertexLabelingSolution(loss, *new_values, new_V, solution.soft_V, solution.T, solution.G, node_info)
         
@@ -185,30 +320,33 @@ def prep_inputs(tree_fns, tsv_fns, run_names, estimate_observed_clones, output_d
     return Ts, pooled_tsv_fns
 
 def one_hot_labeling_for_primary(primary_site, ordered_sites):
-    '''
+    """
     Args:
         - primary_site: name of the primary_site (must be a member of ordered_sites)
         - ordered_sites: list of sites (in the order that they appear in all matrix representations)
     Returns:
         one-hot column vector for a node labeled as belonging to the primary site
-    '''
+    """
     primary_idx = ordered_sites.index(primary_site)
     return torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(ordered_sites)).T
 
 
 def evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
-             O, sample_size, custom_colors, bias_weights, solve_polytomies, num_runs):
-    '''
+             O, sample_size, bias_weights, solve_polytomies, num_runs):
+    """
     Observed clone proportions are inputted (in tsv_fns), only labeling of clone tree is needed
-    '''
+    """
     return evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name,
-                    O, sample_size, custom_colors, bias_weights, solve_polytomies, num_runs, 
+                    O, sample_size, bias_weights, solve_polytomies, num_runs, 
                     estimate_observed_clones=False)
 
 def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
-             O, sample_size, custom_colors, bias_weights, solve_polytomies, num_runs, 
+             O, sample_size, bias_weights, solve_polytomies, num_runs, 
              estimate_observed_clones=True):
-    
+    """
+    Estimate observed clone proportions and labeling of clone tree for a single patient,
+    using inputted weights.
+    """
     Ts, pooled_tsv_fns = prep_inputs([tree_fn], [tsv_fn], [run_name], estimate_observed_clones, output_dir)
     assert isinstance(weights.mig, (float, int)), "Weights must be either a float or an int in evaluate mode"
     assert isinstance(weights.seed_site, (float, int)), "Weights must be either a float or an int in evaluate mode"
@@ -221,7 +359,7 @@ def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name,
 
     for primary_site in primary_sites:
         infer_migration_history(T, pooled_tsv_fn, primary_site, weights, print_config, output_dir, f"{run_name}_{primary_site}", 
-                              O=O, sample_size=sample_size, custom_colors=custom_colors, bias_weights=bias_weights, 
+                              O=O, sample_size=sample_size, bias_weights=bias_weights, 
                               mode="evaluate", solve_polytomies=solve_polytomies, estimate_observed_clones=estimate_observed_clones,
                               num_runs=num_runs)
     if estimate_observed_clones:
@@ -229,30 +367,30 @@ def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name,
 
 
 def patient_calibration_weight(T, num_poss_primaries):
-    '''
+    """
     Calculate the weight to place on this patient's contribution to the 
     cohort-level cross-entropy score. This is based on the tree size (number of edges)
     and the number of possible primaries, since we don't want to bias towards patients
     with many possible primaries
-    '''
+    """
     num_edges = T.shape[0]-1
     return num_edges/num_poss_primaries
 
 def calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names,
-                               Os, sample_size, custom_colors, bias_weights, solve_polytomies, num_runs):
-    '''
+                               Os, sample_size, bias_weights, solve_polytomies, num_runs):
+    """
     Observed clone proportions are inputted (in tsv_fns), only labeling of clone tree is needed
-    '''
+    """
     return calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
-                    Os, sample_size, custom_colors, bias_weights, solve_polytomies, num_runs, estimate_observed_clones=False)
+                    Os, sample_size, bias_weights, solve_polytomies, num_runs, estimate_observed_clones=False)
 
 def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
-              Os, sample_size, custom_colors, bias_weights, solve_polytomies, num_runs,
+              Os, sample_size, bias_weights, solve_polytomies, num_runs,
               estimate_observed_clones=True):
-    '''
+    """
     Estimate observed clone proportions and labeling of clone tree for a cohort of patients,
     calibrate parsimony weights to metastasis priors
-    '''
+    """
     
     Ts, pooled_tsv_fns = prep_inputs(tree_fns, tsv_fns, run_names, estimate_observed_clones, output_dir)
 
@@ -287,7 +425,7 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
 
         for primary_site in primary_sites:
             infer_migration_history(Ts[i], pooled_tsv_fns[i], primary_site, weights, print_config, calibrate_dir, f"{run_names[i]}_{primary_site}", 
-                                    O=O, sample_size=sample_size, custom_colors=custom_colors, bias_weights=bias_weights,
+                                    O=O, sample_size=sample_size, bias_weights=bias_weights,
                                     mode="calibrate", solve_polytomies=solve_polytomies, estimate_observed_clones=estimate_observed_clones,
                                     num_runs=num_runs)
             output_files.append(os.path.join(calibrate_dir, f"{run_names[i]}_{primary_site}.pkl.gz"))
@@ -323,7 +461,7 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
                                                 print_config)
             
             putil.save_best_trees(reranked_solutions, saved_U, O, cal_weights, ordered_sites[i], print_config, 
-                                  custom_colors, primary_site, calibrate_dir, run_name)
+                                  primary_site, calibrate_dir, run_name)
     
     if estimate_observed_clones:
         for pooled_tsv_fn in pooled_tsv_fns:
@@ -333,7 +471,7 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
 
 def to_cpu(tensor):
     """
-    Send a tensor to CPU if it is not None; otherwise, return None.
+    Send a tensor to CPU.
     
     Parameters:
         tensor (torch.Tensor or None): The tensor to send to CPU.
@@ -346,6 +484,9 @@ def to_cpu(tensor):
     return None
 
 def validate_inputs(T, node_collection, ref, var, primary_site, ordered_sites, weights, O, mode):
+    """
+    Validate the inputs to Metient.
+    """
     if not (T.shape[0] == T.shape[1]):
         raise ValueError(f"Number of tree nodes should be consistent (T.shape[0] == T.shape[1])")
     if (T.shape[0] != len(node_collection.idx_to_label())):
@@ -375,9 +516,9 @@ def validate_inputs(T, node_collection, ref, var, primary_site, ordered_sites, w
 
 
 def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, output_dir, run_name, estimate_observed_clones=True,
-                            O=None, lr=0.05, init_temp=20, final_temp=0.01,sample_size=-1, custom_colors=None, bias_weights=True,
-                            mode="evaluate",solve_polytomies=False, num_runs=1, keep_pareto_only=True):
-    '''
+                            O=None, lr=0.05, init_temp=20, final_temp=0.01, sample_size=-1, bias_weights=True,
+                            mode="evaluate", solve_polytomies=False, num_runs=1, keep_pareto_only=True):
+    """
     Args:
         T: numpy ndarray or torch tensor (shape: num_internal_nodes x num_internal_nodes). Adjacency matrix (directed) of the internal nodes.
         
@@ -408,7 +549,7 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
         (3) edges for the migration graph (e.g. [('P', 'M1')])
         (4) dictionary w/ loss values for each component of the loss
         (5) how long (in seconds) the algorithm took to run
-    '''
+    """
 
     if torch.cuda.is_available():
         torch.set_default_tensor_type(torch.cuda.FloatTensor)
@@ -421,12 +562,13 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
     ref, var, omega, ordered_sites, node_collection, idx_to_observed_sites, G, O = dutil.extract_matrices_from_tsv(tsv_fn, estimate_observed_clones, 
                                                                                                                    T, initialize_G, O, primary_site)
     
-    print("ordered_sites", ordered_sites)
+    print("Tumor samples:", ordered_sites)
     # Validate inputs
     validate_inputs(T, node_collection, ref, var, primary_site, ordered_sites, weights, O, mode)
 
     if sample_size == -1:
         sample_size = vutil.calculate_sample_size(T.shape[0], len(ordered_sites), solve_polytomies)
+    opt_subtree_sample_size = sample_size
     # Total sample size gets split for the individual parsimony models
     sample_size = sample_size // len(ALL_PARSIMONY_MODELS)
     
@@ -453,7 +595,9 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
 
     # Keep a copy of input clone tree (T from now on has leaf nodes from U)
     input_T = copy.deepcopy(T)
-    print("T size:", input_T.shape)
+
+    # TODO: Make this a more sophisticated decision
+    use_sparse_T = input_T.shape[0] > 200
 
     config = {
         "init_temp": init_temp,
@@ -465,12 +609,19 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
         "second_max_iter": 150 if solve_polytomies else 100,
         "first_v_interval": 15,
         "second_v_interval": 20,
+        "opt_subtree_sample_size": opt_subtree_sample_size,
         "sample_size": sample_size,
         "bias_weights": bias_weights,
         "solve_polytomies": solve_polytomies,
         # the genetic distance between two identical clones is a close to 0 but non-zero value
         "identical_clone_gen_dist": identical_clone_gen_dist,
         "num_runs":num_runs,
+        "promote_diversity": True,
+        "diversity_weight": 0.2,
+        "use_sparse_T": use_sparse_T,
+        # If we're using a dense T, collapsing nodes is not worth the compute time,
+        # and solving polytomies makes the indexing extremely complicated for collapsing (maybe implement in the future)
+        "collapse_nodes": use_sparse_T and not solve_polytomies
     }
 
     ############ Step 1, optimize U ############
@@ -497,27 +648,23 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
     ############ Step 3, visualize and save outputs ############
     with torch.no_grad():
         # Send tensors to CPU after inference to free up GPU memory
-        #torch.set_default_tensor_type(torch.FloatTensor)
         G = to_cpu(v_optimizer.G)
         O = to_cpu(O)
         p = to_cpu(p)
-        # Offset for root index which is always known
-        # TODO: make this behavior more clear
-        fixed_indices = [x+1 for x in v_optimizer.fixed_labeling.known_indices] if v_optimizer.fixed_labeling!=None else []
         
         final_solutions = get_best_final_solutions(results, G, O, p, weights, print_config, 
                                                    node_collection, solve_polytomies,
-                                                   fixed_indices, num_internal_nodes, keep_pareto_only=keep_pareto_only)
-        print("# final solutions:", len(final_solutions))
+                                                   v_optimizer, num_internal_nodes, keep_pareto_only=keep_pareto_only)
+        print("Number of Pareto-optimal solutions:", len(final_solutions))
 
-        tracemalloc.start()
+        # tracemalloc.start()
         edges, vert_to_site_map, mig_graph_edges, loss_info = putil.save_best_trees(final_solutions, U, O, weights,
-                                                                                    ordered_sites,print_config, custom_colors, 
+                                                                                    ordered_sites, print_config,
                                                                                     primary_site_label, output_dir, run_name,
                                                                                     original_root_idx=original_root_idx) 
-        current, peak = tracemalloc.get_traced_memory()
-        print(f"[After getting pkl outputs ] Current memory usage: {current / 10**6:.2f} MB; Peak was {peak / 10**6:.2f} MB")
-        tracemalloc.stop()
+        # current, peak = tracemalloc.get_traced_memory()
+        # print(f"[After getting pkl outputs ] Current memory usage: {current / 10**6:.2f} MB; Peak was {peak / 10**6:.2f} MB")
+        # tracemalloc.stop()
 
     torch.cuda.empty_cache()
  

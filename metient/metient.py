@@ -4,7 +4,7 @@ from metient.lib import migration_history_inference as mig_hist
 from metient.util import plotting_util as plutil
 
 def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
-             O=None, sample_size=-1, custom_colors=None, solve_polytomies=False, num_runs=1):
+             O=None, sample_size=-1, solve_polytomies=False, num_runs=3):
     '''
     Runs Metient-evaluate, and infers the observed clone percentages and the labels of the clone tree.
 
@@ -19,19 +19,18 @@ def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name,
         run_name: Name for this patient which will be used to save all outputs.
 
         OPTIONAL:
-        O: a 1 x n array (where n is number of anatomical sites) if using organotropism
+        O: a dictionary mapping anatomical site name (as used in tsv_fn) -> frequency of metastasis (these values should be normalized)
         sample_size: how many samples to have Metient solve in parallel
-        custom_colors: an array of hex strings (with length = number of anatomical sites) to be used as custom colors in output visualizations.
         solve_polytomies: bool, whether or not to resolve polytomies 
 
     Outputs migration history inferences for a single patient.
     '''
-    return mig_hist.evaluate(tree_fn, tsv_fn,weights, print_config, output_dir, run_name, 
-                             O=O, sample_size=sample_size, custom_colors=custom_colors, 
-                             bias_weights=True, solve_polytomies=solve_polytomies, num_runs=num_runs)
+    return mig_hist.evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
+                             O=O, sample_size=sample_size, solve_polytomies=solve_polytomies, 
+                             num_runs=num_runs, bias_weights=True)
 
 def evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
-                               O=None, sample_size=-1, custom_colors=None, solve_polytomies=False, num_runs=1):
+                              O=None, sample_size=-1, solve_polytomies=False, num_runs=3):
     '''
     Runs Metient-evaluate with observed clone percentages inputted, and only inferring the labels of the clone tree.
 
@@ -46,18 +45,18 @@ def evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir
         run_name: Name for this patient which will be used to save all outputs.
 
         OPTIONAL:
-        O: a 1 x n array (where n is number of anatomical sites) if using organotropism
+        O: a dictionary mapping anatomical site name (as used in tsv_fn) -> frequency of metastasis (these values should be normalized)
         sample_size: how many samples to have Metient solve in parallel
-        custom_colors: an array of hex strings (with length = number of anatomical sites) to be used as custom colors in output visualizations.
         solve_polytomies: bool, whether or not to resolve polytomies 
     
     Outputs migration history inferences for a single patient.
     '''
-    return mig_hist.evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, O=O, sample_size=sample_size, 
-                                              custom_colors=custom_colors, bias_weights=True, solve_polytomies=solve_polytomies, num_runs=num_runs)
+    return mig_hist.evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
+                                              O=O, sample_size=sample_size, bias_weights=True, 
+                                              solve_polytomies=solve_polytomies, num_runs=num_runs)
 
 def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, 
-              Os=None, sample_size=-1, custom_colors=None, solve_polytomies=False):
+              Os=None, sample_size=-1, solve_polytomies=False, num_runs=3):
     '''
     Runs Metient-calibrate on a cohort of patients. For each patient, we infer the observed clone percentages and the labels of the clone tree.
 
@@ -73,18 +72,18 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
         NOTE: tree_fns[i] and tsv_fns[i] and run_names[i] all correspond to patient i.
 
         OPTIONAL:
-        O: a 1 x n array (where n is number of anatomical sites) if using organotropism
+        O: a dictionary mapping anatomical site name (as used in tsv_fn) -> frequency of metastasis (these values should be normalized)
         sample_size: how many samples to have Metient solve in parallel
-        custom_colors: an array of hex strings (with length = number of anatomical sites) to be used as custom colors in output visualizations.
         solve_polytomies: bool, whether or not to resolve polytomies 
 
     Outputs migration history inferences for a full cohort.
     '''
-    return mig_hist.calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, Os=Os, sample_size=sample_size, 
-                              custom_colors=custom_colors, bias_weights=True, solve_polytomies=solve_polytomies)
+    return mig_hist.calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, 
+                            Os=Os, sample_size=sample_size, bias_weights=True, 
+                            solve_polytomies=solve_polytomies, num_runs=num_runs)
 
 def calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names, 
-                               Os=None, sample_size=-1, custom_colors=None,  solve_polytomies=False):
+                               Os=None, sample_size=-1, solve_polytomies=False, num_runs=3):
     '''
     Runs Metient-calibrate on a cohort of patients. For each patient, we use the inputted observed clone percentages, and only infer the labels of the clone tree.
 
@@ -100,25 +99,26 @@ def calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_
         NOTE: tree_fns[i] and tsv_fns[i] and run_names[i] all correspond to patient i.
 
         OPTIONAL:
-        O: a 1 x n array (where n is number of anatomical sites) if using organotropism
+        O: a dictionary mapping anatomical site name (as used in tsv_fn) -> frequency of metastasis (these values should be normalized)
         sample_size: how many samples to have Metient solve in parallel
-        custom_colors: an array of hex strings (with length = number of anatomical sites) to be used as custom colors in output visualizations.
         solve_polytomies: bool, whether or not to resolve polytomies 
 
     Outputs migration history inferences for a full cohort.
     '''
-    return mig_hist.calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names, Os=Os, sample_size=sample_size, 
-                                               custom_colors=custom_colors, bias_weights=True, solve_polytomies=solve_polytomies)
+    return mig_hist.calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names, 
+                                             Os=Os, sample_size=sample_size, bias_weights=True, 
+                                             solve_polytomies=solve_polytomies, num_runs=num_runs)
 
 
 class PrintConfig:
-    def __init__(self, visualize=True, verbose=False, k_best_trees=float("inf"), save_outputs=True):
+    def __init__(self, visualize=True, verbose=False, k_best_trees=float("inf"), save_outputs=True, custom_colors=None):
         '''
         Args:
             visualize: bool, whether to visualize loss, best tree, and migration graph
             verbose: bool, whether to print debug info
             k_best_trees: int, number of best tree solutions to visualize (if 1, only show best tree)
-            save_outputs: bool, whether to save pngs and pickle files 
+            save_outputs: bool, whether to save pngs and pickle files
+            custom_colors: array of hex strings (with length = number of anatomical sites) to be used as custom colors in output visualizations
         '''
         if k_best_trees <= 0:
             raise ValueError("k_best_trees must be >= 1")
@@ -126,9 +126,10 @@ class PrintConfig:
         self.verbose = verbose 
         self.k_best_trees = k_best_trees
         self.save_outputs = save_outputs
+        self.custom_colors = custom_colors
 
 class Weights:
-    def __init__(self, mig=4.8, comig=3.0, seed_site=2.2, gen_dist=0.0, organotrop=0.0, data_fit=15.0, reg=0.5, entropy=0.01):
+    def __init__(self, mig=0.48, comig=0.30, seed_site=0.22, gen_dist=0.0, organotrop=0.0, data_fit=15.0, reg=0.5, entropy=0.01):
         '''
         The higher the inputted weight, the higher the penalty on that metric.
 
