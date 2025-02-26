@@ -15,6 +15,11 @@ class PolytomyResolver():
         # (we place them in this order: given internal nodes, new resolver nodes, leaf nodes from U)
         T, G = v_optimizer.T, v_optimizer.G
 
+        # TODO: Handle sparse T and G
+        # Convert T to dense if it's sparse
+        if T.is_sparse:
+            T = T.to_dense()
+
         num_new_nodes = 0
         for r in resolver_sites:
             num_new_nodes += len(r)
@@ -72,7 +77,6 @@ class PolytomyResolver():
                 potential_child_indices = vutil.get_child_indices(T, [parent_idx])
                 for child_idx in potential_child_indices:
                     G[new_node_idx, child_idx] = G[parent_idx, child_idx]
-        print("resolver_index_to_parent_idx", resolver_index_to_parent_idx)
         v_optimizer.T = T
         v_optimizer.G = G
         self.latent_var = poly_adj_matrix
@@ -81,6 +85,44 @@ class PolytomyResolver():
         self.resolver_indices = resolver_indices
         self.resolver_index_to_parent_idx = resolver_index_to_parent_idx
         self.resolver_labeling = resolver_labeling
+
+    def _update_indices_with_mapping(self, indices, mapping):
+        """Helper function to update indices using a mapping dictionary.
+        
+        Args:
+            indices: List of indices to update
+            mapping: Dictionary mapping old indices to new indices
+        
+        Returns:
+            List of updated indices, using original value if not in mapping
+        """
+        if indices is None:
+            return None
+        return [mapping[x] if x in mapping else x for x in indices]
+
+    def update_indices(self, old_to_new):
+        """Update resolver mappings when nodes are added back to the tree.
+        
+        Args:
+            old_to_new (dict): Mapping from original node indices to reduced tree indices
+        """
+        # Update nodes with polytomies
+        self.nodes_w_polys = self._update_indices_with_mapping(self.nodes_w_polys, old_to_new)
+        
+        # Update children of polytomies
+        self.children_of_polys = self._update_indices_with_mapping(self.children_of_polys, old_to_new)
+
+        # Update resolver indices 
+        self.resolver_indices = self._update_indices_with_mapping(self.resolver_indices, old_to_new)
+        
+        # Update resolver index to parent mapping
+        if self.resolver_index_to_parent_idx is not None:
+            new_mapping = {}
+            for resolver_idx, parent_idx in self.resolver_index_to_parent_idx.items():
+                new_resolver_idx = old_to_new[resolver_idx] if resolver_idx in old_to_new else resolver_idx
+                new_parent_idx = old_to_new[parent_idx] if parent_idx in old_to_new else parent_idx
+                new_mapping[new_resolver_idx] = new_parent_idx
+            self.resolver_index_to_parent_idx = new_mapping
 
 def initialize_polytomy_resolver_adj_matrix(T, children_of_polys, num_internal_nodes, 
                                             num_new_nodes, v_optimizer, nodes_w_polys, resolver_sites):
@@ -156,40 +198,16 @@ def should_remove_node(poly_res, V, T, remove_idx, children_of_removal_node):
         return True
     
     # Case 3
-    children_of_parent_node = get_child_indices_sparse_t(T, parent_idx)
+    children_of_parent_node = vutil.get_child_indices(T, parent_idx)
     if len(children_of_parent_node) == 1:
         return True
     
     return False
 
-def get_child_indices_sparse_t(T, parent_idx):
-    T = T.coalesce()
-    indices = T.indices()
-    # Extract the row (iss) and column (jss) indices
-    iss, jss = indices[0], indices[1]
-    
-    # Use a boolean mask to filter indices where iss matches parent_idx
-    mask = (iss == parent_idx)
-    
-    # Use the mask to get the corresponding child indices
-    child_indices = jss[mask]
-    
-    # Convert to a Python list if needed
-    return child_indices.tolist()
-
-def reindex_sparse_adjacency_matrix(adj_matrix, removal_nodes):
-    """
-    Reindex the sparse adjacency matrix after removing nodes.
-    
-    Args:
-        adj_matrix (torch.sparse_coo_tensor): The sparse adjacency matrix.
-        remove_nodes (list): A list of node indices to be removed.
-
-    Returns:
-        torch.sparse_coo_tensor: The reindexed sparse adjacency matrix.
-        dict: Mapping of old indices to new indices.
-    """
-
+def remove_nodes_from_adjacency_matrix_sparse(adj_matrix, removal_nodes):
+    '''
+    Reindex the adjacency matrix after removing nodes.
+    '''
     # Extract indices and values from the sparse adjacency matrix
     adj_matrix = adj_matrix.coalesce()
     indices = adj_matrix.indices()  # Shape: [2, nnz]
@@ -270,13 +288,48 @@ def reindex_sparse_adjacency_matrix(adj_matrix, removal_nodes):
 
     return new_adj_matrix
 
+
+def remove_nodes_from_adjacency_matrix(T, removal_nodes):
+    """
+    Reindex the adjacency matrix after removing nodes.
+    
+    Args:
+        T (torch.sparse_coo_tensor): The sparse adjacency matrix.
+        remove_nodes (list): A list of node indices to be removed.
+
+    Returns:
+        torch.sparse_coo_tensor: The reindexed sparse adjacency matrix.
+        dict: Mapping of old indices to new indices.
+    """
+    if T.is_sparse:
+        return remove_nodes_from_adjacency_matrix_sparse(T, removal_nodes)
+
+    T = T.clone().detach()
+    # Attach children of the node to remove to their original parent
+    for remove_idx in removal_nodes:
+        parent_idx = torch.where(T[:,remove_idx] > 0)[0][0]
+        child_indices = vutil.get_child_indices(T, [remove_idx])
+        for child_idx in child_indices:
+            T[parent_idx,child_idx] = 1.0
+
+    # Get the device of the input tensor
+    device = T.device
+    # Create indices on the same device as adj_matrix
+    keep_indices = torch.tensor([i for i in range(T.size(0)) if i not in removal_nodes], device=device)
+    # Remove rows of T
+    T = T[keep_indices]
+    # Remove columns of T
+    T = T[:, keep_indices]
+    return T
+
+
 def remove_nodes(removal_indices, V, T, G, node_collection):
     '''
     Remove polytomy resolver nodes from V, T, G and node_idx_to_label
     if they didn't actually help
     '''
 
-    T = reindex_sparse_adjacency_matrix(T, removal_indices)
+    T = remove_nodes_from_adjacency_matrix(T, removal_indices)
     # Remove columns from V
     V = V[:, torch.tensor([i for i in range(V.size(1)) if i not in removal_indices], device=V.device)]
 
@@ -297,7 +350,6 @@ def remove_extra_resolver_nodes(solution_set, poly_res, weights, O, p):
 
     if poly_res == None:
         return solution_set
-    
 
     for i,soln in enumerate(solution_set):
         modified_soln = None
@@ -305,7 +357,7 @@ def remove_extra_resolver_nodes(solution_set, poly_res, weights, O, p):
         V, T = soln.V, soln.T
         nodes_to_remove = []
         for new_node_idx in poly_res.resolver_indices:
-            children_of_new_node = get_child_indices_sparse_t(T, new_node_idx)
+            children_of_new_node = vutil.get_child_indices(T, new_node_idx)
             if len(children_of_new_node) == 0:
                 nodes_to_remove.append(new_node_idx)
             elif should_remove_node(poly_res, V, T, new_node_idx, children_of_new_node):

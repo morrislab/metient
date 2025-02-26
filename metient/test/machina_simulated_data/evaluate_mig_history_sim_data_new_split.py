@@ -51,6 +51,7 @@ def save_boxplot(joint_df, run_name, ys):
         add_stat_annotation(ax, data=joint_df, x="seeding pattern", y=y, hue="method",
                             box_pairs=box_pairs,test='Wilcoxon', text_format='star', loc='inside', 
                             verbose=2, order=seeding_pattern_order, fontsize=18, comparisons_correction=None)
+        
         ax.set(ylim=(-0.1, 1.1))
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)

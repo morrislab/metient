@@ -13,7 +13,8 @@ DEFAULT_CALIBRATE_SEED_WEIGHTS = [1000.0,1.0]
 DEFAULT_CALIBRATE_COMIG_WEIGHTS = 100.0
 
 import itertools
-ALL_PARSIMONY_MODELS = list(itertools.permutations([1000.0, 100.0, 1.0]))
+ALL_PARSIMONY_MODELS = list(itertools.permutations([100.0, 50.0, 1.0]))
+# ALL_PARSIMONY_MODELS = [[1000.0,1000.0,1.0],[10.0,10.0,1.0], [10.0,1.0,10.0],[1.0,1.0,100.0], [10.0,1000.0,1.0], [100.0,10.0,1.0]]
 
 DEFAULT_COLORS = ["#6aa84f", "#6fa8dc", "#e69138", "#c27ba0", "#bf4040", "#9e9e9e","#993366", "brown", "black", "darkgreen", "blue"]*3
 DEFAULT_GREEN = "#6aa84f"
@@ -32,6 +33,9 @@ GEN_DIST_KEY = "genetic_distance"
 DATA_FIT_KEY = "neg_log_likelihood"
 REG_KEY = "regularizer"
 FULL_LOSS_KEY = "loss"
+
+# For projection algorithm
+MIN_VARIANCE = 1e-4
 
 # For pickle outputs
 OUT_LABElING_KEY = "clone_tree_labeling_matrices"

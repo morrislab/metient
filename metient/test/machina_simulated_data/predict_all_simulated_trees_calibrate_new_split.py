@@ -6,6 +6,7 @@ import argparse
 import datetime
 import math
 import time
+import shutil
 
 from metient.metient import *
 from metient.lib.migration_history_inference import rank_solutions
@@ -23,6 +24,11 @@ import json
 import pandas as pd
 
 VISUALIZE=False
+
+def create_directory(directory_path):
+    if os.path.exists(directory_path):
+        shutil.rmtree(directory_path)    
+    os.makedirs(directory_path)
 
 def get_num_mut_trees(mut_tree_fn):
     with open(mut_tree_fn, 'r') as f:
@@ -44,7 +50,7 @@ def recalibrate(seed, tree_num, out_dir, ref_var_fn, weights, print_config, cust
     primary_idx = unique_sites.index('P')
     p = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(unique_sites)).T
     final_solutions = rank_solutions(create_reweighted_solution_set_from_pckl(pckl, None, p, weights),
-                                     print_config, needs_pruning=False)
+                                     print_config)
     print("final_solutions:", len(final_solutions))
 
     plot_util.save_best_trees(final_solutions, saved_U, None, weights, unique_sites, print_config, 
@@ -73,7 +79,7 @@ machina_sims_data_dir = args.sim_data_dir
 run_name = args.run_name
 
 predictions_dir = os.path.join('/data/morrisq/divyak/data/metient_prediction_results', f"predictions_{run_name}")
-os.mkdir(predictions_dir)
+create_directory(predictions_dir)
 sys.stdout = open(os.path.join(predictions_dir, f"output.txt"), 'a')
 
 sites = ["m8", "m5"]
@@ -112,7 +118,7 @@ for site in sites:
             subprocess.run(" ".join(python_cmd), shell=True)
 
 print(files_to_check)
-# assert(len(files_to_check)==80)
+assert(len(files_to_check)==80)
 # Wait until all files exist
 while not all(os.path.exists(file) for file in files_to_check):
     print("Waiting for files to exist...")

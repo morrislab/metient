@@ -292,5 +292,100 @@ class TestTRACERxPreprocessing(unittest.TestCase):
 
 	# TODO: test write_pooled_tsv_from_pairtree_clusters
 
+# Test cases for transitive closure
+import unittest
+class TestTransitiveClosure(unittest.TestCase):
+    
+    def test_basic_functionality(self):
+        T = torch.tensor([[0, 1, 0],
+                           [0, 0, 1],
+                           [0, 0, 0]])
+        expected_result = torch.tensor([[0, 1, 1],
+                                         [0, 0, 1],
+                                         [0, 0, 0]])
+        result = vert_util.path_matrix(T)
+        self.assertTrue(torch.equal(result, expected_result))
+
+    def test_no_edges(self):
+        T = torch.tensor([[0, 0],
+                           [0, 0]])
+        expected_result = torch.tensor([[0, 0],
+                                         [0, 0]])
+        result = vert_util.path_matrix(T)
+        self.assertTrue(torch.equal(result, expected_result))
+
+    def test_complex_binary_tree(self):
+        # Create a complex binary tree adjacency matrix
+        T = torch.tensor([[0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Node 0 to Node 1 and 2
+                        [0, 0, 0, 1, 1, 0, 0, 0, 0, 0],  # Node 1 to Node 3 and 4
+                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],  # Node 2 to Node 5
+                        [0, 0, 0, 0, 0, 0, 1, 1, 0, 0],  # Node 3 to Node 6 and 7
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Node 4 has no children
+                        [0, 0, 0, 0, 0, 0, 0, 0, 1, 1],  # Node 5 to Node 8 and 9
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Node 6 has no children
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Node 7 has no children
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Node 8 has no children
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=torch.float32)
+
+        expected_result = torch.tensor([[0, 1, 1, 1, 1, 1, 1, 1, 1, 1],  # Node 0 can reach all nodes
+                                        [0, 0, 0, 1, 1, 0, 1, 1, 0, 0],  # Node 1 can reach Nodes 3, 4, 6, 7
+                                        [0, 0, 0, 0, 0, 1, 0, 0, 1, 1],  # Node 2 can reach Nodes 5, 8, 9
+                                        [0, 0, 0, 0, 0, 0, 1, 1, 0, 0],  # Node 3 can reach Nodes 6 and 7
+                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Node 4 has no outgoing edges
+                                        [0, 0, 0, 0, 0, 0, 0, 0, 1, 1],  # Node 5 can reach Nodes 8 and 9
+                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Node 6 has no outgoing edges
+                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Node 7 has no outgoing edges
+                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Node 8 has no outgoing edges
+                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]) # Node 9 has no outgoing edges
+        result = vert_util.path_matrix(T)
+        self.assertTrue(torch.equal(result, expected_result))
+
+    def test_fully_connected(self):
+        T = torch.tensor([[0, 1, 1],
+                           [0, 0, 1],
+                           [0, 0, 0]])
+        expected_result = torch.tensor([[0, 1, 1],
+                                         [0, 0, 1],
+                                         [0, 0, 0]])
+        result = vert_util.path_matrix(T)
+        self.assertTrue(torch.equal(result, expected_result))
+
+    def test_disconnected_graph(self):
+        T = torch.tensor([[0, 1, 0],
+                           [0, 0, 0],
+                           [0, 1, 0]])
+        expected_result = torch.tensor([[0, 1, 0],
+                                         [0, 0, 0],
+                                         [0, 1, 0]])
+        result = vert_util.path_matrix(T)
+        self.assertTrue(torch.equal(result, expected_result))
+
+    def test_leaf_nodes(self):
+        T = torch.tensor([[0, 1],
+                           [0, 0]])
+        expected_result = torch.tensor([[0, 1],
+                                         [0, 0]])
+        result = vert_util.path_matrix(T)
+        self.assertTrue(torch.equal(result, expected_result))
+
+    def test_large_sparse_graph(self):
+        T = torch.zeros((10, 10), dtype=torch.int)
+        T[0, 1] = 1
+        T[1, 2] = 1
+        T[3, 4] = 1
+        T[4, 5] = 1
+        expected_result = torch.tensor([[0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+                                         [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+        result = vert_util.path_matrix(T)
+        self.assertTrue(torch.equal(result, expected_result))
+
 
 unittest.main()

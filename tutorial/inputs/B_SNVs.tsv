@@ -1,277 +1,277 @@
 anatomical_site_index	anatomical_site_label	cluster_index	character_index	character_label	ref	var	var_read_prob	site_category
-0	Primary, mid-left back	2	0	RAPGEF4	35	0	0.445	primary
-1	Lymph node metastasis, left axilla	2	0	RAPGEF4	18	0	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	2	0	RAPGEF4	13	0	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	2	0	RAPGEF4	29	4	0.255	metastasis
-0	Primary, mid-left back	0	1	HERC2	2	8	0.445	primary
-1	Lymph node metastasis, left axilla	0	1	HERC2	8	1	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	1	HERC2	6	2	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	1	HERC2	10	3	0.255	metastasis
-0	Primary, mid-left back	0	2	TMPRSS11A	136	100	0.445	primary
-1	Lymph node metastasis, left axilla	0	2	TMPRSS11A	226	29	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	2	TMPRSS11A	75	61	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	2	TMPRSS11A	171	40	0.255	metastasis
-0	Primary, mid-left back	0	3	HERC2	11	12	0.445	primary
-1	Lymph node metastasis, left axilla	0	3	HERC2	16	3	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	3	HERC2	10	9	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	3	HERC2	16	12	0.255	metastasis
-0	Primary, mid-left back	6	4	FAM213A	25	0	0.445	primary
-1	Lymph node metastasis, left axilla	6	4	FAM213A	36	0	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	6	4	FAM213A	39	8	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	6	4	FAM213A	22	3	0.255	metastasis
-0	Primary, mid-left back	7	5	QRICH2	243	33	0.445	primary
-1	Lymph node metastasis, left axilla	7	5	QRICH2	207	32	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	7	5	QRICH2	221	23	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	7	5	QRICH2	333	53	0.255	metastasis
-0	Primary, mid-left back	0	6	COL1A1	95	60	0.445	primary
-1	Lymph node metastasis, left axilla	0	6	COL1A1	95	16	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	6	COL1A1	68	37	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	6	COL1A1	127	34	0.255	metastasis
-0	Primary, mid-left back	0	7	KIAA1107	235	141	0.445	primary
-1	Lymph node metastasis, left axilla	0	7	KIAA1107	338	37	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	7	KIAA1107	181	117	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	7	KIAA1107	247	87	0.255	metastasis
-0	Primary, mid-left back	0	8	COX7B2	218	206	0.445	primary
-1	Lymph node metastasis, left axilla	0	8	COX7B2	366	44	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	8	COX7B2	146	113	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	8	COX7B2	301	114	0.255	metastasis
-0	Primary, mid-left back	0	9	SSH1	138	144	0.445	primary
-1	Lymph node metastasis, left axilla	0	9	SSH1	179	26	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	9	SSH1	108	93	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	9	SSH1	211	75	0.255	metastasis
-0	Primary, mid-left back	3	10	C10orf113	406	98	0.445	primary
-1	Lymph node metastasis, left axilla	3	10	C10orf113	332	34	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	3	10	C10orf113	163	136	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	3	10	C10orf113	407	138	0.255	metastasis
-0	Primary, mid-left back	8	11	RAD51AP2	630	0	0.445	primary
-1	Lymph node metastasis, left axilla	8	11	RAD51AP2	592	64	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	8	11	RAD51AP2	432	0	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	8	11	RAD51AP2	647	0	0.255	metastasis
-0	Primary, mid-left back	0	12	TTN	202	133	0.445	primary
-1	Lymph node metastasis, left axilla	0	12	TTN	247	33	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	12	TTN	124	71	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	12	TTN	239	68	0.255	metastasis
-0	Primary, mid-left back	4	13	DCLK1	112	0	0.445	primary
-1	Lymph node metastasis, left axilla	4	13	DCLK1	122	0	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	4	13	DCLK1	62	42	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	4	13	DCLK1	136	0	0.255	metastasis
-0	Primary, mid-left back	0	14	PABPC1P2	109	75	0.445	primary
-1	Lymph node metastasis, left axilla	0	14	PABPC1P2	161	14	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	14	PABPC1P2	66	51	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	14	PABPC1P2	161	44	0.255	metastasis
-0	Primary, mid-left back	0	15	ANKRD12	339	240	0.445	primary
-1	Lymph node metastasis, left axilla	0	15	ANKRD12	487	44	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	15	ANKRD12	206	133	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	15	ANKRD12	443	128	0.255	metastasis
-0	Primary, mid-left back	0	16	PLXND1	222	147	0.445	primary
-1	Lymph node metastasis, left axilla	0	16	PLXND1	221	23	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	16	PLXND1	134	125	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	16	PLXND1	265	99	0.255	metastasis
-0	Primary, mid-left back	0	17	DRGX	75	91	0.445	primary
-1	Lymph node metastasis, left axilla	0	17	DRGX	118	21	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	17	DRGX	73	54	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	17	DRGX	158	51	0.255	metastasis
-0	Primary, mid-left back	0	18	SCN11A	310	229	0.445	primary
-1	Lymph node metastasis, left axilla	0	18	SCN11A	473	52	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	18	SCN11A	216	191	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	18	SCN11A	439	147	0.255	metastasis
-0	Primary, mid-left back	1	19	RPTOR	12	4	0.445	primary
-1	Lymph node metastasis, left axilla	1	19	RPTOR	2	0	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	1	19	RPTOR	12	0	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	1	19	RPTOR	6	0	0.255	metastasis
-0	Primary, mid-left back	7	20	SLC6A10P	14	1	0.445	primary
-1	Lymph node metastasis, left axilla	7	20	SLC6A10P	9	4	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	7	20	SLC6A10P	15	2	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	7	20	SLC6A10P	10	2	0.255	metastasis
-0	Primary, mid-left back	8	21	SIDT1	318	1	0.445	primary
-1	Lymph node metastasis, left axilla	8	21	SIDT1	253	31	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	8	21	SIDT1	197	0	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	8	21	SIDT1	320	0	0.255	metastasis
-0	Primary, mid-left back	0	22	DCC	106	76	0.445	primary
-1	Lymph node metastasis, left axilla	0	22	DCC	165	26	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	22	DCC	65	48	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	22	DCC	129	32	0.255	metastasis
-0	Primary, mid-left back	0	23	GSDMA	137	91	0.445	primary
-1	Lymph node metastasis, left axilla	0	23	GSDMA	194	12	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	23	GSDMA	112	88	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	23	GSDMA	202	67	0.255	metastasis
-0	Primary, mid-left back	0	24	PRSS54	211	175	0.445	primary
-1	Lymph node metastasis, left axilla	0	24	PRSS54	287	21	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	24	PRSS54	167	104	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	24	PRSS54	353	114	0.255	metastasis
-0	Primary, mid-left back	0	25	SNED1	457	322	0.445	primary
-1	Lymph node metastasis, left axilla	0	25	SNED1	411	61	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	25	SNED1	336	252	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	25	SNED1	683	234	0.255	metastasis
-0	Primary, mid-left back	0	26	EFHD1	47	44	0.445	primary
-1	Lymph node metastasis, left axilla	0	26	EFHD1	72	6	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	26	EFHD1	44	28	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	26	EFHD1	85	24	0.255	metastasis
-0	Primary, mid-left back	4	27	PRPF8	334	0	0.445	primary
-1	Lymph node metastasis, left axilla	4	27	PRPF8	266	0	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	4	27	PRPF8	326	72	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	4	27	PRPF8	405	1	0.255	metastasis
-0	Primary, mid-left back	2	28	PHYHIPL	142	0	0.445	primary
-1	Lymph node metastasis, left axilla	2	28	PHYHIPL	153	0	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	2	28	PHYHIPL	95	0	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	2	28	PHYHIPL	139	45	0.255	metastasis
-0	Primary, mid-left back	4	29	DLL4	199	0	0.445	primary
-1	Lymph node metastasis, left axilla	4	29	DLL4	171	0	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	4	29	DLL4	129	27	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	4	29	DLL4	235	0	0.255	metastasis
-0	Primary, mid-left back	0	30	TRIM71	313	228	0.445	primary
-1	Lymph node metastasis, left axilla	0	30	TRIM71	402	38	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	30	TRIM71	250	181	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	30	TRIM71	487	158	0.255	metastasis
-0	Primary, mid-left back	0	31	FMN2	445	363	0.445	primary
-1	Lymph node metastasis, left axilla	0	31	FMN2	613	60	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	31	FMN2	376	251	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	31	FMN2	680	234	0.255	metastasis
-0	Primary, mid-left back	0	32	BCL9	324	193	0.445	primary
-1	Lymph node metastasis, left axilla	0	32	BCL9	463	39	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	32	BCL9	222	143	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	32	BCL9	430	92	0.255	metastasis
-0	Primary, mid-left back	0	33	ANKFN1	71	72	0.445	primary
-1	Lymph node metastasis, left axilla	0	33	ANKFN1	109	11	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	33	ANKFN1	57	33	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	33	ANKFN1	82	36	0.255	metastasis
-0	Primary, mid-left back	0	34	EDEM3	72	48	0.445	primary
-1	Lymph node metastasis, left axilla	0	34	EDEM3	110	12	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	34	EDEM3	61	41	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	34	EDEM3	109	33	0.255	metastasis
-0	Primary, mid-left back	0	35	SLC8A1	960	672	0.445	primary
-1	Lymph node metastasis, left axilla	0	35	SLC8A1	1338	172	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	35	SLC8A1	656	447	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	35	SLC8A1	1367	351	0.255	metastasis
-0	Primary, mid-left back	9	36	TRIM2	134	6	0.445	primary
-1	Lymph node metastasis, left axilla	9	36	TRIM2	96	8	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	9	36	TRIM2	115	38	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	9	36	TRIM2	153	18	0.255	metastasis
-0	Primary, mid-left back	0	37	PARP11	133	93	0.445	primary
-1	Lymph node metastasis, left axilla	0	37	PARP11	183	28	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	37	PARP11	74	56	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	37	PARP11	171	44	0.255	metastasis
-0	Primary, mid-left back	0	38	ADAM11	172	132	0.445	primary
-1	Lymph node metastasis, left axilla	0	38	ADAM11	168	27	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	38	ADAM11	149	82	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	38	ADAM11	270	67	0.255	metastasis
-0	Primary, mid-left back	0	39	FN1	21	15	0.445	primary
-1	Lymph node metastasis, left axilla	0	39	FN1	27	4	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	39	FN1	12	8	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	39	FN1	21	7	0.255	metastasis
-0	Primary, mid-left back	0	40	CYP1B1	82	85	0.445	primary
-1	Lymph node metastasis, left axilla	0	40	CYP1B1	74	8	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	40	CYP1B1	66	54	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	40	CYP1B1	133	47	0.255	metastasis
-0	Primary, mid-left back	0	41	MYH4	170	131	0.445	primary
-1	Lymph node metastasis, left axilla	0	41	MYH4	240	32	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	41	MYH4	132	98	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	41	MYH4	217	98	0.255	metastasis
-0	Primary, mid-left back	4	42	MANBA	16	0	0.445	primary
-1	Lymph node metastasis, left axilla	4	42	MANBA	16	0	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	4	42	MANBA	13	4	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	4	42	MANBA	15	0	0.255	metastasis
-0	Primary, mid-left back	0	43	SNUPN	186	172	0.445	primary
-1	Lymph node metastasis, left axilla	0	43	SNUPN	214	30	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	43	SNUPN	146	133	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	43	SNUPN	322	112	0.255	metastasis
-0	Primary, mid-left back	0	44	AIFM2	86	46	0.445	primary
-1	Lymph node metastasis, left axilla	0	44	AIFM2	106	13	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	44	AIFM2	73	42	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	44	AIFM2	89	41	0.255	metastasis
-0	Primary, mid-left back	0	45	UGT2B4	52	27	0.445	primary
-1	Lymph node metastasis, left axilla	0	45	UGT2B4	63	4	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	45	UGT2B4	25	17	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	45	UGT2B4	60	17	0.255	metastasis
-0	Primary, mid-left back	1	46	FOXD2	26	10	0.445	primary
-1	Lymph node metastasis, left axilla	1	46	FOXD2	24	2	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	1	46	FOXD2	65	2	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	1	46	FOXD2	47	0	0.255	metastasis
-0	Primary, mid-left back	0	47	HERC2	346	220	0.445	primary
-1	Lymph node metastasis, left axilla	0	47	HERC2	389	58	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	47	HERC2	213	173	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	47	HERC2	452	172	0.255	metastasis
-0	Primary, mid-left back	0	48	NES	144	145	0.445	primary
-1	Lymph node metastasis, left axilla	0	48	NES	208	22	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	48	NES	151	105	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	48	NES	241	83	0.255	metastasis
-0	Primary, mid-left back	0	49	TCF4	200	162	0.445	primary
-1	Lymph node metastasis, left axilla	0	49	TCF4	329	37	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	49	TCF4	142	83	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	49	TCF4	239	78	0.255	metastasis
-0	Primary, mid-left back	3	50	DCST1	598	149	0.445	primary
-1	Lymph node metastasis, left axilla	3	50	DCST1	520	64	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	3	50	DCST1	320	257	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	3	50	DCST1	658	200	0.255	metastasis
-0	Primary, mid-left back	0	51	DUSP27	108	108	0.445	primary
-1	Lymph node metastasis, left axilla	0	51	DUSP27	192	14	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	51	DUSP27	121	54	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	51	DUSP27	189	62	0.255	metastasis
-0	Primary, mid-left back	3	52	PROS1	25	6	0.445	primary
-1	Lymph node metastasis, left axilla	3	52	PROS1	34	4	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	3	52	PROS1	8	17	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	3	52	PROS1	21	14	0.255	metastasis
-0	Primary, mid-left back	7	53	FLG	28	7	0.445	primary
-1	Lymph node metastasis, left axilla	7	53	FLG	18	3	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	7	53	FLG	28	0	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	7	53	FLG	34	4	0.255	metastasis
-0	Primary, mid-left back	0	54	DQ583205	775	585	0.445	primary
-1	Lymph node metastasis, left axilla	0	54	DQ583205	1000	115	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	54	DQ583205	582	445	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	54	DQ583205	1259	358	0.255	metastasis
-0	Primary, mid-left back	0	55	MYH8	119	78	0.445	primary
-1	Lymph node metastasis, left axilla	0	55	MYH8	158	19	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	55	MYH8	63	54	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	55	MYH8	150	59	0.255	metastasis
-0	Primary, mid-left back	0	56	PLCH1	96	65	0.445	primary
-1	Lymph node metastasis, left axilla	0	56	PLCH1	120	12	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	56	PLCH1	92	40	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	56	PLCH1	109	35	0.255	metastasis
-0	Primary, mid-left back	0	57	PGRMC2	121	109	0.445	primary
-1	Lymph node metastasis, left axilla	0	57	PGRMC2	160	14	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	57	PGRMC2	89	82	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	57	PGRMC2	179	76	0.255	metastasis
-0	Primary, mid-left back	0	58	C10orf112	156	116	0.445	primary
-1	Lymph node metastasis, left axilla	0	58	C10orf112	205	36	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	58	C10orf112	114	77	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	58	C10orf112	240	59	0.255	metastasis
-0	Primary, mid-left back	0	59	CEP170	9	2	0.445	primary
-1	Lymph node metastasis, left axilla	0	59	CEP170	8	1	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	59	CEP170	15	4	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	59	CEP170	14	6	0.255	metastasis
-0	Primary, mid-left back	0	60	BNC1	209	233	0.445	primary
-1	Lymph node metastasis, left axilla	0	60	BNC1	313	42	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	60	BNC1	148	141	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	60	BNC1	297	104	0.255	metastasis
-0	Primary, mid-left back	0	61	SLC8A1	72	57	0.445	primary
-1	Lymph node metastasis, left axilla	0	61	SLC8A1	122	20	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	61	SLC8A1	48	51	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	61	SLC8A1	138	42	0.255	metastasis
-0	Primary, mid-left back	5	62	EFS	32	4	0.445	primary
-1	Lymph node metastasis, left axilla	5	62	EFS	19	3	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	5	62	EFS	13	4	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	5	62	EFS	32	1	0.255	metastasis
-0	Primary, mid-left back	2	63	CABLES1	27	0	0.445	primary
-1	Lymph node metastasis, left axilla	2	63	CABLES1	12	0	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	2	63	CABLES1	16	2	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	2	63	CABLES1	23	8	0.255	metastasis
-0	Primary, mid-left back	0	64	CDH2	91	54	0.445	primary
-1	Lymph node metastasis, left axilla	0	64	CDH2	119	21	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	64	CDH2	51	32	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	64	CDH2	94	20	0.255	metastasis
-0	Primary, mid-left back	2	65	BPTF	63	0	0.445	primary
-1	Lymph node metastasis, left axilla	2	65	BPTF	32	0	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	2	65	BPTF	58	0	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	2	65	BPTF	36	9	0.255	metastasis
-0	Primary, mid-left back	0	66	SPATA16	102	46	0.445	primary
-1	Lymph node metastasis, left axilla	0	66	SPATA16	166	15	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	66	SPATA16	52	36	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	66	SPATA16	103	19	0.255	metastasis
-0	Primary, mid-left back	1	67	AHNAK2	15	4	0.445	primary
-1	Lymph node metastasis, left axilla	1	67	AHNAK2	11	0	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	1	67	AHNAK2	8	0	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	1	67	AHNAK2	16	0	0.255	metastasis
-0	Primary, mid-left back	0	68	CCR8	429	300	0.445	primary
-1	Lymph node metastasis, left axilla	0	68	CCR8	516	45	0.115	metastasis
-2	Locoregional skin metastasis 1, left back	0	68	CCR8	266	171	0.44	metastasis
-3	Locoregional skin metastasis 2, left axilla	0	68	CCR8	527	167	0.255	metastasis
+0	Primary, mid-left back	0	0	EDEM3	72	48	0.5	primary
+1	Lymph node metastasis, left axilla	0	0	EDEM3	110	12	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	0	EDEM3	61	41	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	0	EDEM3	109	33	0.5	metastasis
+0	Primary, mid-left back	1	1	CABLES1	27	0	0.5	primary
+1	Lymph node metastasis, left axilla	1	1	CABLES1	12	0	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	1	1	CABLES1	16	2	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	1	1	CABLES1	23	8	0.5	metastasis
+0	Primary, mid-left back	0	2	SLC8A1	960	672	0.5	primary
+1	Lymph node metastasis, left axilla	0	2	SLC8A1	1338	172	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	2	SLC8A1	656	447	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	2	SLC8A1	1367	351	0.5	metastasis
+0	Primary, mid-left back	0	3	CYP1B1	82	85	0.5	primary
+1	Lymph node metastasis, left axilla	0	3	CYP1B1	74	8	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	3	CYP1B1	66	54	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	3	CYP1B1	133	47	0.5	metastasis
+0	Primary, mid-left back	1	4	FAM213A	25	0	0.5	primary
+1	Lymph node metastasis, left axilla	1	4	FAM213A	36	0	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	1	4	FAM213A	39	8	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	1	4	FAM213A	22	3	0.5	metastasis
+0	Primary, mid-left back	0	5	SNED1	457	322	0.5	primary
+1	Lymph node metastasis, left axilla	0	5	SNED1	411	61	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	5	SNED1	336	252	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	5	SNED1	683	234	0.5	metastasis
+0	Primary, mid-left back	0	6	HERC2	2	8	0.5	primary
+1	Lymph node metastasis, left axilla	0	6	HERC2	8	1	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	6	HERC2	6	2	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	6	HERC2	10	3	0.5	metastasis
+0	Primary, mid-left back	1	7	PHYHIPL	142	0	0.5	primary
+1	Lymph node metastasis, left axilla	1	7	PHYHIPL	153	0	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	1	7	PHYHIPL	95	0	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	1	7	PHYHIPL	139	45	0.5	metastasis
+0	Primary, mid-left back	1	8	FOXD2	26	10	0.5	primary
+1	Lymph node metastasis, left axilla	1	8	FOXD2	24	2	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	1	8	FOXD2	65	2	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	1	8	FOXD2	47	0	0.5	metastasis
+0	Primary, mid-left back	0	9	TRIM71	313	228	0.5	primary
+1	Lymph node metastasis, left axilla	0	9	TRIM71	402	38	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	9	TRIM71	250	181	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	9	TRIM71	487	158	0.5	metastasis
+0	Primary, mid-left back	0	10	PLXND1	222	147	0.5	primary
+1	Lymph node metastasis, left axilla	0	10	PLXND1	221	23	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	10	PLXND1	134	125	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	10	PLXND1	265	99	0.5	metastasis
+0	Primary, mid-left back	0	11	HERC2	11	12	0.5	primary
+1	Lymph node metastasis, left axilla	0	11	HERC2	16	3	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	11	HERC2	10	9	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	11	HERC2	16	12	0.5	metastasis
+0	Primary, mid-left back	0	12	BNC1	209	233	0.5	primary
+1	Lymph node metastasis, left axilla	0	12	BNC1	313	42	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	12	BNC1	148	141	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	12	BNC1	297	104	0.5	metastasis
+0	Primary, mid-left back	0	13	TMPRSS11A	136	100	0.5	primary
+1	Lymph node metastasis, left axilla	0	13	TMPRSS11A	226	29	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	13	TMPRSS11A	75	61	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	13	TMPRSS11A	171	40	0.5	metastasis
+0	Primary, mid-left back	0	14	PGRMC2	121	109	0.5	primary
+1	Lymph node metastasis, left axilla	0	14	PGRMC2	160	14	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	14	PGRMC2	89	82	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	14	PGRMC2	179	76	0.5	metastasis
+0	Primary, mid-left back	0	15	UGT2B4	52	27	0.5	primary
+1	Lymph node metastasis, left axilla	0	15	UGT2B4	63	4	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	15	UGT2B4	25	17	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	15	UGT2B4	60	17	0.5	metastasis
+0	Primary, mid-left back	0	16	MYH4	170	131	0.5	primary
+1	Lymph node metastasis, left axilla	0	16	MYH4	240	32	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	16	MYH4	132	98	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	16	MYH4	217	98	0.5	metastasis
+0	Primary, mid-left back	0	17	ANKRD12	339	240	0.5	primary
+1	Lymph node metastasis, left axilla	0	17	ANKRD12	487	44	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	17	ANKRD12	206	133	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	17	ANKRD12	443	128	0.5	metastasis
+0	Primary, mid-left back	0	18	CDH2	91	54	0.5	primary
+1	Lymph node metastasis, left axilla	0	18	CDH2	119	21	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	18	CDH2	51	32	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	18	CDH2	94	20	0.5	metastasis
+0	Primary, mid-left back	0	19	GSDMA	137	91	0.5	primary
+1	Lymph node metastasis, left axilla	0	19	GSDMA	194	12	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	19	GSDMA	112	88	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	19	GSDMA	202	67	0.5	metastasis
+0	Primary, mid-left back	0	20	KIAA1107	235	141	0.5	primary
+1	Lymph node metastasis, left axilla	0	20	KIAA1107	338	37	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	20	KIAA1107	181	117	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	20	KIAA1107	247	87	0.5	metastasis
+0	Primary, mid-left back	0	21	SCN11A	310	229	0.5	primary
+1	Lymph node metastasis, left axilla	0	21	SCN11A	473	52	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	21	SCN11A	216	191	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	21	SCN11A	439	147	0.5	metastasis
+0	Primary, mid-left back	1	22	RAPGEF4	35	0	0.5	primary
+1	Lymph node metastasis, left axilla	1	22	RAPGEF4	18	0	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	1	22	RAPGEF4	13	0	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	1	22	RAPGEF4	29	4	0.5	metastasis
+0	Primary, mid-left back	0	23	DUSP27	108	108	0.5	primary
+1	Lymph node metastasis, left axilla	0	23	DUSP27	192	14	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	23	DUSP27	121	54	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	23	DUSP27	189	62	0.5	metastasis
+0	Primary, mid-left back	0	24	PLCH1	96	65	0.5	primary
+1	Lymph node metastasis, left axilla	0	24	PLCH1	120	12	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	24	PLCH1	92	40	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	24	PLCH1	109	35	0.5	metastasis
+0	Primary, mid-left back	0	25	SSH1	138	144	0.5	primary
+1	Lymph node metastasis, left axilla	0	25	SSH1	179	26	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	25	SSH1	108	93	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	25	SSH1	211	75	0.5	metastasis
+0	Primary, mid-left back	0	26	MYH8	119	78	0.5	primary
+1	Lymph node metastasis, left axilla	0	26	MYH8	158	19	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	26	MYH8	63	54	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	26	MYH8	150	59	0.5	metastasis
+0	Primary, mid-left back	2	27	DCLK1	112	0	0.5	primary
+1	Lymph node metastasis, left axilla	2	27	DCLK1	122	0	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	2	27	DCLK1	62	42	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	2	27	DCLK1	136	0	0.5	metastasis
+0	Primary, mid-left back	2	28	DLL4	199	0	0.5	primary
+1	Lymph node metastasis, left axilla	2	28	DLL4	171	0	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	2	28	DLL4	129	27	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	2	28	DLL4	235	0	0.5	metastasis
+0	Primary, mid-left back	0	29	PABPC1P2	109	75	0.5	primary
+1	Lymph node metastasis, left axilla	0	29	PABPC1P2	161	14	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	29	PABPC1P2	66	51	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	29	PABPC1P2	161	44	0.5	metastasis
+0	Primary, mid-left back	0	30	TTN	202	133	0.5	primary
+1	Lymph node metastasis, left axilla	0	30	TTN	247	33	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	30	TTN	124	71	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	30	TTN	239	68	0.5	metastasis
+0	Primary, mid-left back	0	31	PRSS54	211	175	0.5	primary
+1	Lymph node metastasis, left axilla	0	31	PRSS54	287	21	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	31	PRSS54	167	104	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	31	PRSS54	353	114	0.5	metastasis
+0	Primary, mid-left back	1	32	BPTF	63	0	0.5	primary
+1	Lymph node metastasis, left axilla	1	32	BPTF	32	0	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	1	32	BPTF	58	0	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	1	32	BPTF	36	9	0.5	metastasis
+0	Primary, mid-left back	0	33	FMN2	445	363	0.5	primary
+1	Lymph node metastasis, left axilla	0	33	FMN2	613	60	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	33	FMN2	376	251	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	33	FMN2	680	234	0.5	metastasis
+0	Primary, mid-left back	0	34	COX7B2	218	206	0.5	primary
+1	Lymph node metastasis, left axilla	0	34	COX7B2	366	44	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	34	COX7B2	146	113	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	34	COX7B2	301	114	0.5	metastasis
+0	Primary, mid-left back	2	35	PRPF8	334	0	0.5	primary
+1	Lymph node metastasis, left axilla	2	35	PRPF8	266	0	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	2	35	PRPF8	326	72	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	2	35	PRPF8	405	1	0.5	metastasis
+0	Primary, mid-left back	0	36	SLC8A1	72	57	0.5	primary
+1	Lymph node metastasis, left axilla	0	36	SLC8A1	122	20	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	36	SLC8A1	48	51	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	36	SLC8A1	138	42	0.5	metastasis
+0	Primary, mid-left back	0	37	ADAM11	172	132	0.5	primary
+1	Lymph node metastasis, left axilla	0	37	ADAM11	168	27	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	37	ADAM11	149	82	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	37	ADAM11	270	67	0.5	metastasis
+0	Primary, mid-left back	0	38	EFHD1	47	44	0.5	primary
+1	Lymph node metastasis, left axilla	0	38	EFHD1	72	6	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	38	EFHD1	44	28	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	38	EFHD1	85	24	0.5	metastasis
+0	Primary, mid-left back	0	39	TCF4	200	162	0.5	primary
+1	Lymph node metastasis, left axilla	0	39	TCF4	329	37	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	39	TCF4	142	83	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	39	TCF4	239	78	0.5	metastasis
+0	Primary, mid-left back	0	40	SNUPN	186	172	0.5	primary
+1	Lymph node metastasis, left axilla	0	40	SNUPN	214	30	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	40	SNUPN	146	133	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	40	SNUPN	322	112	0.5	metastasis
+0	Primary, mid-left back	0	41	HERC2	346	220	0.5	primary
+1	Lymph node metastasis, left axilla	0	41	HERC2	389	58	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	41	HERC2	213	173	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	41	HERC2	452	172	0.5	metastasis
+0	Primary, mid-left back	0	42	BCL9	324	193	0.5	primary
+1	Lymph node metastasis, left axilla	0	42	BCL9	463	39	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	42	BCL9	222	143	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	42	BCL9	430	92	0.5	metastasis
+0	Primary, mid-left back	0	43	COL1A1	95	60	0.5	primary
+1	Lymph node metastasis, left axilla	0	43	COL1A1	95	16	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	43	COL1A1	68	37	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	43	COL1A1	127	34	0.5	metastasis
+0	Primary, mid-left back	0	44	SPATA16	102	46	0.5	primary
+1	Lymph node metastasis, left axilla	0	44	SPATA16	166	15	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	44	SPATA16	52	36	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	44	SPATA16	103	19	0.5	metastasis
+0	Primary, mid-left back	0	45	ANKFN1	71	72	0.5	primary
+1	Lymph node metastasis, left axilla	0	45	ANKFN1	109	11	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	45	ANKFN1	57	33	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	45	ANKFN1	82	36	0.5	metastasis
+0	Primary, mid-left back	1	46	QRICH2	243	33	0.5	primary
+1	Lymph node metastasis, left axilla	1	46	QRICH2	207	32	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	1	46	QRICH2	221	23	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	1	46	QRICH2	333	53	0.5	metastasis
+0	Primary, mid-left back	0	47	DQ583205	775	585	0.5	primary
+1	Lymph node metastasis, left axilla	0	47	DQ583205	1000	115	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	47	DQ583205	582	445	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	47	DQ583205	1259	358	0.5	metastasis
+0	Primary, mid-left back	1	48	AHNAK2	15	4	0.5	primary
+1	Lymph node metastasis, left axilla	1	48	AHNAK2	11	0	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	1	48	AHNAK2	8	0	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	1	48	AHNAK2	16	0	0.5	metastasis
+0	Primary, mid-left back	1	49	SLC6A10P	14	1	0.5	primary
+1	Lymph node metastasis, left axilla	1	49	SLC6A10P	9	4	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	1	49	SLC6A10P	15	2	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	1	49	SLC6A10P	10	2	0.5	metastasis
+0	Primary, mid-left back	2	50	MANBA	16	0	0.5	primary
+1	Lymph node metastasis, left axilla	2	50	MANBA	16	0	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	2	50	MANBA	13	4	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	2	50	MANBA	15	0	0.5	metastasis
+0	Primary, mid-left back	0	51	NES	144	145	0.5	primary
+1	Lymph node metastasis, left axilla	0	51	NES	208	22	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	51	NES	151	105	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	51	NES	241	83	0.5	metastasis
+0	Primary, mid-left back	0	52	CEP170	9	2	0.5	primary
+1	Lymph node metastasis, left axilla	0	52	CEP170	8	1	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	52	CEP170	15	4	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	52	CEP170	14	6	0.5	metastasis
+0	Primary, mid-left back	0	53	DCST1	598	149	0.5	primary
+1	Lymph node metastasis, left axilla	0	53	DCST1	520	64	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	53	DCST1	320	257	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	53	DCST1	658	200	0.5	metastasis
+0	Primary, mid-left back	3	54	RAD51AP2	630	0	0.5	primary
+1	Lymph node metastasis, left axilla	3	54	RAD51AP2	592	64	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	3	54	RAD51AP2	432	0	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	3	54	RAD51AP2	647	0	0.5	metastasis
+0	Primary, mid-left back	0	55	CCR8	429	300	0.5	primary
+1	Lymph node metastasis, left axilla	0	55	CCR8	516	45	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	55	CCR8	266	171	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	55	CCR8	527	167	0.5	metastasis
+0	Primary, mid-left back	0	56	FN1	21	15	0.5	primary
+1	Lymph node metastasis, left axilla	0	56	FN1	27	4	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	56	FN1	12	8	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	56	FN1	21	7	0.5	metastasis
+0	Primary, mid-left back	0	57	DRGX	75	91	0.5	primary
+1	Lymph node metastasis, left axilla	0	57	DRGX	118	21	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	57	DRGX	73	54	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	57	DRGX	158	51	0.5	metastasis
+0	Primary, mid-left back	1	58	EFS	32	4	0.5	primary
+1	Lymph node metastasis, left axilla	1	58	EFS	19	3	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	1	58	EFS	13	4	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	1	58	EFS	32	1	0.5	metastasis
+0	Primary, mid-left back	1	59	TRIM2	134	6	0.5	primary
+1	Lymph node metastasis, left axilla	1	59	TRIM2	96	8	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	1	59	TRIM2	115	38	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	1	59	TRIM2	153	18	0.5	metastasis
+0	Primary, mid-left back	3	60	SIDT1	318	1	0.5	primary
+1	Lymph node metastasis, left axilla	3	60	SIDT1	253	31	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	3	60	SIDT1	197	0	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	3	60	SIDT1	320	0	0.5	metastasis
+0	Primary, mid-left back	0	61	DCC	106	76	0.5	primary
+1	Lymph node metastasis, left axilla	0	61	DCC	165	26	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	61	DCC	65	48	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	61	DCC	129	32	0.5	metastasis
+0	Primary, mid-left back	1	62	FLG	28	7	0.5	primary
+1	Lymph node metastasis, left axilla	1	62	FLG	18	3	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	1	62	FLG	28	0	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	1	62	FLG	34	4	0.5	metastasis
+0	Primary, mid-left back	0	63	C10orf112	156	116	0.5	primary
+1	Lymph node metastasis, left axilla	0	63	C10orf112	205	36	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	63	C10orf112	114	77	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	63	C10orf112	240	59	0.5	metastasis
+0	Primary, mid-left back	0	64	C10orf113	406	98	0.5	primary
+1	Lymph node metastasis, left axilla	0	64	C10orf113	332	34	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	64	C10orf113	163	136	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	64	C10orf113	407	138	0.5	metastasis
+0	Primary, mid-left back	0	65	PARP11	133	93	0.5	primary
+1	Lymph node metastasis, left axilla	0	65	PARP11	183	28	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	65	PARP11	74	56	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	65	PARP11	171	44	0.5	metastasis
+0	Primary, mid-left back	0	66	AIFM2	86	46	0.5	primary
+1	Lymph node metastasis, left axilla	0	66	AIFM2	106	13	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	66	AIFM2	73	42	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	66	AIFM2	89	41	0.5	metastasis
+0	Primary, mid-left back	0	67	PROS1	25	6	0.5	primary
+1	Lymph node metastasis, left axilla	0	67	PROS1	34	4	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	0	67	PROS1	8	17	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	0	67	PROS1	21	14	0.5	metastasis
+0	Primary, mid-left back	1	68	RPTOR	12	4	0.5	primary
+1	Lymph node metastasis, left axilla	1	68	RPTOR	2	0	0.5	metastasis
+2	Locoregional skin metastasis 1, left back	1	68	RPTOR	12	0	0.5	metastasis
+3	Locoregional skin metastasis 2, left axilla	1	68	RPTOR	6	0	0.5	metastasis

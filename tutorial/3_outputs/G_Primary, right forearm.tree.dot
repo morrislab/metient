@@ -1,22 +1,25 @@
-strict digraph  {
-graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dpi=600; size=2.5;
-0 [color="#6fa8dcff", fillcolor="#6fa8dcff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=ABLIM2];
-6 [color="#6fa8dcff", fillcolor="#6fa8dcff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
-1 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=FAT1];
-2 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=DCC];
-4 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
-5 [color="#6fa8dcff", fillcolor="#6fa8dcff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
-3 [color="#e69138ff", fillcolor="#e69138ff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=filled, xlabel=SHISA3];
-7 [color="#6aa84fff", fillcolor="#6aa84fff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
-8 [color="#e69138ff", fillcolor="#e69138ff", fixedsize=true, fontname=Arial, fontsize="12pt", height="0.25", label="", penwidth=3, shape=circle, style=solid, xlabel=""];
-normal [label="", penwidth=3, style=invis, xlabel=FAT1];
-0 -> 6  [arrowsize=0, color="#6fa8dcff;0.5:#6fa8dcff", minlen="1.75", penwidth=5, style=dashed];
-1 -> 2  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="2.5", penwidth="5.5", style=solid];
-1 -> 4  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.75", penwidth=5, style=dashed];
-1 -> 5  [arrowsize=0, color="#6aa84fff;0.5:#6fa8dcff", minlen="1.75", penwidth=5, style=dashed];
-2 -> 0  [arrowsize=0, color="#6aa84fff;0.5:#6fa8dcff", minlen="2.5", penwidth="5.5", style=solid];
-2 -> 3  [arrowsize=0, color="#6aa84fff;0.5:#e69138ff", minlen="2.5", penwidth="5.5", style=solid];
-2 -> 7  [arrowsize=0, color="#6aa84fff;0.5:#6aa84fff", minlen="1.75", penwidth=5, style=dashed];
-3 -> 8  [arrowsize=0, color="#e69138ff;0.5:#e69138ff", minlen="1.75", penwidth=5, style=dashed];
-normal -> 1  [arrowsize=0, color="#6aa84fff", label="", penwidth=4, style=solid];
+strict digraph {
+graph[splines=false]; nodesep=0.4; rankdir=TB; ranksep=0.4; forcelabels=true; dpi=800; size=2.5; seed=42
+0 [xlabel=FAT1, fillcolor="#6aa84fff", color="#6aa84fff", style=filled, label="", shape=circle, penwidth=3, fontname=Arial, fontsize=12, fixedsize=true, height=0.25];
+2 [xlabel="SEL1L3;FRAS1", fillcolor="#6aa84fff", fontcolor=black, color="#6aa84fff", style=filled, label="", shape=circle, penwidth=3, fontname=Arial, fontsize=12, fixedsize=true, height=0.25];
+4 [xlabel="", fillcolor="#6aa84fff", fontcolor=white, color="#6aa84fff", style=solid, label="", shape=circle, penwidth=3, fontname=Arial, fontsize=12, fixedsize=true, height=0.25];
+5 [xlabel="", fillcolor="#6fa8dcff", fontcolor=white, color="#6fa8dcff", style=solid, label="", shape=circle, penwidth=3, fontname=Arial, fontsize=12, fixedsize=true, height=0.25];
+6 [xlabel="", fillcolor="#e69138ff", fontcolor=white, color="#e69138ff", style=solid, label="", shape=circle, penwidth=3, fontname=Arial, fontsize=12, fixedsize=true, height=0.25];
+1 [xlabel=SHISA3, fillcolor="#e69138ff", color="#e69138ff", style=filled, label="", shape=circle, penwidth=3, fontname=Arial, fontsize=12, fixedsize=true, height=0.25, fontcolor=black];
+7 [xlabel="", fillcolor="#e69138ff", fontcolor=white, color="#e69138ff", style=solid, label="", shape=circle, penwidth=3, fontname=Arial, fontsize=12, fixedsize=true, height=0.25];
+3 [xlabel=ABLIM2, fillcolor="#6fa8dcff", fontcolor=black, color="#6fa8dcff", style=filled, label="", shape=circle, penwidth=3, fontname=Arial, fontsize=12, fixedsize=true, height=0.25];
+8 [xlabel="", fillcolor="#6aa84fff", fontcolor=white, color="#6aa84fff", style=solid, label="", shape=circle, penwidth=3, fontname=Arial, fontsize=12, fixedsize=true, height=0.25];
+9 [xlabel="", fillcolor="#6fa8dcff", fontcolor=white, color="#6fa8dcff", style=solid, label="", shape=circle, penwidth=3, fontname=Arial, fontsize=12, fixedsize=true, height=0.25];
+normal [label="", xlabel=FAT1, penwidth=3, style=invis];
+0 -> 2 [color="#6aa84fff;0.5:#6aa84fff", penwidth=5.5, arrowsize=0, style=solid, minlen=1.0];
+0 -> 4 [color="#6aa84fff;0.5:#6aa84fff", penwidth=5, arrowsize=0, style=dashed, minlen=1.0];
+0 -> 5 [color="#6aa84fff;0.5:#6fa8dcff", penwidth=5, arrowsize=0, style=dashed, minlen=1.0];
+0 -> 6 [color="#6aa84fff;0.5:#e69138ff", penwidth=5, arrowsize=0, style=dashed, minlen=1.0];
+2 -> 1 [color="#6aa84fff;0.5:#e69138ff", penwidth=5.5, arrowsize=0, style=solid, minlen=1.0];
+2 -> 3 [color="#6aa84fff;0.5:#6fa8dcff", penwidth=5.5, arrowsize=0, style=solid, minlen=1.0];
+2 -> 8 [color="#6aa84fff;0.5:#6aa84fff", penwidth=5, arrowsize=0, style=dashed, minlen=1.0];
+1 -> 7 [color="#e69138ff;0.5:#e69138ff", penwidth=5, arrowsize=0, style=dashed, minlen=1.0];
+3 -> 9 [color="#6fa8dcff;0.5:#6fa8dcff", penwidth=5, arrowsize=0, style=dashed, minlen=1.0];
+normal -> 0 [label="", color="#6aa84fff", penwidth=4, arrowsize=0, style=solid];
+graph [layout=dot, seed=42];
 }
