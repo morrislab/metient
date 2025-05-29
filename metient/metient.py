@@ -2,6 +2,7 @@
 
 from metient.lib import migration_history_inference as mig_hist
 from metient.util import plotting_util as plutil
+from metient.util import data_extraction_util as dutil
 
 def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
              O=None, sample_size=-1, solve_polytomies=False, num_runs=3):
@@ -56,7 +57,7 @@ def evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir
                                               solve_polytomies=solve_polytomies, num_runs=num_runs)
 
 def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, 
-              Os=None, sample_size=-1, solve_polytomies=False, num_runs=3):
+              calibration_type, Os=None, sample_size=-1, solve_polytomies=False, num_runs=3):
     '''
     Runs Metient-calibrate on a cohort of patients. For each patient, we infer the observed clone percentages and the labels of the clone tree.
 
@@ -68,22 +69,22 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
         print_config: PrintConfig object which specifies saving/visualization configuration
         output_dir: Path for where to save outputs
         run_names: List of patient names which will be used to save all outputs.
+        calibration_type: str, one of ["genetic", "organotropism", "both"] specifying which type of calibration to perform
 
         NOTE: tree_fns[i] and tsv_fns[i] and run_names[i] all correspond to patient i.
 
         OPTIONAL:
-        O: a dictionary mapping anatomical site name (as used in tsv_fn) -> frequency of metastasis (these values should be normalized)
+        Os: a list of dictionaries mapping anatomical site name (as used in tsv_fn) -> 
+            frequency of metastasis (these values should be normalized), Os[i] corresponds to patient i.
         sample_size: how many samples to have Metient solve in parallel
         solve_polytomies: bool, whether or not to resolve polytomies 
-
-    Outputs migration history inferences for a full cohort.
     '''
     return mig_hist.calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, 
-                            Os=Os, sample_size=sample_size, bias_weights=True, 
-                            solve_polytomies=solve_polytomies, num_runs=num_runs)
+                              calibration_type, Os=Os, sample_size=sample_size, 
+                              bias_weights=True, solve_polytomies=solve_polytomies, num_runs=num_runs)
 
 def calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names, 
-                               Os=None, sample_size=-1, solve_polytomies=False, num_runs=3):
+                               calibration_type, Os=None, sample_size=-1, solve_polytomies=False, num_runs=3):
     '''
     Runs Metient-calibrate on a cohort of patients. For each patient, we use the inputted observed clone percentages, and only infer the labels of the clone tree.
 
@@ -95,23 +96,24 @@ def calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_
         print_config: PrintConfig object which specifies saving/visualization configuration
         output_dir: Path for where to save outputs
         run_names: List of patient names which will be used to save all outputs.
+        calibration_type: str, one of ["genetic", "organotropism", "both"] specifying which type of calibration to perform
 
         NOTE: tree_fns[i] and tsv_fns[i] and run_names[i] all correspond to patient i.
 
         OPTIONAL:
-        O: a dictionary mapping anatomical site name (as used in tsv_fn) -> frequency of metastasis (these values should be normalized)
+        Os: a list of dictionaries mapping anatomical site name (as used in tsv_fn) -> 
+            frequency of metastasis (these values should be normalized), Os[i] corresponds to patient i.
         sample_size: how many samples to have Metient solve in parallel
         solve_polytomies: bool, whether or not to resolve polytomies 
-
-    Outputs migration history inferences for a full cohort.
     '''
-    return mig_hist.calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names, 
-                                             Os=Os, sample_size=sample_size, bias_weights=True, 
-                                             solve_polytomies=solve_polytomies, num_runs=num_runs)
+    return mig_hist.calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names, calibration_type,
+                                              Os=Os, sample_size=sample_size, bias_weights=True, 
+                                              solve_polytomies=solve_polytomies, num_runs=num_runs)
 
 
 class PrintConfig:
-    def __init__(self, visualize=True, verbose=False, k_best_trees=float("inf"), save_outputs=True, custom_colors=None):
+    def __init__(self, visualize=True, verbose=False, k_best_trees=float("inf"), 
+                 save_outputs=True, custom_colors=None, display_labels=True):
         '''
         Args:
             visualize: bool, whether to visualize loss, best tree, and migration graph
@@ -119,6 +121,7 @@ class PrintConfig:
             k_best_trees: int, number of best tree solutions to visualize (if 1, only show best tree)
             save_outputs: bool, whether to save pngs and pickle files
             custom_colors: array of hex strings (with length = number of anatomical sites) to be used as custom colors in output visualizations
+            display_labels: bool, whether to display node labels on the migration history tree
         '''
         if k_best_trees <= 0:
             raise ValueError("k_best_trees must be >= 1")
@@ -127,9 +130,55 @@ class PrintConfig:
         self.k_best_trees = k_best_trees
         self.save_outputs = save_outputs
         self.custom_colors = custom_colors
+        self.display_labels = display_labels
 
 class Weights:
-    def __init__(self, mig=0.48, comig=0.30, seed_site=0.22, gen_dist=0.0, organotrop=0.0, data_fit=15.0, reg=0.5, entropy=0.01):
+    """Weight configuration for Metient models"""
+    
+    @classmethod
+    def pancancer_genetic_uniform_weighting(cls):
+        """Default weights for genetic-only model (no tissue tropism),
+            using uniform cohort weighting
+        """
+        return cls(
+            mig=0.5448,
+            comig=0.2727,
+            seed_site=0.1825,
+        )
+    
+    @classmethod
+    def pancancer_genetic_cohort_size_weighting(cls):
+        """Default weights for genetic-only model (no tissue tropism),
+            using weighting by cohort size
+        """
+        return cls(
+            mig=0.5398,
+            comig=0.2837,
+            seed_site=0.1764,
+        )
+
+    @classmethod
+    def pancancer_genetic_organotropism_uniform_weighting(cls):
+        """Default weights for combined genetic and tissue tropism model"""
+        return cls(
+            mig=0.5437,
+            comig=0.2712,
+            seed_site=0.1852,
+        )
+    
+    @classmethod
+    def pancancer_genetic_organotropism_cohort_size_weighting(cls):
+        """Default weights for combined genetic and tissue tropism model,
+            using weighting by cohort size
+        """
+        return cls(
+            mig=0.5363,
+            comig=0.2848,
+            seed_site=0.1789,
+        )
+
+    def __init__(self, mig, comig, seed_site, gen_dist=0.0, 
+                 organotrop=0.0, data_fit=15.0, reg=0.5, entropy=0.0001):
         '''
         The higher the inputted weight, the higher the penalty on that metric.
 
@@ -220,3 +269,52 @@ def genetic_clonality(V, A, node_info):
     else returns polyclonal.
     '''
     return plutil.genetic_clonality(V, A, node_info)
+
+
+def adjacency_matrix_from_parents(parents):
+    """
+    Convert parents vector to sparse adjacency matrix
+    
+    Args:
+        parents: numpy array where index i contains the parent node of node i,
+                with -1 indicating a root node
+                
+    Returns:
+        torch.sparse_coo_tensor: Sparse adjacency matrix where entry (i,j)=1 
+                                indicates i is the parent of j
+    """
+    return dutil.adjacency_matrix_from_parents(parents)
+
+
+def weighted_phyleticity(pkl, sites=None):
+    """
+    Calculate weighted phyleticity classification across all solutions.
+    Args:
+        pkl (dict): Pickle file containing tree data
+        sites (list[str] | None, optional): List of anatomical site names to restrict phyleticity classification to.
+    """
+    return plutil.weighted_phyleticity(pkl, sites=sites)
+
+def weighted_genetic_clonality(pkl):
+    """
+    Calculate weighted genetic clonality classification across all solutions.
+    Args:
+        pkl (dict): Pickle file containing tree data
+    """
+    return plutil.weighted_genetic_clonality(pkl)   
+
+def weighted_site_clonality(pkl):
+    """
+    Calculate weighted site clonality classification across all solutions.
+    Args:
+        pkl (dict): Pickle file containing tree data
+    """
+    return plutil.weighted_site_clonality(pkl)  
+
+def weighted_seeding_pattern(pkl):
+    """
+    Calculate weighted seeding pattern classification across all solutions.
+    Args:
+        pkl (dict): Pickle file containing tree data
+    """
+    return plutil.weighted_seeding_pattern(pkl)

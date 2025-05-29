@@ -67,8 +67,12 @@ def get_descendants(P, batch_num, parent_idx):
     """
     if not P.is_sparse:
         return [t.item() for t in torch.nonzero(P[batch_num,parent_idx])]
-        
-    P_indices = P.coalesce().indices()
+    
+    # Coalesce only if needed
+    if not P.is_coalesced():
+        P = P.coalesce()
+
+    P_indices = P.indices()
     # Get coalesced indices and create combined mask
     mask = (P_indices[0] == batch_num) & (P_indices[1] == parent_idx)
     
@@ -95,10 +99,14 @@ def find_optimal_subtree_nodes(T, V, v_solver, num_internal_nodes):
     for cand in cand_optimal_subtree_indices:
         batch_num = int(cand[0])
         optimal_subtree_root = int(cand[1])
+        # Getting descendants is expensive, so don't bother if we've already seen this node
+        # since cand_optimal_subtree_indices is sorted by the number of descendants
+        if optimal_subtree_root in seen_nodes:
+            continue
         descendants = set(get_descendants(P, batch_num, optimal_subtree_root))
-        # Don't bother with nodes we've already seen
-        seen_subset = not optimal_subtree_root in seen_nodes and not (descendants - set([optimal_subtree_root])).issubset(seen_nodes)
-        if seen_subset:
+        # Don't bother with a subset of nodes we've already added to an optimal subtree
+        not_seen_subset = not (descendants - set([optimal_subtree_root])).issubset(seen_nodes)
+        if not_seen_subset:
             # Add the optimal_subtree_root and all its descendants
             # Don't fix witness nodes (num. descendants == 0), since we already know their labeling, 
             # and if they are under an optimal polytomy branch, they would be getting added by an optimal
@@ -140,10 +148,11 @@ def _collect_node_fixes(node_idx, optimal_batch_num, X, V, T, poly_res):
     Returns:
         tuple: (should_fix, node_idx, optimal_site) or None if node should not be fixed
     """
-    node_children = vutil.get_child_indices(T[optimal_batch_num,:,:],[node_idx])
-    is_unused_poly_resolver = (poly_res is not None and 
-                             node_idx in poly_res.resolver_indices and 
-                             len(node_children) < 2)
+    is_unused_poly_resolver = False
+    if poly_res is not None:
+        node_children = vutil.get_child_indices(T[optimal_batch_num],[node_idx])
+        is_unused_poly_resolver = (node_idx in poly_res.resolver_indices and 
+                                   len(node_children) < 2)
     
     if (node_idx <= X.shape[2] and node_idx != 0) and not is_unused_poly_resolver:
         optimal_site = int(V[optimal_batch_num,:,node_idx].nonzero(as_tuple=False))
@@ -198,7 +207,6 @@ def _apply_node_fixes(nodes_to_fix, X, v_solver):
         X[:, optimal_site, idx] = 1
         non_optimal_sites = [i for i in range(v_solver.num_sites) if i != optimal_site]
         X[:, non_optimal_sites, idx] = float("-inf")
-        
     return known_indices, known_labelings
 
 def _apply_poly_fixes(poly_fixes, poly_res, T):

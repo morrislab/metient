@@ -129,8 +129,25 @@ class MigrationHistory:
         # Check for equality based on the positions of non-zero entries in both tensors
         if not isinstance(other, MigrationHistory):
             return False
-        return (self._nonzero_tuple(self.labeling) == self._nonzero_tuple(other.labeling) and
-                self._nonzero_tuple(self.tree) == self._nonzero_tuple(other.tree))
+        
+        # Check labeling equality
+        if self._nonzero_tuple(self.labeling) != self._nonzero_tuple(other.labeling):
+            return False
+            
+        # Handle case where one tree is sparse and other is dense
+        if self.tree.is_sparse and not other.tree.is_sparse:
+            # Convert sparse to dense indices for comparison
+            sparse_indices = self.tree.coalesce().indices()
+            dense_indices = torch.nonzero(other.tree, as_tuple=False).t()
+            return torch.equal(sparse_indices, dense_indices)
+        elif not self.tree.is_sparse and other.tree.is_sparse:
+            # Convert sparse to dense indices for comparison
+            sparse_indices = other.tree.coalesce().indices() 
+            dense_indices = torch.nonzero(self.tree, as_tuple=False).t()
+            return torch.equal(sparse_indices, dense_indices)
+        else:
+            # Both same type, use original comparison
+            return self._nonzero_tuple(self.tree) == self._nonzero_tuple(other.tree)
 
     def __str__(self):
         A = str(torch.where(self.tree != 0))
@@ -316,7 +333,7 @@ def comigration_number(site_adj, A, VA, V, VT, update_path_matrix, identical_T):
     diff_nodes = torch.where(node_colors != parent_colors)  # Returns (batch_indices, node_indices)
     
     temporal_migrations = torch.zeros(node_colors.shape[0], device=V.device)
-    
+        
     # Process each batch
     for batch in range(node_colors.shape[0]):
         # Get the differing nodes for this batch
@@ -399,6 +416,7 @@ def organotropism_score(O, site_adj_no_diag, p, bs):
     '''
     o = torch.zeros(bs, device=site_adj_no_diag.device)
     if O != None:
+        O = O.to(site_adj_no_diag.device)
         # the organotropism frequencies can only be used on the first 
         # row, which is for the migrations from primary cancer site to
         # other metastatic sites (we don't have frequencies for every 
@@ -785,20 +803,37 @@ def to_tensor(t):
         return t
     return torch.stack(t)
 
+def parents_to_adj_matrix(parents):
+    '''
+    Convert a parents vector to a sparse adjacency matrix
+    '''
+    # Convert parents to tensor if it's a numpy array
+    if isinstance(parents, np.ndarray):
+        parents = torch.from_numpy(parents).to('cpu')
+    # Get child nodes (all indices except root)
+    child_nodes = torch.arange(len(parents), device='cpu')
+
+    # Filter out the root node (-1 parent)
+    mask = parents != -1
+    parent_nodes = parents[mask]
+    child_nodes = child_nodes[mask]
+
+    # Create sparse adjacency matrix
+    indices = torch.stack([parent_nodes, child_nodes])  # [Parents, Children]
+    values = torch.ones(len(parent_nodes))  # Edge existence
+    size = (len(parents), len(parents))  # Square adjacency matrix
+
+    adj_matrix = torch.sparse_coo_tensor(indices, values, size, device='cpu')
+    
+    return adj_matrix
+
 def create_reweighted_solution_set_from_pckl(pckl, O, p, weights):
     # Make a solution set from the pickled files
     Ts, Vs, soft_Vs, Gs = pckl[OUT_ADJ_KEY], pckl[OUT_LABElING_KEY], pckl[OUT_SOFTV_KEY], pckl[OUT_GEN_DIST_KEY]
     node_collections = [MigrationHistoryNodeCollection.from_dict(dct) for dct in pckl[OUT_IDX_LABEL_KEY]]
     solution_set = []
     for T, V, soft_V, G, node_collection in zip(Ts, Vs, soft_Vs, Gs, node_collections):
-        # Handle T being either sparse COO format or dense tensor
-        if isinstance(T, tuple):
-            # Sparse COO format
-            T = torch.sparse_coo_tensor(T[0], T[1], size=T[2], device='cpu')
-        else:
-            # Dense tensor
-            T = torch.tensor(T, device='cpu')
-            
+        T = parents_to_adj_matrix(T)
         V,soft_V,G = torch.tensor(V, device='cpu'),torch.tensor(soft_V, device='cpu'),torch.tensor(G, device='cpu')
         loss, new_metrics = clone_tree_labeling_objective(V,soft_V, T, G, O, p, weights, True)
         solution_set.append(VertexLabelingSolution(loss, *new_metrics,V,soft_V, T, G,node_collection))
@@ -912,14 +947,22 @@ def get_root_index(T):
     '''
     Returns the root idx (node with no inbound edges) from adjacency matrix T
     '''
+    # Get column indices of all edges
+    if T.is_sparse:
+        T = T.coalesce()
+        dest_nodes = set(T.indices()[1].tolist())
+    else:
+        dest_nodes = set(torch.nonzero(T, as_tuple=True)[1].tolist())
 
-    candidates = set([x for x in range(len(T))])
-    for _, j in tree_iterator(T):
-        candidates.remove(j)
+    # Root is the only node that is not a destination
+    all_nodes = set(range(T.shape[0]))
+    candidates = all_nodes - dest_nodes
+
     msg = "More than one" if len(candidates) > 1 else "No"
     assert (len(candidates) == 1), f"{msg} root node detected"
 
     return list(candidates)[0]
+
 
 def reverse_bfs_order(A):
     '''
@@ -1221,20 +1264,48 @@ def combine_subtrees(subtrees_list, labels_list, common_root):
         combinations.append((combined_adj_matrix, combined_labels))
     return combinations
 
+def sparse_tensors_equal(A: torch.Tensor, B: torch.Tensor) -> bool:
+    """
+    Compare two sparse tensors for equality.
+
+    Args:
+        A (torch.Tensor): First sparse tensor to compare
+        B (torch.Tensor): Second sparse tensor to compare
+
+    Returns:
+        bool: True if tensors have identical indices and values, False otherwise
+    """
+    if A.shape != B.shape:
+        return False
+
+    A = A.coalesce()
+    B = B.coalesce()
+
+    return (torch.equal(A.indices(), B.indices()) and
+            torch.equal(A.values(), B.values()))
+
 def get_child_indices_sparse_t(T, indices):
-    T = T.coalesce()
-    indices = T.indices()
+    """Get child indices from a sparse tensor adjacency matrix.
     
-    # Extract indices for rows, and columns
-    iss, jss = indices[0], indices[1]
+    Args:
+        T: Sparse tensor adjacency matrix
+        indices: Parent node indices to find children for
+        
+    Returns:
+        List of child node indices
+    """
+    # Convert indices to tensor if needed
+    if not isinstance(indices, torch.Tensor):
+        indices = torch.tensor(indices, device=T.device)
+    elif len(indices.shape) == 0:
+        indices = indices.unsqueeze(0)
+        
+    # Get coalesced indices and create index mask in one step
+    T_indices = T.coalesce().indices()
+    mask = torch.isin(T_indices[0], indices)
     
-    # Apply boolean masks to filter for the conditions
-    mask = (iss == parent_idx)
-    
-    # Extract the corresponding child indices using the mask
-    child_indices = jss[mask].tolist()  # Convert the result to a list
-    
-    return child_indices
+    # Return child indices directly from masked tensor
+    return T_indices[1, mask].tolist()
 
 def get_child_indices(T, indices):
     '''
@@ -1263,12 +1334,14 @@ def get_child_indices(T, indices):
 def get_parent_idx_sparse_t(T, child_idx):
     T = T.coalesce()
     indices = T.indices()
-    iss,jss =  indices[0], indices[1]
-    for i,j in zip(iss,jss):
-        if j == child_idx:
-            return int(i)
-
-    assert(False, "Parent index not found")
+    # Find where column index matches child_idx
+    mask = indices[1] == child_idx
+    # Get corresponding row index (parent)
+    parent = indices[0][mask]
+    
+    if len(parent) == 0:
+        raise ValueError("Parent index not found")
+    return int(parent[0])
 
 def get_parent(T, node):
     if T.is_sparse:
@@ -1328,32 +1401,6 @@ def repeat_sparse(x, n):
     # Create a new sparse tensor with batch-wise repeated indices and values
     return torch.sparse_coo_tensor(final_indices, repeated_values, new_size)
 
-
-def stack_closures(closures, batch_size, n):
-    # Stack the closures into a single sparse tensor
-    stacked_indices = []
-    stacked_values = []
-
-    for i in range(batch_size):
-        closure = closures[i]
-        indices = closure.indices().clone()
-        values = closure.values()
-
-        # Adjust row indices for stacking
-        indices[0] += i * n
-
-        stacked_indices.append(indices)
-        stacked_values.append(values)
-
-    # Concatenate indices and values
-    final_indices = torch.cat(stacked_indices, dim=1)
-    final_values = torch.cat(stacked_values)
-
-    # Create the final stacked sparse tensor
-    stacked_closure = torch.sparse_coo_tensor(final_indices, final_values, (batch_size, n, n))
-
-    return stacked_closure
-
 def topological_sort_dag(T):
     """
     Perform topological sorting on the DAG using NetworkX.
@@ -1399,11 +1446,10 @@ def purdom_transitive_closure(T, remove_self_loops):
 
     return reachability_matrix.to_sparse().coalesce()
 
-def path_matrix_dense(T, remove_self_loops=False, identical_T=False):
+def path_matrix_dense(T, remove_self_loops=False):
     '''
     T is a numpy ndarray or tensor adjacency matrix (where Tij = 1 if there is a path from i to j)
     remove_self_loops: bool, whether to retain 1s on the diagonal
-    identical_T: every T along the batch_size dimension is identical (allows us to optimize)
 
     Returns path matrix that tells us if path exists from node i to node j    
     '''
@@ -1423,9 +1469,6 @@ def path_matrix_dense(T, remove_self_loops=False, identical_T=False):
         P_old = torch.nonzero(P)
         # Update path matrix
         P |= B
-        # Early stopping if there have been no changes
-        if torch.equal(P_old, torch.nonzero(P)) and k != 0:
-            break
         
     if remove_self_loops:
         P = torch.logical_xor(P, I.int())
@@ -1437,7 +1480,7 @@ def path_matrix(T, remove_self_loops=False, identical_T=False):
     Compute the transitive closure of adjacency matrix T using Purdom's algorithm
     '''
     if not T.is_sparse:
-        return path_matrix_dense(T, remove_self_loops, identical_T)
+        return path_matrix_dense(T, remove_self_loops)
 
     # If there's a single 2D matrix, compute its closure directly
     if len(T.shape) == 2:
@@ -1511,18 +1554,75 @@ def pareto_front(solutions, all_pars_metrics):
     pareto_solutions = [front[1] for front in pareto_front]
     return pareto_metrics, pareto_solutions
 
+def build_tree_structure(adj_matrix):
+    n = adj_matrix.shape[0]
+    children = {i: [] for i in range(n)}
+    parents = {}
+    for parent in range(n):
+        for child in range(n):
+            if adj_matrix[parent, child] != 0:
+                children[parent].append(child)
+                parents[child] = parent
+    root = next(i for i in range(n) if i not in parents)
+    return children, parents, root
+
+def post_order_traversal(children, root):
+    visited = set()
+    order = []
+    def dfs(node):
+        for child in children.get(node, []):
+            if child not in visited:
+                dfs(child)
+        visited.add(node)
+        order.append(node)
+    dfs(root)
+    return order
+
+def compute_cost_matrix(children, post_order, observed, n, k):
+    cost = torch.full((k, n), float('inf'))
+    for node in range(n):
+        if node in observed:
+            cost[:, node] = float('inf')
+            cost[observed[node], node] = 0
+
+    for node in post_order:
+        if node not in children or not children[node]:
+            continue
+        for label in range(k):
+            total = 0
+            for child in children[node]:
+                child_cost = cost[:, child]
+                penalties = (torch.arange(k) != label).float()
+                total += torch.min(child_cost + penalties)
+            cost[label, node] = total
+    return cost
+
+def assign_optimal_labels(children, cost, root, root_label, k):
+    n = cost.shape[1]
+    labels = [None] * n
+    labels[root] = root_label
+    def assign(node):
+        for child in children.get(node, []):
+            best_label = None
+            best_score = float('inf')
+            for l in range(k):
+                transition = 0 if l == labels[node] else 1
+                score = cost[l, child].item() + transition
+                if score < best_score:
+                    best_score = score
+                    best_label = l
+            labels[child] = best_label
+            assign(child)
+    assign(root)
+    return labels
+
+def build_one_hot_matrix(labels, n, k, root):
+    mat = torch.zeros((k, n), dtype=torch.float32)
+    for node, label in enumerate(labels):
+        mat[label, node] = 1.0
+    return torch.cat((mat[:, :root], mat[:, root+1:]), dim=1)
+
 def run_fitch_hartigan(v_solver, results):
-    """
-    Recover possible ancestral states using Fitch's algorithm and select one optimal solution
-
-    Parameters:
-    - adj_matrix: Sparse COO adjacency matrix representing the tree structure (n x n).
-    - node_idx_to_observed_sites: Dictionary mapping leaf node indices to their labels.
-    - root_label: The known label of the root node.
-
-    Returns:
-    - ancestral_matrix: A k x n matrix, where k is the number of labels, and n is the internal node indices.
-    """
     adj_matrix = v_solver.input_T
     node_idx_to_observed_sites = v_solver.idx_to_observed_sites
     root_label = torch.argmax(v_solver.p, dim=0).item()
@@ -1530,97 +1630,18 @@ def run_fitch_hartigan(v_solver, results):
     n = adj_matrix.shape[0]
     k = v_solver.num_sites
 
-    # Step 1: Initialize a k x n matrix to store possible labels for each node (True/False for each label)
-    ancestral_matrix = torch.zeros((k, n), dtype=torch.float32)
+    children, parents, root = build_tree_structure(adj_matrix)
+    post_order = post_order_traversal(children, root)
+    cost = compute_cost_matrix(children, post_order, node_idx_to_observed_sites, n, k)
+    labels = assign_optimal_labels(children, cost, root, root_label, k)
+    single_soln_matrix = build_one_hot_matrix(labels, n, k, root)
 
-    # Step 2: Fill in the matrix for leaf nodes and root node based on the node_idx_to_observed_sites dictionary
-    for node, leaf_labels in node_idx_to_observed_sites.items():
-        ancestral_matrix[:, node] = 0
-        for leaf_label in leaf_labels:
-            ancestral_matrix[leaf_label, node] = 1  # Set the corresponding label to True
-
-    # For leaf nodes without any observed sites, initialize as possibly belonging to all sites
-    leaf_nodes = torch.nonzero(adj_matrix.sum(dim=1) == 0).squeeze(dim=1).tolist()
-
-    for leaf in leaf_nodes:
-        if leaf not in node_idx_to_observed_sites:
-            ancestral_matrix[:, leaf] = 1
-
-    root = get_root_index(adj_matrix)
-    ancestral_matrix[:, root] = 0
-    ancestral_matrix[root_label, root] = 1
-
-    # Step 3: Perform the downward pass (Fitch algorithm) for internal nodes
-    def fitch_down(node):
-        node = int(node)
-
-        # Check if the node has observed sites
-        has_observed_sites = node in node_idx_to_observed_sites
-
-        # Find children of the node using the adjacency matrix
-        children = torch.nonzero(adj_matrix[node]).squeeze(dim=1)
-
-        # If the node is a leaf, return its known label set
-        if len(children) == 0 and has_observed_sites:
-            return ancestral_matrix[:, node]
-
-        # Collect label sets from all children
-        child_label_sets = [fitch_down(child) for child in children]
-
-        # Perform set intersection or union based on children's labels
-        intersection = torch.stack(child_label_sets).all(dim=0)
-        if torch.any(intersection):  # If intersection is non-empty, use it as the set
-            ancestral_matrix[:, node] = intersection
-        else:  # Otherwise, use the union of the children's sets
-            union = torch.stack(child_label_sets).any(dim=0)
-            ancestral_matrix[:, node] = union
-
-        # If the node has observed sites, enforce them on the computed labels
-        if has_observed_sites:
-            observed_sites = ancestral_matrix[:, node]
-            ancestral_matrix[:, node] = ancestral_matrix[:, node] * observed_sites
-
-        return ancestral_matrix[:, node]
-    
-    # Step 4: Perform Fitch's downward pass starting from the root
-    fitch_down(root)
-    # Reinforce root label
-    ancestral_matrix[:, root] = 0
-    ancestral_matrix[root_label, root] = 1
-    single_soln_matrix = ancestral_matrix.clone()
-
-    # Step 5: Perform the upward pass to choose specific states for internal nodes,
-    # starting with the root label.
-    def fitch_up(node, parent_label):
-        children = torch.nonzero(adj_matrix[node]).squeeze(dim=1)
-
-        # If there are multiple possible labels, choose one (use the parent's label if possible)
-        possible_labels = torch.where(single_soln_matrix[:, node])[0]
-        if parent_label in possible_labels:
-            chosen_label = parent_label
-        else:
-            chosen_label = possible_labels[0]
-
-        # Set the chosen label to True and others to False for the node
-        single_soln_matrix[:, node] = 0
-        single_soln_matrix[chosen_label, node] = 1
-
-        # Pass the chosen label to the children
-        for child in children:
-            fitch_up(child, chosen_label)
-
-    # Perform the upward pass starting from the root with the enforced root label
-    fitch_up(root, root_label)
-
-    # We needed to include the root labeling for Fitch-Hartigan, but we restack 
-    # it using stack_vertex_labeling, so remove it momentarily
-    single_soln_matrix = torch.cat((single_soln_matrix[:, :root], single_soln_matrix[:, root+1:]), dim=1)
     V = stack_vertex_labeling(v_solver.L, add_batch_dim(single_soln_matrix), v_solver.p, None, None)
-    T = repeat_n(v_solver.full_T,1).to_sparse()
-    metrics = ancestral_labeling_metrics(V, T, v_solver.full_G, v_solver.O, v_solver.p, 
+    T = repeat_n(v_solver.full_T, 1)
+    if v_solver.config['use_sparse_T']:
+        T = T.to_sparse()
+
+    metrics = ancestral_labeling_metrics(V, T, v_solver.full_G, v_solver.O, v_solver.p,
                                          update_path_matrix=True, compute_full_c=True, identical_T=True)
-    V = V.cpu().detach()
-    T = T.cpu().detach()
-    metrics = tuple(metric.cpu().detach() for metric in metrics)
     print("Fitch-hartigan result:", metrics)
-    results.append((V, torch.zeros(V.shape, device=V.device), T, None, (*metrics,torch.zeros(size=(1,),device=V.device))))
+    results.append((V.cpu(), torch.zeros_like(V), T.cpu(), None, (*[m.cpu() for m in metrics], torch.zeros(1))))

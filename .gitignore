@@ -1,4 +1,5 @@
 *.pyc
+data/
 metient/test/machina_simulated_data/predictions_*
 metient/test/machina_simulated_data/predict_*.txt
 metient/test/machina_simulated_data/output_*.txt
@@ -15,3 +16,11 @@ metient/data
 **/*.png
 **/*.pickle
 **/*.log
+# Ignore build directories
+build/
+dist/
+*.egg-info/
+
+# Ignore Python bytecode files
+__pycache__/
+*.pyc

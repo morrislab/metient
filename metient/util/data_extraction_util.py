@@ -10,6 +10,44 @@ from metient.util import vertex_labeling_util as vutil
 
 # TODO: make more assertions on uniqueness and completeness of input csvs
 
+
+def adjacency_matrix_from_parents(parents):
+    """
+    Convert parents vector to sparse adjacency matrix
+    
+    Args:
+        parents: numpy array where index i contains the parent node of node i,
+                with -1 indicating a root node
+                
+    Returns:
+        torch.sparse_coo_tensor: Sparse adjacency matrix where entry (i,j)=1 
+                                indicates i is the parent of j
+    """
+    if not torch.is_tensor(parents):
+        parents = torch.tensor(parents)
+    n = len(parents)
+    
+    # Create mask for non-root nodes
+    mask = parents != -1
+    # Get child indices (just the enumerated indices where parent != -1)
+    children = torch.arange(n)[mask]
+    # Get parent indices (the actual parent values where parent != -1)
+    parents = torch.tensor(parents)[mask]
+    # Stack parent and child indices
+    indices = torch.stack([parents, children])
+    
+    # Create values tensor of ones
+    values = torch.ones(len(children), dtype=torch.float)
+    
+    # Handle empty case
+    if len(children) == 0:
+        return torch.sparse_coo_tensor(size=(n,n))
+    
+    # Create sparse tensor
+    adj_matrix = torch.sparse_coo_tensor(indices, values, size=(n,n))
+    
+    return adj_matrix
+    
 def get_adjacency_matrix_from_txt_edge_list(txt_file):
     edges = []
     max_idx = -1
@@ -373,10 +411,13 @@ def initialize_organotropism_vector(O, ordered_sites, primary_site):
     Returns:
     A 1 x num_sites tensor where each value represents the frequency of metastasis to that site
     '''
-
+    if O is None:
+        return None
+        
     # Check for sites in ordered_sites that are not in the dictionary
     for site in ordered_sites:
         if site != primary_site and site not in O:
+            print(O,site, primary_site)
             raise ValueError(f"Error: '{site}' is not found in the inputted organotropism frequency dictionary.")
 
     frequency_tensor = torch.zeros(len(ordered_sites), dtype = torch.float32)

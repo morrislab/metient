@@ -18,9 +18,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument('sim_data_dir', type=str, help="Directory containing machina simulated data")
 parser.add_argument('run_name', type=str, help="Name of this run")
 
-parser.add_argument('--mig', type=float, help="Weight on migration number", default=10000.0)
-parser.add_argument('--comig', type=float, help="Weight on mig_delta", default=1000.0)
-parser.add_argument('--seed', type=float, help="Weight on seeding site number", default=10.0)
+parser.add_argument('--mig', type=float, help="Weight on migration number", default=1000.0)
+parser.add_argument('--comig', type=float, help="Weight on mig_delta", default=100.0)
+parser.add_argument('--seed', type=float, help="Weight on seeding site number", default=1.0)
 parser.add_argument('--gen', type=float, help="Weight on genetic distance", default=0.0)
 
 parser.add_argument('--wip', action='store_true', help="If passed, initialize weights higher to favor vertex labeling of primary for all internal nodes", default=False)
