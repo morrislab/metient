@@ -16,6 +16,7 @@ metient/data
 **/*.png
 **/*.pickle
 **/*.log
+**/*.csv
 # Ignore build directories
 build/
 dist/
