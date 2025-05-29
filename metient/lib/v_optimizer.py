@@ -277,8 +277,12 @@ def run_multiple_optimizations(v_solver):
             ret = second_optimization_task(v_solver, exploration_weights)
             results.append(ret)
 
+    # TODO diagnose why Fitch-Hartigan is failing in some cases (e.g. H103207)
     if not v_solver.config['solve_polytomies']:
+        # try:
         vutil.run_fitch_hartigan(v_solver, results)
+        # except:
+        #     pass
 
     return results
 

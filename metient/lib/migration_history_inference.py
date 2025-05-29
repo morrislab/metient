@@ -117,6 +117,7 @@ def get_best_final_solutions(results, G, O, p, weights, print_config,
             if tree not in unique_labelings:
                 all_pars_metrics.append((int(m), int(c), int(s)))
                 all_result_soln_indices.append((result_idx, soln_idx, (m,c,s,g,o,e)))
+
             unique_labelings.add(tree)
 
     fixed_labeling = v_solver.fixed_labeling
@@ -155,7 +156,6 @@ def get_best_final_solutions(results, G, O, p, weights, print_config,
     # Compute the pareto front
     if keep_pareto_only:
         pruned_histories = prune_histories(full_solution_set)  
-        #pruned_histories = full_solution_set
     else:
         pruned_histories = full_solution_set
 
@@ -261,11 +261,13 @@ def recover_prim_ss_solutions(solution_set, unique_labelings,
     """
     fixed_indices: indices of nodes that are in optimal subtrees 
 
-    In hard (i.e. usually large input) cases where we are unable to find a 
-    primary-only seeding solution, see if we can recover one by post-processing
-    final solutions and removing any met-to-met migration edges, and add these
-    to our final solution set
+    In cases where we are unable to find a primary-only seeding solution, 
+    see if we can recover one by post-processing final solutions and removing 
+    any met-to-met migration edges, and add these to our final solution set
     """
+    print("fixed_indices", fixed_indices)
+    all_node_indices = [x for x in range(num_internal_nodes)]
+    print("all_node_indices", all_node_indices)
     
     new_solutions = []
     for i, solution in enumerate(solution_set):
@@ -274,6 +276,7 @@ def recover_prim_ss_solutions(solution_set, unique_labelings,
         all_node_indices = [x for x in range(num_internal_nodes)]
         node_info = solution.node_collection
         leaf_nodes = [x for x in all_node_indices if node_info.get_node(x).is_witness]
+        
         # Don't touch the optimal subtrees or leaf nodes
         node_to_label_primary = set(all_node_indices) - (set(fixed_indices).union(set(leaf_nodes)))
         new_V = solution.V.clone()
@@ -283,7 +286,6 @@ def recover_prim_ss_solutions(solution_set, unique_labelings,
         unique_labeled_tree = vutil.MigrationHistory(solution.T, new_V)
         if unique_labeled_tree in unique_labelings:
             continue
-        print("calling clone_tree_labeling_objective, updating path matrix", solve_polytomies or i==0)
         loss, new_values = vutil.clone_tree_labeling_objective(new_V, solution.soft_V, solution.T, 
                                                                solution.G, O, p, weights, update_path_matrix=solve_polytomies or i==0, 
                                                                compute_full_c=True)
@@ -365,26 +367,68 @@ def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name,
     if estimate_observed_clones:
         os.remove(pooled_tsv_fn) # cleanup pooled tsv
 
-
-def patient_calibration_weight(T, num_poss_primaries):
+def patient_calibration_weight_from_soln_info(pt_to_soln_info):
     """
     Calculate the weight to place on this patient's contribution to the 
-    cohort-level cross-entropy score. This is based on the tree size (number of edges)
-    and the number of possible primaries, since we don't want to bias towards patients
-    with many possible primaries
+    cohort-level cross-entropy score. This is based on the tree size (number of edges), the number of possible primaries, 
+    and the number of solutions found for each primary, since we don't want to bias towards patients
+    with many possible primaries.
+    
+    Args:
+        pt_to_soln_info: dict mapping patient index to list of [num_edges, num_solns] lists,
+                        one per primary site
+    Returns:
+        List of patient weights for calibration
     """
-    num_edges = T.shape[0]-1
-    return num_edges/num_poss_primaries
+    # Count number of primary sites with multiple solutions per patient
+    pt_idx_to_denom = {i:0 for i in range(len(pt_to_soln_info))}
+    for pt_idx, info_list in pt_to_soln_info.items():
+        for num_edges, num_solns in info_list:
+            if num_solns > 1:
+                pt_idx_to_denom[pt_idx] += 1
+    print('pt_idx_to_denom', pt_idx_to_denom)
+    # Calculate weights as num_edges / num_primaries_with_multiple_solns
+    weights = []
+    for pt_idx, info_list in pt_to_soln_info.items():
+        for num_edges, num_solns in info_list:
+            if pt_idx_to_denom[pt_idx] > 0 and num_solns > 1:
+                weights.append(num_edges / pt_idx_to_denom[pt_idx])
+            else:
+                weights.append(0)  # No multiple solution primaries
+    print('new pt weights', weights)   
+    return weights
 
-def calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names,
+def get_num_unique_pars_metrics(solns):
+    """
+    Get the number of unique parsimony metrics for a given set of solutions
+    """
+    unique_metrics = set()
+    for soln in solns:
+        unique_metrics.add((soln.m, soln.c, soln.s))
+    return len(unique_metrics)
+
+def validate_calibrate(run_names, calibration_type, Os):
+    # Validate that run names are unique to avoid overwriting results
+    if len(run_names) != len(set(run_names)):
+        raise ValueError("Run names must be unique. Found duplicate names in: " + str(run_names))
+    
+    # Validate calibration type
+    if calibration_type not in ["genetic", "organotropism", "both"]:
+        raise ValueError("calibrate must be one of: 'genetic', 'organotropism', 'both'. Got: " + str(calibrate))
+    
+    # Check that Os is provided if using organotropism calibration
+    if calibration_type in ["organotropism", "both"] and Os is None:
+        raise ValueError("Organotropism frequencies (Os) must be provided when calibrating to organotropism.")
+
+def calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names, calibration_type,
                                Os, sample_size, bias_weights, solve_polytomies, num_runs):
     """
     Observed clone proportions are inputted (in tsv_fns), only labeling of clone tree is needed
     """
-    return calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
+    return calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, calibration_type,
                     Os, sample_size, bias_weights, solve_polytomies, num_runs, estimate_observed_clones=False)
 
-def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
+def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, calibration_type,
               Os, sample_size, bias_weights, solve_polytomies, num_runs,
               estimate_observed_clones=True):
     """
@@ -392,6 +436,12 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
     calibrate parsimony weights to metastasis priors
     """
     
+    validate_calibrate(run_names, calibration_type, Os)
+    
+    # Set calibration flags based on type
+    calibrate_genetic = calibration_type in ["genetic", "both"] 
+    calibrate_organotropism = calibration_type in ["organotropism", "both"]
+
     Ts, pooled_tsv_fns = prep_inputs(tree_fns, tsv_fns, run_names, estimate_observed_clones, output_dir)
 
     # Only use maximum parsimony metrics when initially searching for high likelihood trees
@@ -412,7 +462,9 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
         print(f"Overwriting existing directory at {calibrate_dir}")
     
     os.makedirs(calibrate_dir)
-    output_files, patient_weights = [],[]
+    output_files= []
+    pt_index_to_soln_info = {i:[] for i in range(len(Ts))}
+    full_run_names = [] # includes primary site in the name
 
     # 1. Go through each patient and get migration history in calibrate mode
     for i in range(len(Ts)):
@@ -422,41 +474,59 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names,
         primary_sites = dutil.get_primary_sites(pooled_tsv_fns[i])
         if len(primary_sites) > 1:
             print("Multiple primaries given. Running each as primary")
+            # Validate that primary sites are unique to avoid duplicate runs
+            if len(primary_sites) != len(set(primary_sites)):
+                raise ValueError("Primary site names must be unique. Found duplicate sites in: " + str(primary_sites))
 
         for primary_site in primary_sites:
-            infer_migration_history(Ts[i], pooled_tsv_fns[i], primary_site, weights, print_config, calibrate_dir, f"{run_names[i]}_{primary_site}", 
-                                    O=O, sample_size=sample_size, bias_weights=bias_weights,
-                                    mode="calibrate", solve_polytomies=solve_polytomies, estimate_observed_clones=estimate_observed_clones,
-                                    num_runs=num_runs)
-            output_files.append(os.path.join(calibrate_dir, f"{run_names[i]}_{primary_site}.pkl.gz"))
-            patient_weights.append(patient_calibration_weight(Ts[i],len(primary_sites)))
-            
+            solns = infer_migration_history(Ts[i], pooled_tsv_fns[i], primary_site, weights, print_config, calibrate_dir, f"{run_names[i]}_{primary_site}", 
+                                            O=O, sample_size=sample_size, bias_weights=bias_weights,
+                                            mode="calibrate", solve_polytomies=solve_polytomies, estimate_observed_clones=estimate_observed_clones,
+                                            num_runs=num_runs)
+
+            full_run_name = f"{run_names[i]}_{primary_site}"
+            output_files.append(os.path.join(calibrate_dir, f"{full_run_name}.pkl.gz"))
+            full_run_names.append(full_run_name)
+            pt_index_to_soln_info[i].append([Ts[i].shape[0]-1, get_num_unique_pars_metrics(solns)])
+    
+    pt_weights = patient_calibration_weight_from_soln_info(pt_index_to_soln_info)
+    full_run_name_to_calibration_weight = {k:v for k,v in zip(full_run_names, pt_weights)}
+    print("full_run_name_to_calibration_weight",full_run_name_to_calibration_weight)
+
     # 2. Find the best theta for this cohort
-    best_theta = eutil.get_max_cross_ent_thetas(output_files, patient_weights)
+    best_theta = eutil.get_max_cross_ent_thetas(output_files, pt_weights, calibrate_genetic, calibrate_organotropism)
     rounded_best_theta = [round(v,3) for v in best_theta]
     with open(os.path.join(calibrate_dir, "best_theta.json"), 'w') as json_file:
         json.dump(rounded_best_theta, json_file, indent=2)
+        
+    with open(os.path.join(calibrate_dir, "full_run_name_to_calibration_weight.json"), 'w') as json_file:
+        json.dump(full_run_name_to_calibration_weight, json_file, indent=2)
 
     ordered_sites = dutil.extract_ordered_sites(pooled_tsv_fns)
         
     # 3. Recalibrate trees using the best thetas
     print_config.visualize = visualize
     print_config.k_best_trees = input_k
-    cal_weights = met.Weights(mig=[best_theta[0]*50], comig=best_theta[1]*50, seed_site=[best_theta[2]*50],
-                          gen_dist=1.0, organotrop=1.0)
+
+    # Set genetic distance and organotropism weights based on whether we're using them
+    gen_dist_weight = 1.0 if calibrate_genetic else 0.0
+    organotrop_weight = 1.0 if calibrate_organotropism else 0.0
+    cal_weights = met.Weights(mig=[best_theta[0]*PARS_METRIC_MULTIPLIER], comig=best_theta[1]*PARS_METRIC_MULTIPLIER, seed_site=[best_theta[2]*PARS_METRIC_MULTIPLIER],
+                              gen_dist=gen_dist_weight, organotrop=organotrop_weight)
     
     # 4. Use the saved trees to rescore trees, visualize, and re-save 
     for i in range(len(Ts)):
-        O = Os[i] if Os != None else None
         primary_sites = dutil.get_primary_sites(pooled_tsv_fns[i])
         for primary_site in primary_sites:
+            O = Os[i] if Os != None else None
+            O = dutil.initialize_organotropism_vector(O, ordered_sites[i], primary_site)
             run_name = f"{run_names[i]}_{primary_site}"
             with gzip.open(os.path.join(calibrate_dir, f"{run_name}.pkl.gz"), 'rb') as f:
                 pckl = pickle.load(f)
 
             saved_U = torch.tensor(pckl[OUT_OBSERVED_CLONES_KEY])
-            primary_sites = dutil.get_primary_sites(pooled_tsv_fns[i])
             p = one_hot_labeling_for_primary(primary_site, ordered_sites[i])
+            
             reranked_solutions = rank_solutions(vutil.create_reweighted_solution_set_from_pckl(pckl, O, p, cal_weights),
                                                 print_config)
             
@@ -562,6 +632,7 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
     ref, var, omega, ordered_sites, node_collection, idx_to_observed_sites, G, O = dutil.extract_matrices_from_tsv(tsv_fn, estimate_observed_clones, 
                                                                                                                    T, initialize_G, O, primary_site)
     
+    print("O:", O)
     print("Tumor samples:", ordered_sites)
     # Validate inputs
     validate_inputs(T, node_collection, ref, var, primary_site, ordered_sites, weights, O, mode)
@@ -595,9 +666,10 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
 
     # Keep a copy of input clone tree (T from now on has leaf nodes from U)
     input_T = copy.deepcopy(T)
-
+    print("input_T.shape", input_T.shape)
     # TODO: Make this a more sophisticated decision
-    use_sparse_T = input_T.shape[0] > 200
+    use_sparse_T = input_T.shape[0] > 100
+    print("Using sparse T:", use_sparse_T)
 
     config = {
         "init_temp": init_temp,
@@ -621,7 +693,8 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
         "use_sparse_T": use_sparse_T,
         # If we're using a dense T, collapsing nodes is not worth the compute time,
         # and solving polytomies makes the indexing extremely complicated for collapsing (maybe implement in the future)
-        "collapse_nodes": use_sparse_T and not solve_polytomies
+        #"collapse_nodes": use_sparse_T and not solve_polytomies
+        "collapse_nodes": False
     }
 
     ############ Step 1, optimize U ############
@@ -655,18 +728,12 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
         final_solutions = get_best_final_solutions(results, G, O, p, weights, print_config, 
                                                    node_collection, solve_polytomies,
                                                    v_optimizer, num_internal_nodes, keep_pareto_only=keep_pareto_only)
-        print("Number of Pareto-optimal solutions:", len(final_solutions))
+        print("Number of final solutions:", len(final_solutions))
 
-        # tracemalloc.start()
-        edges, vert_to_site_map, mig_graph_edges, loss_info = putil.save_best_trees(final_solutions, U, O, weights,
-                                                                                    ordered_sites, print_config,
-                                                                                    primary_site_label, output_dir, run_name,
-                                                                                    original_root_idx=original_root_idx) 
-        # current, peak = tracemalloc.get_traced_memory()
-        # print(f"[After getting pkl outputs ] Current memory usage: {current / 10**6:.2f} MB; Peak was {peak / 10**6:.2f} MB")
-        # tracemalloc.stop()
+        putil.save_best_trees(final_solutions, U, O, weights,ordered_sites, print_config,
+                              primary_site_label, output_dir, run_name,original_root_idx=original_root_idx) 
 
     torch.cuda.empty_cache()
  
 
-    return edges, vert_to_site_map, mig_graph_edges, loss_info, time_elapsed
+    return final_solutions

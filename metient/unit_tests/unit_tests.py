@@ -387,5 +387,91 @@ class TestTransitiveClosure(unittest.TestCase):
         result = vert_util.path_matrix(T)
         self.assertTrue(torch.equal(result, expected_result))
 
+class TestMigrationHistory(unittest.TestCase):
+    def test_migration_history_equality(self):
+        # Create test trees and labelings
+        tree1 = torch.sparse_coo_tensor(indices=torch.tensor([[0,1], 
+                                                             [1,2]]).t(), 
+                                      values=torch.ones(2),
+                                      size=(3,3))
+        tree2 = torch.zeros(3,3)
+        tree2[0,1] = tree2[1,2] = 1
+        
+        labeling1 = torch.tensor([[1,0,0], [0,1,1]])
+        labeling2 = torch.tensor([[1,0,0], [0,1,1]])
+        
+        # Create MigrationHistory objects
+        mh1 = vert_util.MigrationHistory(tree1, labeling1)
+        mh2 = vert_util.MigrationHistory(tree2, labeling2)
+        
+        # Test equality between sparse and dense trees
+        self.assertEqual(mh1, mh2)
+        
+        # Test inequality with different labelings
+        labeling3 = torch.tensor([[1,0,1], [0,1,0]])
+        mh3 = vert_util.MigrationHistory(tree1, labeling3)
+        self.assertNotEqual(mh1, mh3)
+        
+        # Test inequality with different trees
+        tree3 = torch.sparse_coo_tensor(indices=torch.tensor([[0,2], [1,2]]).t(),
+                                      values=torch.ones(2), 
+                                      size=(3,3))
+        mh4 = vert_util.MigrationHistory(tree3, labeling1)
+        self.assertNotEqual(mh1, mh4)
+
+class TestMigrationEdges(unittest.TestCase):
+    def test_migration_edges(self):
+        # Create test case
+        num_sites = 3
+        num_nodes = 4
+        
+        # Create vertex labeling matrix V where nodes 0,1 are from site 0, 
+        # node 2 from site 1, and node 3 from site 2
+        V = torch.zeros(num_sites, num_nodes)
+        V[0,0] = 1
+        V[0,1] = 1 
+        V[1,2] = 1
+        V[2,3] = 1
+
+        # Test with dense adjacency matrix
+        A_dense = torch.zeros(num_nodes, num_nodes)
+        A_dense[0,1] = 1
+        A_dense[1,2] = 1
+        A_dense[1,3] = 1
+
+        # Test without sites restriction - dense case
+        Y_dense = plot_util.migration_edges(V, A_dense)
+        
+        # Expected: Y should have 1s at positions (1,2) and (1,3) since these
+        # represent migrations between different sites
+        expected = torch.zeros(num_nodes, num_nodes)
+        expected[1,2] = 1
+        expected[1,3] = 1
+        
+        self.assertTrue(torch.equal(Y_dense, expected), "Basic migration edges test failed for dense matrix")
+        
+        # Test with sites restriction - dense case
+        sites = {1} # Only keep migrations to site 1
+        Y_restricted_dense = plot_util.migration_edges(V, A_dense, sites)
+        
+        # Expected: Y should only have 1 at position (1,2) since that's the only
+        # migration edge going to site 1
+        expected_restricted = torch.zeros(num_nodes, num_nodes) 
+        expected_restricted[1,2] = 1
+        
+        self.assertTrue(torch.equal(Y_restricted_dense, expected_restricted), "Sites restriction test failed for dense matrix")
+
+        # Test with sparse adjacency matrix
+        indices = torch.tensor([[0,1,1], [1,2,3]])
+        values = torch.ones(3)
+        A_sparse = torch.sparse_coo_tensor(indices, values, (num_nodes, num_nodes))
+
+        # Test without sites restriction - sparse A case
+        Y_from_sparse_A = plot_util.migration_edges(V, A_sparse)
+        self.assertTrue(torch.equal(Y_from_sparse_A.to_dense(), expected), "Basic migration edges test failed for sparse A matrix")
+
+        # Test with sites restriction - sparse A case
+        Y_restricted_sparse_A = plot_util.migration_edges(V, A_sparse, sites)
+        self.assertTrue(torch.equal(Y_restricted_sparse_A.to_dense(), expected_restricted), "Sites restriction test failed for sparse A matrix")
 
 unittest.main()

@@ -1,12 +1,11 @@
 import torch
-from metient.util import vertex_labeling_util as vutil
-from metient.util import data_extraction_util as dutil
 from torch.distributions.binomial import Binomial
 import numpy as np
 import pandas as pd
 import numpy as np
 
-from metient.lib.projection import fit_F
+from metient.util import vertex_labeling_util as vutil
+from metient.util import data_extraction_util as dutil
 from metient.util.globals import MIN_VARIANCE
 
 class ObservedClonesSolver:
@@ -40,6 +39,8 @@ class ObservedClonesSolver:
         """
         Fits the observed clone proportions matrix U using the projection algorithm (finds an MLE estimate of U)
         """
+        from metient.lib.projection import fit_F
+
         V, R, omega_V = self.var.T, self.ref.T, self.omega.T
         V_hat = V + 1
         T_hat = V + R + 2

@@ -1897,4 +1897,155 @@ def analyze_loss_landscape(v_solver, X, v_temp, t_temp, poly_res, exploration_we
     #     print("nodes_to_remove", nodes_to_remove)
     #     _T = _remove_nodes_from_T(T, nodes_to_remove)
     #     print("_T", _T[0])
+
+def stack_closures(closures, batch_size, n):
+    # Stack the closures into a single sparse tensor
+    stacked_indices = []
+    stacked_values = []
+
+    for i in range(batch_size):
+        closure = closures[i]
+        indices = closure.indices().clone()
+        values = closure.values()
+
+        # Adjust row indices for stacking
+        indices[0] += i * n
+
+        stacked_indices.append(indices)
+        stacked_values.append(values)
+
+    # Concatenate indices and values
+    final_indices = torch.cat(stacked_indices, dim=1)
+    final_values = torch.cat(stacked_values)
+
+    # Create the final stacked sparse tensor
+    stacked_closure = torch.sparse_coo_tensor(final_indices, final_values, (batch_size, n, n))
+
+    return stacked_closure
+
+# in eval_util.get_max_cross_ent_thetas
+
+if use_min_tau:
+    gen_dist_scores = torch.zeros((len(loss_dicts)))
+    for i, loss_dict in enumerate(loss_dicts):
+        gen_dist_scores[i] = loss_dict[GEN_DIST_KEY]
+    unique_gs,_ = torch.sort(torch.unique(gen_dist_scores))
+    if len(unique_gs) >= 2:
+        print("gen dist diff", (unique_gs[1]-unique_gs[0]))
+        min_tau = min(min_tau, (unique_gs[1]-unique_gs[0]))
+
+def run_fitch_hartigan(v_solver, results):
+    """
+    Recover possible ancestral states using Fitch's algorithm and select one optimal solution
+
+    Parameters:
+    - adj_matrix: Sparse COO adjacency matrix representing the tree structure (n x n).
+    - node_idx_to_observed_sites: Dictionary mapping leaf node indices to their labels.
+    - root_label: The known label of the root node.
+
+    Returns:
+    - ancestral_matrix: A k x n matrix, where k is the number of labels, and n is the internal node indices.
+    """
+    adj_matrix = v_solver.input_T
+    node_idx_to_observed_sites = v_solver.idx_to_observed_sites
+    root_label = torch.argmax(v_solver.p, dim=0).item()
     
+    n = adj_matrix.shape[0]
+    k = v_solver.num_sites
+
+    # Step 1: Initialize a k x n matrix to store possible labels for each node (True/False for each label)
+    ancestral_matrix = torch.zeros((k, n), dtype=torch.float32)
+
+    # Step 2: Fill in the matrix for leaf nodes and root node based on the node_idx_to_observed_sites dictionary
+    for node, leaf_labels in node_idx_to_observed_sites.items():
+        ancestral_matrix[:, node] = 0
+        for leaf_label in leaf_labels:
+            ancestral_matrix[leaf_label, node] = 1  # Set the corresponding label to True
+
+    # For leaf nodes without any observed sites, initialize as possibly belonging to all sites
+    leaf_nodes = torch.nonzero(adj_matrix.sum(dim=1) == 0).squeeze(dim=1).tolist()
+
+    for leaf in leaf_nodes:
+        if leaf not in node_idx_to_observed_sites:
+            ancestral_matrix[:, leaf] = 1
+
+    root = get_root_index(adj_matrix)
+    ancestral_matrix[:, root] = 0
+    ancestral_matrix[root_label, root] = 1
+
+    # Step 3: Perform the downward pass (Fitch algorithm) for internal nodes
+    def fitch_down(node):
+        node = int(node)
+
+        # Check if the node has observed sites
+        has_observed_sites = node in node_idx_to_observed_sites
+
+        # Find children of the node using the adjacency matrix
+        children = torch.nonzero(adj_matrix[node]).squeeze(dim=1)
+
+        # If the node is a leaf, return its known label set
+        if len(children) == 0 and has_observed_sites:
+            return ancestral_matrix[:, node]
+
+        # Collect label sets from all children
+        child_label_sets = [fitch_down(child) for child in children]
+
+        # Perform set intersection or union based on children's labels
+        intersection = torch.stack(child_label_sets).all(dim=0)
+        if torch.any(intersection):  # If intersection is non-empty, use it as the set
+            ancestral_matrix[:, node] = intersection
+        else:  # Otherwise, use the union of the children's sets
+            union = torch.stack(child_label_sets).any(dim=0)
+            ancestral_matrix[:, node] = union
+
+        # If the node has observed sites, enforce them on the computed labels
+        if has_observed_sites:
+            observed_sites = ancestral_matrix[:, node]
+            ancestral_matrix[:, node] = ancestral_matrix[:, node] * observed_sites
+
+        return ancestral_matrix[:, node]
+    
+    # Step 4: Perform Fitch's downward pass starting from the root
+    fitch_down(root)
+    # Reinforce root label
+    ancestral_matrix[:, root] = 0
+    ancestral_matrix[root_label, root] = 1
+    single_soln_matrix = ancestral_matrix.clone()
+
+    # Step 5: Perform the upward pass to choose specific states for internal nodes,
+    # starting with the root label.
+    def fitch_up(node, parent_label):
+        children = torch.nonzero(adj_matrix[node]).squeeze(dim=1)
+
+        # If there are multiple possible labels, choose one (use the parent's label if possible)
+        possible_labels = torch.where(single_soln_matrix[:, node])[0]
+        if parent_label in possible_labels:
+            chosen_label = parent_label
+        else:
+            chosen_label = possible_labels[0]
+
+        # Set the chosen label to True and others to False for the node
+        single_soln_matrix[:, node] = 0
+        single_soln_matrix[chosen_label, node] = 1
+
+        # Pass the chosen label to the children
+        for child in children:
+            fitch_up(child, chosen_label)
+
+    # Perform the upward pass starting from the root with the enforced root label
+    fitch_up(root, root_label)
+
+    # We needed to include the root labeling for Fitch-Hartigan, but we restack 
+    # it using stack_vertex_labeling, so remove it momentarily
+    single_soln_matrix = torch.cat((single_soln_matrix[:, :root], single_soln_matrix[:, root+1:]), dim=1)
+    V = stack_vertex_labeling(v_solver.L, add_batch_dim(single_soln_matrix), v_solver.p, None, None)
+    T = repeat_n(v_solver.full_T,1)
+    if v_solver.config['use_sparse_T']:
+        T = T.to_sparse()
+    metrics = ancestral_labeling_metrics(V, T, v_solver.full_G, v_solver.O, v_solver.p, 
+                                         update_path_matrix=True, compute_full_c=True, identical_T=True)
+    V = V.cpu().detach()
+    T = T.cpu().detach()
+    metrics = tuple(metric.cpu().detach() for metric in metrics)
+    print("Fitch-hartigan result:", metrics)
+    results.append((V, torch.zeros(V.shape, device=V.device), T, None, (*metrics,torch.zeros(size=(1,),device=V.device))))

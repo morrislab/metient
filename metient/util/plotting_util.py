@@ -21,6 +21,7 @@ import copy
 import tracemalloc
 
 import metient.util.vertex_labeling_util as vutil 
+import metient.util.data_extraction_util as dutil
 from metient.util.globals import *
 
 import pandas as pd
@@ -130,22 +131,21 @@ def seeding_pattern(V, A):
     return seeding_pattern_with_G(G)
     
 
-def remove_migration_edges_to_sites_sparse(Y, V, A, sites):
+def remove_migration_edges_to_sites_sparse(Y, V, sites_to_keep):
     Y = Y.coalesce()
     indices = Y.indices()
     values = Y.values()
 
-    # Iterate over the sparse tensor's nonzero elements using tree_iterator
-    for idx in range(indices.size(1)):
-        i, j = indices[:, idx]  # Get the row (i) and column (j) indices
-        k = (V[:, j] == 1).nonzero(as_tuple=True)[0][0].item()
-        if k not in sites:
-            values[idx] = 0  # Set the value to zero
-
-    # Remove zeroed-out entries efficiently
-    mask = values != 0  # Keep only non-zero values
-    Y = torch.sparse_coo_tensor(indices[:, mask], values[mask], Y.size())
-    return
+    # Get destination sites for all edges in one operation
+    dest_sites = torch.argmax(V[:, indices[1]], dim=0)
+    
+    # Create mask for edges to keep
+    sites_tensor = torch.tensor(list(sites_to_keep), device=dest_sites.device)
+    keep_mask = torch.isin(dest_sites, sites_tensor)
+    
+    # Filter indices and values in one step
+    Y = torch.sparse_coo_tensor(indices[:, keep_mask], values[keep_mask], Y.size())
+    return Y
 
 def migration_edges(V, A, sites=None):
     """
@@ -162,7 +162,7 @@ def migration_edges(V, A, sites=None):
     # Remove migration edges to sites that we're not interested in 
     if sites != None:
         if Y.is_sparse:
-            remove_migration_edges_to_sites_sparse(Y, V, A, sites)
+            return remove_migration_edges_to_sites_sparse(Y, V, sites)
         for i,j in vutil.tree_iterator(Y):
             k = (V[:,j] == 1).nonzero()[0][0].item()
             if k not in sites:
@@ -189,6 +189,7 @@ def seeding_cluster_sparse(Y, A, node_idx_to_label, sites=None):
     if isinstance(node_idx_to_label, vutil.MigrationHistoryNodeCollection):
         node_collection = node_idx_to_label
     else:
+        # TODO this is way too slow on large trees
         node_collection = vutil.MigrationHistoryNodeCollection.from_dict(node_idx_to_label)
 
     # Special case for if the node w/ diff color parent is a witness node or polytomy resolver node,
@@ -212,10 +213,6 @@ def seeding_clusters(V, A, node_idx_to_label, sites=None):
     if Y.is_sparse:
         return seeding_cluster_sparse(Y, A, node_idx_to_label, sites)
     
-    V, A = prep_V_A_inputs(V, A)
-    Y = migration_edges(V,A, sites)
-    if Y.is_sparse:
-        Y = Y.to_dense()
     seeding_clusters = torch.nonzero(Y.any(dim=1)).squeeze()
     # Check if it's a scalar (0D tensor)
     if seeding_clusters.dim() == 0:
@@ -225,7 +222,6 @@ def seeding_clusters(V, A, node_idx_to_label, sites=None):
 
     return seeding_clusters
         
-
 def find_tree_trunk(adj_matrix):
     n = len(adj_matrix)  # Number of nodes in the matrix
     root = vutil.get_root_index(adj_matrix)  # Assuming the root node is 0
@@ -396,6 +392,243 @@ def tracerx_seeding_pattern(V, A, idx_to_label):
 
     return clonality + phyleticity
 
+def min_max_normalize(x):
+    x = np.array(x, dtype=np.float64)
+    return (x - x.min()) / (x.max() - x.min() + 1e-8)
+
+def losses_to_probabilities(messy_losses, temperature=0.5):
+    """
+    Converts a messy list of losses (in NumPy arrays) to probabilities using the softmax function
+    with temperature scaling.
+
+    Args:
+    - messy_losses (list): List of NumPy arrays or scalars containing loss values.
+    - temperature (float): Temperature parameter for softmax. Lower = sharper distribution.
+
+    Returns:
+    - probabilities (numpy array): Probabilities corresponding to each loss.
+    """
+    # Flatten and extract numerical values from the messy list
+    cleaned_losses = np.array([loss.flatten() if hasattr(loss, 'flatten') else loss for loss in messy_losses])
+    neg_losses = -np.array([loss.item() if hasattr(loss, 'item') else loss for loss in cleaned_losses])  # Ensure scalar
+    neg_losses = min_max_normalize(neg_losses)
+    # Apply temperature scaling
+    scaled_losses = neg_losses / temperature
+
+    # Subtract the max to prevent overflow
+    max_scaled_loss = np.max(scaled_losses)
+    exp_scaled = np.exp(scaled_losses - max_scaled_loss)
+
+    # Normalize to get probabilities
+    probabilities = exp_scaled / np.sum(exp_scaled)
+
+    return probabilities
+    
+def get_soln_probabilities(loss_dicts):
+    """
+    Calculate probability weights for each solution based on loss values.
+    
+    Args:
+        loss_dicts (list[dict]): List of dictionaries containing loss values and metrics for each solution
+        thetas (list[float] | None, optional): List of 3 theta parameters for weighting migration, comigration, 
+            and seeding site metrics. If None, uses raw loss values. Defaults to None.
+            
+    Returns:
+        np.ndarray: List of probabilities for each solution
+    """
+    # Calculate losses for each solution
+    losses = []
+    for loss_dict in loss_dicts:
+        losses.append(loss_dict[FULL_LOSS_KEY])
+    
+    probabilities = losses_to_probabilities(losses)
+    return probabilities
+
+def weighted_classification(losses, classifications):
+    """
+    Performs weighted classification by summing probabilities for each class.
+
+    Args:
+        losses (list[float]): List of loss values/weights for each classification
+        classifications (list[str]): List of classification labels corresponding to each loss
+
+    Returns:
+        str: The classification label with the highest total weighted probability
+    """
+    # Initialize a dictionary to hold the weighted sum of probabilities for each class
+    weighted_probs = {c: 0 for c in classifications}
+
+    # Sum the weighted probabilities for each attribute
+    for loss, c in zip(losses, classifications):
+        weighted_probs[c] += loss
+    
+    # Return the classification with the highest total weight
+    return max(weighted_probs, key=weighted_probs.get)
+
+def _get_weighted_classification_data(pkl):
+    """Helper function to extract and prepare data for weighted classification.
+
+    Args:
+        pkl (dict): Pickle file containing tree data
+
+    Returns:
+        tuple: (probabilities, Vs, As, node_infos) containing solution probabilities and tree data
+    """
+    # Get data from pickle
+    loss_dicts = pkl[OUT_LOSS_DICT_KEY]
+    parents = pkl[OUT_ADJ_KEY]
+    As = [dutil.adjacency_matrix_from_parents(p) for p in parents]
+    Vs = pkl[OUT_LABElING_KEY]
+    node_infos = [vutil.MigrationHistoryNodeCollection.from_dict(x) for x in pkl[OUT_IDX_LABEL_KEY]]
+
+    probabilities = get_soln_probabilities(loss_dicts)
+    
+    return probabilities, Vs, As, node_infos
+
+def compute_depths(A,P):
+    """
+    Returns:
+    dict: Dictionary where keys are nodes and values are their depth in the tree.
+    """
+    root = vutil.get_root_index(A)
+    n = P.shape[0]
+    depths = {}
+    
+    for node in range(n):
+        if node == root:
+            depths[node] = 0  # Root has depth 0
+        else:
+            # The depth is the number of ancestors (nodes that can reach this node)
+            depths[node] = torch.sum(P[:, node],dim=0)
+    
+    return depths
+
+def fast_phyleticity(V, A, P, node_info, depths, sites=None):
+    '''
+    If all nodes can be reached from the top level node in the seeding clusters,
+    returns monophyletic, else polyphyletic
+    '''
+    
+    V, A = prep_V_A_inputs(V, A)
+    all_seeding_clusters = seeding_clusters(V, A, node_info, sites)
+
+    if len(all_seeding_clusters) == 0: # no seeding
+        return "no seeding"
+    
+    # Get the seeding node that is closest to the root
+    highest_node = min(all_seeding_clusters, key=lambda num: depths.get(num, float('-inf')))
+
+    # Check if all nodes can be reached from the top level node in the seeding
+    # nodes (seeding node that is closest to the root)
+    for node in all_seeding_clusters:
+        if not P[highest_node, node] == 1:
+            return "polyphyletic"
+    return "monophyletic"
+
+def check_equal_trees(As):
+    """Check if all adjacency matrices in a list are equal.
+    
+    Args:
+        As (list): List of adjacency matrices (torch tensors) to compare
+
+    Returns:
+        bool: True if all matrices are equal, False otherwise
+    """
+    if len(As) <= 1:
+        return True
+    first_A = As[0]
+    for A in As[1:]:
+        if not vutil.sparse_tensors_equal(first_A, A):
+            return False
+    return True
+
+def weighted_phyleticity(pkl, sites):
+    """
+    Calculate weighted phyleticity classification across all solutions.
+
+    Args:
+        pkl (dict): Pickle file containing tree data with labeling matrices, adjacency matrices, 
+                   loss dictionaries and node information
+        sites (list[str] | None, optional): List of anatomical site names to restrict phyleticity 
+        calculation to. Defaults to None.
+
+    Returns:
+        str: Weighted phyleticity classification ('monophyletic' or 'polyphyletic') based on 
+             solution probabilities
+    """
+    probabilities, Vs, As, node_infos = _get_weighted_classification_data(pkl)
+
+    # If all trees are the same, we can use the fast phyleticity method
+    equal_trees = check_equal_trees(As)
+    if equal_trees:
+        P = vutil.path_matrix(As[0], remove_self_loops=False).to_dense()
+        depths = compute_depths(As[0], P)
+
+    phyleticities = []
+    for i in range(len(Vs)):
+        if equal_trees:
+            phyleticities.append(fast_phyleticity(Vs[i], As[i], P, node_infos[i], depths, sites))
+        else:
+            phyleticities.append(phyleticity(Vs[i], As[i], node_infos[i], sites))
+    
+    return weighted_classification(probabilities, phyleticities)
+
+def weighted_genetic_clonality(pkl):
+    """
+    Calculate weighted genetic clonality classification across all solutions.
+
+    Args:
+        pkl (dict): Pickle file containing tree data with labeling matrices, adjacency matrices, 
+                   loss dictionaries and node information
+    Returns:
+        str: Weighted genetic clonality classification ('monoclonal' or 'polyclonal') based on 
+             solution probabilities
+    """
+    probabilities, Vs, As, node_infos = _get_weighted_classification_data(pkl)
+    
+    clonalities = []
+    for V, A, node_info in zip(Vs, As, node_infos):
+        clonalities.append(genetic_clonality(V, A, node_info))
+    
+    return weighted_classification(probabilities, clonalities)
+
+def weighted_site_clonality(pkl):
+    """
+    Calculate weighted site clonality classification across all solutions.
+
+    Args:
+        pkl (dict): Pickle file containing tree data with labeling matrices, adjacency matrices, 
+                   loss dictionaries and node information
+    Returns:
+        str: Weighted site clonality classification ('monoclonal' or 'polyclonal') based on 
+             solution probabilities
+    """
+    probabilities, Vs, As, _ = _get_weighted_classification_data(pkl)
+    
+    clonalities = []
+    for V, A in zip(Vs, As):
+        clonalities.append(site_clonality(V, A))
+    
+    return weighted_classification(probabilities, clonalities)
+
+def weighted_seeding_pattern(pkl):
+    """
+    Calculate weighted seeding pattern classification across all solutions.
+
+    Args:
+        pkl (dict): Pickle file containing tree data with labeling matrices, adjacency matrices, 
+                   loss dictionaries and node information
+    Returns:
+        str: Weighted seeding pattern classification based on solution probabilities
+    """
+    probabilities, Vs, As, _ = _get_weighted_classification_data(pkl)
+    
+    patterns = []
+    for V, A in zip(Vs, As):
+        patterns.append(seeding_pattern(V, A))
+    
+    return weighted_classification(probabilities, patterns)
+
 def write_tree(tree_edge_list, output_filename, add_germline_node=False):
     """
     Writes the full tree to file like so:
@@ -498,7 +731,7 @@ def pruned_mut_label(mut_names, shorten_label, to_string):
         elif gene in ENSEMBLE_TO_GENE_MAP:
             gene_candidates.add(ENSEMBLE_TO_GENE_MAP[gene])
     final_genes = gene_names if len(gene_candidates) == 0 else gene_candidates
-   
+
     k = 2 if len(final_genes) > 2 else len(final_genes)
     if to_string:
         return ";".join(list(final_genes)[:k])
@@ -529,7 +762,9 @@ def idx_to_color(custom_colors, idx, alpha=1.0):
 
 def prep_V_A_inputs(V, A):
     if not isinstance(V, torch.Tensor):
-        V = torch.tensor(V)
+        V = torch.tensor(V, dtype=torch.float)
+    elif V.dtype != torch.float:
+        V = V.float()
     if not isinstance(A, torch.Tensor):
         if isinstance(A, tuple):
             # Assuming A is a tuple of (indices, values, size) for sparse COO tensor
@@ -601,7 +836,7 @@ def migration_graph_dot(V, A, ordered_sites, custom_colors, show=True):
 
     return dot_str
 
-def migration_history_tree_dot(V, T, gen_dist, custom_colors, node_collection=None, show=True):
+def migration_history_tree_dot(V, T, gen_dist, custom_colors, node_collection=None, show=True, display_labels=True):
 
     # (1) Create full directed graph 
     # these labels are used for display in plotting
@@ -610,8 +845,8 @@ def migration_history_tree_dot(V, T, gen_dist, custom_colors, node_collection=No
     color_map = { i:idx_to_color(custom_colors, (V[:,i] == 1).nonzero()[0][0].item()) for i in range(V.shape[1])}
     G = nx.DiGraph()
     node_options = {"label":"", "shape": "circle", "penwidth":3, 
-                    "fontname":FONT, "fontsize":12,
-                    "fixedsize":"true", "height":0.25}
+                    "fontname":FONT, "fontsize":14,
+                    "fixedsize":"true", "height":0.3}
 
     if gen_dist != None:
         gen_dist = ((gen_dist / torch.max(gen_dist[gen_dist>0]))*1.5) + 1
@@ -619,13 +854,13 @@ def migration_history_tree_dot(V, T, gen_dist, custom_colors, node_collection=No
     for i, j in vutil.tree_iterator(T):
         label_i, _, _ = display_node_idx_to_label_map[i]
         label_j, is_witness, _ = display_node_idx_to_label_map[j]
-        
-        # label_i, label_j = "",""
+        if not display_labels:
+            label_i, label_j = "", ""
         G.add_node(i, xlabel=label_i, fillcolor=color_map[i], 
                     color=color_map[i], style="filled", **node_options)
         G.add_node(j, xlabel="" if is_witness else label_j, fillcolor=color_map[j], fontcolor="white" if is_witness else "black",
                     color=color_map[j], style="solid" if is_witness else "filled", **node_options)
-
+       
         style = "dashed" if is_witness else "solid"
         penwidth = 5 if is_witness else 5.5
 
@@ -653,6 +888,7 @@ def migration_history_tree_dot(V, T, gen_dist, custom_colors, node_collection=No
     # hack since there doesn't seem to be API to modify graph attributes...
     # dot.insert(1, 'graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dpi=800; size=2.5;')
     dot.insert(1, 'graph[splines=false]; nodesep=0.4; rankdir=TB; ranksep=0.4; forcelabels=true; dpi=800; size=2.5; seed=42')
+
     dot_str = ("\n").join(dot)
 
     if show:
@@ -710,18 +946,50 @@ def figure_output_pattern(V, A, idx_to_label):
     output_str += f"genetic clonality: {gen_clonality}, site clonality: {st_clonality}\n"
     return output_str
 
-def get_components(tensor):
-    """Get components to pickle a sparse COO tensor."""
-    if not tensor.is_sparse:
-        return tensor.detach().cpu().numpy()
-
-    # Extract components
-    indices = tensor._indices().cpu()
-    values = tensor._values().cpu()
+def get_parents_sparse(tensor):
+    """
+    Get parents vector from sparse adjacency matrix
+    """
+    # Extract parents vector
     size = tensor.size()
+    parents = -1 * np.ones(size[0])  # Initialize with -1 (for roots)
 
-    # Pack components into a tuple
-    return (indices, values, size)
+    # Set parents using adjacency matrix
+    # Coalesce the sparse tensor first to ensure unique indices
+    tensor = tensor.coalesce()
+    indices = tensor.indices()
+    parents[indices[1]] = indices[0]
+
+    return parents
+
+def get_parents(tensor):
+    """Convert adjacency matrix tensor to parents vector.
+    
+    Args:
+        tensor: Adjacency matrix tensor (sparse or dense)
+        
+    Returns:
+        numpy array: Parents vector where index i contains the parent node of node i,
+                    with -1 indicating the root node
+    """
+    # Convert to dense numpy array if sparse
+    if tensor.is_sparse:
+       return get_parents_sparse(tensor)
+    
+    # Convert to CPU numpy array if on GPU
+    adj = tensor.detach().cpu().numpy()
+    
+    # Zero out diagonal
+    np.fill_diagonal(adj, 0)
+    
+    # Find parent indices for all nodes
+    parents = np.argmax(adj, axis=0)
+    
+    # Set parent to -1 where there is no parent (i.e., where column sum is 0)
+    col_sums = adj.sum(axis=0)
+    parents[col_sums == 0] = -1
+    
+    return parents
 
 def dense_to_sparse(dense_tensor):
     """Convert a dense tensor to a sparse COO tensor and delete the dense tensor."""
@@ -742,6 +1010,40 @@ def dense_to_sparse(dense_tensor):
     del dense_tensor
 
     return sparse_tensor
+
+def restructure_matrices_for_plotting(T, node_collection, G, V, U, original_root_idx):
+    """
+    Restructures adjacency matrices to match original cluster indices for plotting.
+    
+    Args:
+        T: Transition matrix (sparse or dense)
+        node_collection: Collection of nodes
+        G: Graph matrix
+        V, U: Additional matrices
+        original_root_idx: Original root index (-1 if no restructuring needed)
+    
+    Returns:
+        tuple: (T, node_collection, G, V, U)
+    """
+    if original_root_idx == -1:
+        return T, node_collection, G, V, U
+        
+    needs_sparse_conversion = False
+    if T.is_sparse:
+        T = T.to_dense()
+        needs_sparse_conversion = True
+    
+    node_collection = copy.deepcopy(node_collection)
+    T, _, _, node_collection, G, _, V, U = vutil.restructure_matrices(
+        0, original_root_idx, T, None, None, node_collection, G, None, V, U
+    )
+    
+    if needs_sparse_conversion:
+        T = dense_to_sparse(T)
+        
+    return T, node_collection, G, V, U
+
+
 
 def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites, print_config, primary, output_dir, run_name, original_root_idx=-1):
     """
@@ -779,36 +1081,25 @@ def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites, print_conf
             node_collection = min_loss_solution.node_collection
             loss_dict = construct_loss_dict(min_loss_solution, full_loss)
             
-            # Restructure adjacency matrices so that node indices match the cluster indices
-            # that the user originally input (we restructure them s.t. root index is 0 during
-            # inference to make indexing logic much simpler)
-            # TODO: this is unideal, restructure matrices should take in sparse matrix
-            # from here on, return a parents matrix?
-            needs_sparse_conversion = False
-            if original_root_idx != -1:
-                if T.is_sparse:
-                    T = T.to_dense()
-                    needs_sparse_conversion = True
-                node_collection = copy.deepcopy(node_collection)
-                T, _, _, node_collection, G, _, V, U = vutil.restructure_matrices(0, original_root_idx, T, None, None, node_collection, G, None, V, U)
-            if needs_sparse_conversion:
-                T = dense_to_sparse(T)
-                
+            # Restructure adjacency matrices to match original cluster indices
+            T, node_collection, G, V, U = restructure_matrices_for_plotting(
+                T, node_collection, G, V, U, original_root_idx
+            )
+            
             edges, full_tree_idx_to_label, vertices_to_sites_map, mig_graph_edges = collect_top_tree_info(V, T, node_collection, ordered_sites)
-                
-            tree_dot = migration_history_tree_dot(V, T, G, custom_colors, node_collection, show=False)
-            mig_graph_dot = migration_graph_dot(V, T, ordered_sites, custom_colors, show=False)
-
             if print_config.visualize:
                 pattern = figure_output_pattern(V, T, full_tree_idx_to_label)
+                tree_dot = migration_history_tree_dot(V, T, G, custom_colors, node_collection, show=False, display_labels=print_config.display_labels)
+                mig_graph_dot = migration_graph_dot(V, T, ordered_sites, custom_colors, show=False)
             else:
                 pattern = ""
+                tree_dot, mig_graph_dot = None, None
 
             figure_outputs.append((tree_dot, mig_graph_dot, loss_dict, pattern))
             pickle_outputs[OUT_LABElING_KEY].append(V.detach().cpu().numpy())
             pickle_outputs[OUT_LOSSES_KEY].append(full_loss.cpu().numpy())
             
-            pickle_outputs[OUT_ADJ_KEY].append(get_components(T))
+            pickle_outputs[OUT_ADJ_KEY].append(get_parents(T))
             pickle_outputs[OUT_SOFTV_KEY].append(soft_V.detach().cpu().numpy())
             pickle_outputs[OUT_OBSERVED_CLONES_KEY] = U.detach().cpu().numpy() if U != None else np.array([])
         
@@ -852,7 +1143,7 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
         n = len(figure_outputs)
         print(run_name)
 
-        max_trees = 20
+        max_trees = 10
         if n > max_trees:
             print(f"More than {max_trees} solutions detected, only plotting top {max_trees} trees.")
             n = max_trees
@@ -926,7 +1217,9 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
             
         # Save best dot to file
         tree_dot, mig_graph_dot, _, _ = figure_outputs[0]
-        with open(os.path.join(output_dir, f"{run_name}.tree.dot"), 'w') as file:
-            file.write(tree_dot)
-        with open(os.path.join(output_dir, f"{run_name}.mig_graph.dot"), 'w') as file:
-            file.write(mig_graph_dot)
+        if tree_dot is not None:
+            with open(os.path.join(output_dir, f"{run_name}.tree.dot"), 'w') as file:
+                file.write(tree_dot)
+        if mig_graph_dot is not None:
+            with open(os.path.join(output_dir, f"{run_name}.mig_graph.dot"), 'w') as file:
+                file.write(mig_graph_dot)

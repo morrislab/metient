@@ -44,40 +44,76 @@ def stable_softmax(x):
     exp_x = torch.exp(x - x_max)
     return exp_x / torch.sum(exp_x, dim=0)
 
-def cross_ent(loss_dicts, pt_weight, thetas, tau):
+def min_max_normalize(m, c, s, min_max_vals, epsilon=1e-8):
+    min_m, max_m, min_c, max_c, min_s, max_s = min_max_vals
+
+    m_range = max_m - min_m
+    c_range = max_c - min_c
+    s_range = max_s - min_s
+
+    # Normalize and scale to the range [1, 2]
+    m = 1 + (m - min_m) / (m_range + epsilon)  # Scaled to [1, 2] to avoid zeros
+    c = 1 + (c - min_c) / (c_range + epsilon)  
+    s = 1 + (s - min_s) / (s_range + epsilon)  
+
+    return m, c, s
+
+def cross_ent(loss_dicts, pt_weight, thetas, tau, patient_pars_metrics, calibrate_genetic, calibrate_organotrop):
     '''
-    Computes the cross entropy between the target distribution (genetic distance)
-    and the predicted distribution (parsimony) using the input thetas (which we are
-    trying to optimize)
+    Computes the cross entropy between the target distributions (genetic distance and/or
+    organotropic scores) and the predicted distribution (parsimony) using the input thetas 
+    (which we are trying to optimize)
+
+    Args:
+        calibrate_genetic: Whether to calibrate against genetic distance scores
+        calibrate_organotrop: Whether to calibrate against organotropic scores
     '''
+    normed_thetas = stable_softmax(thetas)
     theta_X = torch.zeros((len(loss_dicts)))
     gen_dist_scores = torch.zeros((len(loss_dicts)))
     organotrop_scores = torch.zeros((len(loss_dicts)))
+
+    # Calculate raw scores
     for i, loss_dict in enumerate(loss_dicts):
         m = loss_dict[MIG_KEY]
         c = loss_dict[COMIG_KEY]
         s = loss_dict[SEEDING_KEY]
         g = loss_dict[GEN_DIST_KEY]
         o = loss_dict[ORGANOTROP_KEY]
-        theta_X[i] = -1.0*(thetas[0]*m + thetas[1]*c + thetas[2]*s)
+
+        theta_X[i] = -1.0*(normed_thetas[0]*m + normed_thetas[1]*c + normed_thetas[2]*s)
         gen_dist_scores[i] = -tau*g
         organotrop_scores[i] = -tau*o
-    #print()
-    # print("theta x", theta_X, "\n gen dist", gen_dist_scores, "\n organotrop", organotrop_scores)
-    # this is in the case where there is no seeding detected (happens rarely in some datasets)
+    
+    # This is in the case where there is no seeding detected (happens rarely in some datasets)
     if torch.sum(theta_X) == 0 or torch.isnan(gen_dist_scores).any():
         return 0.0
-    theta_X = stable_softmax(theta_X)
 
-    log_wn = np.log2(pt_weight+1) # So that weight=1 doesn't go to 0
+    # Apply stable softmax to predicted distribution
+    theta_X = stable_softmax(theta_X)
+    
+    # Calculate weight
+    log_wn = np.log2(pt_weight+1)
+    # print("pt_weight", pt_weight, "log_wn", log_wn)
+    
+    # Small epsilon to prevent log(0)
+    epsilon = 1e-10
     
     cross_ent_sum = 0.0
-    if not torch.sum(gen_dist_scores == 0):
+    print()
+    # print("theta x", theta_X)
+
+    if calibrate_genetic and not torch.sum(gen_dist_scores == 0):
+        # Normalize and apply softmax to target distribution
         gen_dist_scores = stable_softmax(gen_dist_scores)
-        cross_ent_sum += -log_wn*torch.sum(torch.mul(gen_dist_scores, torch.log2(theta_X+0.1)))
-    if not torch.sum(organotrop_scores == 0):
+        cross_ent_sum += -log_wn*torch.sum(torch.mul(gen_dist_scores, torch.log2(theta_X + epsilon)))
+        # print("gen_dist_scores", gen_dist_scores)
+
+    if calibrate_organotrop and not torch.sum(organotrop_scores == 0):
+        # Normalize and apply softmax to target distribution
         organotrop_scores = stable_softmax(organotrop_scores)
-        cross_ent_sum += -log_wn*torch.sum(torch.mul(organotrop_scores, torch.log2(theta_X+0.1)))
+        cross_ent_sum += -log_wn*torch.sum(torch.mul(organotrop_scores, torch.log2(theta_X + epsilon)))
+        # print("organotrop", organotrop_scores)
 
     return cross_ent_sum
 
@@ -89,19 +125,44 @@ def get_pickle_filenames(pickle_files_dirs, suffix=None):
             if match in file:
                 pickle_filenames.append(os.path.join(pickle_files_dir, file))
     return pickle_filenames
-    
-def get_max_cross_ent_thetas(pickle_file_list, patient_weights, tau=3.0, use_min_tau=False):
+
+def get_min_max_pars_metrics(all_pars_metrics):
+    '''
+    Get the minimum and maximum values for the parsimony metrics
+    '''
+    # print("all pars metrics", all_pars_metrics)
+    min_m = min([x[0] for x in all_pars_metrics])
+    max_m = max([x[0] for x in all_pars_metrics])
+    min_c = min([x[1] for x in all_pars_metrics])
+    max_c = max([x[1] for x in all_pars_metrics])
+    min_s = min([x[2] for x in all_pars_metrics])
+    max_s = max([x[2] for x in all_pars_metrics])
+
+    return min_m, max_m, min_c, max_c, min_s, max_s
+
+def get_max_cross_ent_thetas(pickle_file_list, patient_weights, calibrate_genetic, calibrate_organotrop, tau=3.0):
     '''
     pickle_file_list: list of paths to Metient results
-    patient_weights: the 
+    patient_weights: the weight to place on each patient's contribution to the 
+    cohort-level cross-entropy score. This is based on the tree size (number of edges)
+    and the number of possible primaries, since we don't want to bias towards patients
+    with many possible primaries
 
     Returns the parsimony weights which give the best cross entropy 
     between the target distribution (genetic distance) and predicted 
     distribution (parsimony) across all patients in pickle_files_dir
     '''
     
+    if calibrate_genetic and calibrate_organotrop:
+        print("Calibrating parsimony weights to match both genetic distance and organotropism distributions")
+    elif calibrate_genetic:
+        print("Calibrating parsimony weights to match genetic distance distribution")
+    elif calibrate_organotrop:
+        print("Calibrating parsimony weights to match organotropism distribution")
+        
     min_tau = float("inf")
     all_data = []
+    
     for pkl_file,pt_weight in zip(pickle_file_list, patient_weights):
         with gzip.open(pkl_file,'rb') as f:
             pckl = pickle.load(f)
@@ -115,25 +176,12 @@ def get_max_cross_ent_thetas(pickle_file_list, patient_weights, tau=3.0, use_min
         if len(pars_metrics) == 1:
             continue
 
-        all_data.append((loss_dicts, pt_weight))
-
-        if use_min_tau:
-            gen_dist_scores = torch.zeros((len(loss_dicts)))
-            for i, loss_dict in enumerate(loss_dicts):
-                gen_dist_scores[i] = loss_dict[GEN_DIST_KEY]
-            unique_gs,_ = torch.sort(torch.unique(gen_dist_scores))
-            if len(unique_gs) >= 2:
-                print("gen dist diff", (unique_gs[1]-unique_gs[0]))
-                min_tau = min(min_tau, (unique_gs[1]-unique_gs[0]))
+        all_data.append((loss_dicts, pt_weight, list(pars_metrics)))
     
     if len(all_data) == 0:
         print("WARNING: Unable to calibrate since no patients have multiple Pareto optimal trees with multiple unique Pareto metrics. Using default weighting, wm > wc > ws")
-        return [0.46, 0.29, 0.25] # these are estimated from multiple cancer cohorts
+        return PAN_CANCER_WEIGHTS # these are estimated from multiple cancer cohorts
     
-    if use_min_tau:
-        tau = min_tau
-        print("min_tau", tau)
-        
     print(f"Calibrating to {len(all_data)} patients")
 
     patience = 50
@@ -148,9 +196,18 @@ def get_max_cross_ent_thetas(pickle_file_list, patient_weights, tau=3.0, use_min
     losses = []
     for step in range(max_iter):
         optimizer.zero_grad()
+        
         total_cross_ent = 0.0
-        for i, (patient_loss_dicts, pt_weight) in enumerate(all_data):
-            patient_cross_ent = cross_ent(patient_loss_dicts, pt_weight, thetas, tau)
+        for i, (patient_loss_dicts, pt_weight, pt_pars_metrics) in enumerate(all_data):
+            patient_cross_ent = cross_ent(
+                patient_loss_dicts,
+                pt_weight,
+                thetas,
+                tau,
+                pt_pars_metrics,
+                calibrate_genetic,
+                calibrate_organotrop
+            )
             total_cross_ent += patient_cross_ent
         total_cross_ent = total_cross_ent/float(len(all_data))
         total_cross_ent.backward()
