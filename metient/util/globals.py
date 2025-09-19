@@ -30,17 +30,16 @@ FULL_LOSS_KEY = "loss"
 MIN_VARIANCE = 1e-4
 
 # For pickle outputs
-OUT_LABElING_KEY = "clone_tree_labeling_matrices"
-OUT_ADJ_KEY = "full_adjacency_matrices"
-OUT_OBSERVED_CLONES_KEY = "observed_clone_proportion_matrix"
+OUT_LABElING_KEY = "node_labels"
+OUT_PARENTS_KEY = "parents"
+OUT_OBSERVED_CLONES_KEY = "observed_proportions"
 OUT_LOSSES_KEY = "losses"
 OUT_IDX_LABEL_KEY = "node_info"
-OUT_SITES_KEY = "ordered_anatomical_sites"
+OUT_SITES_KEY = "anatomical_sites"
 OUT_PRIMARY_KEY = "primary_site"
-OUT_LOSS_DICT_KEY = "loss_dict"
-OUT_SOFTV_KEY = "soft_v"
-OUT_GEN_DIST_KEY = "gen_dist_matrices"
-
+OUT_LOSS_DICT_KEY = "loss_info"
+OUT_SOFTV_KEY = "soft_labeling"
+OUT_GEN_DIST_KEY = "genetic_distances"
 
 U_CUTOFF = 0.05
 
