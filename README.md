@@ -210,32 +210,30 @@ print_config = met.PrintConfig(
 
 ### Weights
 ```python
-# Use pre-calibrated weights (recommended)
-weights = met.Weights.pancancer_genetic_uniform_weighting()
+# Use pre-calibrated weights
+weights = met.Weights.pancancer_genetic_organotropism_uniform_weighting()
 
 # Or other preset options:
 # weights = met.Weights.pancancer_genetic_cohort_size_weighting()
 # weights = met.Weights.pancancer_genetic_organotropism_uniform_weighting()
-# weights = met.Weights.pancancer_genetic_organotropism_cohort_size_weighting()
+# weights = met.Weights.pancancer_genetic_uniform_weighting()
 
 # Or create custom weights
 weights = met.Weights(mig=0.5, comig=0.3, seed_site=0.2)
 ```
 
 **Weight Configuration Options:**
-- **pancancer_genetic_uniform_weighting()**: Genetic-only model with uniform cohort weighting (most common)
+- **pancancer_genetic_organotropism_uniform_weighting()**: Combined genetic + oranotropism model with uniform cohort weighting (recommended for human data)
+- **pancancer_genetic_uniform_weighting()**: Genetic-only model with uniform cohort weighting (recommended for non-human data)
 - **pancancer_genetic_cohort_size_weighting()**: Genetic-only model weighted by cohort size
-- **pancancer_genetic_organotropism_uniform_weighting()**: Combined genetic + tissue tropism model
-- **pancancer_genetic_organotropism_cohort_size_weighting()**: Combined model weighted by cohort size
+- **pancancer_genetic_organotropism_cohort_size_weighting()**: Combined genetic + oranotropism model weighted by cohort size
 
 **Weight Parameters:**
 - Higher weights mean higher penalty on that metric
-- **mig**: Migration number (fewer direct migrations)
-- **comig**: Co-migration number (encourage shared migration paths)  
-- **seed_site**: Seeding site number (fewer seeding locations)
+- **mig**: Migration number penality
+- **comig**: Comigration number penality
+- **seed_site**: Seeding site number penality
 - **gen_dist**: Genetic distance penalty
-- **organotrop**: Tissue tropism penalty
-- **data_fit**: Data likelihood penalty (usually keep at 15.0)
-- **reg**: Regularization penalty (usually keep at 0.5)
+- **organotrop**: Organotropism penalty
 
 
