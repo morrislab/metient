@@ -209,11 +209,7 @@ print_config = met.PrintConfig(
 
 ### Weights
 ```python
-weights = met.Weights(
-    mig=0.48,        # Default calibrated weights (to real data) work well for most cases
-    comig=0.30,      
-    seed_site=0.22,  
-)
+weights = met.Weights()
 ```
 - Use default weights for initial analysis
 - Higher weights mean higher penalty on that metric
