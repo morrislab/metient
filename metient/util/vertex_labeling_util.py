@@ -829,7 +829,7 @@ def parents_to_adj_matrix(parents):
 
 def create_reweighted_solution_set_from_pckl(pckl, O, p, weights):
     # Make a solution set from the pickled files
-    Ts, Vs, soft_Vs, Gs = pckl[OUT_ADJ_KEY], pckl[OUT_LABElING_KEY], pckl[OUT_SOFTV_KEY], pckl[OUT_GEN_DIST_KEY]
+    Ts, Vs, soft_Vs, Gs = pckl[OUT_PARENTS_KEY], pckl[OUT_LABElING_KEY], pckl[OUT_SOFTV_KEY], pckl[OUT_GEN_DIST_KEY]
     node_collections = [MigrationHistoryNodeCollection.from_dict(dct) for dct in pckl[OUT_IDX_LABEL_KEY]]
     solution_set = []
     for T, V, soft_V, G, node_collection in zip(Ts, Vs, soft_Vs, Gs, node_collections):

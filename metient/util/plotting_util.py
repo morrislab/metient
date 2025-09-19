@@ -476,7 +476,7 @@ def _get_weighted_classification_data(pkl):
     """
     # Get data from pickle
     loss_dicts = pkl[OUT_LOSS_DICT_KEY]
-    parents = pkl[OUT_ADJ_KEY]
+    parents = pkl[OUT_PARENTS_KEY]
     As = [dutil.adjacency_matrix_from_parents(p) for p in parents]
     Vs = pkl[OUT_LABElING_KEY]
     node_infos = [vutil.MigrationHistoryNodeCollection.from_dict(x) for x in pkl[OUT_IDX_LABEL_KEY]]
@@ -887,7 +887,7 @@ def migration_history_tree_dot(V, T, gen_dist, custom_colors, node_collection=No
     dot = dot.to_string().split("\n")
     # hack since there doesn't seem to be API to modify graph attributes...
     # dot.insert(1, 'graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dpi=800; size=2.5;')
-    dot.insert(1, 'graph[splines=false]; nodesep=0.2; rankdir=TB; ranksep=0.4; forcelabels=true; dpi=800; size=2.5; seed=42')
+    dot.insert(1, 'graph[splines=false]; nodesep=0.4; rankdir=TB; ranksep=0.4; forcelabels=true; dpi=800; size=2.5; seed=42')
 
     dot_str = ("\n").join(dot)
 
@@ -1059,7 +1059,7 @@ def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites, print_conf
     ret = None
     figure_outputs = []
     pickle_outputs = {OUT_LABElING_KEY:[], OUT_LOSSES_KEY:[],OUT_IDX_LABEL_KEY:[],
-                      OUT_ADJ_KEY:[], OUT_SITES_KEY:ordered_sites, OUT_LOSS_DICT_KEY:[],
+                      OUT_PARENTS_KEY:[], OUT_SITES_KEY:ordered_sites, OUT_LOSS_DICT_KEY:[],
                       OUT_PRIMARY_KEY:primary, 
                       OUT_SOFTV_KEY:[], OUT_GEN_DIST_KEY:[]}
 
@@ -1099,7 +1099,7 @@ def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites, print_conf
             pickle_outputs[OUT_LABElING_KEY].append(V.detach().cpu().numpy())
             pickle_outputs[OUT_LOSSES_KEY].append(full_loss.cpu().numpy())
             
-            pickle_outputs[OUT_ADJ_KEY].append(get_parents(T))
+            pickle_outputs[OUT_PARENTS_KEY].append(get_parents(T))
             pickle_outputs[OUT_SOFTV_KEY].append(soft_V.detach().cpu().numpy())
             pickle_outputs[OUT_OBSERVED_CLONES_KEY] = U.detach().cpu().numpy() if U != None else np.array([])
         
@@ -1110,7 +1110,7 @@ def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites, print_conf
             if i == 0: # Best tree
                 ret = (edges, vertices_to_sites_map, mig_graph_edges, loss_dict)
 
-        #pickle_outputs = convert_lists_to_np_arrays(pickle_outputs, [OUT_LABElING_KEY, OUT_LOSSES_KEY, OUT_ADJ_KEY, OUT_SOFTV_KEY, OUT_GEN_DIST_KEY])
+        #pickle_outputs = convert_lists_to_np_arrays(pickle_outputs, [OUT_LABElING_KEY, OUT_LOSSES_KEY, OUT_PARENTS_KEY, OUT_SOFTV_KEY, OUT_GEN_DIST_KEY])
 
         save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outputs, weights)
 
@@ -1163,9 +1163,9 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
         for i, (tree_dot, mig_graph_dot, loss_info, seeding_pattern) in enumerate(figure_outputs):
             if i >= max_trees:
                 break
-            tree = pgv.AGraph(string=tree_dot).draw(format="svg", prog="dot", args="-Glabel=\"\"")
+            tree = pgv.AGraph(string=tree_dot).draw(format="png", prog="dot", args="-Glabel=\"\"")
             tree = PILImage.open(io.BytesIO(tree))
-            mig_graph = pgv.AGraph(string=mig_graph_dot).draw(format="svg", prog="dot")
+            mig_graph = pgv.AGraph(string=mig_graph_dot).draw(format="png", prog="dot")
             mig_graph = PILImage.open(io.BytesIO(mig_graph))
 
             gs = gridspec.GridSpec(3, 1, height_ratios=[0.02, 0.73, 0.25])
@@ -1204,7 +1204,7 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
         plt.show()
         plt.close()
         if print_config.save_outputs: 
-            fig1.savefig(os.path.join(output_dir, f'{run_name}.svg'), dpi=600, bbox_inches='tight')
+            fig1.savefig(os.path.join(output_dir, f'{run_name}.png'), dpi=600, bbox_inches='tight')
 
     if print_config.save_outputs:
         if not os.path.isdir(output_dir):

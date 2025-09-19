@@ -1,12 +1,12 @@
-digraph {
+digraph  {
 dpi=600;size=3.5;
-LN_SU_LN5 [shape=box, color="#e69138", fillcolor=white, fontname=Arial, penwidth=3.0];
-LN_SU_LN7 [shape=box, color="#6fa8dc", fillcolor=white, fontname=Arial, penwidth=3.0];
-primary_SU_T1 [shape=box, color="#6aa84f", fillcolor=white, fontname=Arial, penwidth=3.0];
-LN_SU_FLN1 [shape=box, color="#c27ba0", fillcolor=white, fontname=Arial, penwidth=3.0];
-metachronousMet_BR_T1 [shape=box, color="#bf4040", fillcolor=white, fontname=Arial, penwidth=3.0];
-primary_SU_T1 -> LN_SU_LN5 [key=0, color="#6aa84f;0.5:#e69138", penwidth=3];
-primary_SU_T1 -> LN_SU_FLN1 [key=0, color="#6aa84f;0.5:#c27ba0", penwidth=3];
-primary_SU_T1 -> metachronousMet_BR_T1 [key=0, color="#6aa84f;0.5:#bf4040", penwidth=3];
-LN_SU_FLN1 -> LN_SU_LN7 [key=0, color="#c27ba0;0.5:#6fa8dc", penwidth=3];
+LN_SU_LN5 [color="#e69138", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+LN_SU_LN7 [color="#6fa8dc", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+primary_SU_T1 [color="#6aa84f", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+LN_SU_FLN1 [color="#c27ba0", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+metachronousMet_BR_T1 [color="#bf4040", fillcolor=white, fontname=Arial, penwidth="3.0", shape=box];
+primary_SU_T1 -> LN_SU_LN5  [color="#6aa84f;0.5:#e69138", key=0, penwidth=3];
+primary_SU_T1 -> LN_SU_FLN1  [color="#6aa84f;0.5:#c27ba0", key=0, penwidth=3];
+primary_SU_T1 -> metachronousMet_BR_T1  [color="#6aa84f;0.5:#bf4040", key=0, penwidth=3];
+LN_SU_FLN1 -> LN_SU_LN7  [color="#c27ba0;0.5:#6fa8dc", key=0, penwidth=3];
 }

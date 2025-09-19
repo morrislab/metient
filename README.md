@@ -124,13 +124,14 @@ Metient will output a pickle file in the specificed output directory for each pa
 In the pickle file you'll find the following keys:
 | Pkl key name | Description |
 |----------|----------|
-| **ordered_anatomical_sites** | a list of anatomical sites in the order used for the matrices detailed below.| 
+| **anatomical_sites** | a list of anatomical sites **in the order** used for the matrices detailed below.| 
 | **node_info** | list of dictionaries, in order from best to worst solution. This is solution specific because reolving polytomies can change the tree. Each dictionary maps node index (as used for the matrices detailed below) to a tuple: (label, is_leaf, is_polytomy_resolver_node) used on the tree. The reason labels can be different from what is inputted into Metient is that Metient adds leaf nodes which correspond to the inferred presence of each node in anatomical sites. Each leaf node is labeled as <parent_node_name>_<anatomical_site>. |
-| **clone_tree_labeling_matrices** | list of numpy ndarrays, in order from best to worst solution. Each numpy array is a matrix (shape: `len(ordered_anatomical_sites)`, `len(node_info[x])`), where `x` is the `x` best solution. Row i corresponds to the site at index i in `ordered_anatomical_sites`, and column j corresponds to the node with label `node_info[x][j][0]`. Each column is a one-hot vector representing the location inferred by Metient for that node. |
-| **full_adjacency_matrices** | list of numpy ndarrays, in order from best to worst tree. Each tensor is a matrix (shape: `len(node_info[x])`, `len(node_info[x])`), where `x` is the `x` best solution. A 1 at index i,j indicates an edge from i to j. | 
-| **observed_clone_proportion_matrix** | numpy ndarray (shape: `len(ordered_anatomical_sites)`, `num_clusters`). Row i corresponds to the site at index i in `ordered_anatomical_sites`, and column j corresponds to the node with label `node_info[x][j][0]`. A value at i,j greater than 0.05 indicates that that node is present in that antomical site. These are the nodes that get added as leaf nodes. |
+| **node_labels** | list of numpy ndarrays, in order from best to worst solution. Each numpy array is a matrix (shape: `len(ordered_anatomical_sites)`, `len(node_info[x])`), where `x` is the `x`th best solution. Row i corresponds to the site at index i in `ordered_anatomical_sites`, and column j corresponds to the node with label `node_info[x][j][0]`. Each column is a one-hot vector representing the location inferred by Metient for that node. |
+| **parents** | list of numpy 1-D arrays, in order from best to worst tree. Each is a an array (shape: `len(node_info[x])`), where `x` is the `x`th best solution. The value at index i is the parent of node i. The root node will have a -1 at its index. | 
+| **observed_proportions** | numpy ndarray (shape: `len(ordered_anatomical_sites)`, `num_clusters`). Row i corresponds to the site at index i in `ordered_anatomical_sites`, and column j corresponds to the node with label `node_info[x][j][0]`. A value at i,j greater than 0.05 indicates that that node is present in that antomical site. These are the nodes that get added as leaf nodes. |
 |**losses** | a list of the losses, from best to worst solution.|
 |**primary_site**|str, the name of the anatomical site used as the primary site.|
+|**loss_info**| a list of the dicts, from best to worst solution. Each dictionary contains the unweighted components of the loss (e.g. migration number, comigration number, etc.)|
 
 ## Usage
 
