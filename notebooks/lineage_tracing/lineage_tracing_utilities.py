@@ -313,7 +313,7 @@ def plot_nx_tree(node_to_label, nx_digraph, output_name):
     mig_graph = pgv.AGraph(string=mig_graph_dot).draw(format="png", prog="dot")
     mig_graph = PILImage.open(io.BytesIO(mig_graph))
 
-    gs = gridspec.GridSpec(3, 1, height_ratios=[0.02, 0.73, 0.25])
+    gs = gridspec.GridSpec(3, 1, height_ratios=[0.02, 0.5, 0.5])
 
     row,i = 0,0
     pad = 0.02
@@ -348,7 +348,7 @@ def plot_nx_tree(node_to_label, nx_digraph, output_name):
     fig1 = plt.gcf()
     plt.show()
     plt.close()
-    output_dir = "/data/morrisq/divyak/projects/metient/metient/jupyter_notebooks/lineage_tracing/outputs"
+    output_dir = "/data/morrisq/divyak/projects/metient/notebooks/lineage_tracing/outputs"
     fig1.savefig(os.path.join(output_dir, f'{output_name}.png'), dpi=1200, bbox_inches='tight')
         
     return 
