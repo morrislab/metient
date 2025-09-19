@@ -13,7 +13,7 @@ import numpy as np
 import os
 import sys
 
-sys.path.append(os.path.join(os.getcwd(), "notebooks/lineage_tracing"))
+sys.path.append("/lila/data/morrisq/divyak/projects/metient/notebooks/lineage_tracing")
 import lineage_tracing_utilities as lt
 
 def split_pattern_clonality(full_pattern):
