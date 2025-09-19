@@ -365,6 +365,11 @@ def extract_info_from_observed_clone_tsv(tsv_filename):
     '''
     df = pd.read_csv(tsv_filename, delimiter="\t", index_col=False)  
 
+    # Check that all values in 'present' column are 0s and 1s
+    valid_present_values = df['present'].isin([0, 1])
+    if not valid_present_values.all():
+        raise ValueError(f"All values in the present column must be either 0 or 1.")
+
     num_sites = df['anatomical_site_index'].max() + 1
     mig_hist_nodes = []
     idx_to_sites_present = dict()

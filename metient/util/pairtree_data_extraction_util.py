@@ -199,7 +199,7 @@ def get_adj_matrix_from_parents(parents):
     I = np.identity(T.shape[0])
     T = np.logical_xor(T,I).astype(int) # remove self-loops
     # remove the normal subclone
-    normal_clone_idx = vutil.get_root_index(T)
+    normal_clone_idx = vutil.get_root_index(torch.tensor(T))
     # Assert that this is a monoprimary tree (normal subclone has one cancerous child)
     if len(T[normal_clone_idx].nonzero()[0]) > 1:
         raise ValueError("Normal subclone has more than one child node. Rerun Orchard with monoprimary flag (-p).")

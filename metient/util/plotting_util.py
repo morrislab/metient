@@ -887,7 +887,7 @@ def migration_history_tree_dot(V, T, gen_dist, custom_colors, node_collection=No
     dot = dot.to_string().split("\n")
     # hack since there doesn't seem to be API to modify graph attributes...
     # dot.insert(1, 'graph[splines=false]; nodesep=0.7; rankdir=TB; ranksep=0.6; forcelabels=true; dpi=800; size=2.5;')
-    dot.insert(1, 'graph[splines=false]; nodesep=0.4; rankdir=TB; ranksep=0.4; forcelabels=true; dpi=800; size=2.5; seed=42')
+    dot.insert(1, 'graph[splines=false]; nodesep=0.2; rankdir=TB; ranksep=0.4; forcelabels=true; dpi=800; size=2.5; seed=42')
 
     dot_str = ("\n").join(dot)
 
@@ -1163,9 +1163,9 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
         for i, (tree_dot, mig_graph_dot, loss_info, seeding_pattern) in enumerate(figure_outputs):
             if i >= max_trees:
                 break
-            tree = pgv.AGraph(string=tree_dot).draw(format="png", prog="dot", args="-Glabel=\"\"")
+            tree = pgv.AGraph(string=tree_dot).draw(format="svg", prog="dot", args="-Glabel=\"\"")
             tree = PILImage.open(io.BytesIO(tree))
-            mig_graph = pgv.AGraph(string=mig_graph_dot).draw(format="png", prog="dot")
+            mig_graph = pgv.AGraph(string=mig_graph_dot).draw(format="svg", prog="dot")
             mig_graph = PILImage.open(io.BytesIO(mig_graph))
 
             gs = gridspec.GridSpec(3, 1, height_ratios=[0.02, 0.73, 0.25])
@@ -1204,7 +1204,7 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
         plt.show()
         plt.close()
         if print_config.save_outputs: 
-            fig1.savefig(os.path.join(output_dir, f'{run_name}.png'), dpi=600, bbox_inches='tight')
+            fig1.savefig(os.path.join(output_dir, f'{run_name}.svg'), dpi=600, bbox_inches='tight')
 
     if print_config.save_outputs:
         if not os.path.isdir(output_dir):
