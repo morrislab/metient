@@ -61,7 +61,7 @@ with open("requirements.txt") as f:
 
 setup(
     name='metient',
-    version='0.1.2.3.16',
+    version='0.1.3.4.11',
     url="https://github.com/divyakoyy/metient.git",
     packages=['metient', 'metient.util', 'metient.lib'],
     install_requires=requirements,
