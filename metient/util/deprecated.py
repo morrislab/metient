@@ -2049,3 +2049,129 @@ def run_fitch_hartigan(v_solver, results):
     metrics = tuple(metric.cpu().detach() for metric in metrics)
     print("Fitch-hartigan result:", metrics)
     results.append((V, torch.zeros(V.shape, device=V.device), T, None, (*metrics,torch.zeros(size=(1,),device=V.device))))
+
+def comigration_number(site_adj, A, VA, V, VT, update_path_matrix, identical_T):
+    '''
+    Handles the case where the adjacency matrix is sparse, in which case we can use slower per-batch operations
+    to compute the comigration number.
+
+    Args:
+        - site_adj: sample_size x num_sites x num_sites matrix, where each num_sites x num_sites
+        matrix has the number of migrations from site i to site j
+        - A: Adjacency matrix (directed) of the full tree (sample_size x num_nodes x num_nodes)
+        - VA: V*A (will be converted to sparse)
+        - V: Vertex labeling one-hot matrix (sample_size x num_sites x num_nodes)
+        - VT: transpose of V 
+        - update_path_matrix: whether we need to update the path matrix or we can use a cached version
+        (need to update when we're actively resolving polytomies)
+        - identical_T: bool, whether all adjacency matrices in T along the sample size dimension are identical
+    Returns:
+        - comigration number: a subset of the migration edges between two anatomical sites, such that 
+        the migration edges occur on distinct branches of the clone tree
+    '''
+
+    # First calculate base comigration number (without temporal repeats)
+    base_c = comigration_number_approximation(site_adj)
+    
+    # Get path matrix if needed
+    global LAST_P
+    if LAST_P is not None and not update_path_matrix:
+        P = LAST_P.to(A.device)
+        if P.shape != A.shape:
+            assert(A.shape[0]==1)
+            P = P[0]
+    else:
+        P = path_matrix(A, remove_self_loops=True, identical_T=identical_T)
+        LAST_P = P
+    
+    if not A.is_sparse:
+        return comigration_number_dense(base_c, V, VA, VT, P)
+    # Get node colors (anatomical site labels) - shape: [batch_size, num_nodes]
+    node_colors = torch.argmax(V, dim=1)
+    
+    # Compute parent colors efficiently using sparse matrix multiplication
+    # Shape: [batch_size, num_nodes]
+    parent_site_probs = VA.transpose(1, 2)
+    parent_colors = torch.argmax(parent_site_probs, dim=2)
+
+    # Find nodes that differ from their parents
+    diff_nodes = torch.where(node_colors != parent_colors)  # Returns (batch_indices, node_indices)
+    
+    temporal_migrations = torch.zeros(node_colors.shape[0], device=V.device)
+    print("P.is_sparse", P.is_sparse)
+    # Process each batch
+    for batch in range(node_colors.shape[0]):
+        # Get the differing nodes for this batch
+        batch_diff_nodes = diff_nodes[1][diff_nodes[0] == batch]
+        print("batch_diff_nodes\n",batch_diff_nodes)
+        root_node = get_root_index(A[batch])
+        print("root_node\n",root_node)
+        
+        if len(batch_diff_nodes) > 1:  # Need at least 2 nodes for temporal migrations
+            # Create combined key for just these nodes
+            diff_node_colors = node_colors[batch, batch_diff_nodes]
+            diff_parent_colors = parent_colors[batch, batch_diff_nodes]
+            combined_colors = diff_node_colors * V.shape[1] + diff_parent_colors
+
+            # Find groups of nodes with same combination
+            unique_combos, inverse_indices, counts = torch.unique(combined_colors, return_inverse=True, return_counts=True)
+            
+            # Process combinations that appear more than once
+            repeated_mask = counts > 1
+            repeated_combos = unique_combos[repeated_mask]
+
+            # For each group of matching nodes with same color combination
+            for combo in repeated_combos:
+                matching_indices = batch_diff_nodes[combined_colors == combo]
+                print("matching_indices\n",matching_indices)
+                # Handle sparse tensor properly
+                if P.is_sparse:
+                    P_batch = P[batch].coalesce()
+                    # Create a mask for the matching indices
+                    matching_mask = torch.zeros(P_batch.size(0), dtype=torch.bool, device=P_batch.device)
+                    matching_mask[matching_indices] = True
+                    
+                    # Get all reachable pairs at once
+                    source_mask = P_batch.indices()[0][:, None] == matching_indices
+                    target_mask = matching_mask[P_batch.indices()[1]]
+                    
+                    # Count valid paths (avoiding self-paths and double counting)
+                    valid_paths = (source_mask & target_mask[:, None]).sum()
+                    print("valid_paths\n",valid_paths)
+                    temporal_migrations[batch] += valid_paths
+                else:
+                    # For dense tensors, use matrix operations
+                    reachability_submatrix = P[batch][matching_indices][:, matching_indices]
+                    # Create upper triangular mask to avoid double counting
+                    upper_tri_mask = torch.triu(torch.ones_like(reachability_submatrix), diagonal=1, device=reachability_submatrix.device)
+                    temporal_migrations[batch] += (reachability_submatrix * upper_tri_mask).sum()
+
+    print("base_c", base_c, "temporal_migrations", temporal_migrations)
+    return base_c + temporal_migrations
+
+
+def comigration_number_dense(base_c, V, VA, VT, P):
+    """
+    Handles the case where the adjacency matrix is dense, in which case we can use faster matrix operations
+    to compute the comigration number.
+
+    Args:
+        - base_c: base comigration number (without temporal repeats, calculated using comigration_number_approximation)
+        - V: Vertex labeling one-hot matrix (sample_size x num_sites x num_nodes)
+        - VA: V*A (will be converted to sparse)
+        - VT: transpose of V 
+        - P: path matrix
+     Returns:
+        - comigration number: a subset of the migration edges between two anatomical sites, such that 
+        the migration edges occur on distinct branches of the clone tree
+        
+    """
+    X = VT @ V # 1 if two nodes are the same color
+    VAT = torch.transpose(VA, 2, 1)
+    W = VAT @ VA # 1 if two nodes' parents are the same color
+    Y = torch.sum(torch.mul(VAT, 1-VT), axis=2) # Y has a 1 for every node where its parent has a diff color
+    shared_par_and_self_color = torch.mul(W, X) # 1 if two nodes' parents are same color AND nodes are same color
+
+    shared_path_and_par_and_self_color = torch.sum(torch.mul(P, shared_par_and_self_color), axis=2)
+    repeated_temporal_migrations = torch.sum(torch.mul(shared_path_and_par_and_self_color, Y), axis=1)
+    return base_c + repeated_temporal_migrations
