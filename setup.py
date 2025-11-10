@@ -48,7 +48,7 @@ class CustomInstall(install):
 
 class CustomDevelop(develop):
     def run(self):
-        # install_projectppm()
+        install_projectppm()
         develop.run(self)
 
 requirements_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'requirements.txt')
@@ -61,7 +61,7 @@ with open("requirements.txt") as f:
 
 setup(
     name='metient',
-    version='0.1.3.4.12',
+    version='0.1.3.4.13',
     url="https://github.com/divyakoyy/metient.git",
     packages=['metient', 'metient.util', 'metient.lib'],
     install_requires=requirements,
