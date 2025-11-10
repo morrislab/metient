@@ -47,27 +47,20 @@ def prune_histories(solutions):
 
     return pruned_solutions
 
-def rank_solutions(solution_set, print_config):
+def rank_solutions(solution_set):
     """
-    Sort solutions by total loss and return the top k solutions.
+    Sort solutions by total loss.
     
     Args:
-        solution_set (list): List of VertexLabelingSolution objects to rank
-        print_config (PrintConfig): Configuration object containing k_best_trees parameter
-        
+        solution_set (list): List of VertexLabelingSolution objects to rank        
     Returns:
-        list: Top k solutions sorted by ascending total loss, where k is specified in print_config.
-              If fewer solutions exist than k, returns all solutions.
+        list: All solutions sorted by ascending total loss.
     """
-    # 1. Sort the solutions from lowest to highest loss
+    # Sort the solutions from lowest to highest loss
     final_solutions = sorted(list(solution_set))
-
-    # 2. Return the k best solutions
-    k = print_config.k_best_trees if len(final_solutions) >= print_config.k_best_trees else len(final_solutions)
-    final_solutions = final_solutions[:k]
     return final_solutions
 
-def get_best_final_solutions(results, G, O, p, weights, print_config, 
+def get_best_final_solutions(results, G, O, p, weights, 
                              node_collection, solve_polytomies, 
                              v_solver, num_internal_nodes, keep_pareto_only=True):
     """
@@ -84,7 +77,6 @@ def get_best_final_solutions(results, G, O, p, weights, print_config,
         O (dict): Organotropism dictionary mapping sites to frequencies
         p (torch.Tensor): One-hot encoding of primary site
         weights (Weights): Object containing weights for different loss components
-        print_config (PrintConfig): Configuration for output formatting
         node_collection (NodeCollection): Object tracking tree node information
         solve_polytomies (bool): Whether polytomy resolution was performed
         v_solver (VertexLabelingSolver): Solver object containing optimization state
@@ -100,7 +92,6 @@ def get_best_final_solutions(results, G, O, p, weights, print_config,
             5. Computing Pareto front (if keep_pareto_only=True)
             6. Ranking by total loss
     """
-
     has_pss_solution = False
     full_solution_set = []
     all_pars_metrics, all_result_soln_indices = [],[]
@@ -159,7 +150,7 @@ def get_best_final_solutions(results, G, O, p, weights, print_config,
     else:
         pruned_histories = full_solution_set
 
-    return rank_solutions(pruned_histories, print_config)
+    return rank_solutions(pruned_histories)
 
 def add_back_removed_nodes(V, v_solver, p):
     """Reconstruct full vertex labeling matrix by adding back removed nodes.
@@ -527,8 +518,7 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, calibratio
             saved_U = torch.tensor(pckl[OUT_OBSERVED_CLONES_KEY])
             p = one_hot_labeling_for_primary(primary_site, ordered_sites[i])
             
-            reranked_solutions = rank_solutions(vutil.create_reweighted_solution_set_from_pckl(pckl, O, p, cal_weights),
-                                                print_config)
+            reranked_solutions = rank_solutions(vutil.create_reweighted_solution_set_from_pckl(pckl, O, p, cal_weights))
             
             putil.save_best_trees(reranked_solutions, saved_U, O, cal_weights, ordered_sites[i], print_config, 
                                   primary_site, calibrate_dir, run_name)
@@ -725,7 +715,7 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
         O = to_cpu(O)
         p = to_cpu(p)
         
-        final_solutions = get_best_final_solutions(results, G, O, p, weights, print_config, 
+        final_solutions = get_best_final_solutions(results, G, O, p, weights, 
                                                    node_collection, solve_polytomies,
                                                    v_optimizer, num_internal_nodes, keep_pareto_only=keep_pareto_only)
         print("Number of final solutions:", len(final_solutions))
