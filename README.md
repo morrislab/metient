@@ -25,7 +25,7 @@ Metient has been tested on macOS Sonoma (14.4) and CentOS Linux 7 (Core).
 
 Installing and running a tutorial for Metient should take ~5 minutes.
 
-Metient is available as a python library, installable via pip. It has been tested on Linux and Apple M1 Pro. 
+Metient is available as a python library, installable via pip.
 ```bash
 # Mamba or conda can be used
 # Create and activate environment
