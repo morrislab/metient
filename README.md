@@ -230,6 +230,22 @@ In the pickle file you'll find the following keys:
 
 </details>
 
+## Questions
+
+Please email any questions you have to divyakoyy@gmail.com, or open a GitHub issue!
+
+## Citation
+If you use Metient, please cite our paper:
+```
+@article{koyyalagunta2025inferring,
+  title={Inferring cancer type-specific patterns of metastatic spread using Metient},
+  author={Koyyalagunta, Divya and Ganesh, Karuna and Morris, Quaid},
+  journal={bioRxiv},
+  pages={2024--07},
+  year={2025}
+}
+```
+
 
 
 
