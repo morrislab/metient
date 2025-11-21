@@ -10,8 +10,9 @@
 2. [Installation](#installation)
 3. [Tutorial](#tutorial)
 4. [Inputs](#inputs)
-5. [Outputs](#outputs)
-6. [Usage](#usage)
+5. [Usage](#usage)
+6. [Outputs](#outputs)
+
 
 ## System requirements
 
@@ -25,7 +26,7 @@ Metient has been tested on macOS Sonoma (14.4) and CentOS Linux 7 (Core).
 
 Installing and running a tutorial for Metient should take ~5 minutes.
 
-Metient is available as a python library, installable via pip. It has been tested on Linux and Apple M1 Pro. 
+Metient is available as a python library, installable via pip.
 ```bash
 # Mamba or conda can be used
 # Create and activate environment
@@ -71,6 +72,9 @@ There are different Jupyter Notebook tutorials based on your use case:
 > ```
 > Then in the jupyter notebook, select Kernel > Change kernel > met.
 
+<details>
+<summary><h2>🔽 Input format</h2></summary>
+   
 ## Inputs
 There are two required inputs, a tsv file with information for each sample and mutation/mutation cluster, and a txt file specifying the edges of the clone tree.
 
@@ -116,9 +120,99 @@ Each row in this tsv should correspond to a single mutation/mutation cluster in 
 A .txt file where each line is an edge from the first index to the second index. Must correspond to the cluster_index column in the input tsv. 
 
 [Example tree .txt file](tutorial/inputs/A_tree.txt)
+</details>
+   
+<details>
+<summary><h2>🔽 Usage</h2></summary>
 
+## Usage
+
+Below is a guide to the most important parameters for `Metient-calibrate` and `Metient-evaluate`. Each parameter is summarized with what it does, when to use it, and recommended settings.
+
+### Core Parameter Summary Table
+
+| Parameter | Default | What it Does | When to Use | Notes / Recommended Values |
+|----------|---------|--------------|-------------|-----------------------------|
+| **solve_polytomies** | `False` | Attempts to refine trees by resolving nodes with >2 children (polytomies) into binary resolutions. | Use when exploring alternative refinements of a tree with polytomies. | Can provide more parsimonious migration histories, but increases compute time. Not tested on trees >100 nodes. |
+| **sample_size** | `-1` (auto) | Number of parallel solutions explored per run. | Use `-1` for Metient to auto-calculate a sample size for you; increase to reduce run-to-run variability. | Auto ≈ (num_sites)^(num_nodes). Trees with <20 nodes: ~4096 is typically sufficient. Consider using 10,000+ samples for larger trees. Increase until results stabilize; must fit available memory. |
+| **num_runs** | `1` | Number of full algorithm repeats. | Use 2-5 for quick exploratory analysis; use much larger values (>50) for stable results or when memory limits sample_size. | If results vary by run, increase sample_size or num_runs. |
+| **run_names** | User-defined | Controls output labels. | Always used. | Use unique, descriptive names; avoid special characters. For calibrate, run_names must match the order of inputs. |
+
+**BEST PRACTICE**: The full number of samples considered by Metient is num_runs × sample_size. In practice, set sample_size as large as your memory allows, and rely on num_runs to stabilize the results through repeated, sequential runs.
+
+---
+
+### Weights
+#### Preset Parimsony Models
+
+We provide parsimony models pre-calibrated to patient data, that provide weights on migration number, comigration number, and seeding site number. 
+| Preset Function | Description | Recommended For |
+|-----------------|-------------|-----------------|
+| **pancancer_genetic_organotropism_uniform_weighting()** | Combined genetic + organotropism model; uniform cohort weighting. | Recommended for human data. |
+| **pancancer_genetic_uniform_weighting()** | Genetic-only model; uniform cohort weighting. | Recommended for non-human data. |
+| **pancancer_genetic_cohort_size_weighting()** | Genetic-only; weighted by cohort size. |  |
+| **pancancer_genetic_organotropism_cohort_size_weighting()** | Genetic + organotropism; weighted by cohort size. | |
+
+**BEST PRACTICE**: If you want to also use genetic distance and organotropism in the model, you must set non-zero values for those weights (see below). We recommend using a much higher penalty on the parsimony metric weights (mig, comig, seed_site) than gen_dist and organotrop.
+
+Example usage:
+```python
+weights = met.Weights.pancancer_genetic_organotropism_uniform_weighting()
+```
+
+#### Custom Weights
+
+| Parameter | Meaning | Notes / Guidelines |
+|-----------|---------|---------------------|
+| **mig** | Penalizes the total number of migrations. |  |
+| **comig** | Penalizes co-migrations. |  |
+| **seed_site** | Penalizes the number of seeding sites. | |
+| **gen_dist** | Penalizes genetic distance. | Default 0; requires branch lengths (see ``num_mutations`` in Inputs). |
+| **organotrop** | Penalizes deviation from organotropism priors. | Default 0; requires organotropism dictionaries. |
+
+**BEST PRACTICE**: Use much higher penalties for the parsimony-related weights (`mig`, `comig`, `seed_site`) than for `gen_dist` or `organotrop`. If using genetic distance and organotropism together, set both `gen_dist > 0` and `organotrop > 0`.
+
+Example usage:
+```python
+weights = met.Weights(mig=0.5, comig=0.3, seed_site=0.2, gen_dist=0.01)
+```
+
+---
+### Os (Organotropism Dictionaries)
+```python
+Os = {
+    "Liver": 0.5,
+    "Lung": 0.4,
+    "Brain": 0.1,
+}, # Organotropism dictionary for patient 1
+{
+    "Lymph": 0.7,
+    "Bone": 0.3,
+},  # Organotropism dictionary for patient 2
+```
+- **What it does**: Specifies known frequencies of metastasis to different sites. Must have a frequency for all metastatic sites for all patients to be used.
+- **Note**: Values should be normalized (sum to 1)
+
+---
+
+### PrintConfig 
+```python
+print_config = met.PrintConfig(
+    visualize=True,      
+    verbose=True,        # Enable for debugging
+    k_best_trees=10,     # The number of solutions to visualize (all solutions are saved to a pkl file)
+    save_outputs=True,
+    custom_colors=None,  # Array of hex strings (with length = number of anatomical sites) to be used as custom colors in visualization
+)
+```
+
+</details>
+
+<details>
+<summary><h2>🔽 Output format</h2></summary>
+   
 ## Outputs
-
+   
 Metient will output a pickle file in the specificed output directory for each patient that is inputted. 
 
 In the pickle file you'll find the following keys:
@@ -133,107 +227,8 @@ In the pickle file you'll find the following keys:
 |**primary_site**|str, the name of the anatomical site used as the primary site.|
 |**loss_info**| a list of the dicts, from best to worst solution. Each dictionary contains the unweighted components of the loss (e.g. migration number, comigration number, etc.)|
 
-## Usage
+</details>
 
-When using either Metient-calibrate or Metient-evaluate functions, several key parameters affect the quality and performance of the results:
 
-### solve_polytomies
-```python
-solve_polytomies=True  # Default: False
-```
-- **What it does**: Attempts to resolve polytomies (nodes with more than two children) in the tree.
-- **When to use**: Enable this if you want to explore potential binary tree resolutions of polytomies in your data.
-- **Impact**: Can provide more parsimonious migration histories but increases computation time.
-- **Note**: Not tested on trees > 100 nodes.
-
-### sample_size
-```python
-sample_size=1024  # Default: -1 (automatic)
-```
-- **What it does**: Controls how many parallel solutions to explore.
-- **Best practices**:
-  - Use `-1` for automatic selection based on problem size
-  - For small trees (<20 nodes), 1024-4096 samples is usually sufficient
-  - For larger trees or many tumor samples, consider 10,000+ samples
-  - Increase if solutions seem inconsistent between runs
-  - Set to the maximum value that fits in available memory
-
-### num_runs
-```python
-num_runs=1  # Default: 1
-```
-- **What it does**: Number of times to run the entire algorithm.
-- **Best practices**:
-  - Use 1 for quick exploratory analysis
-  - Use 5-10 runs for more robust results
-  - If results vary significantly between runs, increase sample_size
-  - For large problems where memory limits sample_size, increase num_runs to explore more total solutions across sequential runs
-
-### Os (Organotropism Dictionaries)
-```python
-Os = {
-    "Liver": 0.5,
-    "Lung": 0.4,
-    "Brain": 0.1,
-}, # Organotropism dictionary for patient 1
-{
-    "Lymph": 0.7,
-    "Bone": 0.3,
-},  # Organotropism dictionary for patient 2
-```
-- **What it does**: Specifies known frequencies of metastasis to different sites
-- **When to use**: When you have prior knowledge about metastatic preferences for your cancer type
-- **Note**: Values should be normalized (sum to 1)
-
-#### output_dir and run_names
-```python
-output_dir = "path/to/outputs"
-run_names = ["patient1", "patient2"]  # For calibrate
-run_name = "patient1"    # For evaluate
-```
-- **Best practices**:
-  - Use descriptive, unique names for each patient
-  - Avoid special characters in names
-  - Create a new output directory for each analysis run
-  - For calibrate, ensure run_names list matches order of input files
-
-### PrintConfig 
-```python
-print_config = met.PrintConfig(
-    visualize=True,      
-    verbose=True,        # Enable for debugging
-    k_best_trees=10,     # The number of solutions to output
-    save_outputs=True,
-    custom_colors=None,  # Array of hex strings (with length = number of anatomical sites) to be used as custom colors in visualization
-)
-```
-
-### Weights
-```python
-# Use pre-calibrated weights
-weights = met.Weights.pancancer_genetic_organotropism_uniform_weighting()
-
-# Or other preset options:
-# weights = met.Weights.pancancer_genetic_cohort_size_weighting()
-# weights = met.Weights.pancancer_genetic_organotropism_uniform_weighting()
-# weights = met.Weights.pancancer_genetic_uniform_weighting()
-
-# Or create custom weights
-weights = met.Weights(mig=0.5, comig=0.3, seed_site=0.2)
-```
-
-**Weight Configuration Options:**
-- **pancancer_genetic_organotropism_uniform_weighting()**: Combined genetic + oranotropism model with uniform cohort weighting (recommended for human data)
-- **pancancer_genetic_uniform_weighting()**: Genetic-only model with uniform cohort weighting (recommended for non-human data)
-- **pancancer_genetic_cohort_size_weighting()**: Genetic-only model weighted by cohort size
-- **pancancer_genetic_organotropism_cohort_size_weighting()**: Combined genetic + oranotropism model weighted by cohort size
-
-**Weight Parameters:**
-- Higher weights mean higher penalty on that metric
-- **mig**: Migration number penality
-- **comig**: Comigration number penality
-- **seed_site**: Seeding site number penality
-- **gen_dist**: Genetic distance penalty
-- **organotrop**: Organotropism penalty
 
 
