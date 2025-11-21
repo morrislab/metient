@@ -377,7 +377,7 @@ def patient_calibration_weight_from_soln_info(pt_to_soln_info):
         for num_edges, num_solns in info_list:
             if num_solns > 1:
                 pt_idx_to_denom[pt_idx] += 1
-    print('pt_idx_to_denom', pt_idx_to_denom)
+    # print('pt_idx_to_denom', pt_idx_to_denom)
     # Calculate weights as num_edges / num_primaries_with_multiple_solns
     weights = []
     for pt_idx, info_list in pt_to_soln_info.items():
@@ -386,7 +386,7 @@ def patient_calibration_weight_from_soln_info(pt_to_soln_info):
                 weights.append(num_edges / pt_idx_to_denom[pt_idx])
             else:
                 weights.append(0)  # No multiple solution primaries
-    print('new pt weights', weights)   
+    # print('new pt weights', weights)   
     return weights
 
 def get_num_unique_pars_metrics(solns):
@@ -482,7 +482,7 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, calibratio
     
     pt_weights = patient_calibration_weight_from_soln_info(pt_index_to_soln_info)
     full_run_name_to_calibration_weight = {k:v for k,v in zip(full_run_names, pt_weights)}
-    print("full_run_name_to_calibration_weight",full_run_name_to_calibration_weight)
+    # print("full_run_name_to_calibration_weight",full_run_name_to_calibration_weight)
 
     # 2. Find the best theta for this cohort
     best_theta = eutil.get_max_cross_ent_thetas(output_files, pt_weights, calibrate_genetic, calibrate_organotropism)
@@ -656,10 +656,8 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
 
     # Keep a copy of input clone tree (T from now on has leaf nodes from U)
     input_T = copy.deepcopy(T)
-    print("input_T.shape", input_T.shape)
     # TODO: Make this a more sophisticated decision
     use_sparse_T = input_T.shape[0] > 100
-    print("Using sparse T:", use_sparse_T)
 
     config = {
         "init_temp": init_temp,

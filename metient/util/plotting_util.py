@@ -423,26 +423,6 @@ def losses_to_probabilities(messy_losses, temperature=0.5):
     probabilities = exp_scaled / np.sum(exp_scaled)
 
     return probabilities
-    
-def get_soln_probabilities(loss_dicts):
-    """
-    Calculate probability weights for each solution based on loss values.
-    
-    Args:
-        loss_dicts (list[dict]): List of dictionaries containing loss values and metrics for each solution
-        thetas (list[float] | None, optional): List of 3 theta parameters for weighting migration, comigration, 
-            and seeding site metrics. If None, uses raw loss values. Defaults to None.
-            
-    Returns:
-        np.ndarray: List of probabilities for each solution
-    """
-    # Calculate losses for each solution
-    losses = []
-    for loss_dict in loss_dicts:
-        losses.append(loss_dict[FULL_LOSS_KEY])
-    
-    probabilities = losses_to_probabilities(losses)
-    return probabilities
 
 def weighted_classification(losses, classifications):
     """
@@ -475,13 +455,11 @@ def _get_weighted_classification_data(pkl):
         tuple: (probabilities, Vs, As, node_infos) containing solution probabilities and tree data
     """
     # Get data from pickle
-    loss_dicts = pkl[OUT_LOSS_DICT_KEY]
     parents = pkl[OUT_PARENTS_KEY]
     As = [dutil.adjacency_matrix_from_parents(p) for p in parents]
     Vs = pkl[OUT_LABElING_KEY]
     node_infos = [vutil.MigrationHistoryNodeCollection.from_dict(x) for x in pkl[OUT_IDX_LABEL_KEY]]
-
-    probabilities = get_soln_probabilities(loss_dicts)
+    probabilities = pkl[OUT_PROBABILITIES_KEY]
     
     return probabilities, Vs, As, node_infos
 
@@ -1060,7 +1038,7 @@ def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites, print_conf
     figure_outputs = []
     pickle_outputs = {OUT_LABElING_KEY:[], OUT_LOSSES_KEY:[],OUT_IDX_LABEL_KEY:[],
                       OUT_PARENTS_KEY:[], OUT_SITES_KEY:ordered_sites, OUT_LOSS_DICT_KEY:[],
-                      OUT_PRIMARY_KEY:primary, 
+                      OUT_PRIMARY_KEY:primary, OUT_PROBABILITIES_KEY:[],
                       OUT_SOFTV_KEY:[], OUT_GEN_DIST_KEY:[]}
 
     with torch.no_grad():
@@ -1110,6 +1088,7 @@ def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites, print_conf
             if i == 0: # Best tree
                 ret = (edges, vertices_to_sites_map, mig_graph_edges, loss_dict)
 
+        pickle_outputs[OUT_PROBABILITIES_KEY] = losses_to_probabilities(pickle_outputs[OUT_LOSSES_KEY])
         #pickle_outputs = convert_lists_to_np_arrays(pickle_outputs, [OUT_LABElING_KEY, OUT_LOSSES_KEY, OUT_PARENTS_KEY, OUT_SOFTV_KEY, OUT_GEN_DIST_KEY])
 
         save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outputs, weights)

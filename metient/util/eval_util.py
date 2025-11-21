@@ -100,7 +100,6 @@ def cross_ent(loss_dicts, pt_weight, thetas, tau, patient_pars_metrics, calibrat
     epsilon = 1e-10
     
     cross_ent_sum = 0.0
-    print()
     # print("theta x", theta_X)
 
     if calibrate_genetic and not torch.sum(gen_dist_scores == 0):
