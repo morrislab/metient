@@ -224,10 +224,27 @@ In the pickle file you'll find the following keys:
 | **parents** | list of numpy 1-D arrays, in order from best to worst tree. Each is a an array (shape: `len(node_info[x])`), where `x` is the `x`th best solution. The value at index i is the parent of node i. The root node will have a -1 at its index. | 
 | **observed_proportions** | numpy ndarray (shape: `len(ordered_anatomical_sites)`, `num_clusters`). Row i corresponds to the site at index i in `ordered_anatomical_sites`, and column j corresponds to the node with label `node_info[x][j][0]`. A value at i,j greater than 0.05 indicates that that node is present in that antomical site. These are the nodes that get added as leaf nodes. |
 |**losses** | a list of the losses, from best to worst solution.|
+|**probabilities** | a list of the probabilities, from best to worst solution.|
 |**primary_site**|str, the name of the anatomical site used as the primary site.|
 |**loss_info**| a list of the dicts, from best to worst solution. Each dictionary contains the unweighted components of the loss (e.g. migration number, comigration number, etc.)|
 
 </details>
+
+## Questions
+
+Please email any questions you have to divyakoyy@gmail.com, or open a GitHub issue!
+
+## Citation
+If you use Metient, please cite our paper:
+```
+@article{koyyalagunta2025inferring,
+  title={Inferring cancer type-specific patterns of metastatic spread using Metient},
+  author={Koyyalagunta, Divya and Ganesh, Karuna and Morris, Quaid},
+  journal={bioRxiv},
+  pages={2024--07},
+  year={2025}
+}
+```
 
 
 
