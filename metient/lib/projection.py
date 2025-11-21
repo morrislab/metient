@@ -298,8 +298,7 @@ def _init_projectppm_lib():
     print(os.path.join(os.path.dirname(__file__)))
     lib_path = os.path.join(os.path.dirname(__file__), 'projectppm', 'bin', 'libprojectppm.so')
     assert os.path.exists(lib_path), 'Could not find projectppm library. \
-                                      Please ensure the libprojectppm repository has been cloned in the lib directory,\
-                                      and that its source has been built. '
+                                      The pre-built library should be included with the package.'
 
     # loads the projectppm library
     lib = ctypes.cdll.LoadLibrary(lib_path)
