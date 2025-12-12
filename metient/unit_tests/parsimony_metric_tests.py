@@ -204,6 +204,38 @@ class TestAncestralLabelingMetrics(unittest.TestCase):
                                 [0, 1, 0, 1, 0, 1, 0]]])
         if sparse_T:
             self.T = self.T.to_sparse()
+    
+    def input_reseeding7(self, sparse_T=False):
+        '''
+                A  
+                |  
+                B  
+               /
+              C 
+             / \ 
+            D   F   
+           / \
+          E   G
+             / \
+            H   I
+                 \
+                  J
+        '''
+        self.T = torch.tensor([[[0, 1, 0, 0, 0, 0, 0, 0, 0, 0], 
+                               [0, 0, 1, 0, 0, 0, 0, 0, 0, 0], 
+                               [0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+                               [0, 0, 0, 0, 1, 0, 1, 0, 0, 0],
+                               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                               [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+                               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                               [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]])
+
+        self.V = torch.tensor([[[1, 0, 1, 0, 1, 0, 1, 0, 1, 0], 
+                                [0, 1, 0, 1, 0, 1, 0, 1, 0, 1]]])
+        if sparse_T:
+            self.T = self.T.to_sparse()
 
     def assert_metrics(self,out,true_m,true_c,true_s,true_g,true_o):
         self.assertEqual(int(out[0]),true_m)
@@ -293,6 +325,15 @@ class TestAncestralLabelingMetrics(unittest.TestCase):
         self.input_reseeding6(sparse_T=True)
         out = vutil.ancestral_labeling_metrics(self.V, self.T, None, None, None, True, True, True)
         self.assert_metrics(out, 6, 4, 2, 0, 0)
+
+        self.input_reseeding7(sparse_T=False)
+        out = vutil.ancestral_labeling_metrics(self.V, self.T, None, None, None, True, True, True)
+        self.assert_metrics(out, 8, 5, 2, 0, 0)
+        
+        self.input_reseeding7(sparse_T=True)
+        out = vutil.ancestral_labeling_metrics(self.V, self.T, None, None, None, True, True, True)
+        self.assert_metrics(out, 8, 5, 2, 0, 0)
+    
     
     def test_lt_clone_43(self):
         data_dir = "/data1/morrisq/divyak/projects/metient/metient/unit_tests/data"
