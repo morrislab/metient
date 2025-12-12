@@ -258,6 +258,26 @@ def comigration_number_approximation(site_adj):
     c = torch.sum(binarized_site_adj, dim=(1,2)) - bin_site_trace
     return c
 
+def has_bidirectional_edge(site_adj):
+    """
+    - site_adj: sample_size x num_sites x num_sites matrix, where each num_sites x num_sites
+        matrix has the number of migrations from site i to site j
+    returns: (sample_size,) bool tensor — True if there exists i!=j with edges both ways
+    """
+    A = site_adj > 0
+    A_T = A.transpose(1, 2)
+
+    # bidirectional pairs: A[i,j] & A[j,i]
+    bidir = A & A_T
+
+    # ignore diagonal
+    k = A.size(1)
+    eye = torch.eye(k, dtype=torch.bool, device=A.device)
+    bidir[:, eye] = False
+
+    # check if any off-diagonal entry is True
+    return bidir.any(dim=(1, 2))
+
 def comigration_number(site_adj, A, VA, V, VT, update_path_matrix, identical_T):
     '''
     Handles the case where the adjacency matrix is sparse, in which case we can use slower per-batch operations
@@ -280,6 +300,8 @@ def comigration_number(site_adj, A, VA, V, VT, update_path_matrix, identical_T):
 
     # First calculate base comigration number (without temporal repeats)
     base_c = comigration_number_approximation(site_adj)
+
+    bidirectional_edges_exist = has_bidirectional_edge(site_adj)
     
     # Get path matrix if needed
     global LAST_P
@@ -301,51 +323,60 @@ def comigration_number(site_adj, A, VA, V, VT, update_path_matrix, identical_T):
     temporal_migrations = torch.zeros(node_colors.shape[0], device=V.device)
 
     for batch in range(node_colors.shape[0]):
+        # No need to check if there are no bidirectional edges, because no temporal migrations can exist
+        if not bidirectional_edges_exist[batch]:
+            continue
+
         batch_diff_nodes = diff_nodes[1][diff_nodes[0] == batch]
         root_node = get_root_index(A[batch])
         batch_diff_nodes = batch_diff_nodes[batch_diff_nodes != root_node]
 
         if len(batch_diff_nodes) == 0:
             continue
-        
+
         diff_node_colors = node_colors[batch, batch_diff_nodes]
         diff_parent_colors = parent_colors[batch, batch_diff_nodes]
         combined_colors = diff_node_colors * V.shape[1] + diff_parent_colors
-        unique_combos = torch.unique(combined_colors)
 
-        # Use coalesced sparse indices if sparse, otherwise convert to dense for indexing
         if A.is_sparse:
             P_batch = P[batch].coalesce()
-            indices = P_batch.indices()  # [2, nnz]
+            src = P_batch.indices()[0]
+            dst = P_batch.indices()[1]
         else:
             P_batch = P[batch]
 
-        for combo in unique_combos:
-            # Nodes with same self color + parent color
-            nodes_with_combo = batch_diff_nodes[combined_colors == combo]
-            if len(nodes_with_combo) <= 1:
+        # Group nodes by their own color + parent_color combo
+        unique_combos, inv = torch.unique(combined_colors, return_inverse=True)
+
+        # Count the number of nodes with same self color + parent color, that can reach other nodes 
+        # with the same combo via the path matrix.
+        for combo_idx, combo in enumerate(unique_combos):
+            idx_mask = (inv == combo_idx)
+            nodes = batch_diff_nodes[idx_mask]
+            if nodes.numel() <= 1:
+                continue
+            
+            if not A.is_sparse:
+                # reachable matrix (m×m)
+                M = P_batch[nodes][:, nodes]  # bool or int
+                M.fill_diagonal_(0)
+                # any row with a nonzero means this node reaches another in group
+                temporal_migrations[batch] += (M.sum(dim=1) > 0).sum()
                 continue
 
-            counted_parents = set()
-            nodes_set = set(int(n) for n in nodes_with_combo)
+            # membership mask for group nodes
+            member = torch.zeros(P_batch.shape[-1], device=P_batch.device, dtype=torch.bool)
+            member[nodes] = True
 
-            # Count the number of nodes with same self color + parent color, that can reach other nodes
-            # with the same combo via the path matrix. 
-            for node in nodes_with_combo:
-                if A.is_sparse:
-                    # Sparse-safe reachability check
-                    mask = (indices[0] == node) & torch.tensor(
-                        [int(j) in nodes_set and j != node for j in indices[1]], device=indices.device
-                    )
-                    if mask.any():
-                        counted_parents.add(int(node))
-                else:
-                    # Dense reachability
-                    reachable = P_batch[node, nodes_with_combo]
-                    if reachable.sum() > 0:
-                        counted_parents.add(int(node))
+            # edges where:
+            # src in nodes AND dst in nodes AND src != dst
+            src_in = member[src]
+            dst_in = member[dst]
+            not_self = src != dst
 
-            temporal_migrations[batch] += len(counted_parents)
+            valid = src_in & dst_in & not_self
+            if valid.any():
+                temporal_migrations[batch] += torch.unique(src[valid]).numel()
 
     return base_c + temporal_migrations
 
