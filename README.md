@@ -1,6 +1,10 @@
 # Metient
-<p align="center">
+<!-- <p align="center">
 <img src="metient/logo.png" width="150">
+</p> -->
+
+<p align="center">
+  <img src="metient/method_overview.png?cachebust=12345" width="1000" style="padding:20px;">
 </p>
 
 **Metient** (**MET**astasis + gradi**ENT**) is a tool for inferring the metastatic migrations of a patient's cancer. You can find our preprint on [bioRxiv](https://www.biorxiv.org/content/10.1101/2024.07.09.602790).
