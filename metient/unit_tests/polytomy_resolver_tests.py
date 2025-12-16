@@ -90,9 +90,6 @@ class TestRemoveNodes(unittest.TestCase):
     def check_results(self):
         # Call the function
         V, T, G, node_collection = pr.remove_nodes(self.removal_indices, self.V, self.T, self.G, self.node_collection)
-        print(T.to_dense())
-        print(V)
-        print(G)
         # Assertions
         self.assertTrue(torch.equal(V, self.expected_V), "V matrix is incorrect after removal")
         self.assertTrue(torch.equal(T.to_dense(), self.expected_T.to_dense()), "T matrix is incorrect after removal")
@@ -129,13 +126,13 @@ class TestRemoveNodes(unittest.TestCase):
                           [0, 0, 0, 0, 0, 0],
                           [0, 0, 0, 0, 0, 0], 
                           [0, 0, 0, 0, 0, 0], ]).to_sparse()
-        child_indices = pr.get_child_indices_sparse_t(T, 0)
+        child_indices = vutil.get_child_indices_sparse_t(T, 0)
         self.assertEqual(child_indices, [1,2])
 
-        child_indices = pr.get_child_indices_sparse_t(T, 1)
+        child_indices = vutil.get_child_indices_sparse_t(T, 1)
         self.assertEqual(child_indices, [3,4])
 
-        child_indices = pr.get_child_indices_sparse_t(T, 4)
+        child_indices = vutil.get_child_indices_sparse_t(T, 4)
         self.assertEqual(child_indices, [])
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ import pickle
 import gzip
 import json
 
-from metient import metient as met
+import metient as met
 from metient.util import vertex_labeling_util as vutil
 from metient.util import data_extraction_util as dutil
 from metient.util import eval_util as eutil
@@ -131,7 +131,7 @@ def get_best_final_solutions(results, G, O, p, weights,
             T = add_back_removed_nodes_to_tree(T, v_solver)
             if G is not None:
                 G = v_solver.full_G
-        soln = vutil.VertexLabelingSolution(loss, m,c,s,g,o,e, V, soft_V, T, G, node_collection)
+        soln = vutil.VertexLabelingSolution(loss, m, c, s, g, o, e, V, soft_V, T, G, node_collection)
         full_solution_set.append(soln)
   
     if not has_pss_solution:
@@ -602,13 +602,7 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
 
         mode: can be "evaluate" or "calibrate"
 
-    Returns:
-        Corresponding info on the *best* tree:
-        (1) edges of the tree (e.g. [('0', '1'), ('1', '2;3')])
-        (2) vertex labeling as a dictionary (e.g. {'0': 'P', '1;3': 'M1'}),
-        (3) edges for the migration graph (e.g. [('P', 'M1')])
-        (4) dictionary w/ loss values for each component of the loss
-        (5) how long (in seconds) the algorithm took to run
+    Returns final, Pareto-optimal migration histories
     """
 
     if torch.cuda.is_available():
@@ -673,7 +667,7 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
         "sample_size": sample_size,
         "bias_weights": bias_weights,
         "solve_polytomies": solve_polytomies,
-        # the genetic distance between two identical clones is a close to 0 but non-zero value
+        # the genetic distance between two identical clones is close to 0 but non-zero value
         "identical_clone_gen_dist": identical_clone_gen_dist,
         "num_runs":num_runs,
         "promote_diversity": True,
