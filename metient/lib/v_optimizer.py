@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from metient.lib import polytomy_resolver as prutil
 from metient.util import vertex_labeling_util as vutil
-from metient import metient as met
+import metient as met
 from metient.util.globals import *
 from metient.util import optimal_subtrees as opt_sub
 
@@ -62,12 +62,6 @@ class VertexLabelingSolver:
     
     def run(self):
         return run_multiple_optimizations(self)
-    
-        
-        
-        return valid_sites
-
-        return valid_sites
 
 def optimize_v_t(v_solver, X, poly_res, exploration_weights, max_iter, v_interval, is_second_optimization):
     """
@@ -277,12 +271,8 @@ def run_multiple_optimizations(v_solver):
             ret = second_optimization_task(v_solver, exploration_weights)
             results.append(ret)
 
-    # TODO diagnose why Fitch-Hartigan is failing in some cases (e.g. H103207)
     if not v_solver.config['solve_polytomies']:
-        # try:
         vutil.run_fitch_hartigan(v_solver, results)
-        # except:
-        #     pass
 
     return results
 

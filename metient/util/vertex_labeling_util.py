@@ -393,15 +393,25 @@ def genetic_distance_score(G, m, A, V, VT):
         - genetic distance score, for each sample in the first dimension
     '''
     g = torch.zeros(m.shape, device=A.device)
+    
     if G != None:
         X = VT @ V # 1 if two nodes are the same color
-        # TODO: is there a way to do this without converting A to a dense matrix?
-        A = A.to_dense()
-        # Calculate if 2 nodes are in diff sites and there's an edge between them (i.e. there is a migration edge)
-        R = torch.mul(A, (1-X))
         adjusted_G = -torch.log(G+0.01)
-        R = torch.mul(R, adjusted_G)
-        g = torch.sum(R, dim=(1,2))/(m + 1) # to prevent division by 0
+
+        if A.is_sparse:
+            A = A.coalesce()
+            idx, vals = A.indices(), A.values()
+            # Calculate if 2 nodes are in diff sites and there's an edge between them (i.e. there is a migration edge)
+            vals = vals * (1 - X[idx[0], idx[1], idx[2]])
+            vals = vals * adjusted_G[idx[1], idx[2]]
+            g = torch.zeros(A.shape[0], device=A.device)
+            g = g.index_add(0, idx[0], vals)
+            g = g / (m + 1) # to prevent division by 0
+        else:
+            # Calculate if 2 nodes are in diff sites and there's an edge between them (i.e. there is a migration edge)
+            R = torch.mul(A, (1-X))
+            R = torch.mul(R, adjusted_G)
+            g = torch.sum(R, dim=(1,2)) /(m + 1) # to prevent division by 0
     return g
 
 def organotropism_score(O, site_adj_no_diag, p, bs):

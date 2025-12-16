@@ -996,7 +996,7 @@ def restructure_matrices_for_plotting(T, node_collection, G, V, U, original_root
     Args:
         T: Transition matrix (sparse or dense)
         node_collection: Collection of nodes
-        G: Graph matrix
+        G: Genetic distance matrix
         V, U: Additional matrices
         original_root_idx: Original root index (-1 if no restructuring needed)
     
@@ -1193,12 +1193,3 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
         # with open(os.path.join(output_dir, f"{run_name}.pickle"), 'wb') as handle:
         with gzip.open(os.path.join(output_dir,f"{run_name}.pkl.gz"), 'wb') as gzip_file:
             pickle.dump(pickle_outputs, gzip_file, protocol=pickle.HIGHEST_PROTOCOL)
-            
-        # Save best dot to file
-        tree_dot, mig_graph_dot, _, _ = figure_outputs[0]
-        if tree_dot is not None:
-            with open(os.path.join(output_dir, f"{run_name}.tree.dot"), 'w') as file:
-                file.write(tree_dot)
-        if mig_graph_dot is not None:
-            with open(os.path.join(output_dir, f"{run_name}.mig_graph.dot"), 'w') as file:
-                file.write(mig_graph_dot)

@@ -23,34 +23,6 @@ class TestSolutionClassification(unittest.TestCase):
         classifications = ['A', 'B']
         self.assertEqual(plutil.weighted_classification(losses, classifications), 'A')
 
-    def test_get_soln_probabilities(self):
-        # Create mock loss dictionaries
-        loss_dict1 = {
-            MIG_KEY: 1.0,
-            COMIG_KEY: 1.0,
-            SEEDING_KEY: 1.0,
-            GEN_DIST_KEY: 1.0,
-            ORGANOTROP_KEY: 1.0,
-            ENTROPY_KEY: 1.0,
-            FULL_LOSS_KEY: 1.0
-        }
-        loss_dict2 = {
-            MIG_KEY: 2.0,
-            COMIG_KEY: 2.0,
-            SEEDING_KEY: 2.0,
-            GEN_DIST_KEY: 2.0,
-            ORGANOTROP_KEY: 2.0,
-            ENTROPY_KEY: 2.0,
-            FULL_LOSS_KEY: 2.0
-        }
-        
-        # Test case 1
-        probs = plutil.get_soln_probabilities([loss_dict1, loss_dict2])
-        self.assertTrue(isinstance(probs, np.ndarray))
-        self.assertEqual(len(probs), 2)
-        self.assertGreater(probs[0], probs[1])  # First solution should have higher probability
-
-
     def _tree1(self):
         '''
         Tree:
@@ -104,7 +76,7 @@ class TestSolutionClassification(unittest.TestCase):
                / \
               2   3
 
-        0,1 are same site, 2 and 3 are diff site
+        0,1 are site 0; 2 is site 1; and 3 is site 2
         site monoclonal, genetically polyclonal
         polyphyletic
         '''
@@ -117,16 +89,63 @@ class TestSolutionClassification(unittest.TestCase):
             ]
         )
         return parents, V
+    
+    def _tree4(self):
+        '''
+        Tree:
+                0
+                |
+                1
+               / \
+              2   3
+                   \
+                    4
+        0,1 are site 0; 2 is site 1; 3,4 are site 2
+        site monoclonal, genetically polyclonal
+        polyphyletic, primary single-source
+        '''
+        parents = [-1,0,1,1,3]
+        V = torch.tensor(
+            [
+                [1,1,0,0,0],
+                [0,0,1,0,0],
+                [0,0,0,1,1]
+            ]
+        )
+        return parents, V
+    
+    def _tree5(self):
+        '''
+        Tree:
+                0
+                |
+                1
+               / \
+              2   3
+                   \
+                    4
+        0 is site 0; 1,2 is site 1; 3,4 are site 2
+        site monoclonal, genetically polyclonal
+        monophyletic, single-source
+        '''
+        parents = [-1,0,1,1,3]
+        V = torch.tensor(
+            [
+                [1,0,0,0,0],
+                [0,1,1,0,0],
+                [0,0,0,1,1]
+            ]
+        )
+        return parents, V
+
 
     def test_weighted_classification_tree_1(self):
         parents, V = self._tree1()
         # Create mock pickle data
         mock_pkl = {
             OUT_LABElING_KEY: [V],
-            OUT_ADJ_KEY: [parents],
-            OUT_LOSS_DICT_KEY: [
-                {FULL_LOSS_KEY: 1.0},
-            ],
+            OUT_PARENTS_KEY: [parents],
+            OUT_PROBABILITIES_KEY: [1.0],
             OUT_IDX_LABEL_KEY: [{x:([f'x'], False, False) for x in range(len(parents))}]
         }
         
@@ -141,10 +160,8 @@ class TestSolutionClassification(unittest.TestCase):
         # Create mock pickle data
         mock_pkl = {
             OUT_LABElING_KEY: [V],
-            OUT_ADJ_KEY: [parents],
-            OUT_LOSS_DICT_KEY: [
-                {FULL_LOSS_KEY: 1.0},
-            ],
+            OUT_PARENTS_KEY: [parents],
+            OUT_PROBABILITIES_KEY: [1.0],
             OUT_IDX_LABEL_KEY: [{x:([f'x'], False, False) for x in range(len(parents))}]
         }
         
@@ -160,11 +177,8 @@ class TestSolutionClassification(unittest.TestCase):
         # Create mock pickle data
         mock_pkl = {
             OUT_LABElING_KEY: [V1, V2],
-            OUT_ADJ_KEY: [parents1, parents2],
-            OUT_LOSS_DICT_KEY: [
-                {FULL_LOSS_KEY: 1.0}, # Tree 1 is a lot better than tree 2
-                {FULL_LOSS_KEY: 10.0},
-            ],
+            OUT_PARENTS_KEY: [parents1, parents2],
+            OUT_PROBABILITIES_KEY: [0.9,0.1],
             OUT_IDX_LABEL_KEY: [{x:([f'x'], False, False) for x in range(len(parents1))}, 
                                 {x:([f'x'], False, False) for x in range(len(parents2))}]
         }
@@ -180,11 +194,8 @@ class TestSolutionClassification(unittest.TestCase):
         # Create mock pickle data
         mock_pkl = {
             OUT_LABElING_KEY: [V2, V3],
-            OUT_ADJ_KEY: [parents2, parents3],
-            OUT_LOSS_DICT_KEY: [
-                {FULL_LOSS_KEY: 10.0}, 
-                {FULL_LOSS_KEY: 1.0}, # Tree 3 is a lot better than tree 2
-            ],
+            OUT_PARENTS_KEY: [parents2, parents3],
+            OUT_PROBABILITIES_KEY: [0.1,0.9], # Tree 3 is a lot better than tree 2
             OUT_IDX_LABEL_KEY: [{x:([f'x'], False, False) for x in range(len(parents2))}, 
                                 {x:([f'x'], False, False) for x in range(len(parents3))}]
         }
@@ -197,20 +208,62 @@ class TestSolutionClassification(unittest.TestCase):
         # Now do Tree 2 is a lot better than tree 3
         mock_pkl = {
             OUT_LABElING_KEY: [V2, V3],
-            OUT_ADJ_KEY: [parents2, parents3],
-            OUT_LOSS_DICT_KEY: [
-                {FULL_LOSS_KEY: 1.0}, 
-                {FULL_LOSS_KEY: 10.0}, # Tree 3 is a lot better than tree 2
-            ],
+            OUT_PARENTS_KEY: [parents2, parents3],
+            OUT_PROBABILITIES_KEY: [0.9,0.1],
             OUT_IDX_LABEL_KEY: [{x:([f'x'], False, False) for x in range(len(parents2))}, 
                                 {x:([f'x'], False, False) for x in range(len(parents3))}]
         }
-        self.assertEqual(met.weighted_phyleticity(mock_pkl), 'polyphyletic')
+        self.assertEqual(met.weighted_phyleticity(mock_pkl), 'monophyletic')
         self.assertEqual(met.weighted_genetic_clonality(mock_pkl), 'monoclonal')
         self.assertEqual(met.weighted_site_clonality(mock_pkl), 'monoclonal')
         self.assertEqual(met.weighted_seeding_pattern(mock_pkl), 'primary single-source')
 
     
+    def test_weighted_classification_both_trees3_4_5(self):
+        parents3, V3 = self._tree3()
+        parents4, V4 = self._tree4()
+        parents5, V5 = self._tree5()
+        # Tree 3 the best
+        mock_pkl = {
+            OUT_LABElING_KEY: [V3, V4, V5],
+            OUT_PARENTS_KEY: [parents3, parents4, parents5],
+            OUT_PROBABILITIES_KEY: [0.8,0.1,0.1], 
+            OUT_IDX_LABEL_KEY: [{x:([f'x'], False, False) for x in range(len(parents3))}, 
+                                {x:([f'x'], False, False) for x in range(len(parents4))},
+                                {x:([f'x'], False, False) for x in range(len(parents5))}]
+        }
+        self.assertEqual(met.weighted_phyleticity(mock_pkl), 'polyphyletic')
+        self.assertEqual(met.weighted_genetic_clonality(mock_pkl), 'polyclonal')
+        self.assertEqual(met.weighted_site_clonality(mock_pkl), 'monoclonal')
+        self.assertEqual(met.weighted_seeding_pattern(mock_pkl), 'primary single-source')
+
+        # Tree 4 the best
+        mock_pkl = {
+            OUT_LABElING_KEY: [V3, V4, V5],
+            OUT_PARENTS_KEY: [parents3, parents4, parents5],
+            OUT_PROBABILITIES_KEY: [0.1,0.8,0.1], 
+            OUT_IDX_LABEL_KEY: [{x:([f'x'], False, False) for x in range(len(parents3))}, 
+                                {x:([f'x'], False, False) for x in range(len(parents4))},
+                                {x:([f'x'], False, False) for x in range(len(parents5))}]
+        }
+        self.assertEqual(met.weighted_phyleticity(mock_pkl), 'polyphyletic')
+        self.assertEqual(met.weighted_genetic_clonality(mock_pkl), 'polyclonal')
+        self.assertEqual(met.weighted_site_clonality(mock_pkl), 'monoclonal')
+        self.assertEqual(met.weighted_seeding_pattern(mock_pkl), 'primary single-source')
+
+        # Tree 5 the best
+        mock_pkl = {
+            OUT_LABElING_KEY: [V3, V4, V5],
+            OUT_PARENTS_KEY: [parents3, parents4, parents5],
+            OUT_PROBABILITIES_KEY: [0.1,0.1,0.8], 
+            OUT_IDX_LABEL_KEY: [{x:([f'x'], False, False) for x in range(len(parents3))}, 
+                                {x:([f'x'], False, False) for x in range(len(parents4))},
+                                {x:([f'x'], False, False) for x in range(len(parents5))}]
+        }
+        self.assertEqual(met.weighted_phyleticity(mock_pkl), 'monophyletic')
+        self.assertEqual(met.weighted_genetic_clonality(mock_pkl), 'polyclonal')
+        self.assertEqual(met.weighted_site_clonality(mock_pkl), 'monoclonal')
+        self.assertEqual(met.weighted_seeding_pattern(mock_pkl), 'single-source')
 
 if __name__ == '__main__':
     unittest.main()
