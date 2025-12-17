@@ -395,21 +395,29 @@ def genetic_distance_score(G, m, A, V, VT):
     g = torch.zeros(m.shape, device=A.device)
     
     if G != None:
-        X = VT @ V # 1 if two nodes are the same color
+        
+        # Compute a penalty from genetic distance matrix
         adjusted_G = -torch.log(G+0.01)
 
         if A.is_sparse:
+            bs = A.shape[0]
+            site = V.argmax(dim=1)          # (B, N)
+            adjusted_G = -torch.log(G + 0.01)
             A = A.coalesce()
             idx, vals = A.indices(), A.values()
+            b, u, v = idx
+
             # Calculate if 2 nodes are in diff sites and there's an edge between them (i.e. there is a migration edge)
-            vals = vals * (1 - X[idx[0], idx[1], idx[2]])
-            vals = vals * adjusted_G[idx[1], idx[2]]
-            g = torch.zeros(A.shape[0], device=A.device)
-            g = g.index_add(0, idx[0], vals)
+            is_migration = (site[b, u] != site[b, v]).float()
+            gen_dist_penalty = vals * is_migration * adjusted_G[u, v]
+            g = torch.zeros(bs, device=A.device)
+            g.index_add_(0, b, gen_dist_penalty)
             g = g / (m + 1) # to prevent division by 0
+
         else:
             # Calculate if 2 nodes are in diff sites and there's an edge between them (i.e. there is a migration edge)
-            R = torch.mul(A, (1-X))
+            X = VT @ V # 1 if two nodes are the same color
+            R = torch.mul(A, (1-X)) # 1 if two nodes are the same color and there's an edge between them
             R = torch.mul(R, adjusted_G)
             g = torch.sum(R, dim=(1,2)) /(m + 1) # to prevent division by 0
     return g
