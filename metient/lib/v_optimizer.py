@@ -417,9 +417,6 @@ def compute_v_t_loss(X, v_solver, poly_res, exploration_weights, update_path_mat
     else:
         T = vutil.repeat_n(v_solver.T, bs)
     
-    G = v_solver.G
-    if G != None:
-        G = vutil.repeat_n(G, T.shape[0])
     loss, metrics = vutil.clone_tree_labeling_objective(V, softmax_X_soft, T, v_solver.G, 
                                                         v_solver.O, v_solver.p, exploration_weights, 
                                                         update_path_matrix=update_path_matrix, compute_full_c=compute_full_c,

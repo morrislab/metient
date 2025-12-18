@@ -401,8 +401,7 @@ def genetic_distance_score(G, m, A, V, VT):
 
         if A.is_sparse:
             bs = A.shape[0]
-            site = V.argmax(dim=1)          # (B, N)
-            adjusted_G = -torch.log(G + 0.01)
+            site = V.argmax(dim=1) # (sample_size, num_nodes)
             A = A.coalesce()
             idx, vals = A.indices(), A.values()
             b, u, v = idx
