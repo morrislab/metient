@@ -543,7 +543,7 @@ def to_cpu(tensor):
         return tensor.to('cpu')
     return None
 
-def validate_inputs(T, node_collection, ref, var, primary_site, ordered_sites, weights, O, mode, sample_size):
+def validate_inputs(T, node_collection, ref, var, primary_site, ordered_sites, weights, O, mode, sample_size, solve_polytomies):
     """
     Validate the inputs to Metient.
     """
@@ -575,7 +575,9 @@ def validate_inputs(T, node_collection, ref, var, primary_site, ordered_sites, w
             raise ValueError(f"Unfortunately our visualization code uses pydot, which does not allow colons (:) in node names. Please use a different separator in 'character_label' values.")
     if sample_size != -1 and sample_size < 32:
         raise ValueError(f"Sample size must be -1 (auto) or at least 32 to allow for sampling of all parsimony models. We recommend setting to at least 1024 even for small inputs.")
-
+    if T.shape[0] > SPARSE_T_THRESHOLD and solve_polytomies:
+        raise ValueError(f"Solving polytomies for trees with more than {SPARSE_T_THRESHOLD} nodes is not currently supported due to high memory usage. Please set solve_polytomies to False.")
+    
 def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, output_dir, run_name, estimate_observed_clones=True,
                             O=None, lr=0.05, init_temp=20, final_temp=0.01, sample_size=-1, bias_weights=True,
                             mode="evaluate", solve_polytomies=False, num_runs=1, keep_pareto_only=True):
@@ -620,7 +622,7 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
     print("O:", O)
     print("Tumor samples:", ordered_sites)
     # Validate inputs
-    validate_inputs(T, node_collection, ref, var, primary_site, ordered_sites, weights, O, mode, sample_size)
+    validate_inputs(T, node_collection, ref, var, primary_site, ordered_sites, weights, O, mode, sample_size, solve_polytomies)
 
     if sample_size == -1:
         sample_size = vutil.calculate_sample_size(T.shape[0], len(ordered_sites), solve_polytomies)
@@ -652,7 +654,7 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
     # Keep a copy of input clone tree (T from now on has leaf nodes from U)
     input_T = copy.deepcopy(T)
     # TODO: Make this a more sophisticated decision
-    use_sparse_T = input_T.shape[0] > 100
+    use_sparse_T = input_T.shape[0] > SPARSE_T_THRESHOLD
 
     config = {
         "init_temp": init_temp,

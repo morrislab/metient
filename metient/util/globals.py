@@ -8,6 +8,8 @@ import itertools
 ALL_PARSIMONY_MODELS = list(itertools.permutations([100.0, 50.0, 1.0]))
 # ALL_PARSIMONY_MODELS = [[1000.0,1000.0,1.0],[10.0,10.0,1.0], [10.0,1.0,10.0],[1.0,1.0,100.0], [10.0,1000.0,1.0], [100.0,10.0,1.0]]
 
+SPARSE_T_THRESHOLD = 150
+
 DEFAULT_COLORS = ["#6aa84f", "#6fa8dc", "#e69138", "#c27ba0", "#bf4040", "#9e9e9e","#993366", "brown", "black", "darkgreen", "blue"]*3
 DEFAULT_GREEN = "#6aa84f"
 
