@@ -18,7 +18,6 @@ from collections import deque
 import gzip
 import re
 import copy
-import tracemalloc
 
 import metient.util.vertex_labeling_util as vutil 
 import metient.util.data_extraction_util as dutil
@@ -1190,6 +1189,5 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
             raise ValueError(f"{output_dir} does not exist.")
         if print_config.verbose: print(f"Saving {run_name} to {output_dir}")
         # Save results to pickle file
-        # with open(os.path.join(output_dir, f"{run_name}.pickle"), 'wb') as handle:
         with gzip.open(os.path.join(output_dir,f"{run_name}.pkl.gz"), 'wb') as gzip_file:
             pickle.dump(pickle_outputs, gzip_file, protocol=pickle.HIGHEST_PROTOCOL)

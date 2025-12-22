@@ -65,7 +65,7 @@ class VertexLabelingSolver:
 
 def optimize_v_t(v_solver, X, poly_res, exploration_weights, max_iter, v_interval, is_second_optimization):
     """
-    Perform gradient-based Gumbel-softmax optimization on V and T (if resolving polytomies)
+    Perform gradient-based Gumbel-softmax optimization on V (and T if resolving polytomies)
     """
     if v_solver.config['use_sparse_T']:
         v_solver.T = v_solver.T.to(X.device).to_sparse()
@@ -78,8 +78,6 @@ def optimize_v_t(v_solver, X, poly_res, exploration_weights, max_iter, v_interva
     v_optimizer = torch.optim.Adam([X], lr=lr)
     v_scheduler = lr_scheduler.LinearLR(v_optimizer, start_factor=1.0, end_factor=0.5, total_iters=max_iter)
     
-    # Determine device type from X tensor
-    device_type = 'cuda' if X.is_cuda else 'cpu'
     scaler = GradScaler()
 
     solve_polytomies = v_solver.config['solve_polytomies']
@@ -94,9 +92,6 @@ def optimize_v_t(v_solver, X, poly_res, exploration_weights, max_iter, v_interva
     identical_T = (not solve_polytomies)
 
     global PROGRESS_BAR
-
-
-    # print("X\n", X[0])
 
     for i in range(max_iter):
         update_path = update_path_matrix(i, max_iter, solve_polytomies, is_second_optimization)
@@ -130,55 +125,34 @@ def optimize_v_t(v_solver, X, poly_res, exploration_weights, max_iter, v_interva
     return V, soft_V, T, metrics, poly_res
 
 
-def initialize_polytomy_resolver(v_solver, solve_polytomies):
-    """Initialize the polytomy resolver if needed.
+def check_and_initialize_polytomy_resolver(v_solver):
+    """Check and initialize the polytomy resolver if needed.
     
     Args:
         v_solver: The vertex labeling solver instance
-        solve_polytomies: Boolean indicating whether to solve polytomies
-        
-    Returns:
-        tuple: (PolytomyResolver instance or None, updated solve_polytomies flag)
     """
-    if not solve_polytomies:
-        return None, False
-        
-    nodes_w_polys, resolver_sites = vutil.get_k_or_more_children_nodes(
-        v_solver.input_T, v_solver.T, 
-        v_solver.idx_to_observed_sites, 3, True, 2
-    )
-    
-    if len(nodes_w_polys) == 0:
-        print("No potential polytomies to solve, not resolving polytomies.")
-        return None, False
-        
-    poly_res = prutil.PolytomyResolver(v_solver, nodes_w_polys, resolver_sites)
-    v_solver.num_nodes_to_label += len(poly_res.resolver_indices)
-    return poly_res, True
-    
-def first_v_optimization(v_solver, exploration_weights):
-    
-    vutil.LAST_P = None
-    
+    poly_res = None
     solve_polytomies = v_solver.config['solve_polytomies']
-    # mult_run_sample_size = v_solver.config['sample_size']
-    # v_solver.config['sample_size'] = v_solver.config['opt_subtree_sample_size']
 
-    # If solving for polytomies, setup T and G appropriately
     if solve_polytomies:
+        # If solving for polytomies, setup T and G appropriately
         nodes_w_polys, resolver_sites = vutil.get_k_or_more_children_nodes(v_solver.input_T, v_solver.T, 
                                                                            v_solver.idx_to_observed_sites, 3, True, 2)
+        #  Sometimes there are no polytomies to resolve, so everything downstream can ignore polytomy resolution
         if len(nodes_w_polys) == 0:
             print("No potential polytomies to solve, not resolving polytomies.")
             poly_res, solve_polytomies = None, False
         else:
             poly_res = prutil.PolytomyResolver(v_solver, nodes_w_polys, resolver_sites)
-            v_solver.num_nodes_to_label += len(poly_res.resolver_indices)
-    else:
-        poly_res = None
-
+            v_solver.num_nodes_to_label += len(poly_res.resolver_indices)      
     v_solver.poly_res = poly_res
-    v_solver.config['solve_polytomies'] = solve_polytomies
+    v_solver.config['solve_polytomies'] = solve_polytomies  
+    
+def first_v_optimization(v_solver, exploration_weights):
+    
+    assert v_solver.config['solve_polytomies']
+
+    vutil.LAST_P = None
     
     # We're learning X, which is the vertex labeling of the internal nodes
     X = x_weight_initialization(v_solver)
@@ -194,10 +168,8 @@ def first_v_optimization(v_solver, exploration_weights):
     V = V.cpu().detach()
     torch.cuda.empty_cache()
 
-    #v_solver.config['sample_size'] = mult_run_sample_size
     return optimal_nodes, optimal_batch_nums, T, V
 
-    
 def second_v_optimization(v_solver, run_specific_x, run_specific_poly_res, exploration_weights):
     vutil.LAST_P = None
 
@@ -248,18 +220,26 @@ def run_multiple_optimizations(v_solver):
     PROGRESS_BAR = tqdm(total=v_solver.config['first_max_iter'] + v_solver.config['second_max_iter']*len(ALL_PARSIMONY_MODELS)*v_solver.config['num_runs'], position=0)
     
     results = []
+    check_and_initialize_polytomy_resolver(v_solver)
     
-    # Only run first optimization once (this finds optimal subtrees)
-    first_opt_result = first_v_optimization(v_solver, full_exploration_weights(v_solver.weights))
-    optimal_nodes, optimal_batch_nums, T, V = first_opt_result
+    if v_solver.config['solve_polytomies']:
+        # We only need to run this first optimization for optimal subtrees if we're solving polytomies
+        # If not, we can skip directly to second optimization (optimal subtrees are found 
+        # deterministically in init_optimal_x_polyres)
+        first_opt_result = first_v_optimization(v_solver, full_exploration_weights(v_solver.weights))
+        optimal_nodes, optimal_batch_nums, T, V = first_opt_result
+    else:
+        optimal_nodes, optimal_batch_nums, V = None, None, None
+        T = v_solver.T.cpu().detach()
 
     # Function to wrap the second optimization 
     def second_optimization_task(v_solver, exploration_weights):
         # Each run needs its own polytomy resolver and X
         run_specific_poly_solver = copy.deepcopy(v_solver.poly_res)
         run_specific_x = x_weight_initialization(v_solver)
-        run_specific_x, v_solver = opt_sub.init_optimal_x_polyres(run_specific_x, run_specific_poly_solver, optimal_nodes, 
-                                                                  optimal_batch_nums, T, V, v_solver)
+        # Initialize run_specific_x to have optimal subtrees fixed
+        run_specific_x = opt_sub.init_optimal_x_polyres(run_specific_x, run_specific_poly_solver, optimal_nodes, 
+                                                        optimal_batch_nums, T, V, v_solver)
         ret = second_v_optimization(v_solver, run_specific_x, run_specific_poly_solver, exploration_weights)
         return ret
 
@@ -498,6 +478,3 @@ def update_path_matrix(itr, max_iter, solve_polytomies, second_optimization):
     if not solve_polytomies:
         return False
     return True
-    # if second_optimization:
-    #     return itr > max_iter*1/4 and itr < max_iter*3/4
-    return itr > max_iter*1/4 and itr < max_iter*3/4
