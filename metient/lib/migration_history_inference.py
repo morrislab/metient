@@ -103,8 +103,7 @@ def get_best_final_solutions(results, G, O, p, weights,
 
         for soln_idx, (m,c,s,g,o,e) in enumerate(zip(*metrics)):
             tree = vutil.MigrationHistory(best_Ts[soln_idx].clone(), best_Vs[soln_idx].clone())
-            # print((int(m), int(c), int(s)))
-            # print(tree.tree, "\n", torch.nonzero(tree.labeling))
+
             if tree not in unique_labelings:
                 all_pars_metrics.append((int(m), int(c), int(s)))
                 all_result_soln_indices.append((result_idx, soln_idx, (m,c,s,g,o,e)))
@@ -619,7 +618,7 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
     ref, var, omega, ordered_sites, node_collection, idx_to_observed_sites, G, O = dutil.extract_matrices_from_tsv(tsv_fn, estimate_observed_clones, 
                                                                                                                    T, initialize_G, O, primary_site)
     
-    print("O:", O)
+    print("Organotropism frequencies:", O)
     print("Tumor samples:", ordered_sites)
     # Validate inputs
     validate_inputs(T, node_collection, ref, var, primary_site, ordered_sites, weights, O, mode, sample_size, solve_polytomies)
@@ -653,6 +652,7 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
 
     # Keep a copy of input clone tree (T from now on has leaf nodes from U)
     input_T = copy.deepcopy(T)
+    print("Input tree has", input_T.shape[0], "nodes.")
     # TODO: Make this a more sophisticated decision
     use_sparse_T = input_T.shape[0] > SPARSE_T_THRESHOLD
 
@@ -715,7 +715,9 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
                                                    v_optimizer, num_internal_nodes, keep_pareto_only=keep_pareto_only)
         print("Number of final solutions:", len(final_solutions))
 
-        putil.save_best_trees(final_solutions, U, O, weights,ordered_sites, print_config,
+        plot_tree = input_T.shape[0] < SPARSE_T_THRESHOLD
+
+        putil.save_best_trees(final_solutions, U, weights,ordered_sites, print_config, plot_tree,
                               primary_site_label, output_dir, run_name,original_root_idx=original_root_idx) 
 
     torch.cuda.empty_cache()

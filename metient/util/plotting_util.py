@@ -1022,15 +1022,19 @@ def restructure_matrices_for_plotting(T, node_collection, G, V, U, original_root
 
 
 
-def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites, print_config, primary, output_dir, run_name, original_root_idx=-1):
+def save_best_trees(min_loss_solutions, U, weights, ordered_sites, print_config, plot_tree, primary, output_dir, run_name, original_root_idx=-1):
     """
     min_loss_solutions is in order from lowest to highest loss 
 
+    plot_tree: if True, visualize tree plots
     original_root_idx: if not -1, swap the original_root_idx with 0 in all
     data that we save that involves node/cluster indices. This will then match
     the inputs from the user's again.
     """
     
+    if not plot_tree:
+        print("INFO: Not plotting migration history tree because tree is too big, plotting migration graphs only.")
+
     primary_idx = ordered_sites.index(primary)
 
     ret = None
@@ -1066,7 +1070,9 @@ def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites, print_conf
             edges, full_tree_idx_to_label, vertices_to_sites_map, mig_graph_edges = collect_top_tree_info(V, T, node_collection, ordered_sites)
             if print_config.visualize:
                 pattern = figure_output_pattern(V, T, full_tree_idx_to_label)
-                tree_dot = migration_history_tree_dot(V, T, G, custom_colors, node_collection, show=False, display_labels=print_config.display_labels)
+                tree_dot = None
+                if plot_tree:
+                    tree_dot = migration_history_tree_dot(V, T, G, custom_colors, node_collection, show=False, display_labels=print_config.display_labels)
                 mig_graph_dot = migration_graph_dot(V, T, ordered_sites, custom_colors, show=False)
             else:
                 pattern = ""
@@ -1088,7 +1094,6 @@ def save_best_trees(min_loss_solutions, U, O, weights, ordered_sites, print_conf
                 ret = (edges, vertices_to_sites_map, mig_graph_edges, loss_dict)
 
         pickle_outputs[OUT_PROBABILITIES_KEY] = losses_to_probabilities(pickle_outputs[OUT_LOSSES_KEY])
-        #pickle_outputs = convert_lists_to_np_arrays(pickle_outputs, [OUT_LABElING_KEY, OUT_LOSSES_KEY, OUT_PARENTS_KEY, OUT_SOFTV_KEY, OUT_GEN_DIST_KEY])
 
         save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outputs, weights)
 
@@ -1111,12 +1116,6 @@ def formatted_loss_string(loss_dict, weights):
 def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outputs, weights):
 
     if print_config.visualize:
-        k = print_config.k_best_trees
-        sys_fonts = matplotlib.font_manager.findSystemFonts(fontpaths=None, fontext='ttf')
-        for font in sys_fonts:
-            if FONT in font:
-                matplotlib.font_manager.fontManager.addfont(font)
-                rcParams['font.family'] = FONT
 
         n = len(figure_outputs)
         print(run_name)
@@ -1125,62 +1124,83 @@ def save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outp
         if n > max_trees:
             print(f"More than {max_trees} solutions detected, only plotting top {max_trees} trees.")
             n = max_trees
-        # Create a figure and subplots
-        #fig, axs = plt.subplots(3, k*2, figsize=(10, 8))
 
-        plt.suptitle(run_name)
-
+        plot_mig_hist_tree = figure_outputs[0][0] is not None
         z = 2 # number of trees displayed per row
-
         nrows = math.ceil(n/z)
-        h = nrows*4
+        h = nrows*4 if plot_mig_hist_tree else nrows*1.66
         fig = plt.figure(figsize=(8,h))
-        
+        fig.suptitle(run_name, y=0.98, fontsize=10)
+        top_margin = 0.85
+        plt.subplots_adjust(top=top_margin)        
         vspace = 1/nrows
 
         for i, (tree_dot, mig_graph_dot, loss_info, seeding_pattern) in enumerate(figure_outputs):
             if i >= max_trees:
                 break
-            tree = pgv.AGraph(string=tree_dot).draw(format="png", prog="dot", args="-Glabel=\"\"")
-            tree = PILImage.open(io.BytesIO(tree))
+
+            if plot_mig_hist_tree:
+                tree = pgv.AGraph(string=tree_dot).draw(format="png", prog="dot", args="-Glabel=\"\"")
+                tree = PILImage.open(io.BytesIO(tree))
+                gs = gridspec.GridSpec(3, 1, height_ratios=[0.02, 0.63, 0.35])
+            else:
+                gs = gridspec.GridSpec(2, 1, height_ratios=[0.2, 0.8])
+
             mig_graph = pgv.AGraph(string=mig_graph_dot).draw(format="png", prog="dot")
             mig_graph = PILImage.open(io.BytesIO(mig_graph))
-
-            gs = gridspec.GridSpec(3, 1, height_ratios=[0.02, 0.73, 0.25])
 
             row = math.floor(i/2)
             pad = 0.02
 
             # left = 0.0 if i is odd, 0.55 if even
             # right = 0.45 if i is odd, 1.0 if even
-            gs.update(left=0.0+((i%2)*0.53), right=0.47+0.55*(i%2), top=1-(row*vspace)-pad, bottom=1-((row+1)*vspace)+pad, wspace=0.05)
+            gs.update(
+                left=0.0+((i%2)*0.53), 
+                right=0.47+0.55*(i%2), 
+                top=top_margin-(row*vspace)-pad, 
+                bottom=top_margin-((row+1)*vspace)+pad, 
+                wspace=0.05)
 
             # Top row: Title
             ax1 = plt.subplot(gs[0])
-            ax1.text(0.5, 0.5, f'Solution {i+1}\n{seeding_pattern}', ha='center', va='center', fontsize=7)
+            ax1.text(0.5, 0.5, f'Solution {i+1}\n{seeding_pattern}', ha='center', va='center', fontsize=8)
             ax1.axis('off')  # Hide the axis
 
             # Second row: Plot for the tree
-            ax2 = plt.subplot(gs[1])
-            ax2.imshow(tree)
-            ax2.axis('off')
+            if plot_mig_hist_tree:
+                # Tree panel
+                ax2 = plt.subplot(gs[1])
+                ax2.imshow(tree)
+                ax2.axis("off")
+
+                bottom_spec = gs[2]
+            else:
+                bottom_spec = gs[1]
 
             # Third row: Create a subgrid for the migration graph and loss information
-            gs_bottom = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[2], wspace=0.05)
+            gs_bottom = gridspec.GridSpecFromSubplotSpec(
+                1, 2,
+                subplot_spec=bottom_spec,
+                width_ratios=[0.7, 0.3],  # migration graph gets more space
+                wspace=0.08
+            )
 
-            # Left column for the migration graph
             ax3 = plt.subplot(gs_bottom[0])
             ax3.imshow(mig_graph)
-            ax3.axis('off')
+            ax3.axis("off")
 
-            # Right column for loss information
             ax4 = plt.subplot(gs_bottom[1])
-            ax4.text(0.5, 0.5, formatted_loss_string(loss_info, weights), ha='center', va='center', fontsize=7)
-            ax4.axis('off')
+            ax4.text(
+                0.5, 0.5,
+                formatted_loss_string(loss_info, weights),
+                ha="center", va="center", fontsize=7
+            )
+            ax4.axis("off")
 
         fig1 = plt.gcf()
         plt.show()
         plt.close()
+
         if print_config.save_outputs: 
             fig1.savefig(os.path.join(output_dir, f'{run_name}.png'), dpi=600, bbox_inches='tight')
 
