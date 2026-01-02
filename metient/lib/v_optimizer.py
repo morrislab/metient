@@ -61,7 +61,7 @@ class VertexLabelingSolver:
         self.fixed_labeling = None  # Fixed node labelings
     
     def run(self):
-        return run_multiple_optimizations(self)
+        return run_optimization(self)
 
 def optimize_v_t(v_solver, X, poly_res, exploration_weights, max_iter, v_interval, is_second_optimization):
     """
@@ -144,11 +144,11 @@ def check_and_initialize_polytomy_resolver(v_solver):
             poly_res, solve_polytomies = None, False
         else:
             poly_res = prutil.PolytomyResolver(v_solver, nodes_w_polys, resolver_sites)
-            v_solver.num_nodes_to_label += len(poly_res.resolver_indices)      
+            v_solver.num_nodes_to_label += len(poly_res.resolver_indices)
     v_solver.poly_res = poly_res
     v_solver.config['solve_polytomies'] = solve_polytomies  
     
-def first_v_optimization(v_solver, exploration_weights):
+def optimal_subtree_optimization(v_solver, exploration_weights):
     
     assert v_solver.config['solve_polytomies']
 
@@ -170,7 +170,7 @@ def first_v_optimization(v_solver, exploration_weights):
 
     return optimal_nodes, optimal_batch_nums, T, V
 
-def second_v_optimization(v_solver, run_specific_x, run_specific_poly_res, exploration_weights):
+def migration_history_optimization(v_solver, run_specific_x, run_specific_poly_res, exploration_weights):
     vutil.LAST_P = None
 
     # Second optimization
@@ -206,13 +206,26 @@ def no_metastasis_solution(v_solver):
     ret = [(V, torch.zeros(V.shape, device=V.device), vutil.repeat_n(v_solver.T,1), None, metrics)]
     return ret
 
-def run_multiple_optimizations(v_solver):
+def find_optimal_subtree_indices(v_solver):
+    if v_solver.config['solve_polytomies']:
+        # We only need to run this first optimization for optimal subtrees if we're solving polytomies
+        # If not, we can skip directly to second optimization (optimal subtrees are found 
+        # deterministically in init_optimal_x_polyres)
+        result = optimal_subtree_optimization(v_solver, full_exploration_weights(v_solver.weights))
+        optimal_nodes, optimal_batch_nums, T, V = result
+        fixed_indices, fixed_labels, optimal_roots, poly_fixes = opt_sub.find_fixed_nodes(v_solver.poly_res, optimal_nodes, optimal_batch_nums, T, V, v_solver)
+        return T, fixed_indices, fixed_labels, optimal_roots, poly_fixes
+
+    T = v_solver.T.cpu().detach()
+    fixed_indices, fixed_labels, optimal_roots, poly_fixes = opt_sub.find_fixed_nodes(None, None, None, T, None, v_solver)
+    return T, fixed_indices, fixed_labels, optimal_roots, poly_fixes
+
+def run_optimization(v_solver):
     """
     Run optimization on V/T on a first pass to find optimal subtrees, fix those subtrees,
     then run second optimization to infer Pareto optimal solutions, using multiple parsimony models
     to promote exploration
     """
-
     if v_solver.num_sites == 1:
         return no_metastasis_solution(v_solver)
 
@@ -221,26 +234,25 @@ def run_multiple_optimizations(v_solver):
     
     results = []
     check_and_initialize_polytomy_resolver(v_solver)
-    
-    if v_solver.config['solve_polytomies']:
-        # We only need to run this first optimization for optimal subtrees if we're solving polytomies
-        # If not, we can skip directly to second optimization (optimal subtrees are found 
-        # deterministically in init_optimal_x_polyres)
-        first_opt_result = first_v_optimization(v_solver, full_exploration_weights(v_solver.weights))
-        optimal_nodes, optimal_batch_nums, T, V = first_opt_result
-    else:
-        optimal_nodes, optimal_batch_nums, V = None, None, None
-        T = v_solver.T.cpu().detach()
 
-    # Function to wrap the second optimization 
-    def second_optimization_task(v_solver, exploration_weights):
+    T, known_indices, known_labelings, optimal_root_nodes, poly_fixes = find_optimal_subtree_indices(v_solver)
+
+    # Function to wrap the an optimization run
+    def _run_optimization(v_solver, exploration_weights):
         # Each run needs its own polytomy resolver and X
         run_specific_poly_solver = copy.deepcopy(v_solver.poly_res)
         run_specific_x = x_weight_initialization(v_solver)
         # Initialize run_specific_x to have optimal subtrees fixed
-        run_specific_x = opt_sub.init_optimal_x_polyres(run_specific_x, run_specific_poly_solver, optimal_nodes, 
-                                                        optimal_batch_nums, T, V, v_solver)
-        ret = second_v_optimization(v_solver, run_specific_x, run_specific_poly_solver, exploration_weights)
+        run_specific_x = opt_sub.init_subtree_optimized_x(
+            run_specific_x, 
+            run_specific_poly_solver, 
+            known_indices, 
+            known_labelings, 
+            optimal_root_nodes, 
+            poly_fixes,
+            v_solver,
+            T)
+        ret = migration_history_optimization(v_solver, run_specific_x, run_specific_poly_solver, exploration_weights)
         return ret
 
     for _ in range(v_solver.config['num_runs']):
@@ -248,7 +260,7 @@ def run_multiple_optimizations(v_solver):
             exploration_weights = met.Weights(mig=pars_model[0], comig=pars_model[1], 
                                               seed_site=pars_model[2], data_fit=v_solver.weights.data_fit, 
                                               reg=v_solver.weights.reg, entropy=v_solver.weights.entropy, gen_dist=0.0, organotrop=0.0)
-            ret = second_optimization_task(v_solver, exploration_weights)
+            ret = _run_optimization(v_solver, exploration_weights)
             results.append(ret)
 
     if not v_solver.config['solve_polytomies']:
@@ -389,7 +401,7 @@ def compute_v_t_loss(X, v_solver, poly_res, exploration_weights, update_path_mat
         genetic distance loss (if weights for genetic distance and organotropism != 0)
     """
     softmax_X, softmax_X_soft = gumbel_softmax(X, v_temp)
-    V = vutil.stack_vertex_labeling(v_solver.L, softmax_X, v_solver.p, v_solver.poly_res, v_solver.fixed_labeling)
+    V = vutil.stack_vertex_labeling(v_solver.L, softmax_X, v_solver.p, v_solver.fixed_labeling)
 
     bs = X.shape[0]
     if poly_res != None:

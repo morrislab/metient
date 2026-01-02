@@ -103,56 +103,45 @@ class MigrationHistoryNodeCollection:
 
 # Defines a unique adjacency matrix and vertex labeling
 class MigrationHistory:
-    def __init__(self, tree, labeling):
-        if (tree.shape[0] != tree.shape[1]):
-            raise ValueError("Adjacency matrix should have shape (num_nodes x num_nodes)")
-        if (tree.shape[0] != labeling.shape[1]):
-            raise ValueError("Vertex labeling matrix should have shape (num_sites x num_nodes)")
+    __slots__ = ("tree", "labeling", "_tree_sig", "_label_sig", "_hash")
+
+    def __init__(self, tree: torch.Tensor, labeling: torch.Tensor):
+        if tree.shape[0] != tree.shape[1]:
+            raise ValueError("Adjacency matrix should be square")
+        if tree.shape[0] != labeling.shape[1]:
+            raise ValueError("Labeling should have shape (num_sites, num_nodes)")
 
         self.tree = tree
         self.labeling = labeling
 
-    def _nonzero_tuple(self, tensor):
-        # Get the indices of non-zero elements and convert to a hashable form
+        self._tree_sig = self._compute_sig(tree)
+        self._label_sig = self._compute_sig(labeling)
+
+        self._hash = hash((self._tree_sig, self._label_sig))
+
+    @staticmethod
+    def _compute_sig(tensor: torch.Tensor):
+        """
+        Returns a canonical, hashable representation of nonzero entries.
+        """
         if tensor.is_sparse:
-            tensor = tensor.coalesce()
-            indices = tensor.indices()
+            idx = tensor.coalesce().indices()
         else:
-            indices = torch.nonzero(tensor, as_tuple=False)
-        return tuple(map(tuple, indices.tolist()))
+            idx = tensor.nonzero(as_tuple=False).T  # (ndim, nnz)
+
+        # Convert to Python tuples once
+        return tuple(map(tuple, idx.tolist()))
 
     def __hash__(self):
-        # Compute a hash based on the positions of non-zero entries
-        return hash((self._nonzero_tuple(self.labeling), self._nonzero_tuple(self.tree)))
+        return self._hash
 
     def __eq__(self, other):
-        # Check for equality based on the positions of non-zero entries in both tensors
         if not isinstance(other, MigrationHistory):
             return False
-        
-        # Check labeling equality
-        if self._nonzero_tuple(self.labeling) != self._nonzero_tuple(other.labeling):
-            return False
-            
-        # Handle case where one tree is sparse and other is dense
-        if self.tree.is_sparse and not other.tree.is_sparse:
-            # Convert sparse to dense indices for comparison
-            sparse_indices = self.tree.coalesce().indices()
-            dense_indices = torch.nonzero(other.tree, as_tuple=False).t()
-            return torch.equal(sparse_indices, dense_indices)
-        elif not self.tree.is_sparse and other.tree.is_sparse:
-            # Convert sparse to dense indices for comparison
-            sparse_indices = other.tree.coalesce().indices() 
-            dense_indices = torch.nonzero(self.tree, as_tuple=False).t()
-            return torch.equal(sparse_indices, dense_indices)
-        else:
-            # Both same type, use original comparison
-            return self._nonzero_tuple(self.tree) == self._nonzero_tuple(other.tree)
-
-    def __str__(self):
-        A = str(torch.where(self.tree != 0))
-        V = str(torch.where(self.labeling == 1))
-        return f"Tree: {A}\nVertex Labeling: {V}"
+        return (
+            self._tree_sig == other._tree_sig
+            and self._label_sig == other._label_sig
+        )
 
 def convert_metric_to_int(x):
     if isinstance(x, int):
@@ -608,7 +597,7 @@ def stack_fixed_labeling(X, fixed_labeling, p):
     
     return full_X
 
-def stack_vertex_labeling(L, X, p, poly_res, fixed_labeling):
+def stack_vertex_labeling(L, X, p, fixed_labeling):
     '''
     Use leaf labeling L and X (both of size sample_size x num_sites X num_internal_nodes)
     to get the anatomical sites of the leaf nodes and the internal nodes (respectively). 
@@ -1584,6 +1573,21 @@ def build_tree_structure(adj_matrix):
     root = next(i for i in range(n) if i not in parents)
     return children, parents, root
 
+def build_tree_structure(adj_matrix: torch.Tensor):
+    """
+    adj_matrix: (n, n) binary torch tensor where adj_matrix[p, c] = 1 means p -> c
+    """
+    n = adj_matrix.size(0)
+
+    parents_idx, children_idx = adj_matrix.nonzero(as_tuple=True)
+
+    # Build parent to children dictionary
+    children = {i: [] for i in range(n)}
+    for p, c in zip(parents_idx.tolist(), children_idx.tolist()):
+        children[p].append(c)
+
+    return children
+
 def post_order_traversal(children, root):
     visited = set()
     order = []
@@ -1642,19 +1646,20 @@ def build_one_hot_matrix(labels, n, k, root):
 
 def run_fitch_hartigan(v_solver, results):
     adj_matrix = v_solver.input_T
+    root = 0
     node_idx_to_observed_sites = v_solver.idx_to_observed_sites
     root_label = torch.argmax(v_solver.p, dim=0).item()
     
     n = adj_matrix.shape[0]
     k = v_solver.num_sites
 
-    children, parents, root = build_tree_structure(adj_matrix)
+    children = build_tree_structure(adj_matrix)
     post_order = post_order_traversal(children, root)
     cost = compute_cost_matrix(children, post_order, node_idx_to_observed_sites, n, k)
     labels = assign_optimal_labels(children, cost, root, root_label, k)
     single_soln_matrix = build_one_hot_matrix(labels, n, k, root)
 
-    V = stack_vertex_labeling(v_solver.L, add_batch_dim(single_soln_matrix), v_solver.p, None, None)
+    V = stack_vertex_labeling(v_solver.L, add_batch_dim(single_soln_matrix), v_solver.p, None)
     T = repeat_n(v_solver.full_T, 1)
     if v_solver.config['use_sparse_T']:
         T = T.to_sparse()
