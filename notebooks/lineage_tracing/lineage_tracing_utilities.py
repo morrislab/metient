@@ -226,8 +226,8 @@ def create_dot_str(node_to_label, nx_digraph):
     G = nx.DiGraph()
 
     node_options = {"label":"", "shape": "circle", "penwidth":3, 
-                    "fontname":"Arial", "fontsize":12,
-                    "fixedsize":"true", "height":0.25}
+                    "fontname":"Arial", "fontsize":13,
+                    "fixedsize":"true", "height":0.3}
 
     new_idx = max_idx + 1
 
@@ -267,7 +267,7 @@ def create_dot_str(node_to_label, nx_digraph):
     # we have to use graphviz in order to get multi-color edges :/
     dot = to_pydot(G).to_string().split("\n")
     # hack since there doesn't seem to be API to modify graph attributes...
-    dot.insert(1, 'graph[splines=false]; nodesep=0.2; rankdir=TB; ranksep=0.5; forcelabels=true; dpi=1000; size=2.5; seed=42; layout=dot')
+    dot.insert(1, 'graph[splines=false]; nodesep=0.3; rankdir=TB; ranksep=0.5; forcelabels=true; dpi=1000; size=2.5; seed=42; layout=dot')
     dot_str = ("\n").join(dot)
     return dot_str
 
@@ -348,7 +348,22 @@ def plot_nx_tree(node_to_label, nx_digraph, output_name):
     fig1 = plt.gcf()
     plt.show()
     plt.close()
-    output_dir = "/data/morrisq/divyak/projects/metient/notebooks/lineage_tracing/outputs"
+    output_dir = "/data1/morrisq/divyak/projects/metient/notebooks/random/outputs"
     fig1.savefig(os.path.join(output_dir, f'{output_name}.png'), dpi=1200, bbox_inches='tight')
+
+    tree_dot_path = os.path.join(output_dir, f"{output_name}_tree_{i}.dot")
+    output_run_name = output_name.replace(" ", "_")
+    tree_svg_path = os.path.join(output_dir, f"{output_run_name}_tree_{i}.svg")
+    with open(tree_dot_path, "w") as f:
+        tree_dot = tree_dot.replace('style=dashed', 'style=dashed, dash="15,30"')
+        f.write(tree_dot)
+    os.system(f'dot -Tsvg -Gdpi=30 -Glabel=\"\" "{tree_dot_path}" -o {tree_svg_path}')
+
+    mig_dot_path = os.path.join(output_dir, f"{output_name}_mig_graph_{i}.dot")
+    mig_svg_path = os.path.join(output_dir, f"{output_run_name}_mig_graph_{i}.svg")
+    with open(mig_dot_path, "w") as f:
+        f.write(mig_graph_dot)
+    os.system(f'dot -Tsvg -Gdpi=30 -Glabel=\"\" "{mig_dot_path}" -o {mig_svg_path}')
+
         
     return 

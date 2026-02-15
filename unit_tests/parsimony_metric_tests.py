@@ -336,7 +336,7 @@ class TestAncestralLabelingMetrics(unittest.TestCase):
     
     
     def test_lt_clone_43(self):
-        data_dir = "/data1/morrisq/divyak/projects/metient/metient/unit_tests/data"
+        data_dir = "/data1/morrisq/divyak/projects/metient/unit_tests/data"
         with gzip.open(os.path.join(data_dir, "43_LL.pkl.gz") ,"rb") as f:
             pckl = pickle.load(f)
         parents = pckl['full_adjacency_matrices'][0]
@@ -351,7 +351,7 @@ class TestAncestralLabelingMetrics(unittest.TestCase):
         self.assert_metrics(out, 27, 7, 3, 0, 0)
 
     def test_lt_clone_15(self):
-        data_dir = "/data1/morrisq/divyak/projects/metient/metient/unit_tests/data"
+        data_dir = "/data1/morrisq/divyak/projects/metient/unit_tests/data"
         with gzip.open(os.path.join(data_dir, "15_LL.pkl.gz") ,"rb") as f:
             pckl = pickle.load(f)
         parents = pckl['full_adjacency_matrices'][0]

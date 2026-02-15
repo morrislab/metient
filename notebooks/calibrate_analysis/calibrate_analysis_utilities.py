@@ -1,6 +1,6 @@
 import pyreadr
 import torch 
-from metient.metient import *
+from metient import *
 from metient.util.globals import *
 import pandas as pd
 from metient.util import plotting_util as putil
@@ -13,25 +13,11 @@ import numpy as np
 import os
 import sys
 
-sys.path.append("/lila/data/morrisq/divyak/projects/metient/notebooks/lineage_tracing")
-import lineage_tracing_utilities as lt
 
 def split_pattern_clonality(full_pattern):
     clonality = full_pattern.split(" ")[0]
     pattern = " ".join(full_pattern.split(" ")[1:]).replace(" seeding", "")
     return pattern, clonality
-
-def get_tracerx_subtype(pid):
-    # Get NSCLC subtype (LUAD and LUSC)
-    tracerx_patient_info = pyreadr.read_r(os.path.join('/data/morrisq/divyak/data/tracerx_nsclc_2023/20221109_TRACERx421_all_patient_df.rds'))[None]
-    tracerx_patient_info['histology_multi_full_genomically.confirmed'].value_counts()
-
-    subtype = tracerx_patient_info[tracerx_patient_info['cruk_id']==pid]['histology_multi_full_genomically.confirmed'].item()
-    subtype = "LUAD" if "LUAD" in subtype else subtype
-    if subtype == "Other":
-        print("Not LUAD or LUSC subtype", pid)
-        return "N/A"
-    return subtype
 
 def is_ln(met_site):
     return met_site.startswith("LN") or "lymph" in met_site or "Lymph" in met_site
@@ -65,7 +51,7 @@ def get_root_clone_presence_in_met(idx_to_label, primary, A):
 
 def get_seeding_info(index_order, pkl):
     V = torch.tensor(pkl[OUT_LABElING_KEY][index_order[0][0]]) 
-    A = adjacency_matrix_from_parents(pkl[OUT_ADJ_KEY][index_order[0][0]])
+    A = adjacency_matrix_from_parents(pkl[OUT_PARENTS_KEY][index_order[0][0]])
 
     idx_to_label = pkl[OUT_IDX_LABEL_KEY][index_order[0][0]]
     pattern = putil.seeding_pattern(V,A)
@@ -94,7 +80,7 @@ def get_all_migration_percentages(pkl, sites):
     """Calculate migration percentages for all trees in a pickle file.
     
     Args:
-        pkl (dict): Pickle file containing tree data with OUT_LABElING_KEY and OUT_ADJ_KEY
+        pkl (dict): Pickle file containing tree data with OUT_LABElING_KEY and OUT_PARENTS_KEY
         sites (list): List of anatomical site names
         
     Returns:
@@ -104,7 +90,7 @@ def get_all_migration_percentages(pkl, sites):
             - all_pct_met_sites (list): Percentage of metastatic sites receiving seeding for each solution
     """
     Vs = pkl[OUT_LABElING_KEY]
-    parents = pkl[OUT_ADJ_KEY]
+    parents = pkl[OUT_PARENTS_KEY]
 
     all_pct_migs_polyclonal = []
     all_num_ss = []
@@ -154,10 +140,9 @@ def build_top_calibrate_tree_df(result_dirs, dataset_names, bootstrap_fn):
             pid = fn.split("/")[-1].split("_")[0]
             with gzip.open(fn, 'rb') as f:
                 pkl = pickle.load(f)
-
             # Best calibrated tree
             V = torch.tensor(pkl[OUT_LABElING_KEY][0])
-            A = adjacency_matrix_from_parents(pkl[OUT_ADJ_KEY][0])
+            A = adjacency_matrix_from_parents(pkl[OUT_PARENTS_KEY][0])
         
             losses = [l.item() for l in pkl[OUT_LOSSES_KEY]]
             sites = pkl[OUT_SITES_KEY]
@@ -198,8 +183,6 @@ def build_top_calibrate_tree_df(result_dirs, dataset_names, bootstrap_fn):
             all_pct_migs_polyclonal, all_num_ss, all_pct_met_sites = get_all_migration_percentages(pkl, sites)
 
             subtype = "N/A"
-            if dataset == 'NSCLC':
-                subtype = get_tracerx_subtype(pid)
 
             data.append([dataset, pid, fn, losses[0], subtype, len(sites), num_trees_on_pareto,mult_trees_w_same_pars_metrics,mult_trees_w_diff_pars_metrics, root_clone_in_met,
                         cal_pattern, cal_st_clonality, cal_gen_clonality, cal_phyletic, cal_tracerx_phyletic, cal_pct_migs_polyclonal,cal_num_ss,cal_seeding_clusters,cal_pct_met_sites,
@@ -238,7 +221,7 @@ def get_polyclonally_seeded_sites_and_total_seeded_sites(trees_df):
             pkl = pickle.load(f)
         # Best calibrated tree
         V = torch.tensor(pkl[OUT_LABElING_KEY][0])
-        A = adjacency_matrix_from_parents(pkl[OUT_ADJ_KEY][0])
+        A = adjacency_matrix_from_parents(pkl[OUT_PARENTS_KEY][0])
         G = putil.migration_graph(V,A)
         
         # Count number of columns (sites) that are seeded
@@ -341,7 +324,7 @@ def get_majority_vote_classification(bootstrap_df, dataset, pckl, prnt=False):
 
     # Get data from pickle
     loss_dicts = pckl[OUT_LOSS_DICT_KEY]
-    parents = pckl[OUT_ADJ_KEY]
+    parents = pckl[OUT_PARENTS_KEY]
     As = [adjacency_matrix_from_parents(p) for p in parents]
     Vs = pckl[OUT_LABElING_KEY]
     node_infos = pckl[OUT_IDX_LABEL_KEY]
