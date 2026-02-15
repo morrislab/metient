@@ -25,7 +25,6 @@ from metient.util import eval_util as eutil
 from scipy.stats import shapiro, normaltest, anderson
 import scipy.stats as stats
 
-# xaxis_labels = ['monoclonal\nprimary-only', 'polyclonal\nprimary-only', 'monoclonal\nmet-to-met', 'polyclonal\nmet-to-met']
 xaxis_labels = ['Primary-only', 'Met-to-met']
 seeding_pattern_order = ["prim_only", "met_to_met"]
 mig_clones_f1_mach_key = "Seeding clones F1 score"
