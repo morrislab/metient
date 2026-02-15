@@ -42,7 +42,6 @@ def predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_di
 
         primary_idx = unique_sites.index('P')
         r = torch.nn.functional.one_hot(torch.tensor([primary_idx]), num_classes=len(unique_sites)).T
-        # TODO: add these as args
         weights = vertex_labeling.Weights(data_fit=1.0, mig=10.0, comig=5.0, seed_site=1.0, reg=1.0, gen_dist=0.5)
         G = data_util.get_genetic_distance_tensor_from_sim_adj_matrix(T, pruned_cluster_label_to_idx)
 
@@ -91,8 +90,6 @@ if __name__=="__main__":
 
     print(seeds)
     for seed in seeds:
-        #predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir)
-        # Are we IO bound or CPU bound? maybe we should use a thread pool...?
         cProfile.run("predict_vertex_labelings(machina_sims_data_dir, site, mig_type, seed, out_dir)", sort="tottime")
     end_time = datetime.datetime.now()
 
