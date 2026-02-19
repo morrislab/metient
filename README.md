@@ -234,6 +234,12 @@ In the pickle file you'll find the following keys:
 
 </details>
 
+## Reproducibility
+
+To reproduce results from our paper, please see here for input data and outputs from Metient for all datasets: https://github.com/divyakoyy/metient_reproducibility/
+
+Notebooks that use the outputs from above to generate figures for the paper can be found here: https://github.com/morrislab/metient/tree/main/notebooks
+
 ## Questions
 
 Please email any questions you have to divyakoyy@gmail.com, or open a GitHub issue!
@@ -241,13 +247,7 @@ Please email any questions you have to divyakoyy@gmail.com, or open a GitHub iss
 ## Citation
 If you use Metient, please cite our paper:
 ```
-@article{koyyalagunta2025inferring,
-  title={Inferring cancer type-specific patterns of metastatic spread using Metient},
-  author={Koyyalagunta, Divya and Ganesh, Karuna and Morris, Quaid},
-  journal={bioRxiv},
-  pages={2024--07},
-  year={2025}
-}
+Koyyalagunta, D., Ganesh, K. & Morris, Q. Inferring cancer type-specific patterns of metastatic spread using Metient. Nat Methods (2025). https://doi.org/10.1038/s41592-025-02924-8
 ```
 
 
