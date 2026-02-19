@@ -200,7 +200,7 @@ def no_metastasis_solution(v_solver):
     need to do any optimization
     """
     vertex_labeling = vutil.add_batch_dim(torch.ones(1, v_solver.num_nodes_to_label))
-    V = vutil.stack_vertex_labeling(v_solver.L, vertex_labeling, v_solver.p, None, None)
+    V = vutil.stack_vertex_labeling(v_solver.L, vertex_labeling, v_solver.p, None)
     metrics = tuple(torch.zeros(size=(1,), device=V.device) for _ in range(6))
     v_solver.T = v_solver.T.to_sparse()
     ret = [(V, torch.zeros(V.shape, device=V.device), vutil.repeat_n(v_solver.T,1), None, metrics)]
