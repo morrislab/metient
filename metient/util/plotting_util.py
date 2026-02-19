@@ -168,7 +168,7 @@ def migration_edges(V, A, sites=None):
                 Y[i,j] = 0
     return Y
 
-def seeding_cluster_sparse(Y, A, node_idx_to_label, sites=None):
+def _seeding_clusters(Y, A, node_idx_to_label):
     """
     returns: list of nodes whose child is a different color
     """
@@ -178,7 +178,6 @@ def seeding_cluster_sparse(Y, A, node_idx_to_label, sites=None):
 
     # Select the indices where Y is not 0
     seeding_clusters = nonzero_indices[1][Y.values() != 0]
-    # seeding_clusters = (Y == 1).nonzero(as_tuple=True)[1]
     # Check if it's a scalar (0D tensor)
     if seeding_clusters.dim() == 0:
         # Convert to a 1D tensor (vector)
@@ -209,17 +208,9 @@ def seeding_clusters(V, A, node_idx_to_label, sites=None):
     V, A = prep_V_A_inputs(V, A)
     Y = migration_edges(V,A, sites)
 
-    if Y.is_sparse:
-        return seeding_cluster_sparse(Y, A, node_idx_to_label, sites)
-    
-    seeding_clusters = torch.nonzero(Y.any(dim=1)).squeeze()
-    # Check if it's a scalar (0D tensor)
-    if seeding_clusters.dim() == 0:
-        # Convert to a 1D tensor (vector)
-        seeding_clusters = seeding_clusters.unsqueeze(0)
-    seeding_clusters = [int(x) for x in seeding_clusters]
-
-    return seeding_clusters
+    if not Y.is_sparse:
+        Y = Y.to_sparse()
+    return _seeding_clusters(Y, A, node_idx_to_label)
         
 def find_tree_trunk(adj_matrix):
     n = len(adj_matrix)  # Number of nodes in the matrix

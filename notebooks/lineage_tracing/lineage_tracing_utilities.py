@@ -51,17 +51,17 @@ def extract_info(metient_result_dir, clone):
     with gzip.open(os.path.join(metient_result_dir,f"{clone}_LL.pkl.gz") ,"rb") as f:
         pckl = pickle.load(f)
         
-    num_solutions = len(pckl['clone_tree_labeling_matrices'])
+    num_solutions = len(pckl[OUT_LABElING_KEY])
     print(f"{num_solutions} solutions")
-    ordered_sites = pckl['ordered_anatomical_sites']
+    ordered_sites = pckl[OUT_SITES_KEY]
 
     mig_graphs = []
     pars_metrics = []
     unnormed_tissue_trans = torch.zeros((len(TISSUE_ORDER),len(TISSUE_ORDER)))
 
     for tree_idx in range(num_solutions):
-        V = pckl['clone_tree_labeling_matrices'][tree_idx]
-        A = met.adjacency_matrix_from_parents(pckl['full_adjacency_matrices'][tree_idx])
+        V = pckl[OUT_LABElING_KEY][tree_idx]
+        A = met.adjacency_matrix_from_parents(pckl[OUT_PARENTS_KEY][tree_idx])
         G = met.migration_graph(V, A).cpu().numpy()
         
         m, c, s = extract_pars_metrics(pckl, tree_idx)
@@ -118,7 +118,7 @@ def extract_scaled_fitch_tissue_trans(fitch_tissue_trans_data, clone):
     return tissue_trans
 
 def extract_pars_metrics(pckl, tree_idx):
-    loss_dict = pckl['loss_dict'][tree_idx]
+    loss_dict = pckl[OUT_LOSS_DICT_KEY][tree_idx]
     m = int(loss_dict['migration_number'])
     c = int(loss_dict['comigration_number'])
     s = int(loss_dict['seeding_site_number'])
@@ -348,7 +348,8 @@ def plot_nx_tree(node_to_label, nx_digraph, output_name):
     fig1 = plt.gcf()
     plt.show()
     plt.close()
-    output_dir = "/data1/morrisq/divyak/projects/metient/notebooks/random/outputs"
+    output_dir = "/data1/morrisq/divyak/projects/metient/notebooks/outputs"
+
     fig1.savefig(os.path.join(output_dir, f'{output_name}.png'), dpi=1200, bbox_inches='tight')
 
     tree_dot_path = os.path.join(output_dir, f"{output_name}_tree_{i}.dot")

@@ -264,6 +264,60 @@ class TestSolutionClassification(unittest.TestCase):
         self.assertEqual(met.weighted_genetic_clonality(mock_pkl), 'polyclonal')
         self.assertEqual(met.weighted_site_clonality(mock_pkl), 'monoclonal')
         self.assertEqual(met.weighted_seeding_pattern(mock_pkl), 'single-source')
+    
+    def _tree7_mixed_site_clonality(self):
+        '''
+        Two metastatic sites:
+        site1 = monoclonal
+        site2 = polyclonal
+
+        Global site clonality should be polyclonal.
+        '''
+        parents = [-1,0,1,1,1]
+
+        V = torch.tensor(
+            [
+                [1,1,0,0,0],  # primary
+                [0,0,1,0,0],  # site A (monoclonal)
+                [0,0,0,1,1],  # site B (polyclonal)
+            ]
+        )
+        return parents, V
+
+    def test_mixed_site_clonality(self):
+        parents, V = self._tree7_mixed_site_clonality()
+
+        node_info = [{x:([f'x'], False, False) for x in range(len(parents))}]
+        mock_pkl = {
+            OUT_LABElING_KEY: [V],
+            OUT_PARENTS_KEY: [parents],
+            OUT_PROBABILITIES_KEY: [1.0],
+            OUT_IDX_LABEL_KEY: node_info
+        }
+
+        self.assertEqual(met.weighted_site_clonality(mock_pkl), 'polyclonal')
+        A = met.adjacency_matrix_from_parents(parents)
+        self.assertEqual(plutil.seeding_clusters(V, A, node_info[0]), [2,3,4])
+        self.assertEqual(plutil.seeding_clusters(V, A, node_info[0], sites=[1]), [2])
+        self.assertEqual(plutil.seeding_clusters(V, A, node_info[0], sites=[2]), [3,4])
+
+        node_info[0][3] = (['x'], True, False) # make node 3 a polytomy resolver node
+        self.assertEqual(plutil.seeding_clusters(V, A, node_info[0]), [1,2,4])
+        self.assertEqual(plutil.seeding_clusters(V, A, node_info[0], sites=[1]), [2])
+        self.assertEqual(plutil.seeding_clusters(V, A, node_info[0], sites=[2]), [1,4])
+
+        A = A.to_dense()
+        node_info = [{x:([f'x'], False, False) for x in range(len(parents))}]
+        self.assertEqual(plutil.seeding_clusters(V, A, node_info[0]), [2,3,4])
+        self.assertEqual(plutil.seeding_clusters(V, A, node_info[0], sites=[1]), [2])
+        self.assertEqual(plutil.seeding_clusters(V, A, node_info[0], sites=[2]), [3,4])
+
+        node_info[0][3] = (['x'], True, False) # make node 3 a polytomy resolver node
+        self.assertEqual(plutil.seeding_clusters(V, A, node_info[0]), [1,2,4])
+        self.assertEqual(plutil.seeding_clusters(V, A, node_info[0], sites=[1]), [2])
+        self.assertEqual(plutil.seeding_clusters(V, A, node_info[0], sites=[2]), [1,4])
+
+
 
 if __name__ == '__main__':
     unittest.main()
