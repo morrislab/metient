@@ -25,3 +25,11 @@ dist/
 # Ignore Python bytecode files
 __pycache__/
 *.pyc
+*.pickle
+*.pkl
+*.pkl.gz
+*.rda
+*.RData
+*.npz
+src/data/
+metient/data/
