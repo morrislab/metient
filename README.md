@@ -66,7 +66,7 @@ There are different Jupyter Notebook tutorials based on your use case:
 1. I have a cohort of patients (~5 or more patients) with the same cancer type. (Metient-calibrate)
    - I want Metient to estimate which mutations/mutation clusters are present in which anatomical sites. [Tutorial 1](tutorial/1_calibrate_infer_observed_clones_label_clone_tree_tutorial.ipynb)
    - I know which mutations/mutation clusters are present in which anatomical sites.  [Tutorial 2](tutorial/2_calibrate_label_clone_tree_tutorial.ipynb)
-3. I have a small number of patients, or I want to enforce my own parsimony metric weights. (Metient-evaluate)
+3. I have a small number of patients, I want to use Metient's pancancer calibrated weights, or I want to enforce my own parsimony metric weights. (Metient-evaluate)
    - I want Metient to estimate which mutations/mutation clusters are present in which anatomical sites. [Tutorial 3](tutorial/3_evaluate_infer_observed_clones_label_clone_tree_tutorial.ipynb)
    - I know which mutations/mutation clusters are present in which anatomical sites. [Tutorial 4](tutorial/4_evaluate_label_clone_tree_tutorial.ipynb)
 > [!TIP]

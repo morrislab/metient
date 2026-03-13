@@ -6,7 +6,7 @@ with open("requirements.txt") as f:
 
 setup(
     name='metient',
-    version='0.1.3.5.3',
+    version='0.1.3.5.5',
     url="https://github.com/divyakoyy/metient.git",
     packages=find_packages(),  # automatically finds metient, metient.util, metient.lib
     install_requires=requirements,

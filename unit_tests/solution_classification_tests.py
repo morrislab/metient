@@ -482,5 +482,6 @@ class TestTransitiveClosure(unittest.TestCase):
         result = vert_util.path_matrix(T, remove_self_loops=True)
         self.assertTrue(torch.equal(result, expected_result))
 
+
 if __name__ == '__main__':
     unittest.main()
