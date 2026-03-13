@@ -52,7 +52,6 @@ def extract_info(metient_result_dir, clone):
         pckl = pickle.load(f)
         
     num_solutions = len(pckl[OUT_LABElING_KEY])
-    print(f"{num_solutions} solutions")
     ordered_sites = pckl[OUT_SITES_KEY]
 
     mig_graphs = []
