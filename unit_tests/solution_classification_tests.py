@@ -4,6 +4,10 @@ import numpy as np
 import metient as met
 from metient.util.globals import *
 from metient.util import plotting_util as plutil
+from metient.util import vertex_labeling_util as vert_util
+
+import metient
+print(metient.__file__)
 
 class TestSolutionClassification(unittest.TestCase):
     
@@ -138,6 +142,27 @@ class TestSolutionClassification(unittest.TestCase):
         )
         return parents, V
 
+    def _tree6(self):
+        '''
+        Tree:
+             4
+            / \
+           1   2
+          /     \
+         3       0
+        
+        0,1,2,3 are same met site
+        site polyclonal, genetically polyclonal
+        polyphyletic
+        '''
+        parents = [2,4,4,1,-1]
+        V = torch.tensor(
+            [
+                [1,0,0,0,0],
+                [0,1,1,1,1]
+            ]
+        )
+        return parents, V
 
     def test_weighted_classification_tree_1(self):
         parents, V = self._tree1()
@@ -317,7 +342,145 @@ class TestSolutionClassification(unittest.TestCase):
         self.assertEqual(plutil.seeding_clusters(V, A, node_info[0], sites=[1]), [2])
         self.assertEqual(plutil.seeding_clusters(V, A, node_info[0], sites=[2]), [1,4])
 
+    def test_phyleticity(self):
+        parents = [ 2,  2, -1,  1,  0]
+        V = torch.tensor(
+            [[0, 0, 1, 0, 0],
+             [1, 1, 0, 1, 1]]
+        )
+        # Create mock pickle data
+        mock_pkl = {
+            OUT_LABElING_KEY: [V],
+            OUT_PARENTS_KEY: [parents],
+            OUT_PROBABILITIES_KEY: [1.0],
+            OUT_IDX_LABEL_KEY: [{0: (['0'], False, False), 4: (['0', 'LN'], True, False), 1: (['1'], False, False), 3: (['1', 'LN'], True, False), 2: (['2'], False, False)}]
+        }
+        
 
+        self.assertEqual(met.weighted_phyleticity(mock_pkl), 'polyphyletic')
+        self.assertEqual(met.weighted_genetic_clonality(mock_pkl), 'polyclonal')
+    
+    def test_seeding_pattern_from_mig_graph(self):
+        G = torch.tensor([[0,1,1], [0,0,0], [0,0,0]])
+        self.assertEqual(plutil.site_clonality_with_G(G), "monoclonal")
+        self.assertEqual(plutil.seeding_pattern_with_G(G), "primary single-source")
+        
+        G = torch.tensor([[0,0,0], [2,0,3], [0,0,0]])
+        self.assertEqual(plutil.site_clonality_with_G(G), "polyclonal")
+        self.assertEqual(plutil.seeding_pattern_with_G(G), "primary single-source")
+
+        G = torch.tensor([[0,1,0], [0,0,1], [0,0,0]])
+        self.assertEqual(plutil.site_clonality_with_G(G), "monoclonal")
+        self.assertEqual(plutil.seeding_pattern_with_G(G), "single-source")
+
+        G = torch.tensor([[0,1,0], [0,0,2], [0,0,0]])
+        self.assertEqual(plutil.site_clonality_with_G(G), "polyclonal")
+        self.assertEqual(plutil.seeding_pattern_with_G(G), "single-source")
+
+        G = torch.tensor([[0,1,1], [0,0,1], [0,0,0]])
+        self.assertEqual(plutil.site_clonality_with_G(G), "polyclonal")
+        self.assertEqual(plutil.seeding_pattern_with_G(G), "multi-source")
+
+        G = torch.tensor([[0,1,1], [1,0,0], [1,0,0]])
+        self.assertEqual(plutil.site_clonality_with_G(G), "polyclonal")
+        self.assertEqual(plutil.seeding_pattern_with_G(G), "reseeding")
+
+        G = torch.tensor([[0,1,0], [2,0,0], [0,0,0]])
+        self.assertEqual(plutil.site_clonality_with_G(G), "polyclonal")
+        self.assertEqual(plutil.seeding_pattern_with_G(G), "reseeding")
+
+class TestTransitiveClosure(unittest.TestCase):
+    
+    def test_basic_functionality(self):
+        T = torch.tensor([[0, 1, 0],
+                           [0, 0, 1],
+                           [0, 0, 0]])
+        expected_result = torch.tensor([[0, 1, 1],
+                                         [0, 0, 1],
+                                         [0, 0, 0]])
+        result = vert_util.path_matrix(T, remove_self_loops=True)
+        self.assertTrue(torch.equal(result, expected_result))
+
+    def test_no_edges(self):
+        T = torch.tensor([[0, 0],
+                           [0, 0]])
+        expected_result = torch.tensor([[0, 0],
+                                         [0, 0]])
+        result = vert_util.path_matrix(T, remove_self_loops=True)
+        self.assertTrue(torch.equal(result, expected_result))
+
+    def test_complex_binary_tree(self):
+        # Create a complex binary tree adjacency matrix
+        T = torch.tensor([[0, 1, 1, 0, 0, 0, 0, 0, 0, 0],  # Node 0 to Node 1 and 2
+                        [0, 0, 0, 1, 1, 0, 0, 0, 0, 0],  # Node 1 to Node 3 and 4
+                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],  # Node 2 to Node 5
+                        [0, 0, 0, 0, 0, 0, 1, 1, 0, 0],  # Node 3 to Node 6 and 7
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Node 4 has no children
+                        [0, 0, 0, 0, 0, 0, 0, 0, 1, 1],  # Node 5 to Node 8 and 9
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Node 6 has no children
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Node 7 has no children
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Node 8 has no children
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=torch.float32)
+
+        expected_result = torch.tensor([[0, 1, 1, 1, 1, 1, 1, 1, 1, 1],  # Node 0 can reach all nodes
+                                        [0, 0, 0, 1, 1, 0, 1, 1, 0, 0],  # Node 1 can reach Nodes 3, 4, 6, 7
+                                        [0, 0, 0, 0, 0, 1, 0, 0, 1, 1],  # Node 2 can reach Nodes 5, 8, 9
+                                        [0, 0, 0, 0, 0, 0, 1, 1, 0, 0],  # Node 3 can reach Nodes 6 and 7
+                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Node 4 has no outgoing edges
+                                        [0, 0, 0, 0, 0, 0, 0, 0, 1, 1],  # Node 5 can reach Nodes 8 and 9
+                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Node 6 has no outgoing edges
+                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Node 7 has no outgoing edges
+                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],  # Node 8 has no outgoing edges
+                                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]) # Node 9 has no outgoing edges
+        result = vert_util.path_matrix(T, remove_self_loops=True)
+        self.assertTrue(torch.equal(result, expected_result))
+
+    def test_fully_connected(self):
+        T = torch.tensor([[0, 1, 1],
+                           [0, 0, 1],
+                           [0, 0, 0]])
+        expected_result = torch.tensor([[0, 1, 1],
+                                         [0, 0, 1],
+                                         [0, 0, 0]])
+        result = vert_util.path_matrix(T, remove_self_loops=True)
+        self.assertTrue(torch.equal(result, expected_result))
+
+    def test_disconnected_graph(self):
+        T = torch.tensor([[0, 1, 0],
+                           [0, 0, 0],
+                           [0, 1, 0]])
+        expected_result = torch.tensor([[0, 1, 0],
+                                         [0, 0, 0],
+                                         [0, 1, 0]])
+        result = vert_util.path_matrix(T, remove_self_loops=True)
+        self.assertTrue(torch.equal(result, expected_result))
+
+    def test_leaf_nodes(self):
+        T = torch.tensor([[0, 1],
+                           [0, 0]])
+        expected_result = torch.tensor([[0, 1],
+                                         [0, 0]])
+        result = vert_util.path_matrix(T, remove_self_loops=True)
+        self.assertTrue(torch.equal(result, expected_result))
+
+    def test_large_sparse_graph(self):
+        T = torch.zeros((10, 10), dtype=torch.int)
+        T[0, 1] = 1
+        T[1, 2] = 1
+        T[3, 4] = 1
+        T[4, 5] = 1
+        expected_result = torch.tensor([[0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+                                         [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
+        result = vert_util.path_matrix(T, remove_self_loops=True)
+        self.assertTrue(torch.equal(result, expected_result))
 
 if __name__ == '__main__':
     unittest.main()

@@ -68,7 +68,8 @@ def site_clonality_with_G(G):
     """
     if torch.all(G == 0):
         return "n/a"
-    return "polyclonal" if ((G > 1).any()) else  "monoclonal"
+    col_sums = G.sum(dim=0)
+    return "polyclonal" if (col_sums > 1).any() else "monoclonal"
 
 def site_clonality(V, A):
     """
