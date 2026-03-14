@@ -16,6 +16,7 @@ import numpy as np
 from metient.util.globals import *
 from metient.util import plotting_util as plot_util
 from metient.util import vertex_labeling_util as vutil
+import metient as met
 
 def plot_cross_ent_chart(data_dict, output_dir):
     fig = plt.figure(figsize=(2.5, 3),dpi=200)
@@ -100,19 +101,16 @@ def cross_ent(loss_dicts, pt_weight, thetas, tau, patient_pars_metrics, calibrat
     epsilon = 1e-10
     
     cross_ent_sum = 0.0
-    # print("theta x", theta_X)
 
     if calibrate_genetic and not torch.sum(gen_dist_scores == 0):
         # Normalize and apply softmax to target distribution
         gen_dist_scores = stable_softmax(gen_dist_scores)
         cross_ent_sum += -log_wn*torch.sum(torch.mul(gen_dist_scores, torch.log2(theta_X + epsilon)))
-        # print("gen_dist_scores", gen_dist_scores)
 
     if calibrate_organotrop and not torch.sum(organotrop_scores == 0):
         # Normalize and apply softmax to target distribution
         organotrop_scores = stable_softmax(organotrop_scores)
         cross_ent_sum += -log_wn*torch.sum(torch.mul(organotrop_scores, torch.log2(theta_X + epsilon)))
-        # print("organotrop", organotrop_scores)
 
     return cross_ent_sum
 
@@ -178,8 +176,9 @@ def get_max_cross_ent_thetas(pickle_file_list, patient_weights, calibrate_geneti
         all_data.append((loss_dicts, pt_weight, list(pars_metrics)))
     
     if len(all_data) == 0:
-        print("WARNING: Unable to calibrate since no patients have multiple Pareto optimal trees with multiple unique Pareto metrics. Using default weighting, wm > wc > ws")
-        return PAN_CANCER_WEIGHTS # these are estimated from multiple cancer cohorts
+        print("WARNING: Unable to calibrate since no patients have multiple Pareto optimal trees with multiple unique Pareto metrics. Using pancancer calibrated weighting (genetic distance, uniform weighting).")
+        weights = met.Weights.pancancer_genetic_uniform_weighting()
+        return [weights.mig, weights.comig, weights.seed_site] # these are estimated from multiple cancer cohorts
     
     print(f"Calibrating to {len(all_data)} patients")
 

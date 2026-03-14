@@ -1,19 +1,17 @@
-PAN_CANCER_WEIGHTS = [0.46, 0.29, 0.25]
+import logging
+import itertools
 
 DEFAULT_CALIBRATE_MIG_WEIGHTS = [1.0,1000.0]
 DEFAULT_CALIBRATE_SEED_WEIGHTS = [1000.0,1.0]
 DEFAULT_CALIBRATE_COMIG_WEIGHTS = 100.0
 
-import itertools
 ALL_PARSIMONY_MODELS = list(itertools.permutations([100.0, 50.0, 1.0]))
-# ALL_PARSIMONY_MODELS = [[1000.0,1000.0,1.0],[10.0,10.0,1.0], [10.0,1.0,10.0],[1.0,1.0,100.0], [10.0,1000.0,1.0], [100.0,10.0,1.0]]
 
 SPARSE_T_THRESHOLD = 150
 
 DEFAULT_COLORS = ["#6aa84f", "#6fa8dc", "#e69138", "#c27ba0", "#bf4040", "#9e9e9e","#993366", "brown", "black", "darkgreen", "blue"]*3
 DEFAULT_GREEN = "#6aa84f"
 
-import logging
 logger = logging.getLogger('SGD')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s\n\r%(message)s', datefmt='%H:%M:%S')
 logging.getLogger('matplotlib.font_manager').setLevel(logging.ERROR)

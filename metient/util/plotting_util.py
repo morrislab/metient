@@ -1018,7 +1018,7 @@ def save_best_trees(min_loss_solutions, U, weights, ordered_sites, print_config,
     """
     min_loss_solutions is in order from lowest to highest loss 
 
-    plot_tree: if True, visualize tree plots
+    plot_tree: if True, visualize full migration history tree plots
     original_root_idx: if not -1, swap the original_root_idx with 0 in all
     data that we save that involves node/cluster indices. This will then match
     the inputs from the user's again.

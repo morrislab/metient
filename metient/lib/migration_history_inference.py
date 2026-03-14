@@ -518,9 +518,9 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, calibratio
             p = one_hot_labeling_for_primary(primary_site, ordered_sites[i])
             
             reranked_solutions = rank_solutions(vutil.create_reweighted_solution_set_from_pckl(pckl, O, p, cal_weights))
-            
-            putil.save_best_trees(reranked_solutions, saved_U, O, cal_weights, ordered_sites[i], print_config, 
-                                  primary_site, calibrate_dir, run_name)
+            plot_tree = Ts[i].shape[0] < SPARSE_T_THRESHOLD
+            putil.save_best_trees(reranked_solutions, saved_U, cal_weights, ordered_sites[i], print_config, 
+                                  plot_tree, primary_site, calibrate_dir, run_name)
     
     if estimate_observed_clones:
         for pooled_tsv_fn in pooled_tsv_fns:
@@ -718,7 +718,7 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
         plot_tree = input_T.shape[0] < SPARSE_T_THRESHOLD
 
         putil.save_best_trees(final_solutions, U, weights,ordered_sites, print_config, plot_tree,
-                              primary_site_label, output_dir, run_name,original_root_idx=original_root_idx) 
+                              primary_site_label, output_dir, run_name, original_root_idx=original_root_idx) 
 
     torch.cuda.empty_cache()
  
