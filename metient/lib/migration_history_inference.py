@@ -6,6 +6,7 @@ import shutil
 import pickle
 import gzip
 import json
+import warnings
 
 import metient as met
 from metient.util import vertex_labeling_util as vutil
@@ -579,7 +580,7 @@ def validate_inputs(T, node_collection, ref, var, primary_site, ordered_sites, w
     
 def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, output_dir, run_name, estimate_observed_clones=True,
                             O=None, lr=0.05, init_temp=20, final_temp=0.01, sample_size=-1, bias_weights=True,
-                            mode="evaluate", solve_polytomies=False, num_runs=1, keep_pareto_only=True):
+                            mode="evaluate", solve_polytomies=False, num_runs=-1, keep_pareto_only=True):
     """
     Args:
         T: numpy ndarray or torch tensor (shape: num_internal_nodes x num_internal_nodes). Adjacency matrix (directed) of the internal nodes.
@@ -623,8 +624,18 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
     # Validate inputs
     validate_inputs(T, node_collection, ref, var, primary_site, ordered_sites, weights, O, mode, sample_size, solve_polytomies)
 
-    if sample_size == -1:
-        sample_size = vutil.calculate_sample_size(T.shape[0], len(ordered_sites), solve_polytomies)
+    if sample_size == -1 or num_runs == -1:
+        auto_size, auto_runs = vutil.calculate_sample_size(T.shape[0], len(ordered_sites), solve_polytomies)
+        if sample_size == -1:
+            sample_size = auto_size
+        if num_runs == -1:
+            num_runs = auto_runs
+        warnings.warn(
+            f"Using sample_size={sample_size}, num_runs={num_runs}. "
+            "For best results, set both explicitly. See the guide: "
+            "https://github.com/morrislab/metient/blob/main/docs/guide.md#performance-parameters"
+        )
+        
     opt_subtree_sample_size = sample_size
     # Total sample size gets split for the individual parsimony models
     sample_size = sample_size // len(ALL_PARSIMONY_MODELS)

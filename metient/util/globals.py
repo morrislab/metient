@@ -25,6 +25,7 @@ GEN_DIST_KEY = "genetic_distance"
 DATA_FIT_KEY = "neg_log_likelihood"
 REG_KEY = "regularizer"
 FULL_LOSS_KEY = "loss"
+PROBABILITY_KEY = "probability"
 
 # For projection algorithm
 MIN_VARIANCE = 1e-4

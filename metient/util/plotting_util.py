@@ -129,7 +129,6 @@ def seeding_pattern(V, A):
     """
     G = migration_graph(V, A)
     return seeding_pattern_with_G(G)
-    
 
 def remove_migration_edges_to_sites_sparse(Y, V, sites_to_keep):
     Y = Y.coalesce()
@@ -888,9 +887,9 @@ def collect_top_tree_info(V, T, node_collection, ordered_sites):
 
     return tree_edges, full_node_idx_to_label_map, vertex_name_to_site_map, mig_edges
 
-def construct_loss_dict(soln, full_loss):
+def construct_loss_dict(soln, full_loss, prob):
     loss_dict = {MIG_KEY: soln.m, COMIG_KEY:soln.c, SEEDING_KEY: soln.s, ORGANOTROP_KEY: soln.o, GEN_DIST_KEY: soln.g, ENTROPY_KEY: soln.e}
-    loss_dict = {**loss_dict, **{FULL_LOSS_KEY: round(torch.mean(full_loss).item(), 3)}}
+    loss_dict = {**loss_dict, **{FULL_LOSS_KEY: round(full_loss.item(), 3), PROBABILITY_KEY: round(prob, 3)}}
     return loss_dict
 
 def convert_lists_to_np_arrays(pickle_outputs, keys):
@@ -1031,10 +1030,10 @@ def save_best_trees(min_loss_solutions, U, weights, ordered_sites, print_config,
 
     ret = None
     figure_outputs = []
-    pickle_outputs = {OUT_LABElING_KEY:[], OUT_LOSSES_KEY:[],OUT_IDX_LABEL_KEY:[],
+    pickle_outputs = {OUT_LABElING_KEY:[], OUT_LOSSES_KEY:[], OUT_IDX_LABEL_KEY:[],
                       OUT_PARENTS_KEY:[], OUT_SITES_KEY:ordered_sites, OUT_LOSS_DICT_KEY:[],
                       OUT_PRIMARY_KEY:primary, OUT_PROBABILITIES_KEY:[],
-                      OUT_SOFTV_KEY:[], OUT_GEN_DIST_KEY:[]}
+                      OUT_SOFTV_KEY:[],OUT_GEN_DIST_KEY:[]}
 
     with torch.no_grad():
         if print_config.custom_colors == None:
@@ -1045,6 +1044,10 @@ def save_best_trees(min_loss_solutions, U, weights, ordered_sites, print_config,
         else:
             custom_colors = print_config.custom_colors
 
+        losses = [soln.loss.cpu().numpy() for soln in min_loss_solutions]
+        probabilities = losses_to_probabilities(losses)
+        pickle_outputs[OUT_PROBABILITIES_KEY] = probabilities
+
         for i, min_loss_solution in enumerate(min_loss_solutions):
             V = min_loss_solution.V
             soft_V = min_loss_solution.soft_V
@@ -1052,7 +1055,7 @@ def save_best_trees(min_loss_solutions, U, weights, ordered_sites, print_config,
             G = min_loss_solution.G
             full_loss = min_loss_solution.loss
             node_collection = min_loss_solution.node_collection
-            loss_dict = construct_loss_dict(min_loss_solution, full_loss)
+            loss_dict = construct_loss_dict(min_loss_solution, full_loss, probabilities[i])
             
             # Restructure adjacency matrices to match original cluster indices
             T, node_collection, G, V, U = restructure_matrices_for_plotting(
@@ -1084,8 +1087,6 @@ def save_best_trees(min_loss_solutions, U, weights, ordered_sites, print_config,
             pickle_outputs[OUT_IDX_LABEL_KEY].append(full_tree_idx_to_label)
             if i == 0: # Best tree
                 ret = (edges, vertices_to_sites_map, mig_graph_edges, loss_dict)
-
-        pickle_outputs[OUT_PROBABILITIES_KEY] = losses_to_probabilities(pickle_outputs[OUT_LOSSES_KEY])
 
         save_outputs(figure_outputs, print_config, output_dir, run_name, pickle_outputs, weights)
 

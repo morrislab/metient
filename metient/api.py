@@ -5,7 +5,7 @@ from metient.util import plotting_util as plutil
 from metient.util import data_extraction_util as dutil
 
 def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
-             O=None, sample_size=-1, solve_polytomies=False, num_runs=3):
+             O=None, sample_size=-1, solve_polytomies=False, num_runs=-1):
     '''
     Runs Metient-evaluate, and infers the observed clone percentages and the labels of the clone tree.
 
@@ -31,7 +31,7 @@ def evaluate(tree_fn, tsv_fn, weights, print_config, output_dir, run_name,
                              num_runs=num_runs, bias_weights=True)
 
 def evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir, run_name, 
-                              O=None, sample_size=-1, solve_polytomies=False, num_runs=3):
+                              O=None, sample_size=-1, solve_polytomies=False, num_runs=-1):
     '''
     Runs Metient-evaluate with observed clone percentages inputted, and only inferring the labels of the clone tree.
 
@@ -57,7 +57,7 @@ def evaluate_label_clone_tree(tree_fn, tsv_fn, weights, print_config, output_dir
                                               solve_polytomies=solve_polytomies, num_runs=num_runs)
 
 def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, calibration_type, 
-              Os=None, sample_size=-1, solve_polytomies=False, num_runs=3):
+              Os=None, sample_size=-1, solve_polytomies=False, num_runs=-1):
     '''
     Runs Metient-calibrate on a cohort of patients. For each patient, we infer the observed clone percentages and the labels of the clone tree.
 
@@ -84,7 +84,7 @@ def calibrate(tree_fns, tsv_fns, print_config, output_dir, run_names, calibratio
                               bias_weights=True, solve_polytomies=solve_polytomies, num_runs=num_runs)
 
 def calibrate_label_clone_tree(tree_fns, tsv_fns, print_config, output_dir, run_names, 
-                               calibration_type, Os=None, sample_size=-1, solve_polytomies=False, num_runs=3):
+                               calibration_type, Os=None, sample_size=-1, solve_polytomies=False, num_runs=-1):
     '''
     Runs Metient-calibrate on a cohort of patients. For each patient, we use the inputted observed clone percentages, and only infer the labels of the clone tree.
 

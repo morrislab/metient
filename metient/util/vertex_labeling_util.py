@@ -848,20 +848,52 @@ def create_reweighted_solution_set_from_pckl(pckl, O, p, weights):
 
 def calculate_sample_size(num_nodes, num_sites, solve_polytomies):
     '''
-    Calculate the number of samples to initialize for a run based on 
-    the number of tree nodes, the number of anatomical sites, and if we're
-    solving polytomies
+    Auto-calculate sample_size and num_runs based on tree size.
+    Larger trees cap sample_size for memory and compensate with more runs.
     '''
-    min_size = 1024
-    min_size += num_nodes*num_sites*4
+    MAX_TOTAL = 800000
+    RUN_TIERS = [3, 5, 10, 20, 40, 50, 100, 200, 400]
 
+    # Sample size scales with search space
+    search_scale = num_sites * np.log10(max(num_nodes, 2))
+    sample_size = int(2000 * search_scale)
+    sample_size = max(sample_size, 4096)
+
+    # Round up to nearest power of 2
+    sample_size = int(2 ** np.ceil(np.log2(sample_size)))
+
+    # Polytomies need a bit more exploration
     if solve_polytomies:
-        min_size *= 2
+        sample_size = int(sample_size * 1.25)
+        sample_size = int(2 ** np.ceil(np.log2(sample_size)))
 
-    # cap this to a reasonably high sample size
-    min_size = min(min_size, 60000)
-    print(f"Input tree has {num_nodes} nodes, calculated sample size: {min_size}", )
-    return min_size
+    # Cap by tree size, scaled by number of sites for small trees
+    if num_nodes <= 10:
+        sample_size = min(sample_size, 1024 * num_sites)
+    elif num_nodes <= 20:
+        sample_size = min(sample_size, 2048 * num_sites)
+    elif num_nodes > 1000:
+        sample_size = min(sample_size, 8192)
+    elif num_nodes > 100:
+        sample_size = min(sample_size, 16384)
+
+    # Final power of 2 and hard cap
+    sample_size = int(2 ** np.ceil(np.log2(sample_size)))
+    sample_size = min(sample_size, 65536)
+
+    # Target total scales with tree size, small trees need much less
+    target = min(MAX_TOTAL, sample_size * max(3, num_nodes // 4))
+    raw_runs = max(3, int(np.ceil(target / sample_size)))
+    num_runs = min(t for t in RUN_TIERS if t >= raw_runs)
+
+    # Hard cap on total samples, but let large trees exceed
+    if num_nodes <= 1000 and sample_size * num_runs > MAX_TOTAL:
+        max_runs = int(MAX_TOTAL // sample_size)
+        num_runs = max(3, max(t for t in RUN_TIERS if t <= max_runs))
+
+    print(f"Input tree has {num_nodes} nodes and {num_sites} sites. "
+          f"Auto-calculated sample_size={sample_size}, num_runs={num_runs}")
+    return sample_size, num_runs
 
 def tree_iterator(T):
     ''' 
