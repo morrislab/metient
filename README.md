@@ -97,6 +97,11 @@ Notebooks that use the outputs from above to generate figures for the paper can 
 
 Please email any questions you have to divyakoyy@gmail.com, or open a GitHub issue!
 
+## Changelog
+
+**v0.1.3.5.4**
+- Fixed a bug in phyleticity classification that produced incorrect results for certain edge cases. We recommend re-running analyses if phyleticity classifications are central to your conclusions.
+
 ## Citation
 If you use Metient, please cite our paper:
 ```
