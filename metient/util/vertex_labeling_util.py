@@ -400,14 +400,13 @@ def genetic_distance_score(G, m, A, V, VT):
             gen_dist_penalty = vals * is_migration * adjusted_G[u, v]
             g = torch.zeros(bs, device=A.device)
             g.index_add_(0, b, gen_dist_penalty)
-            g = g / (m + 1) # to prevent division by 0
-
+            g = g / m
         else:
             # Calculate if 2 nodes are in diff sites and there's an edge between them (i.e. there is a migration edge)
             X = VT @ V # 1 if two nodes are the same color
             R = torch.mul(A, (1-X)) # 1 if two nodes are the same color and there's an edge between them
             R = torch.mul(R, adjusted_G)
-            g = torch.sum(R, dim=(1,2)) /(m + 1) # to prevent division by 0
+            g = torch.sum(R, dim=(1,2)) / m
     return g
 
 def organotropism_score(O, site_adj_no_diag, p, bs):
@@ -433,7 +432,7 @@ def organotropism_score(O, site_adj_no_diag, p, bs):
         adjusted_freqs = -torch.log(O+0.01)
         num_mig_from_prim = site_adj_no_diag[:,prim_site_idx,:]
         organ_penalty = torch.mul(num_mig_from_prim, adjusted_freqs)
-        o = torch.sum(organ_penalty, dim=(1))/(torch.sum(num_mig_from_prim, dim=(1)) + 1) # to prevent division by 0
+        o = torch.sum(organ_penalty, dim=(1))/(torch.sum(num_mig_from_prim, dim=(1))) 
     return o
 
 def ancestral_labeling_metrics(V, A, G, O, p, update_path_matrix, compute_full_c, identical_T):
@@ -1677,7 +1676,9 @@ def build_one_hot_matrix(labels, n, k, root):
     return torch.cat((mat[:, :root], mat[:, root+1:]), dim=1)
 
 def run_fitch_hartigan(v_solver, results):
+    
     adj_matrix = v_solver.input_T
+    device = adj_matrix.device
     root = 0
     node_idx_to_observed_sites = v_solver.idx_to_observed_sites
     root_label = torch.argmax(v_solver.p, dim=0).item()
@@ -1699,4 +1700,4 @@ def run_fitch_hartigan(v_solver, results):
     metrics = ancestral_labeling_metrics(V, T, v_solver.full_G, v_solver.O, v_solver.p,
                                          update_path_matrix=True, compute_full_c=True, identical_T=True)
     print("Fitch-hartigan result:", metrics)
-    results.append((V.cpu(), torch.zeros_like(V), T.cpu(), None, (*[m.cpu() for m in metrics], torch.zeros(1))))
+    results.append((V.to(device), torch.zeros_like(V, device=device), T.to(device), None, (*[m.to(device) for m in metrics], torch.zeros(1, device=device))))

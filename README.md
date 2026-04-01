@@ -99,6 +99,9 @@ Please email any questions you have to divyakoyy@gmail.com, or open a GitHub iss
 
 ## Changelog
 
+**v0.1.3.5.8**
+- Removed pseudocount in normalization of genetic distance and organotropism scoring when averaging over migration edges. This may produce minor reranking in some cases where the migration numbers of solutions are very close compared to previous versions.
+
 **v0.1.3.5.4**
 - Fixed a bug in phyleticity classification that produced incorrect results for certain edge cases. We recommend re-running analyses if phyleticity classifications are central to your conclusions.
 
