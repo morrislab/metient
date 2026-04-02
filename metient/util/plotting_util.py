@@ -401,6 +401,10 @@ def losses_to_probabilities(messy_losses, temperature=0.5):
     # Flatten and extract numerical values from the messy list
     cleaned_losses = np.array([loss.flatten() if hasattr(loss, 'flatten') else loss for loss in messy_losses])
     neg_losses = -np.array([loss.item() if hasattr(loss, 'item') else loss for loss in cleaned_losses])  # Ensure scalar
+
+    if np.allclose(neg_losses, neg_losses[0], rtol=1e-4, atol=1e-8):
+        return np.ones(len(neg_losses)) / len(neg_losses)
+    
     neg_losses = min_max_normalize(neg_losses)
     # Apply temperature scaling
     scaled_losses = neg_losses / temperature
