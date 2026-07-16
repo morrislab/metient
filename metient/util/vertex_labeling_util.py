@@ -890,8 +890,6 @@ def calculate_sample_size(num_nodes, num_sites, solve_polytomies):
         max_runs = int(MAX_TOTAL // sample_size)
         num_runs = max(3, max(t for t in RUN_TIERS if t <= max_runs))
 
-    print(f"Input tree has {num_nodes} nodes and {num_sites} sites. "
-          f"Auto-calculated sample_size={sample_size}, num_runs={num_runs}")
     return sample_size, num_runs
 
 def tree_iterator(T):
@@ -1693,7 +1691,7 @@ def run_fitch_hartigan(v_solver, results):
     single_soln_matrix = build_one_hot_matrix(labels, n, k, root)
 
     V = stack_vertex_labeling(v_solver.L, add_batch_dim(single_soln_matrix), v_solver.p, None)
-    T = repeat_n(v_solver.full_T, 1)
+    T = v_solver.full_T
     if v_solver.config['use_sparse_T']:
         T = T.to_sparse()
 

@@ -374,6 +374,9 @@ def extract_info_from_observed_clone_tsv(tsv_filename):
     mig_hist_nodes = []
     idx_to_sites_present = dict()
     unique_sites = [""]*num_sites
+
+    has_num_muts = 'num_mutations' in df.columns
+
     idx_to_num_muts = dict()
     for _, row in df.iterrows():
         x = int(row['anatomical_site_index'])
@@ -382,13 +385,16 @@ def extract_info_from_observed_clone_tsv(tsv_filename):
         unique_sites[x] = row['anatomical_site_label']
         mig_hist_node = vutil.MigrationHistoryNode(y, [row['cluster_label']], is_witness=False, is_polytomy_resolver_node=False)
         mig_hist_nodes.append(mig_hist_node)
-        if y not in idx_to_num_muts:
+        if has_num_muts and y not in idx_to_num_muts:
             idx_to_num_muts[y] = float(row['num_mutations'])
         if row['present'] == 1:
             if y not in idx_to_sites_present:
                 idx_to_sites_present[y] = []
             idx_to_sites_present[y].append(row['anatomical_site_index'])
     mig_hist_collection = vutil.MigrationHistoryNodeCollection(mig_hist_nodes)
+
+    if not has_num_muts:
+        idx_to_num_muts = None
     return unique_sites, mig_hist_collection, idx_to_num_muts, idx_to_sites_present
 
 def extract_ordered_sites(tsv_filepaths):

@@ -98,6 +98,11 @@ Notebooks that use the outputs from above to generate figures for the paper can 
 Please email any questions you have to divyakoyy@gmail.com, or open a GitHub issue!
 
 ## Changelog
+**v1.0.0**
+- Improved CPU memory footprint for large trees.
+- `num_mutations` column is now optional in clone-presence TSV input.
+
+Note: version numbering reset to semantic versioning from this release.
 
 **v0.1.3.5.8**
 - Removed pseudocount in normalization of genetic distance and organotropism scoring when averaging over migration edges. This may produce minor reranking in some cases where the migration numbers of solutions are very close compared to previous versions.

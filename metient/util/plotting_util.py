@@ -1102,7 +1102,6 @@ def formatted_loss_string(loss_dict, weights):
     s += f"Migration num.: {int(loss_dict[MIG_KEY])}\n"
     s += f"Comigration num.: {int(loss_dict[COMIG_KEY])}\n"
     s += f"Seeding site num.: {int(loss_dict[SEEDING_KEY])}\n"
-    s += f"Neg. entropy: {round(float(loss_dict[ENTROPY_KEY]), 3)}\n"
 
     if weights.gen_dist != 0:
         s += f"Genetic dist. loss: {round(float(loss_dict[GEN_DIST_KEY]), 3)}\n"

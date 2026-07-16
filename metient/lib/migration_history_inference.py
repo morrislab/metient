@@ -71,7 +71,7 @@ def get_best_final_solutions(results, G, O, p, weights,
         results (list): List of optimization results, each containing:
             - best_Vs: Vertex labeling matrices
             - soft_Vs: Soft vertex labeling matrices (probabilities)
-            - best_Ts: Tree adjacency matrices
+            - best_Ts: Tree adjacency matrices (sample_size x n x n if solving for polytomies, otherwise n x n)
             - poly_res (PolytomyResolver): Object containing polytomy resolver info
             - metrics: Tuple of (m,c,s,g,o,e) parsimony metrics
         G (torch.Tensor): Genetic distance matrix between sites
@@ -97,13 +97,19 @@ def get_best_final_solutions(results, G, O, p, weights,
     full_solution_set = []
     all_pars_metrics, all_result_soln_indices = [],[]
     unique_labelings = set()
+
+    # Sanity check: if we're not solving polytomies, all trees T should be 2D
+    T_to_check = results[0][2]
+    assert T_to_check.dim() == (3 if solve_polytomies else 2)
         
-    # Get the indices of unique solutions
+    # Get the indices of unique solutions (only need tree and labeling to compose a unique solution)
     for result_idx, result in enumerate(results):
         best_Vs, _, best_Ts, _, metrics = result
 
         for soln_idx, (m,c,s,g,o,e) in enumerate(zip(*metrics)):
-            tree = vutil.MigrationHistory(best_Ts[soln_idx].clone(), best_Vs[soln_idx].clone())
+            # We only store multiple Ts when solving for polytomies, otherwise Ts are all identical across solutions
+            T_soln = best_Ts[soln_idx].clone() if solve_polytomies else best_Ts.clone()
+            tree = vutil.MigrationHistory(T_soln, best_Vs[soln_idx].clone())
 
             if tree not in unique_labelings:
                 all_pars_metrics.append((int(m), int(c), int(s)))
@@ -112,7 +118,7 @@ def get_best_final_solutions(results, G, O, p, weights,
             unique_labelings.add(tree)
 
     fixed_labeling = v_solver.fixed_labeling
-    # Create a list of unique VertexLabelingSolutions
+    # Create a list of unique VertexLabelingSolutions (keep all other info on the object such as metrics)
     for idx in all_result_soln_indices:
         result_idx, soln_idx, metrics = idx[0], idx[1], idx[2]
 
@@ -124,7 +130,8 @@ def get_best_final_solutions(results, G, O, p, weights,
         
         V = results[result_idx][0][soln_idx].clone().cpu()
         soft_V = results[result_idx][1][soln_idx].clone().cpu()
-        T = results[result_idx][2][soln_idx].clone().cpu()
+        T_batch = results[result_idx][2]
+        T = T_batch[soln_idx].clone().cpu() if solve_polytomies else T_batch.clone().cpu()
         # Add back any removed nodes into V and T using FixedVertexLabeling info
         if fixed_labeling is not None and v_solver.config['collapse_nodes']:
             V = add_back_removed_nodes(V, v_solver, p)
@@ -630,6 +637,8 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
             sample_size = auto_size
         if num_runs == -1:
             num_runs = auto_runs
+        print(f"Input tree has {T.shape[0]} nodes and {len(ordered_sites)} sites."
+          f" Running with sample_size={sample_size}, num_runs={num_runs}")
         warnings.warn(
             f"Using sample_size={sample_size}, num_runs={num_runs}. "
             "For best results, set both explicitly. See the guide: "
@@ -664,7 +673,6 @@ def infer_migration_history(T, tsv_fn, primary_site, weights, print_config, outp
     # Keep a copy of input clone tree (T from now on has leaf nodes from U)
     input_T = copy.deepcopy(T)
     print("Input tree has", input_T.shape[0], "nodes.")
-    # TODO: Make this a more sophisticated decision
     use_sparse_T = input_T.shape[0] > SPARSE_T_THRESHOLD
 
     config = {

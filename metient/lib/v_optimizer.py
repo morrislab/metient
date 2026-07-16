@@ -179,7 +179,11 @@ def migration_history_optimization(v_solver, run_specific_x, run_specific_poly_r
 
     V = V.cpu().detach()
     soft_V = soft_V.cpu().detach()
-    T = T.cpu().detach()
+    # Don't store sample_size copies of the same tree
+    if v_solver.config['solve_polytomies']:
+        T = T.cpu().detach()
+    else:
+        T = T[0].cpu().detach()  # [N, N] instead of [sample_size, N, N]
     metrics = tuple(metric.cpu().detach() for metric in metrics)
 
     # Free up GPU memory after inference
@@ -219,6 +223,37 @@ def find_optimal_subtree_indices(v_solver):
     T = v_solver.T.cpu().detach()
     fixed_indices, fixed_labels, optimal_roots, poly_fixes = opt_sub.find_fixed_nodes(None, None, None, T, None, v_solver)
     return T, fixed_indices, fixed_labels, optimal_roots, poly_fixes
+
+def filter_batch_pareto(ret, obj_indices=(0, 1, 2)):
+    """
+    Filter a single batch result tuple to keep only Pareto-optimal solutions.
+    
+    Args:
+        ret: (V, soft_V, T, poly_res, metrics) as returned by migration_history_optimization
+        obj_indices: which elements of metrics are the parsimony objectives
+    
+    Returns:
+        Same format tuple with dominated solutions removed
+    """
+    V, soft_V, T, poly_res, metrics = ret
+    n = V.shape[0]
+    if n <= 1:
+        return ret
+
+    # Build per-solution metrics and indices as opaque "solutions"
+    batch_metrics = [tuple(metrics[j][i].item() for j in obj_indices) for i in range(n)]
+    indices = list(range(n))
+
+    _, kept_indices = vutil.pareto_front(indices, batch_metrics)
+
+    keep = torch.tensor(kept_indices, dtype=torch.long, device=V.device)
+    V = V[keep]
+    soft_V = soft_V[keep]
+    if T.dim() == 3:
+        T = T[keep]
+    metrics = tuple(m[keep] for m in metrics)
+
+    return (V, soft_V, T, poly_res, metrics)
 
 def run_optimization(v_solver):
     """
@@ -261,6 +296,7 @@ def run_optimization(v_solver):
                                               seed_site=pars_model[2], data_fit=v_solver.weights.data_fit, 
                                               reg=v_solver.weights.reg, entropy=v_solver.weights.entropy, gen_dist=0.0, organotrop=0.0)
             ret = _run_optimization(v_solver, exploration_weights)
+            ret = filter_batch_pareto(ret)
             results.append(ret)
 
     if not v_solver.config['solve_polytomies']:
@@ -268,8 +304,8 @@ def run_optimization(v_solver):
 
     return results
 
-def sample_gumbel(shape, eps=1e-8):
-    G = torch.rand(shape)
+def sample_gumbel(shape, device, eps=1e-8):
+    G = torch.rand(shape, device=device)
     return -torch.log(-torch.log(G + eps) + eps)
 
 def softmax_shifted_3d(X):
@@ -278,7 +314,7 @@ def softmax_shifted_3d(X):
     return exps / exps.sum(dim=1, keepdim=True)
 
 def gumbel_softmax_sample(logits, temperature):
-    y = logits + sample_gumbel(logits.size())
+    y = logits + sample_gumbel(logits.size(), device=logits.device)
     return softmax_shifted_3d(y / temperature)
 
 def gumbel_softmax(logits, temperature, hard=True):

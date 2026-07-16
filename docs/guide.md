@@ -8,9 +8,11 @@ Metient takes a clone tree and mutation data from one or more tumor sites as inp
 
 Metient exposes four main functions. Pick yours based on two questions.
 
-**How many patients do you have?** If you have a cohort of ~5 or more patients with the same cancer type, use **Metient-calibrate** — it learns optimal parsimony weights from your data. If you have fewer patients, or want to use pre-calibrated or custom weights, use **Metient-evaluate**.
+**How many patients do you have?** If you have a cohort of ~5 or more patients with the same cancer type, use **Metient-calibrate** — it learns optimal parsimony weights from your data. If you have fewer patients, or want to use pre-calibrated or custom weights, use **Metient-evaluate**. 
 
 **Do you know which clones are present at which sites?** Metient needs to know which mutation clusters (clones) are present at each anatomical site. If you have reference and variant read counts, Metient can estimate this for you. If you already have binary present/absent calls per clone per site, you can provide those directly (e.g. from single-cell data, or the output of your tree estimation).
+
+**Do you have barcode-based lineage-tracing data?** We recommend using **Metient-evaluate**. Since you know where each cell is sampled, follow tutorial 4.
 
 |  | **I have ref/var read counts** and want Metient to estimate which clones are present at each site | **I already know which clones are present** at each site (binary present/absent per clone per site) |
 |--|---|---|
@@ -29,7 +31,7 @@ Each line is a space-separated edge `parent_index child_index`. Indices must mat
 
 ### TSV file
 
-Which TSV format you need depends on which function you chose in Step 1.
+Which TSV format you need depends on whether you already know which clones are present in which sites. If so, use 1b. If you want Metient to infer this from ref/var read counts, use 1a.
 
 #### Format 1a: Read count TSV
 
@@ -63,7 +65,7 @@ Each row = a single mutation/cluster in a single tumor sample.
 | **cluster_label** | Mutation/cluster name (short, no colons) |
 | **present** | `0` or `1` — whether this clone is present at this site |
 | **site_category** | `primary` or `metastasis`. Multiple possible primaries triggers one run per candidate. |
-| **num_mutations** | Number of mutations in this cluster |
+| **num_mutations** | [Optional] Number of mutations in this cluster. NOTE: We do not recommend using this for barcode-based lineage tracing data. |
 
 #### var_read_prob details
 
@@ -91,8 +93,8 @@ You can use a pre-calibrated preset:
 
 | Preset | How the weights were fit | Recommended for |
 |--------|-------------|-----------------|
-| `Weights.pancancer_genetic_organotropism_uniform_weighting()` | Genetic + organotropism, uniform cohort weighting | **Human data (recommended)** |
-| `Weights.pancancer_genetic_uniform_weighting()` | Genetic only, uniform cohort weighting | Non-human data |
+| `Weights.pancancer_genetic_organotropism_uniform_weighting()` | Genetic + organotropism, uniform cohort weighting | **Human data** |
+| `Weights.pancancer_genetic_uniform_weighting()` | Genetic only, uniform cohort weighting | **Non-human data** |
 | `Weights.pancancer_genetic_cohort_size_weighting()` | Genetic only, weighted by cohort size | |
 | `Weights.pancancer_genetic_organotropism_cohort_size_weighting()` | Genetic + organotropism, weighted by cohort size | |
 
@@ -111,7 +113,7 @@ weights = met.Weights(mig=0.5, comig=0.3, seed_site=0.2, gen_dist=0.01, organotr
 | `mig` | — | Penalizes total migration number |
 | `comig` | — | Penalizes co-migration number |
 | `seed_site` | — | Penalizes number of seeding sites |
-| `gen_dist` | `0.0` | Penalizes genetic distance (requires `num_mutations` in input) |
+| `gen_dist` | `0.0` | Penalizes genetic distance (requires `num_mutations` in input). NOTE: not recommended for use when using barcode-based lineage tracing data. |
 | `organotrop` | `0.0` | Penalizes deviation from organotropism priors |
 
 > [!TIP]
